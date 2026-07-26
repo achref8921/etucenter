@@ -1,0 +1,87 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
+
+export async function GET() {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user || (session.user as any).role !== "eleve") {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
+    const profil = await prisma.utilisateur.findUnique({
+      where: { id: (session.user as any).id },
+      select: {
+        id: true,
+        nom: true,
+        prenom: true,
+        email: true,
+        telephone: true,
+        role: true,
+        image: true,
+        dateNaissance: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!profil) {
+      return NextResponse.json({ error: "Profil non trouvé" }, { status: 404 });
+    }
+
+    logger.info("Profil élève récupéré", { eleveId: (session.user as any).id });
+
+    return NextResponse.json(profil);
+  } catch (error) {
+    logger.error("Erreur lors de la récupération du profil", { error });
+    return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user || (session.user as any).role !== "eleve") {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { nom, prenom, telephone, image } = body;
+
+    const data: Record<string, string | null> = {};
+    if (nom !== undefined) data.nom = nom;
+    if (prenom !== undefined) data.prenom = prenom;
+    if (telephone !== undefined) data.telephone = telephone;
+    if (image !== undefined) data.image = image;
+
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json({ error: "Aucune donnée à modifier" }, { status: 400 });
+    }
+
+    const profil = await prisma.utilisateur.update({
+      where: { id: (session.user as any).id },
+      data,
+      select: {
+        id: true,
+        nom: true,
+        prenom: true,
+        email: true,
+        telephone: true,
+        role: true,
+        image: true,
+        dateNaissance: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    logger.info("Profil élève mis à jour", { eleveId: (session.user as any).id });
+
+    return NextResponse.json(profil);
+  } catch (error) {
+    logger.error("Erreur lors de la mise à jour du profil", { error });
+    return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });
+  }
+}

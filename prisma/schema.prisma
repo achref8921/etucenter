@@ -1,0 +1,309 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  super_admin
+  admin
+  prof
+  eleve
+}
+
+enum PresenceStatut {
+  present
+  absent
+}
+
+enum SeanceStatut {
+  planifiee
+  en_cours
+  terminee
+  annulee
+}
+
+enum InscriptionStatut {
+  actif
+  inactif
+}
+
+enum MethodePaiement {
+  especes
+  virement
+  cheque
+  autre
+}
+
+enum NiveauScolaire {
+  primaire
+  college
+  lycee
+}
+
+enum Filiere {
+  lettres
+  economique
+  informatique
+  technique
+  sciences
+  math
+}
+
+// ─── Center (Tenant) ─────────────────────────────────────────────────────────
+
+model Center {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @db.VarChar(255)
+  slug      String   @unique @db.VarChar(100)
+  logo      String?  @db.Text
+  phone     String?  @db.VarChar(20)
+  address   String?  @db.Text
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  utilisateurs  Utilisateur[]
+  groupes       Groupe[]
+  matieres      Matiere[]
+  notifications Notification[]
+  subscriptions CenterSubscription[]
+  @@map("centers")
+}
+
+// ─── Utilisateur ─────────────────────────────────────────────────────────────
+
+model Utilisateur {
+  id             String    @id @default(uuid()) @db.Uuid
+  centerId       String    @map("center_id") @db.Uuid
+  nom            String    @db.VarChar(255)
+  prenom         String    @db.VarChar(255)
+  email          String    @unique @db.VarChar(255)
+  motDePasse     String?   @map("mot_de_passe") @db.VarChar(255)
+  telephone      String?   @db.VarChar(20)
+  role           Role
+  image          String?   @db.VarChar(500)
+  dateNaissance  DateTime? @map("date_naissance") @db.Date
+  actif          Boolean   @default(false)
+  codeEleve      String?   @map("code_eleve") @db.VarChar(4)
+  niveau         NiveauScolaire?
+  classe         String?   @db.VarChar(50)
+  filiere        Filiere?
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  center           Center          @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  groupesEnseigne  Groupe[]        @relation("ProfGroupes")
+  inscriptions     Inscription[]
+  presencesAsEleve Presence[]      @relation("PresenceEleve")
+  presencesByAdmin Presence[]      @relation("PresenceEnregistrePar")
+  paiements        Paiement[]
+  tauxBenefice     TauxBenefice?
+  notifications    Notification[]
+
+  @@index([centerId, role])
+  @@index([centerId, email])
+  @@unique([centerId, codeEleve])
+  @@map("utilisateurs")
+}
+
+// ─── Matiere ─────────────────────────────────────────────────────────────────
+
+model Matiere {
+  id          String   @id @default(uuid()) @db.Uuid
+  centerId    String   @map("center_id") @db.Uuid
+  nom         String   @db.VarChar(255)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  center  Center  @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  groupes Groupe[]
+
+  @@index([centerId])
+  @@map("matieres")
+}
+
+// ─── Groupe ──────────────────────────────────────────────────────────────────
+
+model Groupe {
+  id             String   @id @default(uuid()) @db.Uuid
+  centerId       String   @map("center_id") @db.Uuid
+  nom            String   @db.VarChar(255)
+  description    String?
+  profId        String?  @map("prof_id") @db.Uuid
+  matiereId      String?  @map("matiere_id") @db.Uuid
+  prixParSeance  Decimal  @map("prix_par_seance") @db.Decimal(10, 2)
+  capaciteMax    Int?     @map("capacite_max")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  center       Center       @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  prof         Utilisateur? @relation("ProfGroupes", fields: [profId], references: [id], onDelete: SetNull)
+  matiere      Matiere?     @relation(fields: [matiereId], references: [id], onDelete: SetNull)
+  inscriptions Inscription[]
+  seances      Seance[]
+  paiements    Paiement[]
+
+  @@index([centerId, profId])
+  @@map("groupes")
+}
+
+// ─── Inscription ─────────────────────────────────────────────────────────────
+
+model Inscription {
+  id              String            @id @default(uuid()) @db.Uuid
+  eleveId         String            @map("eleve_id") @db.Uuid
+  groupeId        String            @map("groupe_id") @db.Uuid
+  dateInscription DateTime          @default(now()) @map("date_inscription")
+  statut          InscriptionStatut @default(actif)
+
+  eleve  Utilisateur @relation(fields: [eleveId], references: [id], onDelete: Cascade)
+  groupe Groupe      @relation(fields: [groupeId], references: [id], onDelete: Cascade)
+
+  @@unique([eleveId, groupeId])
+  @@index([groupeId])
+  @@map("inscriptions")
+}
+
+// ─── Seance ──────────────────────────────────────────────────────────────────
+
+model Seance {
+  id          String       @id @default(uuid()) @db.Uuid
+  groupeId    String       @map("groupe_id") @db.Uuid
+  date        DateTime     @db.Date
+  heureDebut  DateTime?    @map("heure_debut") @db.Time
+  heureFin    DateTime?    @map("heure_fin") @db.Time
+  statut      SeanceStatut @default(planifiee)
+  notes       String?
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  groupe    Groupe       @relation(fields: [groupeId], references: [id], onDelete: Cascade)
+  presences Presence[]
+
+  @@index([groupeId, date])
+  @@map("seances")
+}
+
+// ─── Presence ────────────────────────────────────────────────────────────────
+
+model Presence {
+  id               String         @id @default(uuid()) @db.Uuid
+  seanceId         String         @map("seance_id") @db.Uuid
+  eleveId          String         @map("eleve_id") @db.Uuid
+  statut           PresenceStatut
+  enregistrePar    String?        @map("enregistre_par") @db.Uuid
+  dateCreation     DateTime       @default(now()) @map("date_creation")
+  dateModification DateTime       @default(now()) @map("date_modification")
+
+  seance       Seance       @relation(fields: [seanceId], references: [id], onDelete: Cascade)
+  eleve        Utilisateur  @relation("PresenceEleve", fields: [eleveId], references: [id], onDelete: Cascade)
+  enregistreur Utilisateur? @relation("PresenceEnregistrePar", fields: [enregistrePar], references: [id], onDelete: SetNull)
+
+  @@unique([seanceId, eleveId])
+  @@index([eleveId])
+  @@map("presences")
+}
+
+// ─── Paiement ────────────────────────────────────────────────────────────────
+
+model Paiement {
+  id              String          @id @default(uuid()) @db.Uuid
+  eleveId         String          @map("eleve_id") @db.Uuid
+  groupeId        String          @map("groupe_id") @db.Uuid
+  montant         Decimal         @db.Decimal(10, 2)
+  datePaiement    DateTime        @default(now()) @map("date_paiement")
+  methodePaiement MethodePaiement @map("methode_paiement")
+  reference       String?
+  notes           String?
+  createdAt       DateTime        @default(now()) @map("created_at")
+
+  eleve  Utilisateur @relation(fields: [eleveId], references: [id], onDelete: Cascade)
+  groupe Groupe      @relation(fields: [groupeId], references: [id], onDelete: Cascade)
+
+  @@index([eleveId, groupeId])
+  @@map("paiements")
+}
+
+// ─── TauxBenefice ────────────────────────────────────────────────────────────
+
+model TauxBenefice {
+  id              String   @id @default(uuid()) @db.Uuid
+  profId          String   @unique @map("prof_id") @db.Uuid
+  tauxPourcentage Decimal  @map("taux_pourcentage") @db.Decimal(5, 2)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  prof Utilisateur @relation(fields: [profId], references: [id], onDelete: Cascade)
+
+  @@map("taux_benefices")
+}
+
+// ─── Notification ────────────────────────────────────────────────────────────
+
+model Notification {
+  id              String    @id @default(uuid()) @db.Uuid
+  centerId        String    @map("center_id") @db.Uuid
+  destinataireId  String    @map("destinataire_id") @db.Uuid
+  titre           String    @db.VarChar(255)
+  message         String    @db.Text
+  type            String    @db.VarChar(50)
+  lu              Boolean   @default(false)
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  center        Center      @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  destinataire  Utilisateur @relation(fields: [destinataireId], references: [id], onDelete: Cascade)
+
+  @@index([centerId, destinataireId])
+  @@index([destinataireId, lu])
+  @@map("notifications")
+}
+
+// ─── SystemLog (Audit) ────────────────────────────────────────────────────
+
+model SystemLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  action    String   @db.VarChar(100)
+  entity    String?  @db.VarChar(50)
+  entityId  String?  @map("entity_id") @db.Uuid
+  details   Json?
+  userId    String?  @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([action])
+  @@index([createdAt])
+  @@map("system_logs")
+}
+
+// ─── CenterSubscription ──────────────────────────────────────────────────────
+
+enum SubscriptionStatus {
+  active
+  expired
+  cancelled
+}
+
+model CenterSubscription {
+  id            String             @id @default(uuid()) @db.Uuid
+  centerId      String             @map("center_id") @db.Uuid
+  montant       Decimal            @db.Decimal(10, 2)
+  dateDebut     DateTime           @map("date_debut")
+  dateFin       DateTime           @map("date_fin")
+  statut        SubscriptionStatus @default(active)
+  notes         String?
+  createdAt     DateTime           @default(now()) @map("created_at")
+  updatedAt     DateTime           @updatedAt @map("updated_at")
+
+  center Center @relation(fields: [centerId], references: [id], onDelete: Cascade)
+
+  @@index([centerId])
+  @@index([statut])
+  @@index([dateFin])
+  @@map("center_subscriptions")
+}
+
+

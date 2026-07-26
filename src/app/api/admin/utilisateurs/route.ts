@@ -1,0 +1,198 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import bcrypt from "bcryptjs";
+import { authOptions, isAdminRole } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
+import { utilisateurSchema } from "@/lib/validations";
+import { generateRandomCode } from "@/lib/utils";
+
+export async function GET() {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user || !isAdminRole((session.user as any).role as string)) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
+    const centerId = (session.user as any).centerId;
+
+    const currentUserId = (session.user as any).id;
+
+    const utilisateurs = await prisma.utilisateur.findMany({
+      where: { centerId, id: { not: currentUserId } },
+      select: {
+        id: true,
+        nom: true,
+        prenom: true,
+        email: true,
+        telephone: true,
+        role: true,
+        actif: true,
+        codeEleve: true,
+        image: true,
+        niveau: true,
+        classe: true,
+        filiere: true,
+        dateNaissance: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    logger.info("Liste des utilisateurs récupérée", { adminId: (session.user as any).id, count: utilisateurs.length });
+
+    return NextResponse.json(utilisateurs);
+  } catch (error) {
+    logger.error("Erreur lors de la récupération des utilisateurs", { error });
+    return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user || !isAdminRole((session.user as any).role as string)) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const parsed = utilisateurSchema.safeParse(body);
+
+    if (!parsed.success) {
+      logger.warn("Validation échouée pour la création d'utilisateur", { errors: parsed.error.flatten() });
+      return NextResponse.json({ error: parsed.error.issues[0]?.message || "Données invalides" }, { status: 400 });
+    }
+
+    const { nom, prenom, email, motDePasse, telephone, role, dateNaissance, niveau, classe, filiere } = parsed.data;
+
+    const existingUser = await prisma.utilisateur.findUnique({ where: { email } });
+    if (existingUser) {
+      return NextResponse.json({ error: "Un utilisateur avec cet email existe déjà" }, { status: 409 });
+    }
+
+    const data: any = {
+      centerId: (session.user as any).centerId,
+      nom,
+      prenom,
+      email,
+      role,
+      telephone: telephone ?? null,
+      dateNaissance: dateNaissance ? new Date(dateNaissance) : null,
+      niveau: role === "eleve" ? (niveau ?? null) : null,
+      classe: role === "eleve" ? (classe ?? null) : null,
+      filiere: role === "eleve" ? (filiere ?? null) : null,
+    };
+
+    if (motDePasse) {
+      data.motDePasse = await bcrypt.hash(motDePasse, 12);
+    }
+
+    if (role === "eleve") {
+      let code: string;
+      let exists = true;
+      while (exists) {
+        code = generateRandomCode();
+        const found = await prisma.utilisateur.findFirst({ where: { codeEleve: code, centerId: (session.user as any).centerId } });
+        exists = !!found;
+      }
+      data.codeEleve = code!;
+    }
+
+    const utilisateur = await prisma.utilisateur.create({
+      data,
+      select: {
+        id: true,
+        nom: true,
+        prenom: true,
+        email: true,
+        telephone: true,
+        role: true,
+        actif: true,
+        codeEleve: true,
+        image: true,
+        niveau: true,
+        classe: true,
+        filiere: true,
+        dateNaissance: true,
+        createdAt: true,
+      },
+    });
+
+    logger.info("Utilisateur créé", { adminId: (session.user as any).id, userId: utilisateur.id, email: utilisateur.email });
+
+    return NextResponse.json(utilisateur, { status: 201 });
+  } catch (error) {
+    logger.error("Erreur lors de la création de l'utilisateur", { error });
+    return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user || !isAdminRole((session.user as any).role as string)) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { id, actif } = body;
+
+    if (!id || typeof actif !== "boolean") {
+      return NextResponse.json({ error: "id et actif (boolean) sont requis" }, { status: 400 });
+    }
+
+    const user = await prisma.utilisateur.findUnique({ where: { id } });
+    if (!user || user.centerId !== (session.user as any).centerId) {
+      return NextResponse.json({ error: "Utilisateur non trouvé" }, { status: 404 });
+    }
+
+    if (user.role === "admin" && (session.user as any).role !== "super_admin") {
+      return NextResponse.json({ error: "Seul un super admin peut modifier un admin" }, { status: 403 });
+    }
+
+    const updated = await prisma.utilisateur.update({
+      where: { id },
+      data: { actif },
+      select: { id: true, nom: true, prenom: true, email: true, role: true, actif: true },
+    });
+
+    return NextResponse.json(updated);
+  } catch (error) {
+    return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user || !isAdminRole((session.user as any).role as string)) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "Paramètre id requis" }, { status: 400 });
+    }
+
+    const existingUser = await prisma.utilisateur.findUnique({ where: { id } });
+    if (!existingUser || existingUser.centerId !== (session.user as any).centerId) {
+      return NextResponse.json({ error: "Utilisateur non trouvé" }, { status: 404 });
+    }
+
+    if (existingUser.role === "admin" && (session.user as any).role !== "super_admin") {
+      return NextResponse.json({ error: "Seul un super admin peut supprimer un admin" }, { status: 403 });
+    }
+
+    await prisma.utilisateur.delete({ where: { id } });
+
+    logger.info("Utilisateur supprimé", { adminId: (session.user as any).id, deletedUserId: id });
+
+    return NextResponse.json({ message: "Utilisateur supprimé avec succès" });
+  } catch (error) {
+    logger.error("Erreur lors de la suppression de l'utilisateur", { error });
+    return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });
+  }
+}

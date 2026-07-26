@@ -1,0 +1,232 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft, User, Loader2 } from "lucide-react";
+import { formatDate } from "@/lib/utils";
+
+interface ProfesseurData {
+  professeur: {
+    id: string;
+    nom: string;
+    prenom: string;
+    email: string;
+    telephone: string | null;
+  };
+  groupes: {
+    id: string;
+    nom: string;
+    matiere: { id: string; nom: string } | null;
+    _count: { inscriptions: number; seances: number };
+  }[];
+  seances: {
+    id: string;
+    date: string;
+    heureDebut: string | null;
+    heureFin: string | null;
+    statut: string;
+    groupe: { id: string; nom: string };
+    stats: { presentsCount: number; totalEleves: number };
+  }[];
+}
+
+export default function AdminProfesseurDetailPage() {
+  const params = useParams();
+  const id = params.id as string;
+  const [prof, setProf] = useState<ProfesseurData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await fetch(`/api/admin/professeurs/${id}`);
+        if (!res.ok) throw new Error("Erreur lors du chargement");
+        const data = await res.json();
+        setProf(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Erreur inconnue");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
+      </div>
+    );
+  }
+
+  if (error || !prof) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Link
+            href="/admin/utilisateurs"
+            className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Retour
+          </Link>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Détail Professeur</h1>
+        </div>
+        {error && (
+          <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">
+            {error}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  const p = prof.professeur;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        <Link
+          href="/admin/utilisateurs"
+          className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Retour
+        </Link>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          {p.prenom} {p.nom}
+        </h1>
+      </div>
+
+      <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+            <User className="h-7 w-7 text-green-600 dark:text-green-400" />
+          </div>
+          <div className="space-y-1">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              {p.prenom} {p.nom}
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{p.email}</p>
+          </div>
+        </div>
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <p className="text-xs font-medium uppercase text-gray-400 dark:text-gray-500">Téléphone</p>
+            <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{p.telephone || "—"}</p>
+          </div>
+          <div>
+            <p className="text-xs font-medium uppercase text-gray-400 dark:text-gray-500">Email</p>
+            <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{p.email}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+        <div className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
+          <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Ses Groupes</h2>
+        </div>
+        <table className="w-full text-left text-sm">
+          <thead className="border-b border-gray-200 dark:border-slate-700">
+            <tr>
+              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Groupe</th>
+              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Matière</th>
+              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Élèves</th>
+              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Séances</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+            {prof.groupes.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                  Aucun groupe assigné
+                </td>
+              </tr>
+            ) : (
+              prof.groupes.map((g) => (
+                <tr key={g.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
+                  <td className="px-6 py-4 font-medium">
+                    <Link href={`/admin/groupes/${g.id}`} className="text-blue-600 dark:text-blue-400 hover:underline">
+                      {g.nom}
+                    </Link>
+                  </td>
+                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{g.matiere?.nom ?? "—"}</td>
+                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{g._count.inscriptions}</td>
+                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{g._count.seances}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+        <div className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
+          <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Ses Séances</h2>
+        </div>
+        <table className="w-full text-left text-sm">
+          <thead className="border-b border-gray-200 dark:border-slate-700">
+            <tr>
+              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Date</th>
+              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Groupe</th>
+              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Horaire</th>
+              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Statut</th>
+              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Présences</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+            {prof.seances.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                  Aucune séance
+                </td>
+              </tr>
+            ) : (
+              prof.seances.map((s) => (
+                <tr key={s.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
+                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{formatDate(s.date)}</td>
+                  <td className="px-6 py-4 font-medium">{s.groupe.nom}</td>
+                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                    {s.heureDebut && s.heureFin
+                      ? `${new Date(s.heureDebut).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })} - ${new Date(s.heureFin).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`
+                      : "—"}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span
+                      className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        s.statut === "planifiee"
+                          ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400"
+                          : s.statut === "en_cours"
+                            ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400"
+                            : s.statut === "terminee"
+                              ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400"
+                              : "bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-gray-200"
+                      }`}
+                    >
+                      {s.statut === "planifiee"
+                        ? "Planifiée"
+                        : s.statut === "en_cours"
+                          ? "En cours"
+                          : s.statut === "terminee"
+                            ? "Terminée"
+                            : "Annulée"}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                    {s.stats.presentsCount}/{s.stats.totalEleves}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

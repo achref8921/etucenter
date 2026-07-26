@@ -1,0 +1,52 @@
+# dependencies
+node_modules/
+
+# build
+.next/
+out/
+dist/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# debug
+npm-debug.log*
+
+# misc
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts
+
+# prisma local engine cache
+node_modules/.cache/prisma/
+
+# temporary/local scripts
+activate-admin.cjs
+backfill-centers.cjs
+check-data.cjs
+check-superadmin.cjs
+check-table.cjs
+check-user.cjs
+create-center.cjs
+create-superadmin.cjs
+create-superadmin2.cjs
+create-test-accounts.cjs
+fix-data.cjs
+fix-orphans.cjs
+fix-password.cjs
+generate-codes.cjs
+seed-full.cjs
+seed-test-data.cjs
+seed-realistic.cjs
+test-center.cjs
+test-centers.cjs
+test-login.cjs
+test-message.cjs
+launch.vbs
+start.cmd
+start.ps1
+ARCHITECTURE_REVIEW.txt
+DOCUMENTATION.txt
+PROJECT_MAP.md

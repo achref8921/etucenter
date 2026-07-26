@@ -1,0 +1,488 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { Plus, Trash2, X, Loader2, Filter, ToggleLeft, ToggleRight, Search, Download } from "lucide-react";
+import ConfirmDelete from "@/components/confirm-delete";
+
+interface Utilisateur {
+  id: string;
+  nom: string;
+  prenom: string;
+  email: string;
+  telephone: string | null;
+  role: string;
+  actif: boolean;
+  codeEleve: string | null;
+  niveau: string | null;
+  classe: string | null;
+  filiere: string | null;
+}
+
+const classesByNiveau: Record<string, string[]> = {
+  primaire: ["1ère année", "2ème année", "3ème année", "4ème année", "5ème année", "6ème année"],
+  college: ["7ème", "8ème", "9ème"],
+  lycee: ["1ère", "2ème", "3ème", "Bac"],
+};
+
+const filieres = [
+  { value: "lettres", label: "Lettres" },
+  { value: "economique", label: "Économique" },
+  { value: "informatique", label: "Informatique" },
+  { value: "technique", label: "Technique" },
+  { value: "sciences", label: "Sciences" },
+  { value: "math", label: "Mathématiques" },
+];
+
+export default function UtilisateursPage() {
+  const router = useRouter();
+  const { data: session } = useSession();
+  const currentUserRole = (session?.user as any)?.role;
+  const isSuperAdmin = currentUserRole === "super_admin";
+  const [users, setUsers] = useState<Utilisateur[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [roleFilter, setRoleFilter] = useState("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [niveauFilter, setNiveauFilter] = useState("ALL");
+  const [classeFilter, setClasseFilter] = useState("ALL");
+  const [filiereFilter, setFiliereFilter] = useState("ALL");
+  const [etatFilter, setEtatFilter] = useState("ALL");
+  const [confirmDelete, setConfirmDelete] = useState<{ id: string } | null>(null);
+
+  const [formData, setFormData] = useState({
+    nom: "",
+    prenom: "",
+    email: "",
+    motDePasse: "",
+    telephone: "",
+    role: "prof",
+    niveau: "",
+    classe: "",
+    filiere: "",
+  });
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetch("/api/admin/utilisateurs");
+      if (!res.ok) throw new Error("Erreur lors du chargement");
+      const data = await res.json();
+      setUsers(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const resetForm = () => {
+    setFormData({ nom: "", prenom: "", email: "", motDePasse: "", telephone: "", role: "prof", niveau: "", classe: "", filiere: "" });
+    setFormErrors({});
+  };
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const newErrors: Record<string, string> = {};
+    if (!formData.nom.trim()) newErrors.nom = "Requis";
+    if (!formData.prenom.trim()) newErrors.prenom = "Requis";
+    if (!formData.email.trim()) newErrors.email = "Requis";
+    if (!formData.motDePasse || formData.motDePasse.length < 6) newErrors.motDePasse = "Min 6 caractères";
+    if (formData.role === "eleve") {
+      if (!formData.niveau) newErrors.niveau = "Requis";
+      if (!formData.classe) newErrors.classe = "Requis";
+      if (formData.niveau === "lycee" && ["2ème", "3ème", "Bac"].includes(formData.classe) && !formData.filiere) {
+        newErrors.filiere = "Requise";
+      }
+    }
+    if (Object.keys(newErrors).length > 0) { setFormErrors(newErrors); return; }
+
+    try {
+      setSubmitting(true);
+      setError(null);
+      const payload: any = {
+        nom: formData.nom,
+        prenom: formData.prenom,
+        email: formData.email,
+        motDePasse: formData.motDePasse,
+        telephone: formData.telephone || null,
+        role: formData.role,
+      };
+      if (formData.role === "eleve") {
+        payload.niveau = formData.niveau;
+        payload.classe = formData.classe;
+        if (formData.filiere) payload.filiere = formData.filiere;
+      }
+      const res = await fetch("/api/admin/utilisateurs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || "Erreur lors de la création");
+      }
+      setShowModal(false);
+      resetForm();
+      fetchUsers();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      setDeletingId(id);
+      setError(null);
+      const res = await fetch(`/api/admin/utilisateurs?id=${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || "Erreur lors de la suppression");
+      }
+      fetchUsers();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleToggleActif = async (id: string, currentActif: boolean) => {
+    try {
+      setTogglingId(id);
+      setError(null);
+      const res = await fetch("/api/admin/utilisateurs", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, actif: !currentActif }),
+      });
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || "Erreur");
+      }
+      fetchUsers();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
+  const niveauLabels: Record<string, string> = { primaire: "Primaire", college: "Collège", lycee: "Lycée" };
+  const filiereLabels: Record<string, string> = { lettres: "Lettres", economique: "Économique", informatique: "Informatique", technique: "Technique", sciences: "Sciences", math: "Mathématiques" };
+
+  const handleDownloadExcel = () => {
+    const headers = ["Code", "Nom", "Prénom", "Email", "Téléphone", "Niveau", "Classe", "Filière", "État"];
+    const rows = filteredUsers
+      .filter((u) => u.role === "eleve" || u.role === "ELEVE")
+      .map((u) => [
+        u.codeEleve || "",
+        u.nom,
+        u.prenom,
+        u.email,
+        u.telephone || "",
+        niveauLabels[u.niveau || ""] || u.niveau || "",
+        u.classe || "",
+        filiereLabels[u.filiere || ""] || u.filiere || "",
+        u.actif ? "Actif" : "Inactif",
+      ]);
+
+    const parts: string[] = [];
+    if (niveauFilter !== "ALL") parts.push(`Niveau: ${niveauLabels[niveauFilter] || niveauFilter}`);
+    if (classeFilter !== "ALL") parts.push(`Classe: ${classeFilter}`);
+    if (filiereFilter !== "ALL") parts.push(`Filière: ${filiereLabels[filiereFilter] || filiereFilter}`);
+    if (etatFilter !== "ALL") parts.push(`État: ${etatFilter}`);
+
+    const csvContent = [
+      ...(parts.length > 0 ? [`Filtres: ${parts.join(" | ")}`, `Total: ${rows.length} élèves`, ""] : []),
+      headers.join(";"),
+      ...rows.map((row) => row.join(";")),
+    ].join("\n");
+
+    const BOM = "\uFEFF";
+    const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const filterName = parts.length > 0 ? `_${parts.map((p) => p.split(": ")[1]).join("_")}` : "_tous";
+    a.download = `eleves${filterName}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const filteredUsers = users.filter((u) => {
+    const matchesRole = roleFilter === "ALL" || u.role.toUpperCase() === roleFilter;
+    if (!matchesRole) return false;
+
+    if (roleFilter === "ELEVE") {
+      if (niveauFilter !== "ALL" && u.niveau !== niveauFilter) return false;
+      if (classeFilter !== "ALL" && u.classe !== classeFilter) return false;
+      if (filiereFilter !== "ALL" && u.filiere !== filiereFilter) return false;
+      if (etatFilter !== "ALL" && ((etatFilter === "ACTIF" && !u.actif) || (etatFilter === "INACTIF" && u.actif))) return false;
+    }
+
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      (u.codeEleve && u.codeEleve.toLowerCase().includes(q)) ||
+      u.nom.toLowerCase().includes(q) ||
+      u.prenom.toLowerCase().includes(q) ||
+      u.email.toLowerCase().includes(q)
+    );
+  });
+
+  const availableClasses = niveauFilter !== "ALL" ? (classesByNiveau[niveauFilter] || []) : [];
+
+  const roleLabel = (r: string) => {
+    if (r === "admin" || r === "ADMIN") return "Admin";
+    if (r === "prof" || r === "PROF") return "Prof";
+    if (r === "eleve" || r === "ELEVE") return "Élève";
+    return r;
+  };
+
+  const roleNav = (u: Utilisateur) => {
+    if (u.role === "ELEVE" || u.role === "eleve") return `/admin/eleves/${u.id}`;
+    if (u.role === "PROF" || u.role === "prof") return `/admin/professeurs/${u.id}`;
+    return "#";
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestion des Utilisateurs</h1>
+        <button onClick={() => { setShowModal(true); resetForm(); }} className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+          <Plus className="h-4 w-4" /> Ajouter
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-3">
+            <Filter className="h-4 w-4 text-gray-400 dark:text-slate-500" />
+            <div className="flex gap-2">
+              {["ALL", "ADMIN", "PROF", "ELEVE"].map((r) => (
+                <button key={r} onClick={() => { setRoleFilter(r); setNiveauFilter("ALL"); setClasseFilter("ALL"); setFiliereFilter("ALL"); setEtatFilter("ALL"); }} className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${roleFilter === r ? "bg-blue-600 text-white" : "bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700"}`}>
+                  {r === "ALL" ? "Tous" : r === "ELEVE" ? "Élèves" : r === "PROF" ? "Prof" : "Admins"}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
+            <input
+              type="text"
+              placeholder="Rechercher par code, nom, prénom, email..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 pl-9 pr-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-400 dark:placeholder-slate-500"
+            />
+          </div>
+        </div>
+
+        {roleFilter === "ELEVE" && (
+          <div className="flex flex-wrap items-center gap-2 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 px-3 py-2">
+            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Filtrer par :</span>
+            <select value={niveauFilter} onChange={(e) => { setNiveauFilter(e.target.value); setClasseFilter("ALL"); }} className="rounded-md border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none">
+              <option value="ALL">Niveau</option>
+              <option value="primaire">Primaire</option>
+              <option value="college">Collège</option>
+              <option value="lycee">Lycée</option>
+            </select>
+            {niveauFilter !== "ALL" && (
+              <select value={classeFilter} onChange={(e) => setClasseFilter(e.target.value)} className="rounded-md border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none">
+                <option value="ALL">Classe</option>
+                {availableClasses.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            )}
+            <select value={filiereFilter} onChange={(e) => setFiliereFilter(e.target.value)} className="rounded-md border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none">
+              <option value="ALL">Filière</option>
+              <option value="lettres">Lettres</option>
+              <option value="economique">Économique</option>
+              <option value="informatique">Informatique</option>
+              <option value="technique">Technique</option>
+              <option value="sciences">Sciences</option>
+              <option value="math">Mathématiques</option>
+            </select>
+            <select value={etatFilter} onChange={(e) => setEtatFilter(e.target.value)} className="rounded-md border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none">
+              <option value="ALL">État</option>
+              <option value="ACTIF">Actif</option>
+              <option value="INACTIF">Inactif</option>
+            </select>
+            {(niveauFilter !== "ALL" || classeFilter !== "ALL" || filiereFilter !== "ALL" || etatFilter !== "ALL") && (
+              <>
+                <button onClick={() => { setNiveauFilter("ALL"); setClasseFilter("ALL"); setFiliereFilter("ALL"); setEtatFilter("ALL"); }} className="text-xs text-blue-600 dark:text-blue-400 hover:underline">Réinitialiser</button>
+                <button onClick={handleDownloadExcel} className="flex items-center gap-1 rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 ml-auto">
+                  <Download className="h-3 w-3" /> Télécharger Excel ({filteredUsers.filter((u) => u.role === "eleve" || u.role === "ELEVE").length})
+                </button>
+              </>
+            )}
+            {!(niveauFilter !== "ALL" || classeFilter !== "ALL" || filiereFilter !== "ALL" || etatFilter !== "ALL") && (
+              <button onClick={handleDownloadExcel} className="flex items-center gap-1 rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 ml-auto">
+                <Download className="h-3 w-3" /> Télécharger tous ({filteredUsers.filter((u) => u.role === "eleve" || u.role === "ELEVE").length})
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {error && <div className="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">{error}</div>}
+
+      {loading ? (
+        <div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-blue-600" /></div>
+      ) : (
+        <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+          <table className="w-full text-left text-sm">
+            <thead className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
+              <tr>
+                <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Code</th>
+                <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Nom</th>
+                <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Email</th>
+                <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Rôle</th>
+                <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Classe</th>
+                <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-400">État</th>
+                <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+              {filteredUsers.length === 0 ? (
+                <tr><td colSpan={7} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Aucun utilisateur trouvé</td></tr>
+              ) : (
+                filteredUsers.map((user) => (
+                  <tr key={user.id} className="cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800" onClick={() => router.push(roleNav(user))}>
+                    <td className="px-4 py-4">
+                      {user.role === "eleve" || user.role === "ELEVE" ? (
+                        <span className="inline-block rounded bg-blue-100 dark:bg-blue-900/20 px-2 py-0.5 font-mono text-xs font-bold text-blue-700 dark:text-blue-400">{user.codeEleve || "—"}</span>
+                      ) : "—"}
+                    </td>
+                    <td className="px-4 py-4 font-medium">{user.prenom} {user.nom}</td>
+                    <td className="px-4 py-4 text-gray-600 dark:text-gray-400">{user.email}</td>
+                    <td className="px-4 py-4">
+                      <span className="inline-block rounded-full bg-blue-100 dark:bg-blue-900/20 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:text-blue-300">{roleLabel(user.role)}</span>
+                    </td>
+                    <td className="px-4 py-4 text-gray-600 dark:text-gray-400 text-xs">
+                      {user.role === "eleve" || user.role === "ELEVE" ? (
+                        <span>{user.classe || "—"}{user.filiere ? ` (${user.filiere})` : ""}</span>
+                      ) : "—"}
+                    </td>
+                    <td className="px-4 py-4">
+                      <button onClick={(e) => { e.stopPropagation(); handleToggleActif(user.id, user.actif); }} disabled={togglingId === user.id} className="flex items-center gap-1 disabled:opacity-50" title={user.actif ? "Désactiver" : "Activer"}>
+                        {togglingId === user.id ? <Loader2 className="h-4 w-4 animate-spin text-gray-400 dark:text-slate-500" /> : user.actif ? <ToggleRight className="h-6 w-6 text-green-500 dark:text-green-400" /> : <ToggleLeft className="h-6 w-6 text-gray-300 dark:text-slate-600" />}
+                        <span className={`text-xs font-medium ${user.actif ? "text-green-600 dark:text-green-400" : "text-gray-400 dark:text-slate-500"}`}>{user.actif ? "Actif" : "Inactif"}</span>
+                      </button>
+                    </td>
+                    <td className="px-4 py-4">
+                      <button onClick={(e) => { e.stopPropagation(); setConfirmDelete({ id: user.id }); }} disabled={deletingId === user.id} className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 disabled:opacity-50">
+                        {deletingId === user.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Ajouter un utilisateur</h2>
+              <button onClick={() => { setShowModal(false); resetForm(); }} className="text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300"><X className="h-5 w-5" /></button>
+            </div>
+            <form onSubmit={onSubmit} className="space-y-3">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Nom</label>
+                <input value={formData.nom} onChange={(e) => setFormData({ ...formData, nom: e.target.value })} className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                {formErrors.nom && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.nom}</p>}
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Prénom</label>
+                <input value={formData.prenom} onChange={(e) => setFormData({ ...formData, prenom: e.target.value })} className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                {formErrors.prenom && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.prenom}</p>}
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                <input value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} type="email" className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                {formErrors.email && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.email}</p>}
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Mot de passe</label>
+                <input value={formData.motDePasse} onChange={(e) => setFormData({ ...formData, motDePasse: e.target.value })} type="password" className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                {formErrors.motDePasse && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.motDePasse}</p>}
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Téléphone</label>
+                <input value={formData.telephone} onChange={(e) => setFormData({ ...formData, telephone: e.target.value })} className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Rôle</label>
+                <select value={formData.role} onChange={(e) => setFormData({ ...formData, role: e.target.value, niveau: "", classe: "", filiere: "" })} className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                  <option value="admin">Admin</option>
+                  <option value="prof">Prof</option>
+                  <option value="eleve">Élève</option>
+                </select>
+              </div>
+
+              {formData.role === "eleve" && (
+                <>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Niveau</label>
+                    <select value={formData.niveau} onChange={(e) => setFormData({ ...formData, niveau: e.target.value, classe: "", filiere: "" })} className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                      <option value="">-- Sélectionner --</option>
+                      <option value="primaire">Primaire</option>
+                      <option value="college">Collège</option>
+                      <option value="lycee">Lycée</option>
+                    </select>
+                    {formErrors.niveau && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.niveau}</p>}
+                  </div>
+                  {formData.niveau && (
+                    <div>
+                      <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Classe</label>
+                      <select value={formData.classe} onChange={(e) => setFormData({ ...formData, classe: e.target.value, filiere: "" })} className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        <option value="">-- Sélectionner --</option>
+                        {(classesByNiveau[formData.niveau] || []).map((c) => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                      {formErrors.classe && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.classe}</p>}
+                    </div>
+                  )}
+                  {formData.niveau === "lycee" && ["2ème", "3ème", "Bac"].includes(formData.classe) && (
+                    <div>
+                      <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Filière</label>
+                      <select value={formData.filiere} onChange={(e) => setFormData({ ...formData, filiere: e.target.value })} className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        <option value="">-- Sélectionner --</option>
+                        {filieres.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
+                      </select>
+                      {formErrors.filiere && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.filiere}</p>}
+                    </div>
+                  )}
+                </>
+              )}
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button type="button" onClick={() => { setShowModal(false); resetForm(); }} className="rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800">Annuler</button>
+                <button type="submit" disabled={submitting} className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+                  {submitting && <Loader2 className="h-4 w-4 animate-spin" />} Créer
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      <ConfirmDelete open={!!confirmDelete} title="Supprimer l'utilisateur" message="Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible." onConfirm={() => { if (confirmDelete) handleDelete(confirmDelete.id); setConfirmDelete(null); }} onCancel={() => setConfirmDelete(null)} loading={deletingId === confirmDelete?.id} />
+    </div>
+  );
+}
