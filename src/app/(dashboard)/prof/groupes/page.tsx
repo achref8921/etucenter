@@ -207,7 +207,7 @@ export default function ProfGroupesPage() {
               </Link>
             </div>
             {groupe.description && <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">{groupe.description}</p>}
-            <div className="grid grid-cols-3 gap-4 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
               <div>
                 <span className="text-gray-500 dark:text-gray-400">Matiere</span>
                 <p className="font-medium text-gray-900 dark:text-gray-100">{groupe.matiere?.nom ?? "—"}</p>

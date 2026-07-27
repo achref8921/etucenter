@@ -120,40 +120,42 @@ export default function EleveDashboardPage() {
         <div className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
           <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Mes Groupes</h2>
         </div>
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-gray-200 dark:border-slate-700">
-            <tr>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Groupe</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Matière</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Prof</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Prix/Mois</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
-            {groupes.length === 0 ? (
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="border-b border-gray-200 dark:border-slate-700">
               <tr>
-                <td colSpan={4} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                  Vous n&apos;êtes inscrit à aucun groupe
-                </td>
+                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Groupe</th>
+                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Matière</th>
+                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Prof</th>
+                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Prix/Mois</th>
               </tr>
-            ) : (
-              groupes.map((g) => (
-                <tr key={g.groupe.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
-                  <td className="px-6 py-4 font-medium">{g.groupe.nom}</td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{g.groupe.matiere?.nom ?? "—"}</td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
-                    {g.groupe.prof
-                      ? `${g.groupe.prof.prenom} ${g.groupe.prof.nom}`
-                      : "—"}
-                  </td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
-                    {formatCurrency(g.groupe.prixParSeance)}
+            </thead>
+            <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+              {groupes.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                    Vous n&apos;êtes inscrit à aucun groupe
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                groupes.map((g) => (
+                  <tr key={g.groupe.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
+                    <td className="px-6 py-4 font-medium">{g.groupe.nom}</td>
+                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{g.groupe.matiere?.nom ?? "—"}</td>
+                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                      {g.groupe.prof
+                        ? `${g.groupe.prof.prenom} ${g.groupe.prof.nom}`
+                        : "—"}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                      {formatCurrency(g.groupe.prixParSeance)}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

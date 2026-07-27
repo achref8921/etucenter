@@ -261,7 +261,7 @@ export default function UtilisateursPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestion des Utilisateurs</h1>
         <button onClick={() => { setShowModal(true); resetForm(); }} className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
           <Plus className="h-4 w-4" /> Ajouter
@@ -344,6 +344,7 @@ export default function UtilisateursPage() {
         <div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-blue-600" /></div>
       ) : (
         <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+          <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
               <tr>
@@ -393,6 +394,7 @@ export default function UtilisateursPage() {
               )}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 

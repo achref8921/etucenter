@@ -61,7 +61,8 @@ export default function ProfPresencesSelectPage() {
       )}
 
       <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-        <table className="w-full text-left text-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
           <thead className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
             <tr>
               <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Date</th>
@@ -116,7 +117,8 @@ export default function ProfPresencesSelectPage() {
               ))
             )}
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
     </div>
   );

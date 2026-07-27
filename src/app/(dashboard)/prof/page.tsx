@@ -179,26 +179,28 @@ export default function ProfDashboardPage() {
               <div className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
                 <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Mes Groupes</h2>
               </div>
-              <table className="w-full text-left text-sm">
-                <thead className="border-b border-gray-200 dark:border-slate-700">
-                  <tr>
-                    <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Groupe</th>
-                    <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Élèves</th>
-                    <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Séances</th>
-                    <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Prix/Mois</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
-                  {stats.groupes.map((g) => (
-                    <tr key={g.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
-                      <td className="px-6 py-4 font-medium">{g.nom}</td>
-                      <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{g.nbEleves}</td>
-                      <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{g.nbSeances}</td>
-                      <td className="px-6 py-4 font-medium">{formatCurrency(g.prixParSeance)}</td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead className="border-b border-gray-200 dark:border-slate-700">
+                    <tr>
+                      <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Groupe</th>
+                      <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Élèves</th>
+                      <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Séances</th>
+                      <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Prix/Mois</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+                    {stats.groupes.map((g) => (
+                      <tr key={g.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
+                        <td className="px-6 py-4 font-medium">{g.nom}</td>
+                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{g.nbEleves}</td>
+                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{g.nbSeances}</td>
+                        <td className="px-6 py-4 font-medium">{formatCurrency(g.prixParSeance)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </>
@@ -208,54 +210,56 @@ export default function ProfDashboardPage() {
         <div className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
           <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Prochaines Séances</h2>
         </div>
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-gray-200 dark:border-slate-700">
-            <tr>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Date</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Groupe</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Statut</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Nb Présences</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
-            {seances.length === 0 ? (
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="border-b border-gray-200 dark:border-slate-700">
               <tr>
-                <td colSpan={4} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                  Aucune séance à venir
-                </td>
+                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Date</th>
+                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Groupe</th>
+                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Statut</th>
+                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Nb Présences</th>
               </tr>
-            ) : (
-              seances.map((seance) => (
-                <tr key={seance.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{formatDate(seance.date)}</td>
-                  <td className="px-6 py-4 font-medium">{seance.groupe.nom}</td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        seance.statut === "planifiee"
-                          ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
-                          : seance.statut === "en_cours"
-                            ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
-                            : seance.statut === "terminee"
-                              ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                              : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
-                      }`}
-                    >
-                      {seance.statut === "planifiee"
-                        ? "Planifiée"
-                        : seance.statut === "en_cours"
-                          ? "En cours"
-                          : seance.statut === "terminee"
-                            ? "Terminée"
-                            : "Annulée"}
-                    </span>
+            </thead>
+            <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+              {seances.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                    Aucune séance à venir
                   </td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{seance._count.presences}</td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                seances.map((seance) => (
+                  <tr key={seance.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
+                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{formatDate(seance.date)}</td>
+                    <td className="px-6 py-4 font-medium">{seance.groupe.nom}</td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                          seance.statut === "planifiee"
+                            ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                            : seance.statut === "en_cours"
+                              ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
+                              : seance.statut === "terminee"
+                                ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                                : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+                        }`}
+                      >
+                        {seance.statut === "planifiee"
+                          ? "Planifiée"
+                          : seance.statut === "en_cours"
+                            ? "En cours"
+                            : seance.statut === "terminee"
+                              ? "Terminée"
+                              : "Annulée"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{seance._count.presences}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

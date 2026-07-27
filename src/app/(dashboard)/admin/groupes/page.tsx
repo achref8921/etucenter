@@ -165,7 +165,7 @@ export default function GroupesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestion des Groupes</h1>
         <button
           onClick={() => setShowModal(true)}
@@ -188,6 +188,7 @@ export default function GroupesPage() {
         </div>
       ) : (
         <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+          <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
               <tr>
@@ -270,6 +271,7 @@ export default function GroupesPage() {
               )}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
@@ -340,7 +342,7 @@ export default function GroupesPage() {
                   ))}
                 </select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Prix/Mois (DT)

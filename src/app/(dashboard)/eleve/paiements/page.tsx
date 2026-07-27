@@ -125,52 +125,54 @@ export default function ElevePaiementsPage() {
         <div className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
           <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Historique des Paiements</h2>
         </div>
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-gray-200 dark:border-slate-700">
-            <tr>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Date</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Groupe</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Montant</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Méthode</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Référence</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Notes</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
-            {paiements.length === 0 ? (
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="border-b border-gray-200 dark:border-slate-700">
               <tr>
-                <td colSpan={7} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                  Aucun paiement enregistré
-                </td>
+                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Date</th>
+                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Groupe</th>
+                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Montant</th>
+                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Méthode</th>
+                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Référence</th>
+                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Notes</th>
+                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400"></th>
               </tr>
-            ) : (
-              paiements.map((p) => (
-                <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{formatDateTime(p.datePaiement)}</td>
-                  <td className="px-6 py-4 font-medium">{p.groupe.nom}</td>
-                  <td className="px-6 py-4 font-medium">{formatCurrency(p.montant)}</td>
-                  <td className="px-6 py-4">
-                    <span className="inline-block rounded-full bg-gray-100 dark:bg-slate-700 px-2.5 py-0.5 text-xs font-medium text-gray-800 dark:text-slate-300">
-                      {p.methodePaiement}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{p.reference || "—"}</td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{p.notes || "—"}</td>
-                  <td className="px-6 py-4">
-                    <button
-                      onClick={() => window.open(`/api/paiements/${p.id}/facture`, "_blank")}
-                      className="rounded p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-emerald-600 dark:hover:text-emerald-400"
-                      title="Télécharger la facture"
-                    >
-                      <FileText className="h-4 w-4" />
-                    </button>
+            </thead>
+            <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+              {paiements.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                    Aucun paiement enregistré
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                paiements.map((p) => (
+                  <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
+                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{formatDateTime(p.datePaiement)}</td>
+                    <td className="px-6 py-4 font-medium">{p.groupe.nom}</td>
+                    <td className="px-6 py-4 font-medium">{formatCurrency(p.montant)}</td>
+                    <td className="px-6 py-4">
+                      <span className="inline-block rounded-full bg-gray-100 dark:bg-slate-700 px-2.5 py-0.5 text-xs font-medium text-gray-800 dark:text-slate-300">
+                        {p.methodePaiement}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{p.reference || "—"}</td>
+                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{p.notes || "—"}</td>
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => window.open(`/api/paiements/${p.id}/facture`, "_blank")}
+                        className="rounded p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-emerald-600 dark:hover:text-emerald-400"
+                        title="Télécharger la facture"
+                      >
+                        <FileText className="h-4 w-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

@@ -224,7 +224,7 @@ export default function ProfSeancesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Mes Séances</h1>
@@ -259,61 +259,63 @@ export default function ProfSeancesPage() {
         <div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" /></div>
       ) : (
         <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
-              <tr>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Date</th>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Groupe</th>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Horaire</th>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Statut</th>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Présences</th>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
-              {seances.length === 0 ? (
-                <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Aucune séance trouvée</td></tr>
-              ) : (
-                seances.map((seance) => (
-                  <tr key={seance.id} className="cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800" onClick={() => router.push(`/prof/presences/${seance.id}`)}>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{formatDate(seance.date)}</td>
-                    <td className="px-6 py-4 font-medium">{seance.groupe.nom}</td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
-                      {seance.heureDebut && seance.heureFin
-                        ? `${new Date(seance.heureDebut).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })} - ${new Date(seance.heureFin).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`
-                        : "—"}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColor(seance.statut)}`}>
-                        {statusLabel(seance.statut)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{seance._count.presences}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          onClick={(e) => openEditModal(seance, e)}
-                          disabled={isSessionPast(seance)}
-                          className="rounded p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-400"
-                          title={isSessionPast(seance) ? "Séance passée — modification impossible" : "Modifier"}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setConfirmDelete(seance.id); }}
-                          disabled={deletingId === seance.id || isSessionPast(seance)}
-                          className="rounded p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-red-600 dark:hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-400"
-                          title={isSessionPast(seance) ? "Séance passée — suppression impossible" : "Supprimer"}
-                        >
-                          {deletingId === seance.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
+                <tr>
+                  <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Date</th>
+                  <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Groupe</th>
+                  <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Horaire</th>
+                  <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Statut</th>
+                  <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Présences</th>
+                  <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+                {seances.length === 0 ? (
+                  <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Aucune séance trouvée</td></tr>
+                ) : (
+                  seances.map((seance) => (
+                    <tr key={seance.id} className="cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800" onClick={() => router.push(`/prof/presences/${seance.id}`)}>
+                      <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{formatDate(seance.date)}</td>
+                      <td className="px-6 py-4 font-medium">{seance.groupe.nom}</td>
+                      <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                        {seance.heureDebut && seance.heureFin
+                          ? `${new Date(seance.heureDebut).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })} - ${new Date(seance.heureFin).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`
+                          : "—"}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColor(seance.statut)}`}>
+                          {statusLabel(seance.statut)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{seance._count.presences}</td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            onClick={(e) => openEditModal(seance, e)}
+                            disabled={isSessionPast(seance)}
+                            className="rounded p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-400"
+                            title={isSessionPast(seance) ? "Séance passée — modification impossible" : "Modifier"}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setConfirmDelete(seance.id); }}
+                            disabled={deletingId === seance.id || isSessionPast(seance)}
+                            className="rounded p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-red-600 dark:hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-400"
+                            title={isSessionPast(seance) ? "Séance passée — suppression impossible" : "Supprimer"}
+                          >
+                            {deletingId === seance.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -338,7 +340,7 @@ export default function ProfSeancesPage() {
                 <input type="date" value={createDate} onChange={(e) => setCreateDate(e.target.value)} className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                 {createErrors.date && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{createErrors.date}</p>}
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Heure début</label>
                   <input type="time" value={createHeureDebut} onChange={(e) => setCreateHeureDebut(e.target.value)} className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
@@ -378,7 +380,7 @@ export default function ProfSeancesPage() {
                 <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
                 <input type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Heure début</label>
                   <input type="time" value={editHeureDebut} onChange={(e) => setEditHeureDebut(e.target.value)} className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />

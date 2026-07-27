@@ -84,7 +84,7 @@ export default function MatieresPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestion des Matières</h1>
         <button
           onClick={() => setShowModal(true)}
@@ -107,6 +107,7 @@ export default function MatieresPage() {
         </div>
       ) : (
         <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+          <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
               <tr>
@@ -145,6 +146,7 @@ export default function MatieresPage() {
               )}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 

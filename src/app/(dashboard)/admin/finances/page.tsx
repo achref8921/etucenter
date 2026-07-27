@@ -216,7 +216,7 @@ export default function FinancesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Finances</h1>
         <button
           onClick={openModal}
@@ -281,6 +281,7 @@ export default function FinancesPage() {
         <div className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
           <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Historique des Paiements</h2>
         </div>
+        <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-gray-200 dark:border-slate-700">
             <tr>
@@ -343,6 +344,7 @@ export default function FinancesPage() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {showModal && (
@@ -360,7 +362,7 @@ export default function FinancesPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-3">
                 <p className="mb-2 text-xs font-semibold uppercase text-blue-600 dark:text-blue-400">Filtrer par classe</p>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <div>
                     <select
                       value={filterNiveau}
