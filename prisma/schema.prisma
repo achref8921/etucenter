@@ -94,6 +94,15 @@ model Utilisateur {
   niveau         NiveauScolaire?
   classe         String?   @db.VarChar(50)
   filiere        Filiere?
+
+  provider              String?   @default("credentials") @db.VarChar(50)
+  providerId            String?   @map("provider_id") @db.VarChar(255)
+  emailVerified         DateTime? @map("email_verified")
+  emailVerificationToken String?  @map("email_verification_token") @db.VarChar(255)
+  emailVerificationExpiry DateTime? @map("email_verification_expiry")
+  passwordResetToken    String?   @map("password_reset_token") @db.VarChar(255)
+  passwordResetExpiry   DateTime? @map("password_reset_expiry")
+
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
 

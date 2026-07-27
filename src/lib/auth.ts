@@ -3,6 +3,8 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
+import { generateRandomCode } from "@/lib/utils";
 
 export function isAdminRole(role: string): boolean {
   return role === "admin" || role === "super_admin";
@@ -26,6 +28,66 @@ async function findAndValidateUser(email: string) {
       return null;
     }
   }
+
+  return user;
+}
+
+async function findOrCreateGoogleUser(
+  email: string,
+  name: string,
+  image: string | null,
+  providerId: string
+) {
+  let user = await prisma.utilisateur.findUnique({
+    where: { email },
+  });
+
+  if (user) {
+    if (user.provider === "credentials" && !user.providerId) {
+      await prisma.utilisateur.update({
+        where: { id: user.id },
+        data: {
+          provider: "google",
+          providerId,
+          emailVerified: user.emailVerified ?? new Date(),
+          image: user.image ?? image,
+        },
+      });
+    }
+    return user;
+  }
+
+  const defaultCenterId = "00000000-0000-0000-0000-000000000001";
+  const nameParts = name.split(" ");
+  const prenom = nameParts[0] || "Utilisateur";
+  const nom = nameParts.slice(1).join(" ") || "Google";
+
+  let codeEleve: string | null = null;
+  let exists = true;
+  while (exists) {
+    const code = generateRandomCode();
+    const found = await prisma.utilisateur.findFirst({ where: { codeEleve: code } });
+    exists = !!found;
+    if (!exists) codeEleve = code;
+  }
+
+  user = await prisma.utilisateur.create({
+    data: {
+      centerId: defaultCenterId,
+      nom,
+      prenom,
+      email,
+      role: "eleve",
+      actif: true,
+      image,
+      provider: "google",
+      providerId,
+      emailVerified: new Date(),
+      codeEleve,
+    },
+  });
+
+  logger.info("Google user auto-created", { userId: user.id, email });
 
   return user;
 }
@@ -79,19 +141,56 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
+  cookies: {
+    sessionToken: {
+      name: process.env.NODE_ENV === "production" ? "__Secure-next-auth.session-token" : "next-auth.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
+    callbackUrl: {
+      name: process.env.NODE_ENV === "production" ? "__Secure-next-auth.callback-url" : "next-auth.callback-url",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
+    csrfToken: {
+      name: process.env.NODE_ENV === "production" ? "__Host-next-auth.csrf-token" : "next-auth.csrf-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
+  },
   callbacks: {
     async signIn({ user, account }) {
       if (account?.provider === "google") {
-        const dbUser = await findAndValidateUser(user.email ?? "");
-        if (!dbUser) {
+        try {
+          const dbUser = await findOrCreateGoogleUser(
+            user.email ?? "",
+            user.name ?? "Utilisateur Google",
+            user.image,
+            account.providerAccountId
+          );
+          user.id = dbUser.id;
+          (user as any).role = dbUser.role;
+          (user as any).nom = dbUser.nom;
+          (user as any).prenom = dbUser.prenom;
+          (user as any).centerId = dbUser.centerId;
+          (user as any).image = dbUser.image;
+          return true;
+        } catch (err) {
+          logger.error("Google sign-in error", { error: err, email: user.email });
           return "/login?error=google_no_account";
         }
-        user.id = dbUser.id;
-        (user as any).role = dbUser.role;
-        (user as any).nom = dbUser.nom;
-        (user as any).prenom = dbUser.prenom;
-        (user as any).centerId = dbUser.centerId;
-        (user as any).image = dbUser.image;
       }
       return true;
     },

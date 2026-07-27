@@ -91,6 +91,19 @@ export const paiementSchema = z.object({
   notes: z.string().optional(),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Adresse email invalide"),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, "Token requis"),
+  motDePasse: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères"),
+  confirmPassword: z.string().min(8, "La confirmation doit contenir au moins 8 caractères"),
+}).refine((data) => data.motDePasse === data.confirmPassword, {
+  message: "Les mots de passe ne correspondent pas",
+  path: ["confirmPassword"],
+});
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type UtilisateurInput = z.infer<typeof utilisateurSchema>;
@@ -99,3 +112,5 @@ export type GroupeInput = z.infer<typeof groupeSchema>;
 export type SeanceInput = z.infer<typeof seanceSchema>;
 export type PresenceInput = z.infer<typeof presenceSchema>;
 export type PaiementInput = z.infer<typeof paiementSchema>;
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;

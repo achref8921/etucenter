@@ -69,7 +69,7 @@ export default function RegisterPage() {
         return;
       }
 
-      setSuccess("Compte créé avec succès. Vous pouvez maintenant vous connecter.");
+      setSuccess("Compte créé avec succès. Vérifiez votre email pour activer votre compte, puis connectez-vous.");
     } catch {
       setError("Une erreur est survenue. Veuillez réessayer.");
     } finally {

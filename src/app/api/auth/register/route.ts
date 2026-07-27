@@ -4,9 +4,22 @@ import { prisma } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validations";
 import { logger } from "@/lib/logger";
 import { generateRandomCode } from "@/lib/utils";
+import { createEmailVerificationToken } from "@/lib/tokens";
+import { sendEmail, emailVerificationEmail } from "@/lib/email";
+import { rateLimit, getRateLimitKey, AUTH_RATE_LIMITS } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
+    const rlKey = getRateLimitKey(request, "register");
+    const rl = rateLimit(rlKey, AUTH_RATE_LIMITS.register);
+
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "Trop de demandes. Réessayez plus tard." },
+        { status: 429, headers: { "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+      );
+    }
+
     const body = await request.json();
 
     const parsed = registerSchema.safeParse(body);
@@ -58,11 +71,18 @@ export async function POST(request: Request) {
         role,
         actif: false,
         codeEleve,
+        provider: "credentials",
         niveau: role === "eleve" ? niveau : null,
         classe: role === "eleve" ? classe : null,
         filiere: role === "eleve" ? filiere : null,
       },
     });
+
+    const token = await createEmailVerificationToken(user.id);
+    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+    const verifyUrl = `${baseUrl}/api/auth/verify-email?token=${token}`;
+    const { subject, html } = emailVerificationEmail(`${prenom} ${nom}`, verifyUrl);
+    await sendEmail({ to: email, subject, html });
 
     logger.info("User registered successfully", {
       userId: user.id,
@@ -90,7 +110,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       {
-        message: "Compte créé avec succès.",
+        message: "Compte créé avec succès. Vérifiez votre email pour activer votre compte.",
         user: { id: user.id, nom: user.nom, prenom: user.prenom, email: user.email },
       },
       { status: 201 }
