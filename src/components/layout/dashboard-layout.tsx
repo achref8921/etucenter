@@ -29,6 +29,9 @@ export default function DashboardLayoutClient({ children, user, centerName, cent
     if (!user.centerId) return;
     const interval = setInterval(async () => {
       try {
+        const sessRes = await fetch("/api/auth/session");
+        const sess = await sessRes.json();
+        if (sess?.user?.id !== user.id) return;
         const res = await fetch("/api/admin/stats");
         if (res.status === 403) {
           const data = await res.json();
@@ -39,7 +42,7 @@ export default function DashboardLayoutClient({ children, user, centerName, cent
       } catch {}
     }, 60000);
     return () => clearInterval(interval);
-  }, [user.centerId, router]);
+  }, [user.centerId, user.id, router]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
