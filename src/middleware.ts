@@ -53,14 +53,17 @@ export default withAuth(
     const role = token.role as string;
 
     if (!hasAccess(pathname, role)) {
-      if (role === "super_admin") return NextResponse.redirect(new URL("/super-admin", req.url));
-      if (role === "admin") return NextResponse.redirect(new URL("/admin", req.url));
-      if (role === "prof") return NextResponse.redirect(new URL("/prof", req.url));
-      return NextResponse.redirect(new URL("/eleve", req.url));
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json({ error: "Session expirée" }, { status: 401 });
+      }
+      return NextResponse.redirect(new URL("/login?error=session_conflict", req.url));
     }
 
     if (role === "super_admin" && !pathname.startsWith("/super-admin") && !pathname.startsWith("/api/super-admin") && !pathname.startsWith("/api/notifications")) {
-      return NextResponse.redirect(new URL("/super-admin", req.url));
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json({ error: "Session expirée" }, { status: 401 });
+      }
+      return NextResponse.redirect(new URL("/login?error=session_conflict", req.url));
     }
 
     return NextResponse.next();

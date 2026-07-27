@@ -48,6 +48,8 @@ function LoginForm() {
       "Aucun compte associé à cet email. Demandez à votre administrateur de créer un compte d'abord.",
     Configuration: "Erreur de configuration. Veuillez réessayer.",
     AccessDenied: "Accès refusé. Veuillez réessayer.",
+    session_conflict:
+      "Un autre compte a été ouvert dans un autre onglet. Veuillez vous reconnecter.",
     Default: "Une erreur est survenue. Veuillez réessayer.",
   };
 
