@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, type RegisterInput } from "@/lib/validations";
 import { ArrowLeft } from "lucide-react";
+import PasswordInput from "@/components/password-input";
 import { useRouter } from "next/navigation";
 
 const classesByNiveau: Record<string, string[]> = {
@@ -179,9 +180,8 @@ export default function RegisterPage() {
           >
             Mot de passe
           </label>
-          <input
+          <PasswordInput
             id="motDePasse"
-            type="password"
             placeholder="••••••••"
             className="w-full rounded-lg border border-[var(--input)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--ring)] focus:outline-none focus:ring-1 focus:ring-[var(--ring)]"
             {...register("motDePasse")}

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Plus, Trash2, X, Loader2, Filter, ToggleLeft, ToggleRight, Search, Download } from "lucide-react";
+import PasswordInput from "@/components/password-input";
 import ConfirmDelete from "@/components/confirm-delete";
 
 interface Utilisateur {
@@ -427,7 +428,7 @@ export default function UtilisateursPage() {
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Mot de passe</label>
-                <input value={formData.motDePasse} onChange={(e) => setFormData({ ...formData, motDePasse: e.target.value })} type="password" className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                <PasswordInput value={formData.motDePasse} onChange={(e) => setFormData({ ...formData, motDePasse: e.target.value })} className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                 {formErrors.motDePasse && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.motDePasse}</p>}
               </div>
               <div>

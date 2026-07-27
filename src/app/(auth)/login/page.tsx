@@ -8,6 +8,7 @@ import { signIn, useSession } from "next-auth/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginInput } from "@/lib/validations";
 import { ArrowLeft } from "lucide-react";
+import PasswordInput from "@/components/password-input";
 
 function GoogleIcon() {
   return (
@@ -193,9 +194,8 @@ function LoginForm() {
           >
             Mot de passe
           </label>
-          <input
+          <PasswordInput
             id="motDePasse"
-            type="password"
             placeholder="••••••••"
             className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
             {...register("motDePasse")}

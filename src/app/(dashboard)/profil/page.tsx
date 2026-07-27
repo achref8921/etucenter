@@ -35,6 +35,7 @@ export default function ProfilPage() {
   const [confirmerMotDePasse, setConfirmerMotDePasse] = useState("");
   const [showAncien, setShowAncien] = useState(false);
   const [showNouveau, setShowNouveau] = useState(false);
+  const [showConfirmer, setShowConfirmer] = useState(false);
 
   useEffect(() => {
     const fetchProfil = async () => {
@@ -351,12 +352,21 @@ export default function ProfilPage() {
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Confirmer le mot de passe</label>
-                  <input
-                    type="password"
-                    value={confirmerMotDePasse}
-                    onChange={(e) => setConfirmerMotDePasse(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showConfirmer ? "text" : "password"}
+                      value={confirmerMotDePasse}
+                      onChange={(e) => setConfirmerMotDePasse(e.target.value)}
+                      className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 pr-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmer(!showConfirmer)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
+                    >
+                      {showConfirmer ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
                 </div>
                 <div className="flex justify-end">
                   <button
