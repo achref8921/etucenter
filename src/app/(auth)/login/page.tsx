@@ -103,7 +103,7 @@ function LoginForm() {
     setError(null);
     setGoogleLoading(true);
     try {
-      await signIn("google", { callbackUrl: "/admin" });
+      await signIn("google", { callbackUrl: "/" });
     } catch {
       setError("Erreur lors de la connexion avec Google.");
       setGoogleLoading(false);
