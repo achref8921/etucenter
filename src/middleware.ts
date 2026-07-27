@@ -59,7 +59,7 @@ export default withAuth(
       return NextResponse.redirect(new URL("/eleve", req.url));
     }
 
-    if (role === "super_admin" && !pathname.startsWith("/super-admin") && !pathname.startsWith("/api/super-admin")) {
+    if (role === "super_admin" && !pathname.startsWith("/super-admin") && !pathname.startsWith("/api/super-admin") && !pathname.startsWith("/api/profil") && !pathname.startsWith("/api/notifications")) {
       return NextResponse.redirect(new URL("/super-admin", req.url));
     }
 
