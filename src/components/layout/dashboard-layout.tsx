@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "./sidebar";
 import Header from "./header";
+import SessionWatcher from "@/components/session-watcher";
 import { Role } from "@prisma/client";
 
 interface DashboardLayoutProps {
@@ -42,6 +43,7 @@ export default function DashboardLayoutClient({ children, user, centerName, cent
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
+      <SessionWatcher />
       <Sidebar
         role={user.role}
         centerName={centerName}
