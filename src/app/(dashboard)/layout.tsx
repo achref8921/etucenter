@@ -30,12 +30,13 @@ export default async function DashboardRootLayout({
   if (centerId) {
     const center = await prisma.center.findUnique({
       where: { id: centerId },
-      select: { name: true, logo: true },
+      select: { name: true, logo: true, active: true },
     });
-    if (center) {
-      centerName = center.name;
-      centerLogo = center.logo;
+    if (!center || !center.active) {
+      redirect("/centre-suspendu");
     }
+    centerName = center.name;
+    centerLogo = center.logo;
   }
 
   const user: SessionUser = {

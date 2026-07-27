@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Sidebar from "./sidebar";
 import Header from "./header";
 import { Role } from "@prisma/client";
@@ -13,6 +14,7 @@ interface DashboardLayoutProps {
     prenom: string;
     email: string;
     role: Role;
+    centerId?: string;
   };
   centerName?: string;
   centerLogo?: string | null;
@@ -20,6 +22,23 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayoutClient({ children, user, centerName, centerLogo }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!user.centerId) return;
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch("/api/admin/stats");
+        if (res.status === 403) {
+          const data = await res.json();
+          if (data.suspended) {
+            router.push("/centre-suspendu");
+          }
+        }
+      } catch {}
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [user.centerId, router]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950">

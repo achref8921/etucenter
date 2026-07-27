@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { requireActiveCenter } from "@/lib/auth-helpers";
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
+    const { session, error } = await requireActiveCenter();
+    if (error) return error;
 
     const profil = await prisma.utilisateur.findUnique({
       where: { id: (session.user as any).id },
@@ -37,10 +34,8 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
+    const { session, error } = await requireActiveCenter();
+    if (error) return error;
 
     const body = await request.json();
     const { nom, prenom, telephone, email, dateNaissance, motDePasse, ancienMotDePasse } = body;

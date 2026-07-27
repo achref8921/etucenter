@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions, isAdminRole } from "@/lib/auth";
+import { requireActiveCenter } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user || !isAdminRole((session.user as any).role as string)) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
+    const { session, error } = await requireActiveCenter();
+    if (error) return error;
 
     const centreId = (session.user as any).centerId;
 
@@ -64,10 +61,8 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user || !isAdminRole((session.user as any).role as string)) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
+    const { session, error } = await requireActiveCenter();
+    if (error) return error;
 
     const body = await request.json();
     const { profId, tauxPourcentage } = body;

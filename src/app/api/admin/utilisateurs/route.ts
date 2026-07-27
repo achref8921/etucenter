@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import bcrypt from "bcryptjs";
-import { authOptions, isAdminRole } from "@/lib/auth";
+import { requireActiveCenter } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { utilisateurSchema } from "@/lib/validations";
@@ -9,10 +8,8 @@ import { generateRandomCode } from "@/lib/utils";
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user || !isAdminRole((session.user as any).role as string)) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
+    const { session, error } = await requireActiveCenter();
+    if (error) return error;
 
     const centerId = (session.user as any).centerId;
 
@@ -51,10 +48,8 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user || !isAdminRole((session.user as any).role as string)) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
+    const { session, error } = await requireActiveCenter();
+    if (error) return error;
 
     const body = await request.json();
     const parsed = utilisateurSchema.safeParse(body);
@@ -130,10 +125,8 @@ export async function POST(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user || !isAdminRole((session.user as any).role as string)) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
+    const { session, error } = await requireActiveCenter();
+    if (error) return error;
 
     const body = await request.json();
     const { id, actif } = body;
@@ -165,10 +158,8 @@ export async function PATCH(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user || !isAdminRole((session.user as any).role as string)) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
+    const { session, error } = await requireActiveCenter();
+    if (error) return error;
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");

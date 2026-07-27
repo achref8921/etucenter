@@ -1,19 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireActiveCenter } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
+    const { session, error } = await requireActiveCenter();
+    if (error) return error;
     const centerId = (session.user as any).centerId;
-    if (!centerId) {
-      return NextResponse.json({ error: "No center" }, { status: 400 });
-    }
     const center = await prisma.center.findUnique({ where: { id: centerId } });
     if (!center) {
       return NextResponse.json({ error: "Center not found" }, { status: 404 });
@@ -27,17 +21,9 @@ export async function GET() {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
-
+    const { session, error } = await requireActiveCenter();
+    if (error) return error;
     const centerId = (session.user as any).centerId;
-    const role = (session.user as any).role;
-
-    if (role !== "admin" && role !== "super_admin") {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
-    }
 
     const body = await request.json();
     const { name, logo, phone, address } = body;

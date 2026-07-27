@@ -177,7 +177,7 @@ export const authOptions: NextAuthOptions = {
           const dbUser = await findOrCreateGoogleUser(
             user.email ?? "",
             user.name ?? "Utilisateur Google",
-            user.image,
+            user.image ?? null,
             account.providerAccountId
           );
           user.id = dbUser.id;
@@ -211,6 +211,18 @@ export const authOptions: NextAuthOptions = {
         session.user.nom = token.nom as string;
         session.user.prenom = token.prenom as string;
         session.user.centerId = token.centerId as string;
+
+        const centerId = token.centerId as string | undefined;
+        const role = token.role as string;
+        if (centerId && role !== "super_admin") {
+          const center = await prisma.center.findUnique({
+            where: { id: centerId },
+            select: { active: true },
+          });
+          if (!center || !center.active) {
+            (session.user as any).centerSuspended = true;
+          }
+        }
       }
       return session;
     },

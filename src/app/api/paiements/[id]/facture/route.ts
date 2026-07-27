@@ -148,9 +148,9 @@ export async function GET(
 
     const presentCount = presences.filter((p) => p.statut === "present").length;
     const absentCount = presences.filter((p) => p.statut === "absent").length;
-    const retardCount = presences.filter((p) => p.statut === "retard").length;
-    const excusedCount = presences.filter((p) => p.statut === "excuse").length;
-    const noRecordCount = totalSeances - presentCount - absentCount - retardCount - excusedCount;
+    const retardCount = 0;
+    const excusedCount = 0;
+    const noRecordCount = totalSeances - presentCount - absentCount;
 
     const totalAllPresent = allPresences.filter((p) => p.statut === "present").length;
     const totalAllAbsent = allPresences.filter((p) => p.statut === "absent").length;
