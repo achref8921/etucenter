@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import {
   GraduationCap,
   Users,
@@ -69,7 +72,16 @@ const stats = [
   { value: "55K+", label: "DT de revenus" },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const session = await getServerSession(authOptions);
+  if (session?.user) {
+    const role = (session.user as any).role;
+    if (role === "super_admin") redirect("/super-admin");
+    if (role === "admin") redirect("/admin");
+    if (role === "prof") redirect("/prof");
+    redirect("/eleve");
+  }
+
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950">
       {/* Nav */}
