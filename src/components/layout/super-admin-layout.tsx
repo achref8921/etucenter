@@ -4,12 +4,14 @@ import { useState } from "react";
 import SuperAdminSidebar from "@/components/layout/super-admin-sidebar";
 import SuperAdminHeader from "@/components/layout/super-admin-header";
 import SessionWatcher from "@/components/session-watcher";
+import SessionGuard from "@/components/session-guard";
 
 export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
+      <SessionGuard />
       <SessionWatcher />
       <SuperAdminSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="md:pl-64">

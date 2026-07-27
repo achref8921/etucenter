@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Sidebar from "./sidebar";
 import Header from "./header";
 import SessionWatcher from "@/components/session-watcher";
+import SessionGuard from "@/components/session-guard";
 import { Role } from "@prisma/client";
 
 interface DashboardLayoutProps {
@@ -46,6 +47,7 @@ export default function DashboardLayoutClient({ children, user, centerName, cent
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
+      <SessionGuard />
       <SessionWatcher />
       <Sidebar
         role={user.role}
