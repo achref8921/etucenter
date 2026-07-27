@@ -504,7 +504,56 @@ export default function SuperAdminCentersPage() {
         </div>
       )}
 
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-x-auto dark:border-slate-700 dark:bg-slate-900">
+      {/* Mobile: Card view */}
+      <div className="md:hidden space-y-3">
+        {loading ? (
+          <div className="text-center py-12 text-sm text-slate-400">Loading...</div>
+        ) : centers.length === 0 ? (
+          <div className="text-center py-12 text-sm text-slate-400">No centers found.</div>
+        ) : centers.map((c) => (
+          <div key={c.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <div className="flex items-center gap-3 mb-3">
+              {c.logo ? (
+                <img src={c.logo} alt={c.name} className="h-10 w-10 rounded-lg object-contain border border-slate-200 dark:border-slate-700" />
+              ) : (
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-100 text-sm font-bold text-violet-600 dark:bg-violet-900/30 dark:text-violet-400">
+                  {c.name[0]}
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">{c.name}</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500">{c.phone || "No phone"}</p>
+              </div>
+              <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${c.active ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400" : "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400"}`}>
+                {c.active ? "Active" : "Suspended"}
+              </span>
+            </div>
+            <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400 mb-3">
+              <span>{c._count.utilisateurs} users</span>
+              <span>{c._count.groupes} groups</span>
+              <span className="ml-auto text-slate-400">{new Date(c.createdAt).toLocaleDateString("fr-FR")}</span>
+            </div>
+            <div className="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-700">
+              <button onClick={() => openAdmins(c)} className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-violet-50 py-2 text-xs font-semibold text-violet-700 hover:bg-violet-100 dark:bg-violet-900/20 dark:text-violet-400 dark:hover:bg-violet-900/30 transition-colors">
+                <Users className="h-3.5 w-3.5" /> Admins
+              </button>
+              <button onClick={() => setShowStats(c)} className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-blue-50 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30 transition-colors">
+                <Eye className="h-3.5 w-3.5" /> Stats
+              </button>
+              <button onClick={() => toggleActive(c.id, c.active)} disabled={togglingId === c.id} className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-semibold transition-colors disabled:opacity-40 ${c.active ? "bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30" : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/30"}`}>
+                {c.active ? <PowerOff className="h-3.5 w-3.5" /> : <Power className="h-3.5 w-3.5" />}
+                {c.active ? "Suspend" : "Activate"}
+              </button>
+              <button onClick={() => setShowDelete(c)} className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors dark:text-slate-500 dark:hover:bg-red-900/20 dark:hover:text-red-400">
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop: Table view */}
+      <div className="hidden md:block rounded-xl border border-slate-200 bg-white shadow-sm overflow-x-auto dark:border-slate-700 dark:bg-slate-900">
         <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
           <thead className="bg-slate-50 dark:bg-slate-800">
             <tr>
