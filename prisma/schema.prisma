@@ -91,6 +91,7 @@ model Utilisateur {
   dateNaissance  DateTime? @map("date_naissance") @db.Date
   actif          Boolean   @default(false)
   codeEleve      String?   @map("code_eleve") @db.VarChar(4)
+  codeProf       String?   @map("code_prof") @db.VarChar(5)
   niveau         NiveauScolaire?
   classe         String?   @db.VarChar(50)
   filiere        Filiere?
@@ -118,6 +119,7 @@ model Utilisateur {
   @@index([centerId, role])
   @@index([centerId, email])
   @@unique([centerId, codeEleve])
+  @@unique([centerId, codeProf])
   @@map("utilisateurs")
 }
 

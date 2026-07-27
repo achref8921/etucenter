@@ -15,6 +15,7 @@ interface Utilisateur {
   role: string;
   actif: boolean;
   codeEleve: string | null;
+  codeProf: string | null;
   niveau: string | null;
   classe: string | null;
   filiere: string | null;
@@ -238,6 +239,7 @@ export default function UtilisateursPage() {
     const q = searchQuery.toLowerCase();
     return (
       (u.codeEleve && u.codeEleve.toLowerCase().includes(q)) ||
+      (u.codeProf && u.codeProf.toLowerCase().includes(q)) ||
       u.nom.toLowerCase().includes(q) ||
       u.prenom.toLowerCase().includes(q) ||
       u.email.toLowerCase().includes(q)
@@ -366,6 +368,8 @@ export default function UtilisateursPage() {
                     <td className="px-4 py-4">
                       {user.role === "eleve" || user.role === "ELEVE" ? (
                         <span className="inline-block rounded bg-blue-100 dark:bg-blue-900/20 px-2 py-0.5 font-mono text-xs font-bold text-blue-700 dark:text-blue-400">{user.codeEleve || "—"}</span>
+                      ) : user.role === "prof" || user.role === "PROF" ? (
+                        <span className="inline-block rounded bg-emerald-100 dark:bg-emerald-900/20 px-2 py-0.5 font-mono text-xs font-bold text-emerald-700 dark:text-emerald-400">{user.codeProf || "—"}</span>
                       ) : "—"}
                     </td>
                     <td className="px-4 py-4 font-medium">{user.prenom} {user.nom}</td>

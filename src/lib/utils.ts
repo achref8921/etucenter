@@ -64,3 +64,7 @@ export function canModifyAttendance(
 export function generateRandomCode(): string {
   return Math.floor(1000 + Math.random() * 9000).toString();
 }
+
+export function generateProfCode(): string {
+  return "P" + Math.floor(1000 + Math.random() * 9000).toString();
+}

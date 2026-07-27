@@ -4,7 +4,7 @@ import { requireActiveCenter } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { utilisateurSchema } from "@/lib/validations";
-import { generateRandomCode } from "@/lib/utils";
+import { generateRandomCode, generateProfCode } from "@/lib/utils";
 
 export async function GET() {
   try {
@@ -26,6 +26,7 @@ export async function GET() {
         role: true,
         actif: true,
         codeEleve: true,
+        codeProf: true,
         image: true,
         niveau: true,
         classe: true,
@@ -94,6 +95,17 @@ export async function POST(request: NextRequest) {
       data.codeEleve = code!;
     }
 
+    if (role === "prof") {
+      let code: string;
+      let exists = true;
+      while (exists) {
+        code = generateProfCode();
+        const found = await prisma.utilisateur.findFirst({ where: { codeProf: code, centerId: (session.user as any).centerId } });
+        exists = !!found;
+      }
+      data.codeProf = code!;
+    }
+
     const utilisateur = await prisma.utilisateur.create({
       data,
       select: {
@@ -105,6 +117,7 @@ export async function POST(request: NextRequest) {
         role: true,
         actif: true,
         codeEleve: true,
+        codeProf: true,
         image: true,
         niveau: true,
         classe: true,

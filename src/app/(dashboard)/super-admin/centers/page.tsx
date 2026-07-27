@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Power, PowerOff, Eye, X, Trash2, Users, UserPlus } from "lucide-react";
+import { Plus, Power, PowerOff, Eye, X, Trash2, Users, UserPlus, Search } from "lucide-react";
 import ConfirmDelete from "@/components/confirm-delete";
 
 interface CenterData {
@@ -45,6 +45,7 @@ export default function SuperAdminCentersPage() {
   const [creatingAdmin, setCreatingAdmin] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   async function loadCenters() {
     const res = await fetch("/api/super-admin/centers");
@@ -167,6 +168,17 @@ export default function SuperAdminCentersPage() {
           <Plus className="h-4 w-4" />
           Add Center
         </button>
+      </div>
+
+      <div className="relative max-w-sm">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        <input
+          type="text"
+          placeholder="Rechercher par ID ou nom du centre..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-violet-400"
+        />
       </div>
 
       {showCreate && (
@@ -508,9 +520,12 @@ export default function SuperAdminCentersPage() {
       <div className="md:hidden space-y-3">
         {loading ? (
           <div className="text-center py-12 text-sm text-slate-400">Loading...</div>
-        ) : centers.length === 0 ? (
-          <div className="text-center py-12 text-sm text-slate-400">No centers found.</div>
-        ) : centers.map((c) => (
+        ) : (() => {
+          const q = searchQuery.toLowerCase();
+          const filtered = centers.filter((c) => !q || c.name.toLowerCase().includes(q) || c.id.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q));
+          return filtered.length === 0 ? (
+            <div className="text-center py-12 text-sm text-slate-400">Aucun centre trouvé.</div>
+          ) : filtered.map((c) => (
           <div key={c.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
             <div className="flex items-center gap-3 mb-3">
               {c.logo ? (
@@ -522,6 +537,7 @@ export default function SuperAdminCentersPage() {
               )}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">{c.name}</p>
+                <p className="text-[10px] font-mono text-slate-400 dark:text-slate-500">{c.id.slice(0, 8)}</p>
                 <p className="text-xs text-slate-400 dark:text-slate-500">{c.phone || "No phone"}</p>
               </div>
               <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${c.active ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400" : "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400"}`}>
@@ -549,7 +565,8 @@ export default function SuperAdminCentersPage() {
               </button>
             </div>
           </div>
-        ))}
+        ));
+        })()}
       </div>
 
       {/* Desktop: Table view */}
@@ -558,6 +575,7 @@ export default function SuperAdminCentersPage() {
           <thead className="bg-slate-50 dark:bg-slate-800">
             <tr>
               <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Center</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">ID</th>
               <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Slug</th>
               <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Users</th>
               <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Groups</th>
@@ -568,10 +586,13 @@ export default function SuperAdminCentersPage() {
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
             {loading ? (
-              <tr><td colSpan={7} className="px-5 py-8 text-center text-sm text-slate-400 dark:text-slate-500">Loading...</td></tr>
-            ) : centers.length === 0 ? (
-              <tr><td colSpan={7} className="px-5 py-8 text-center text-sm text-slate-400 dark:text-slate-500">No centers found.</td></tr>
-            ) : centers.map((c) => (
+              <tr><td colSpan={8} className="px-5 py-8 text-center text-sm text-slate-400 dark:text-slate-500">Loading...</td></tr>
+            ) : (() => {
+              const q = searchQuery.toLowerCase();
+              const filtered = centers.filter((c) => !q || c.name.toLowerCase().includes(q) || c.id.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q));
+              return filtered.length === 0 ? (
+                <tr><td colSpan={8} className="px-5 py-8 text-center text-sm text-slate-400 dark:text-slate-500">Aucun centre trouvé.</td></tr>
+              ) : filtered.map((c) => (
               <tr key={c.id} className="hover:bg-slate-50 transition-colors dark:hover:bg-slate-800">
                 <td className="px-5 py-3.5">
                   <div className="flex items-center gap-3">
@@ -587,6 +608,9 @@ export default function SuperAdminCentersPage() {
                       <p className="text-xs text-slate-400 dark:text-slate-500">{c.phone || "No phone"}</p>
                     </div>
                   </div>
+                </td>
+                <td className="px-5 py-3.5">
+                  <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-mono text-slate-500 dark:bg-slate-800 dark:text-slate-400">{c.id.slice(0, 8)}</span>
                 </td>
                 <td className="px-5 py-3.5">
                   <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-mono text-slate-600 dark:bg-slate-800 dark:text-slate-400">{c.slug}</span>
@@ -618,7 +642,8 @@ export default function SuperAdminCentersPage() {
                   </div>
                 </td>
               </tr>
-            ))}
+            ));
+            })()}
           </tbody>
         </table>
       </div>
