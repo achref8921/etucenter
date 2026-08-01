@@ -141,9 +141,7 @@ export default function Sidebar({ role, centerName, centerLogo, open, onClose }:
           })}
         </nav>
 
-        <div className="border-t border-slate-100 px-6 py-4 dark:border-slate-800">
-          <p className="text-[11px] text-slate-300 dark:text-slate-600">GestExam SaaS v1.0</p>
-        </div>
+        <div className="border-t border-slate-100 px-6 py-4 dark:border-slate-800"></div>
       </aside>
     </>
   );
