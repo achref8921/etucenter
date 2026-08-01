@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
+import { getBackupRetentionSetting } from "@/lib/settings";
 
 export const BACKUP_SCHEMA_VERSION = "1.0";
 export const BACKUP_KIND = "educenter-db-backup";
@@ -22,9 +23,8 @@ interface DbDump {
 export class BackupBusyError extends Error {}
 export class BackupRestoreError extends Error {}
 
-export function getBackupRetention(): number {
-  const raw = parseInt(process.env.BACKUP_RETENTION || "14", 10);
-  return Number.isFinite(raw) && raw > 0 ? raw : 14;
+export async function getBackupRetention(): Promise<number> {
+  return getBackupRetentionSetting();
 }
 
 function sha256(input: string): string {
@@ -316,7 +316,7 @@ export async function createSystemBackup(opts: { type: BackupType; createdBy?: s
 // ─── Rétention (conserver les N plus récentes) ────────────────────────────────
 
 async function pruneBackups(logActor?: string | null): Promise<void> {
-  const keep = getBackupRetention();
+  const keep = await getBackupRetention();
   const all = await prisma.systemBackup.findMany({
     orderBy: { createdAt: "desc" },
     select: { id: true, createdAt: true, status: true },
@@ -375,7 +375,7 @@ export async function getBackupStats() {
     enCours,
     last,
     totalSizeBytes: sizeAgg._sum.sizeBytes ?? 0,
-    retention: getBackupRetention(),
+    retention: await getBackupRetention(),
   };
 }
 

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isMaintenanceMode } from "@/lib/settings";
 import DashboardLayoutClient from "@/components/layout/dashboard-layout";
 import type { SessionUser } from "@/types";
 
@@ -20,6 +21,10 @@ export default async function DashboardRootLayout({
 
   if (role === "super_admin") {
     return <>{children}</>;
+  }
+
+  if (await isMaintenanceMode()) {
+    redirect("/maintenance");
   }
 
   const centerId = (session.user as any).centerId;

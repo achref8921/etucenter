@@ -7,9 +7,17 @@ import { generateRandomCode } from "@/lib/utils";
 import { createEmailVerificationToken } from "@/lib/tokens";
 import { sendEmail, emailVerificationEmail } from "@/lib/email";
 import { rateLimit, getRateLimitKey, AUTH_RATE_LIMITS } from "@/lib/rate-limit";
+import { isRegistrationOpen } from "@/lib/settings";
 
 export async function POST(request: Request) {
   try {
+    if (!(await isRegistrationOpen())) {
+      return NextResponse.json(
+        { error: "Les inscriptions sont actuellement fermées. Contactez votre centre pour créer un compte." },
+        { status: 403 }
+      );
+    }
+
     const rlKey = getRateLimitKey(request, "register");
     const rl = rateLimit(rlKey, AUTH_RATE_LIMITS.register);
 

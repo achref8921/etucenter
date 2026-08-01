@@ -366,4 +366,14 @@ model CenterSubscription {
   @@map("center_subscriptions")
 }
 
+// ─── PlatformSetting (Configuration globale) ───────────────────────────────
+
+model PlatformSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("platform_settings")
+}
+
 
