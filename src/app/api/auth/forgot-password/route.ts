@@ -34,7 +34,7 @@ export async function POST(request: Request) {
       select: { id: true, nom: true, prenom: true, motDePasse: true, provider: true },
     });
 
-    if (!user || !user.motDePasse || user.provider !== "credentials") {
+    if (!user || user.provider !== "credentials") {
       return NextResponse.json({
         message: "Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.",
       });

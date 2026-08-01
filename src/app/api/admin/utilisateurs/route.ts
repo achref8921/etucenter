@@ -142,10 +142,18 @@ export async function PATCH(request: NextRequest) {
     if (error) return error;
 
     const body = await request.json();
-    const { id, actif } = body;
+    const { id, actif, motDePasse } = body;
 
-    if (!id || typeof actif !== "boolean") {
-      return NextResponse.json({ error: "id et actif (boolean) sont requis" }, { status: 400 });
+    if (!id) {
+      return NextResponse.json({ error: "id est requis" }, { status: 400 });
+    }
+
+    if (actif === undefined && motDePasse === undefined) {
+      return NextResponse.json({ error: "actif ou motDePasse requis" }, { status: 400 });
+    }
+
+    if (motDePasse !== undefined && (typeof motDePasse !== "string" || motDePasse.length < 8)) {
+      return NextResponse.json({ error: "Le mot de passe doit contenir au moins 8 caractères" }, { status: 400 });
     }
 
     const user = await prisma.utilisateur.findUnique({ where: { id } });
@@ -157,11 +165,27 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Seul un super admin peut modifier un admin" }, { status: 403 });
     }
 
+    const data: any = {};
+    if (actif !== undefined) data.actif = actif;
+    if (actif === true) data.deletedAt = null;
+    if (motDePasse) {
+      data.motDePasse = await bcrypt.hash(motDePasse, 12);
+      data.passwordResetToken = null;
+      data.passwordResetExpiry = null;
+    }
+
     const updated = await prisma.utilisateur.update({
       where: { id },
-      data: { actif, ...(actif ? { deletedAt: null } : {}) },
+      data,
       select: { id: true, nom: true, prenom: true, email: true, role: true, actif: true },
     });
+
+    if (motDePasse) {
+      logger.info("Mot de passe réinitialisé par l'admin", {
+        adminId: (session.user as any).id,
+        userId: id,
+      });
+    }
 
     return NextResponse.json(updated);
   } catch (error) {

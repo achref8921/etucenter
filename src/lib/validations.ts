@@ -42,7 +42,7 @@ export const utilisateurSchema = z.object({
   nom: z.string().min(2),
   prenom: z.string().min(2),
   email: z.string().email(),
-  motDePasse: z.string().min(8).optional(),
+  motDePasse: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères"),
   telephone: z.string().optional(),
   role: z.enum(["admin", "prof", "eleve"]),
   dateNaissance: z.string().optional(),

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Plus, Trash2, X, Loader2, Filter, ToggleLeft, ToggleRight, Search, Download } from "lucide-react";
+import { Plus, Trash2, X, Loader2, Filter, ToggleLeft, ToggleRight, Search, Download, KeyRound } from "lucide-react";
 import PasswordInput from "@/components/password-input";
 import ConfirmDelete from "@/components/confirm-delete";
 
@@ -56,6 +56,10 @@ export default function UtilisateursPage() {
   const [filiereFilter, setFiliereFilter] = useState("ALL");
   const [etatFilter, setEtatFilter] = useState("ALL");
   const [confirmDelete, setConfirmDelete] = useState<{ id: string } | null>(null);
+  const [resetPwd, setResetPwd] = useState<{ id: string; name: string } | null>(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [resetSubmitting, setResetSubmitting] = useState(false);
+  const [resetError, setResetError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     nom: "",
@@ -159,6 +163,30 @@ export default function UtilisateursPage() {
       setError(err instanceof Error ? err.message : "Erreur inconnue");
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!resetPwd) return;
+    try {
+      setResetSubmitting(true);
+      setResetError(null);
+      const res = await fetch("/api/admin/utilisateurs", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: resetPwd.id, motDePasse: newPassword }),
+      });
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || "Erreur");
+      }
+      setResetPwd(null);
+      setNewPassword("");
+      fetchUsers();
+    } catch (err) {
+      setResetError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setResetSubmitting(false);
     }
   };
 
@@ -390,9 +418,14 @@ export default function UtilisateursPage() {
                       </button>
                     </td>
                     <td className="px-4 py-4">
-                      <button onClick={(e) => { e.stopPropagation(); setConfirmDelete({ id: user.id }); }} disabled={deletingId === user.id} className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 disabled:opacity-50">
-                        {deletingId === user.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button onClick={(e) => { e.stopPropagation(); setResetPwd({ id: user.id, name: `${user.prenom} ${user.nom}` }); setNewPassword(""); setResetError(null); }} className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300" title="Réinitialiser le mot de passe">
+                          <KeyRound className="h-4 w-4" />
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); setConfirmDelete({ id: user.id }); }} disabled={deletingId === user.id} className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 disabled:opacity-50">
+                          {deletingId === user.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -490,6 +523,31 @@ export default function UtilisateursPage() {
         </div>
       )}
       <ConfirmDelete open={!!confirmDelete} title="Archiver l'utilisateur" message="L'utilisateur sera archivé : il ne pourra plus se connecter, mais toutes ses données (inscriptions, paiements, présences) seront conservées. Vous pourrez le réactiver à tout moment." onConfirm={() => { if (confirmDelete) handleDelete(confirmDelete.id); setConfirmDelete(null); }} onCancel={() => setConfirmDelete(null)} loading={deletingId === confirmDelete?.id} />
+
+      {resetPwd && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Réinitialiser le mot de passe</h2>
+              <button onClick={() => { setResetPwd(null); setNewPassword(""); }} className="text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300"><X className="h-5 w-5" /></button>
+            </div>
+            <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+              Définir un nouveau mot de passe pour <span className="font-semibold text-gray-900 dark:text-gray-100">{resetPwd.name}</span>. Communiquez-le lui ensuite.
+            </p>
+            {resetError && <div className="mb-4 rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">{resetError}</div>}
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Nouveau mot de passe (min 8 caractères)</label>
+              <PasswordInput value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+            </div>
+            <div className="mt-5 flex justify-end gap-3">
+              <button type="button" onClick={() => { setResetPwd(null); setNewPassword(""); }} className="rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800">Annuler</button>
+              <button onClick={handleResetPassword} disabled={resetSubmitting || newPassword.length < 8} className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+                {resetSubmitting && <Loader2 className="h-4 w-4 animate-spin" />} Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

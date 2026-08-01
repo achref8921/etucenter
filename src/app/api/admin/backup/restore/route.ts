@@ -3,6 +3,8 @@ import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { rateLimit, getRateLimitKey } from "@/lib/rate-limit";
+import bcrypt from "bcryptjs";
+import { generateTemporaryPassword } from "@/lib/passwords";
 
 const ALLOWED_ROLES = ["admin", "prof", "eleve"] as const;
 const ALLOWED_INSCRIPTION_STATUTS = ["actif", "inactif"] as const;
@@ -41,6 +43,7 @@ export async function POST(request: Request) {
 
     const idMap: Record<string, string> = {};
     const logs: string[] = [];
+    const tempPasswords: { email: string; password: string }[] = [];
     let created = 0;
     let skipped = 0;
 
@@ -87,11 +90,18 @@ export async function POST(request: Request) {
               userSkipped++;
             } else {
               const safeRole = pickAllowed(u.role, ALLOWED_ROLES, "eleve");
+              let motDePasse: string | null = u.motDePasse || null;
+              let tempPassword: string | null = null;
+              if (!motDePasse) {
+                tempPassword = generateTemporaryPassword();
+                motDePasse = await bcrypt.hash(tempPassword, 12);
+                tempPasswords.push({ email: u.email, password: tempPassword });
+              }
               const created_ = await tx.utilisateur.create({
                 data: {
                   centerId, nom: u.nom, prenom: u.prenom, email: u.email,
                   telephone: u.telephone || null, role: safeRole, actif: u.actif ?? false,
-                  motDePasse: u.motDePasse || null, codeEleve: u.codeEleve || null,
+                  motDePasse, codeEleve: u.codeEleve || null,
                   niveau: u.niveau || null, classe: u.classe || null,
                   filiere: u.filiere || null,
                   dateNaissance: u.dateNaissance ? new Date(u.dateNaissance) : null,
@@ -248,6 +258,7 @@ export async function POST(request: Request) {
       message: `Import terminé: ${result.created} éléments importés, ${result.skipped} ignorés`,
       logs: result.logs,
       mode,
+      tempPasswords,
     });
   } catch (error: any) {
     logger.error("Erreur lors de l'import de backup", { error });
