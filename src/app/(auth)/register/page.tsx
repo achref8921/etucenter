@@ -216,6 +216,31 @@ export default function RegisterPage() {
 
         <div>
           <label
+            htmlFor="codeCentre"
+            className="mb-1 block text-sm font-medium text-[var(--foreground)]"
+          >
+            Code du centre
+          </label>
+          <input
+            id="codeCentre"
+            type="text"
+            placeholder="EX. 86UZGG"
+            autoComplete="off"
+            className="w-full rounded-lg border border-[var(--input)] bg-[var(--background)] px-3 py-2 text-sm uppercase tracking-widest text-[var(--foreground)] placeholder:normal-case placeholder:tracking-normal placeholder:text-[var(--muted-foreground)] focus:border-[var(--ring)] focus:outline-none focus:ring-1 focus:ring-[var(--ring)]"
+            {...register("codeCentre")}
+          />
+          {errors.codeCentre && (
+            <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+              {errors.codeCentre.message}
+            </p>
+          )}
+          <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+            Demandez ce code à votre centre avant de vous inscrire.
+          </p>
+        </div>
+
+        <div>
+          <label
             htmlFor="role"
             className="mb-1 block text-sm font-medium text-[var(--foreground)]"
           >

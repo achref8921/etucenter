@@ -24,6 +24,7 @@ export default function AdminParametresPage() {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [logo, setLogo] = useState<string | null>(null);
+  const [centerCode, setCenterCode] = useState("");
 
   useEffect(() => {
     fetch("/api/admin/center")
@@ -34,6 +35,7 @@ export default function AdminParametresPage() {
         setPhone(data.phone || "");
         setAddress(data.address || "");
         setLogo(data.logo || null);
+        setCenterCode(data.code || "");
         setLoading(false);
       });
   }, []);
@@ -135,6 +137,15 @@ export default function AdminParametresPage() {
         <div className="lg:col-span-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
           <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Center Information</h2>
           <div className="space-y-4">
+            <div className="flex items-center gap-3 rounded-lg border border-violet-200 bg-violet-50 px-4 py-3 dark:border-violet-900/40 dark:bg-violet-900/20">
+              <div>
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-violet-600 dark:text-violet-300">Code du centre</label>
+                <p className="font-mono text-xl font-bold tracking-widest text-violet-800 dark:text-violet-200">{centerCode || "—"}</p>
+              </div>
+              <p className="ml-auto max-w-[220px] text-xs leading-relaxed text-violet-600 dark:text-violet-300">
+                Donnez ce code aux élèves et profs pour qu&apos;ils s&apos;inscrivent dans votre centre.
+              </p>
+            </div>
             <div>
               <label className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Center Name *</label>
               <input

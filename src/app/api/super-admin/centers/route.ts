@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
+import { generateCenterCode } from "@/lib/utils";
 
 export async function GET() {
   try {
@@ -60,10 +61,16 @@ export async function POST(request: NextRequest) {
 
     const hash = await bcrypt.hash(adminPassword, 12);
 
+    let code = generateCenterCode();
+    while (await prisma.center.findUnique({ where: { code } })) {
+      code = generateCenterCode();
+    }
+
     const center = await prisma.center.create({
       data: {
         name,
         slug,
+        code,
         phone: phone ?? null,
         address: address ?? null,
       },

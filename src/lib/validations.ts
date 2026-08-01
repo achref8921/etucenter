@@ -14,6 +14,7 @@ export const registerSchema = z.object({
   email: z.string().email("Adresse email invalide"),
   motDePasse: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
   telephone: z.string().optional(),
+  codeCentre: z.string().min(1, "Le code du centre est requis"),
   role: z.enum(["prof", "eleve"]),
   niveau: z.enum(niveauxScolaires).optional(),
   classe: z.string().optional(),

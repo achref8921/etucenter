@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: errorMessage }, { status: 400 });
     }
 
-    const { nom, prenom, email, motDePasse, telephone, role, niveau, classe, filiere } = parsed.data;
+    const { nom, prenom, email, motDePasse, telephone, role, niveau, classe, filiere, codeCentre } = parsed.data;
 
     const existingUser = await prisma.utilisateur.findUnique({
       where: { email },
@@ -41,6 +41,26 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Un compte avec cet email existe déjà." },
         { status: 409 }
+      );
+    }
+
+    const centerCode = codeCentre.trim().toUpperCase();
+    const center = await prisma.center.findUnique({
+      where: { code: centerCode },
+    });
+
+    if (!center) {
+      logger.warn("Registration with invalid center code", { code: centerCode, email });
+      return NextResponse.json(
+        { error: "Code du centre invalide. Vérifiez le code fourni par votre centre." },
+        { status: 400 }
+      );
+    }
+
+    if (!center.active) {
+      return NextResponse.json(
+        { error: "Ce centre est suspendu. L'inscription n'est pas possible pour le moment." },
+        { status: 403 }
       );
     }
 
@@ -58,11 +78,9 @@ export async function POST(request: Request) {
       codeEleve = code!;
     }
 
-    const defaultCenterId = "00000000-0000-0000-0000-000000000001";
-
     const user = await prisma.utilisateur.create({
       data: {
-        centerId: defaultCenterId,
+        centerId: center.id,
         nom,
         prenom,
         email,
@@ -92,14 +110,14 @@ export async function POST(request: Request) {
 
     const roleLabel = role === "eleve" ? "Élève" : "Prof";
     const admins = await prisma.utilisateur.findMany({
-      where: { role: "admin", centerId: defaultCenterId },
+      where: { role: "admin", centerId: center.id },
       select: { id: true },
     });
 
     if (admins.length > 0) {
       await prisma.notification.createMany({
         data: admins.map((admin) => ({
-          centerId: defaultCenterId,
+          centerId: center.id,
           destinataireId: admin.id,
           titre: `Nouvel(le) ${roleLabel} inscrit(e)`,
           message: `${prenom} ${nom} (${email}) s'est inscrit(e) en tant que ${roleLabel}${niveau ? ` — ${classe}` : ""}. En attente d'activation.`,

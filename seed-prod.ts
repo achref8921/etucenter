@@ -15,6 +15,7 @@ async function main() {
     create: {
       name: "Centre Par Défaut",
       slug: "default",
+      code: "DEFAULT",
       phone: "+216 00 00 00 00",
       address: "Tunis, Tunisie",
       active: true,

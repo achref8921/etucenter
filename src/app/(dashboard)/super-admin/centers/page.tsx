@@ -8,6 +8,7 @@ interface CenterData {
   id: string;
   name: string;
   slug: string;
+  code: string;
   logo: string | null;
   phone: string | null;
   address: string | null;
@@ -44,6 +45,7 @@ export default function SuperAdminCentersPage() {
   const [creating, setCreating] = useState(false);
   const [creatingAdmin, setCreatingAdmin] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [createdCode, setCreatedCode] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -71,6 +73,7 @@ export default function SuperAdminCentersPage() {
       return;
     }
     setShowCreate(false);
+    setCreatedCode(data.center?.code ?? null);
     setForm({ name: "", slug: "", phone: "", address: "", adminEmail: "", adminPassword: "admin123", adminNom: "", adminPrenom: "" });
     setSlugManuallyEdited(false);
     setCreating(false);
@@ -180,6 +183,21 @@ export default function SuperAdminCentersPage() {
           className="w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-violet-400"
         />
       </div>
+
+      {createdCode && (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-300">
+          <span className="font-semibold">Centre créé.</span> Code du centre :{" "}
+          <span className="inline-block rounded-md bg-white px-2 py-0.5 font-mono font-bold tracking-widest text-emerald-700 shadow-sm dark:bg-slate-900 dark:text-emerald-300">
+            {createdCode}
+          </span>
+          <button
+            onClick={() => setCreatedCode(null)}
+            className="ml-3 text-xs font-semibold text-emerald-700 underline hover:text-emerald-900 dark:text-emerald-300 dark:hover:text-emerald-100"
+          >
+            Fermer
+          </button>
+        </div>
+      )}
 
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -540,9 +558,14 @@ export default function SuperAdminCentersPage() {
                 <p className="text-[10px] font-mono text-slate-400 dark:text-slate-500">{c.id.slice(0, 8)}</p>
                 <p className="text-xs text-slate-400 dark:text-slate-500">{c.phone || "No phone"}</p>
               </div>
-              <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${c.active ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400" : "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400"}`}>
-                {c.active ? "Active" : "Suspended"}
-              </span>
+              <div className="flex shrink-0 flex-col items-end gap-1">
+                <span className="rounded-md bg-violet-50 px-2 py-0.5 font-mono text-xs font-bold tracking-widest text-violet-700 dark:bg-violet-900/20 dark:text-violet-300">
+                  {c.code}
+                </span>
+                <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${c.active ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400" : "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400"}`}>
+                  {c.active ? "Active" : "Suspended"}
+                </span>
+              </div>
             </div>
             <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400 mb-3">
               <span>{c._count.utilisateurs} users</span>
@@ -575,6 +598,7 @@ export default function SuperAdminCentersPage() {
           <thead className="bg-slate-50 dark:bg-slate-800">
             <tr>
               <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Center</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Code</th>
               <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">ID</th>
               <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Slug</th>
               <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Users</th>
@@ -608,6 +632,9 @@ export default function SuperAdminCentersPage() {
                       <p className="text-xs text-slate-400 dark:text-slate-500">{c.phone || "No phone"}</p>
                     </div>
                   </div>
+                </td>
+                <td className="px-5 py-3.5">
+                  <span className="rounded-md bg-violet-50 px-2 py-0.5 font-mono text-xs font-bold tracking-widest text-violet-700 dark:bg-violet-900/20 dark:text-violet-300">{c.code}</span>
                 </td>
                 <td className="px-5 py-3.5">
                   <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-mono text-slate-500 dark:bg-slate-800 dark:text-slate-400">{c.id.slice(0, 8)}</span>
