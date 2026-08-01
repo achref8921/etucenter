@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Sidebar from "./sidebar";
 import Header from "./header";
+import BottomNav from "./bottom-nav";
+import { NavModeProvider, useNavMode } from "@/components/nav-mode-provider";
 import SessionGuard from "@/components/session-guard";
 import { Role } from "@prisma/client";
 
@@ -22,7 +24,16 @@ interface DashboardLayoutProps {
   frozen?: boolean;
 }
 
-export default function DashboardLayoutClient({ children, user, centerName, centerLogo, frozen }: DashboardLayoutProps) {
+export default function DashboardLayoutClient(props: DashboardLayoutProps) {
+  return (
+    <NavModeProvider>
+      <DashboardShell {...props} />
+    </NavModeProvider>
+  );
+}
+
+function DashboardShell({ children, user, centerName, centerLogo, frozen }: DashboardLayoutProps) {
+  const { navMode } = useNavMode();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [frozenState, setFrozenState] = useState(!!frozen);
 
@@ -53,15 +64,22 @@ export default function DashboardLayoutClient({ children, user, centerName, cent
       />
 
       <div className="md:pl-64">
-        <Header centerLogo={centerLogo} onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
+        <Header
+          centerLogo={centerLogo}
+          onMenuToggle={navMode === "sidebar" ? () => setSidebarOpen(!sidebarOpen) : undefined}
+        />
         {frozenState && (
           <div className="flex items-center justify-center gap-2 bg-amber-100 px-4 py-2.5 text-center text-sm font-semibold text-amber-900 dark:bg-amber-900/40 dark:text-amber-200">
             Compte gelé : aucune modification autorisée
             <span className="hidden sm:inline">— vous pouvez uniquement consulter vos informations</span>
           </div>
         )}
-        <main className={`p-4 sm:p-6 ${frozenState ? "frozen-mode" : ""}`}>{children}</main>
+        <main className={`p-4 sm:p-6 ${navMode === "bottom" ? "pb-24" : ""} ${frozenState ? "frozen-mode" : ""}`}>
+          {children}
+        </main>
       </div>
+
+      {navMode === "bottom" && <BottomNav role={user.role} />}
     </div>
   );
 }

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Upload, Save, Building2, Phone, MapPin, Loader2 } from "lucide-react";
+import { Upload, Save, Building2, Phone, MapPin, Loader2, PanelLeft, Rows3, Smartphone } from "lucide-react";
+import { useNavMode } from "@/components/nav-mode-provider";
 
 interface CenterData {
   id: string;
@@ -25,6 +26,7 @@ export default function AdminParametresPage() {
   const [address, setAddress] = useState("");
   const [logo, setLogo] = useState<string | null>(null);
   const [centerCode, setCenterCode] = useState("");
+  const { navMode, setNavMode } = useNavMode();
 
   useEffect(() => {
     fetch("/api/admin/center")
@@ -200,6 +202,46 @@ export default function AdminParametresPage() {
               {saving ? "Saving..." : "Save Changes"}
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Navigation sur mobile */}
+      <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 className="mb-1 text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          <span className="flex items-center gap-1.5"><Smartphone className="h-4 w-4" /> Navigation sur mobile</span>
+        </h2>
+        <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
+          Choisissez comment afficher les sections sur le téléphone. Sur l&apos;ordinateur, le menu latéral reste toujours affiché.
+        </p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <button
+            onClick={() => setNavMode("sidebar")}
+            className={`flex items-center gap-3 rounded-xl border-2 p-4 text-left transition-colors ${
+              navMode === "sidebar"
+                ? "border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20"
+                : "border-slate-200 hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-600"
+            }`}
+          >
+            <PanelLeft className={`h-6 w-6 flex-shrink-0 ${navMode === "sidebar" ? "text-blue-600 dark:text-blue-400" : "text-slate-400 dark:text-slate-500"}`} />
+            <span>
+              <span className="block text-sm font-semibold text-slate-900 dark:text-slate-100">Menu latéral</span>
+              <span className="block text-xs text-slate-500 dark:text-slate-400">Comme actuellement (bouton ☰)</span>
+            </span>
+          </button>
+          <button
+            onClick={() => setNavMode("bottom")}
+            className={`flex items-center gap-3 rounded-xl border-2 p-4 text-left transition-colors ${
+              navMode === "bottom"
+                ? "border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20"
+                : "border-slate-200 hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-600"
+            }`}
+          >
+            <Rows3 className={`h-6 w-6 flex-shrink-0 ${navMode === "bottom" ? "text-blue-600 dark:text-blue-400" : "text-slate-400 dark:text-slate-500"}`} />
+            <span>
+              <span className="block text-sm font-semibold text-slate-900 dark:text-slate-100">Icônes en bas de l&apos;écran</span>
+              <span className="block text-xs text-slate-500 dark:text-slate-400">Barre fixe avec les sections</span>
+            </span>
+          </button>
         </div>
       </div>
 

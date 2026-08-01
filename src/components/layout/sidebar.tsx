@@ -28,7 +28,7 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
 }
 
-const navItemsByRole: Record<Role, NavItem[]> = {
+export const navItemsByRole: Record<Role, NavItem[]> = {
   super_admin: [
     { label: "Overview", href: "/super-admin", icon: LayoutDashboard },
   ],
