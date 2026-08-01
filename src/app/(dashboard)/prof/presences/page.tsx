@@ -60,7 +60,7 @@ export default function ProfPresencesSelectPage() {
         </div>
       )}
 
-      <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+      <div className="hidden md:block overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
           <thead className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
@@ -119,6 +119,52 @@ export default function ProfPresencesSelectPage() {
           </tbody>
           </table>
         </div>
+      </div>
+
+      <div className="md:hidden space-y-3">
+        {seances.length === 0 ? (
+          <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-8 text-center text-sm text-gray-500 dark:text-gray-400">
+            Aucune séance disponible
+          </div>
+        ) : (
+          seances.map((seance) => (
+            <Link
+              key={seance.id}
+              href={`/prof/presences/${seance.id}`}
+              className="block rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 shadow-sm"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-bold text-gray-900 dark:text-gray-100">{seance.groupe.nom}</p>
+                  <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{formatDate(seance.date)}</p>
+                </div>
+                <span
+                  className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                    seance.statut === "planifiee"
+                      ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                      : seance.statut === "en_cours"
+                        ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
+                        : seance.statut === "terminee"
+                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                          : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+                  }`}
+                >
+                  {seance.statut === "planifiee"
+                    ? "Planifiée"
+                    : seance.statut === "en_cours"
+                      ? "En cours"
+                      : seance.statut === "terminee"
+                        ? "Terminée"
+                        : "Annulée"}
+                </span>
+              </div>
+              <div className="mt-3 flex items-center gap-2 border-t border-gray-100 pt-3 dark:border-slate-700">
+                <ClipboardCheck className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">Enregistrer Présence</span>
+              </div>
+            </Link>
+          ))
+        )}
       </div>
     </div>
   );

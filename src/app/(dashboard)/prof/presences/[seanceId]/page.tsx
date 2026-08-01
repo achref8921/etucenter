@@ -131,7 +131,7 @@ export default function AttendanceRecordingPage() {
         </div>
       ) : (
         <>
-          <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+          <div className="hidden md:block overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
             <table className="w-full text-left text-sm">
               <thead className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
                 <tr>
@@ -172,6 +172,56 @@ export default function AttendanceRecordingPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          <div className="md:hidden space-y-3">
+            {presences.map((presence) => (
+              <div key={presence.eleveId} className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 shadow-sm">
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-bold text-gray-900 dark:text-gray-100">
+                      {presence.eleve.prenom} {presence.eleve.nom}
+                    </p>
+                    <p className="truncate text-xs text-gray-500 dark:text-gray-400">{presence.eleve.email}</p>
+                  </div>
+                  <span
+                    className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                      presence.statut === "present"
+                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                        : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                    }`}
+                  >
+                    {presence.statut === "present" ? "Présent" : "Absent"}
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleStatusChange(presence.eleveId, "present")}
+                    disabled={isLocked}
+                    className={`flex-1 rounded-lg py-2.5 text-sm font-semibold transition-colors disabled:opacity-50 ${
+                      presence.statut === "present"
+                        ? "bg-green-600 text-white"
+                        : "bg-green-50 text-green-700 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-900/30"
+                    }`}
+                  >
+                    Présent
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleStatusChange(presence.eleveId, "absent")}
+                    disabled={isLocked}
+                    className={`flex-1 rounded-lg py-2.5 text-sm font-semibold transition-colors disabled:opacity-50 ${
+                      presence.statut === "absent"
+                        ? "bg-red-600 text-white"
+                        : "bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
+                    }`}
+                  >
+                    Absent
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
 
           <div className="flex justify-end">
