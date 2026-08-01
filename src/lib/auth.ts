@@ -22,6 +22,21 @@ async function findAndValidateUser(email: string) {
   return user;
 }
 
+async function resolveDefaultCenterId(): Promise<string | null> {
+  const preferred = await prisma.center.findFirst({
+    where: { OR: [{ slug: "default" }, { slug: "platform" }] },
+    orderBy: { createdAt: "asc" },
+    select: { id: true },
+  });
+  if (preferred) return preferred.id;
+
+  const first = await prisma.center.findFirst({
+    orderBy: { createdAt: "asc" },
+    select: { id: true },
+  });
+  return first?.id ?? null;
+}
+
 async function findOrCreateGoogleUser(
   email: string,
   name: string,
@@ -47,7 +62,10 @@ async function findOrCreateGoogleUser(
     return user;
   }
 
-  const defaultCenterId = "00000000-0000-0000-0000-000000000001";
+  const defaultCenterId = await resolveDefaultCenterId();
+  if (!defaultCenterId) {
+    throw new Error("Aucun centre disponible pour l'inscription");
+  }
   const nameParts = name.split(" ");
   const prenom = nameParts[0] || "Utilisateur";
   const nom = nameParts.slice(1).join(" ") || "Google";

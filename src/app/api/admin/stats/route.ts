@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { getAdminStats } from "@/lib/calculations";
-import { requireActiveCenter } from "@/lib/auth-helpers";
+import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 
 export async function GET() {
   try {
-    const { session, error } = await requireActiveCenter();
+    const { session, error } = await requireActiveCenter("GET", ADMIN_ROLES);
     if (error) return error;
 
     const centerId = (session.user as any).centerId;

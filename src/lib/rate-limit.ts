@@ -48,7 +48,10 @@ export function rateLimit(
 
 export function getRateLimitKey(request: Request, prefix: string): string {
   const forwarded = request.headers.get("x-forwarded-for");
-  const ip = forwarded?.split(",")[0]?.trim() ?? "unknown";
+  const realIp = request.headers.get("x-real-ip");
+  const vercelIp = request.headers.get("x-vercel-forwarded-for");
+  const raw = forwarded ?? realIp ?? vercelIp;
+  const ip = raw?.split(",")[0]?.trim() ?? "unknown";
   return `${prefix}:${ip}`;
 }
 

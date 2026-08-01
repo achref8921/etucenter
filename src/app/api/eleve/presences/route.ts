@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { requireActiveCenter } from "@/lib/auth-helpers";
+import { requireActiveCenter, ELEVE_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 
 export async function GET() {
   try {
-    const { session, error } = await requireActiveCenter();
+    const { session, error } = await requireActiveCenter("GET", ELEVE_ROLES);
     if (error) return error;
 
     const presences = await prisma.presence.findMany({

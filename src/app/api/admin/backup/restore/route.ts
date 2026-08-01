@@ -1,10 +1,30 @@
 import { NextResponse } from "next/server";
-import { requireActiveCenter } from "@/lib/auth-helpers";
+import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
+import { rateLimit, getRateLimitKey } from "@/lib/rate-limit";
+
+const ALLOWED_ROLES = ["admin", "prof", "eleve"] as const;
+const ALLOWED_INSCRIPTION_STATUTS = ["actif", "inactif"] as const;
+const ALLOWED_PAIEMENT_METHODES = ["especes", "virement", "cheque", "autre"] as const;
+const ALLOWED_PRESENCE_STATUTS = ["present", "absent"] as const;
+const RESTORE_RATE_LIMIT = { windowMs: 60 * 60 * 1000, max: 5 };
+
+function pickAllowed<T extends readonly string[]>(value: unknown, allowed: T, fallback: T[number]): T[number] {
+  return allowed.includes(value as T[number]) ? (value as T[number]) : fallback;
+}
 
 export async function POST(request: Request) {
   try {
-    const { session, error } = await requireActiveCenter(request.method);
+    const rl = rateLimit(getRateLimitKey(request, "restore"), RESTORE_RATE_LIMIT);
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "Trop de demandes. Réessayez plus tard." },
+        { status: 429, headers: { "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+      );
+    }
+
+    const { session, error } = await requireActiveCenter(request.method, ADMIN_ROLES);
     if (error) return error;
     const centerId = (session.user as any).centerId;
 
@@ -13,6 +33,10 @@ export async function POST(request: Request) {
 
     if (!backup || !backup.data) {
       return NextResponse.json({ error: "Fichier de backup invalide" }, { status: 400 });
+    }
+
+    if (mode !== "merge" && mode !== "full") {
+      return NextResponse.json({ error: "Mode invalide (merge ou full attendu)" }, { status: 400 });
     }
 
     const idMap: Record<string, string> = {};
@@ -57,15 +81,16 @@ export async function POST(request: Request) {
         let userSkipped = 0;
         if (backup.data.utilisateurs?.length) {
           for (const u of backup.data.utilisateurs) {
-            const existing = await tx.utilisateur.findUnique({ where: { email: u.email } });
+            const existing = await tx.utilisateur.findFirst({ where: { email: u.email, centerId } });
             if (existing) {
               idMap[u.id] = existing.id;
               userSkipped++;
             } else {
+              const safeRole = pickAllowed(u.role, ALLOWED_ROLES, "eleve");
               const created_ = await tx.utilisateur.create({
                 data: {
                   centerId, nom: u.nom, prenom: u.prenom, email: u.email,
-                  telephone: u.telephone || null, role: u.role, actif: u.actif ?? false,
+                  telephone: u.telephone || null, role: safeRole, actif: u.actif ?? false,
                   motDePasse: u.motDePasse || null, codeEleve: u.codeEleve || null,
                   niveau: u.niveau || null, classe: u.classe || null,
                   filiere: u.filiere || null,
@@ -142,7 +167,7 @@ export async function POST(request: Request) {
                 data: {
                   eleveId: newEleveId, groupeId: newGroupeId,
                   dateInscription: ins.dateInscription ? new Date(ins.dateInscription) : new Date(),
-                  statut: ins.statut || "actif",
+                  statut: pickAllowed(ins.statut, ALLOWED_INSCRIPTION_STATUTS, "actif"),
                 },
               });
               created++;
@@ -162,7 +187,8 @@ export async function POST(request: Request) {
             if (!existing) {
               await tx.presence.create({
                 data: {
-                  seanceId: newSeanceId, eleveId: newEleveId, statut: p.statut,
+                  seanceId: newSeanceId, eleveId: newEleveId,
+                  statut: pickAllowed(p.statut, ALLOWED_PRESENCE_STATUTS, "present"),
                   enregistrePar: p.enregistrePar ? (idMap[p.enregistrePar] || null) : null,
                 },
               });
@@ -188,7 +214,7 @@ export async function POST(request: Request) {
                 data: {
                   eleveId: newEleveId, groupeId: newGroupeId,
                   montant: pay.montant, datePaiement: new Date(pay.datePaiement),
-                  methodePaiement: pay.methodePaiement || "especes",
+                  methodePaiement: pickAllowed(pay.methodePaiement, ALLOWED_PAIEMENT_METHODES, "especes"),
                   reference: pay.reference || null, notes: pay.notes || null,
                 },
               });
@@ -224,8 +250,9 @@ export async function POST(request: Request) {
       mode,
     });
   } catch (error: any) {
+    logger.error("Erreur lors de l'import de backup", { error });
     return NextResponse.json(
-      { error: "Erreur lors de l'import: " + (error.message || "Erreur inconnue") },
+      { error: "Erreur lors de l'import des données" },
       { status: 500 }
     );
   }

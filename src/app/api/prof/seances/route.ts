@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireActiveCenter } from "@/lib/auth-helpers";
+import { requireActiveCenter, PROF_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { seanceSchema } from "@/lib/validations";
 
 export async function GET(request: NextRequest) {
   try {
-    const { session, error } = await requireActiveCenter();
+    const { session, error } = await requireActiveCenter("GET", PROF_ROLES);
     if (error) return error;
 
     const { searchParams } = new URL(request.url);
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { session, error } = await requireActiveCenter(request.method);
+    const { session, error } = await requireActiveCenter(request.method, PROF_ROLES);
     if (error) return error;
 
     const body = await request.json();

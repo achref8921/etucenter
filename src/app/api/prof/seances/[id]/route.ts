@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireActiveCenter } from "@/lib/auth-helpers";
+import { requireActiveCenter, PROF_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 
 async function assertOwnSeance(userId: string, seanceId: string) {
@@ -34,7 +34,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { session, error } = await requireActiveCenter(request.method);
+    const { session, error } = await requireActiveCenter(request.method, PROF_ROLES);
     if (error) return error;
 
     const { id } = await params;
@@ -84,7 +84,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { session, error } = await requireActiveCenter(request.method);
+    const { session, error } = await requireActiveCenter(request.method, PROF_ROLES);
     if (error) return error;
 
     const { id } = await params;

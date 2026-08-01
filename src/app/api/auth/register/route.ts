@@ -39,8 +39,10 @@ export async function POST(request: Request) {
     if (existingUser) {
       logger.info("Registration attempt with existing email", { email });
       return NextResponse.json(
-        { error: "Un compte avec cet email existe déjà." },
-        { status: 409 }
+        {
+          message: "Compte créé avec succès. Vérifiez votre email pour activer votre compte.",
+        },
+        { status: 201 }
       );
     }
 

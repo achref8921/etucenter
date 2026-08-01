@@ -77,3 +77,14 @@ export function generateCenterCode(): string {
   }
   return code;
 }
+
+export function sanitizeImageValue(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return null;
+  if (trimmed.startsWith("https://") || trimmed.startsWith("http://")) return trimmed;
+  if (/^data:image\/(png|jpe?g|webp|gif|avif);base64,[A-Za-z0-9+/=]+$/i.test(trimmed)) {
+    return trimmed;
+  }
+  return null;
+}

@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireActiveCenter } from "@/lib/auth-helpers";
+import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
+import { sanitizeImageValue } from "@/lib/utils";
 
 export async function GET() {
   try {
-    const { session, error } = await requireActiveCenter();
+    const { session, error } = await requireActiveCenter("GET", ADMIN_ROLES);
     if (error) return error;
     const centerId = (session.user as any).centerId;
     const center = await prisma.center.findUnique({ where: { id: centerId } });
@@ -21,7 +22,7 @@ export async function GET() {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const { session, error } = await requireActiveCenter(request.method);
+    const { session, error } = await requireActiveCenter(request.method, ADMIN_ROLES);
     if (error) return error;
     const centerId = (session.user as any).centerId;
 
@@ -30,7 +31,7 @@ export async function PATCH(request: NextRequest) {
 
     const data: Record<string, unknown> = {};
     if (name !== undefined && name.trim() !== "") data.name = name.trim();
-    if (logo !== undefined) data.logo = logo || null;
+    if (logo !== undefined) data.logo = sanitizeImageValue(logo);
     if (phone !== undefined) data.phone = phone || null;
     if (address !== undefined) data.address = address || null;
 

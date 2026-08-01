@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireActiveCenter } from "@/lib/auth-helpers";
+import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 
 export async function PATCH(
@@ -7,7 +7,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { session, error } = await requireActiveCenter(request.method);
+    const { session, error } = await requireActiveCenter(request.method, ADMIN_ROLES);
     if (error) return error;
 
     const { id } = await params;

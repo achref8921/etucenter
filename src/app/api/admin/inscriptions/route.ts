@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireActiveCenter } from "@/lib/auth-helpers";
+import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
-    const { session, error } = await requireActiveCenter(request.method);
+    const { session, error } = await requireActiveCenter(request.method, ADMIN_ROLES);
     if (error) return error;
 
     const body = await request.json();
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const { session, error } = await requireActiveCenter(request.method);
+    const { session, error } = await requireActiveCenter(request.method, ADMIN_ROLES);
     if (error) return error;
 
     const { searchParams } = new URL(request.url);
@@ -116,13 +116,17 @@ export async function DELETE(request: NextRequest) {
     const eleveId = searchParams.get("eleveId");
     const groupeId = searchParams.get("groupeId");
 
+    const centreId = (session.user as any).centerId;
+
     let inscription;
 
     if (id) {
-      inscription = await prisma.inscription.findUnique({ where: { id } });
+      inscription = await prisma.inscription.findFirst({
+        where: { id, groupe: { centerId: centreId } },
+      });
     } else if (eleveId && groupeId) {
-      inscription = await prisma.inscription.findUnique({
-        where: { eleveId_groupeId: { eleveId, groupeId } },
+      inscription = await prisma.inscription.findFirst({
+        where: { eleveId, groupeId, groupe: { centerId: centreId } },
       });
     } else {
       return NextResponse.json(

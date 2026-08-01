@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { requireActiveCenter } from "@/lib/auth-helpers";
+import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const { session, error } = await requireActiveCenter();
+    const { session, error } = await requireActiveCenter("GET", ADMIN_ROLES);
     if (error) return error;
     const centerId = (session.user as any).centerId;
 
@@ -135,7 +135,7 @@ export async function GET() {
     console.error("Message:", error?.message);
     console.error("Stack:", error?.stack);
     return NextResponse.json(
-      { error: "Erreur lors de l'export: " + (error?.message || "Erreur inconnue") },
+      { error: "Erreur lors de l'export des données" },
       { status: 500 }
     );
   }

@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireActiveCenter } from "@/lib/auth-helpers";
+import { requireActiveCenter, ELEVE_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
+import { sanitizeImageValue } from "@/lib/utils";
 
 export async function GET() {
   try {
-    const { session, error } = await requireActiveCenter();
+    const { session, error } = await requireActiveCenter("GET", ELEVE_ROLES);
     if (error) return error;
 
     const profil = await prisma.utilisateur.findUnique({
@@ -39,7 +40,7 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
-    const { session, error } = await requireActiveCenter(request.method);
+    const { session, error } = await requireActiveCenter(request.method, ELEVE_ROLES);
     if (error) return error;
 
     const body = await request.json();
@@ -49,7 +50,7 @@ export async function PUT(request: NextRequest) {
     if (nom !== undefined) data.nom = nom;
     if (prenom !== undefined) data.prenom = prenom;
     if (telephone !== undefined) data.telephone = telephone;
-    if (image !== undefined) data.image = image;
+    if (image !== undefined) data.image = sanitizeImageValue(image);
 
     if (Object.keys(data).length === 0) {
       return NextResponse.json({ error: "Aucune donnée à modifier" }, { status: 400 });

@@ -1,17 +1,23 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireActiveCenter } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
+
+function esc(value: string | number | null | undefined): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
+    const { session, error } = await requireActiveCenter("GET");
+    if (error) return error;
 
     const { id } = await params;
 
@@ -59,9 +65,12 @@ export async function GET(
     if (userRole === "admin" || userRole === "prof") {
       const groupe = await prisma.groupe.findUnique({
         where: { id: paiement.groupeId },
-        select: { centerId: true },
+        select: { centerId: true, profId: true },
       });
       if (!groupe || groupe.centerId !== userCenterId) {
+        return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
+      }
+      if (userRole === "prof" && groupe.profId !== (session.user as any).id) {
         return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
       }
     }
@@ -193,8 +202,8 @@ export async function GET(
       .map(
         (ins) => `
         <tr>
-          <td>${ins.groupe.nom}</td>
-          <td>${ins.groupe.matiere?.nom || "—"}</td>
+          <td>${esc(ins.groupe.nom)}</td>
+          <td>${esc(ins.groupe.matiere?.nom || "—")}</td>
           <td>${new Date(ins.dateInscription).toLocaleDateString("fr-FR")}</td>
           <td><span class="badge-${ins.statut === "actif" ? "present" : "absent"}">${ins.statut === "actif" ? "Actif" : "Inactif"}</span></td>
         </tr>`
@@ -261,13 +270,13 @@ export async function GET(
     </button>
   </div>
 
-  <div class="header">
+    <div class="header">
     <div class="header-left">
-      ${centreLogo ? `<img src="${centreLogo}" alt="${centreName}">` : ""}
+      ${centreLogo ? `<img src="${esc(centreLogo)}" alt="${esc(centreName)}">` : ""}
       <div>
-        <h1>${centreName}</h1>
-        <p>${centreAddress}</p>
-        <p>${centrePhone}</p>
+        <h1>${esc(centreName)}</h1>
+        <p>${esc(centreAddress)}</p>
+        <p>${esc(centrePhone)}</p>
       </div>
     </div>
     <div class="header-right">
@@ -281,11 +290,11 @@ export async function GET(
     <div class="info-box">
       <h3>Informations de l'élève</h3>
       <p>
-        <strong>${paiement.eleve.prenom} ${paiement.eleve.nom}</strong><br>
-        ${paiement.eleve.email}<br>
-        ${paiement.eleve.telephone ? `Tél : ${paiement.eleve.telephone}<br>` : ""}
-        ${paiement.eleve.codeEleve ? `Code : ${paiement.eleve.codeEleve}<br>` : ""}
-        ${paiement.eleve.niveau ? `Niveau : ${paiement.eleve.niveau}${paiement.eleve.classe ? " — " + paiement.eleve.classe : ""}${paiement.eleve.filiere ? " — " + paiement.eleve.filiere : ""}<br>` : ""}
+        <strong>${esc(paiement.eleve.prenom)} ${esc(paiement.eleve.nom)}</strong><br>
+        ${esc(paiement.eleve.email)}<br>
+        ${paiement.eleve.telephone ? `Tél : ${esc(paiement.eleve.telephone)}<br>` : ""}
+        ${paiement.eleve.codeEleve ? `Code : ${esc(paiement.eleve.codeEleve)}<br>` : ""}
+        ${paiement.eleve.niveau ? `Niveau : ${esc(paiement.eleve.niveau)}${paiement.eleve.classe ? " — " + esc(paiement.eleve.classe) : ""}${paiement.eleve.filiere ? " — " + esc(paiement.eleve.filiere) : ""}<br>` : ""}
         ${paiement.eleve.dateNaissance ? `Né(e) le : ${new Date(paiement.eleve.dateNaissance).toLocaleDateString("fr-FR")}` : ""}
       </p>
     </div>
@@ -293,17 +302,17 @@ export async function GET(
       <h3>Détails du paiement</h3>
       <p>
         <strong>Date :</strong> ${dateStr}<br>
-        <strong>Méthode :</strong> ${methodeLabel[paiement.methodePaiement] || paiement.methodePaiement}<br>
-        ${paiement.reference ? `<strong>Référence :</strong> ${paiement.reference}<br>` : ""}
-        ${paiement.notes ? `<strong>Notes :</strong> ${paiement.notes}` : ""}
+        <strong>Méthode :</strong> ${esc(methodeLabel[paiement.methodePaiement] || paiement.methodePaiement)}<br>
+        ${paiement.reference ? `<strong>Référence :</strong> ${esc(paiement.reference)}<br>` : ""}
+        ${paiement.notes ? `<strong>Notes :</strong> ${esc(paiement.notes)}` : ""}
       </p>
     </div>
     <div class="info-box">
       <h3>Groupe & Matière</h3>
       <p>
-        <strong>Groupe :</strong> ${paiement.groupe.nom}<br>
-        <strong>Matière :</strong> ${paiement.groupe.matiere?.nom || "—"}<br>
-        <strong>Prof :</strong> ${paiement.groupe.prof ? `${paiement.groupe.prof.prenom} ${paiement.groupe.prof.nom}` : "—"}<br>
+        <strong>Groupe :</strong> ${esc(paiement.groupe.nom)}<br>
+        <strong>Matière :</strong> ${esc(paiement.groupe.matiere?.nom || "—")}<br>
+        <strong>Prof :</strong> ${paiement.groupe.prof ? `${esc(paiement.groupe.prof.prenom)} ${esc(paiement.groupe.prof.nom)}` : "—"}<br>
         ${paiement.groupe.capaciteMax ? `<strong>Capacité max :</strong> ${paiement.groupe.capaciteMax} élèves` : ""}
       </p>
     </div>
@@ -418,7 +427,7 @@ export async function GET(
   <div style="clear:both"></div>
 
   <div class="footer">
-    <p><strong>${centreName}</strong>${centrePhone ? " — Tél : " + centrePhone : ""}${centreAddress ? " — " + centreAddress : ""}</p>
+    <p><strong>${esc(centreName)}</strong>${centrePhone ? " — Tél : " + esc(centrePhone) : ""}${centreAddress ? " — " + esc(centreAddress) : ""}</p>
     <p style="margin-top:4px;">Facture générée le ${new Date().toLocaleDateString("fr-FR")} à ${new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</p>
   </div>
 </body>

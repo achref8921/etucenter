@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireActiveCenter } from "@/lib/auth-helpers";
+import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { matiereSchema } from "@/lib/validations";
 
 export async function GET() {
   try {
-    const { session, error } = await requireActiveCenter();
+    const { session, error } = await requireActiveCenter("GET", ADMIN_ROLES);
     if (error) return error;
 
     const centerId = (session.user as any).centerId;
@@ -32,7 +32,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { session, error } = await requireActiveCenter(request.method);
+    const { session, error } = await requireActiveCenter(request.method, ADMIN_ROLES);
     if (error) return error;
 
     const body = await request.json();
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const { session, error } = await requireActiveCenter(request.method);
+    const { session, error } = await requireActiveCenter(request.method, ADMIN_ROLES);
     if (error) return error;
 
     const { searchParams } = new URL(request.url);
