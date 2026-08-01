@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Sidebar from "./sidebar";
 import Header from "./header";
-import SessionWatcher from "@/components/session-watcher";
 import SessionGuard from "@/components/session-guard";
 import { Role } from "@prisma/client";
 
@@ -45,7 +44,6 @@ export default function DashboardLayoutClient({ children, user, centerName, cent
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
       <SessionGuard />
-      <SessionWatcher />
       <Sidebar
         role={user.role}
         centerName={centerName}
