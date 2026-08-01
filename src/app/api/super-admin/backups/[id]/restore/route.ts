@@ -36,7 +36,11 @@ export async function POST(
 
     const result = await restoreSystemBackup({ id, actorId: (session.user as any).id });
 
-    return NextResponse.json({ success: true, message: `Base de données restaurée (version ${result.version})`, ...result });
+    return NextResponse.json({
+      success: true,
+      message: `Base de données fusionnée avec la sauvegarde (version ${result.version})`,
+      ...result,
+    });
   } catch (error: any) {
     logger.error("Erreur lors de la restauration de la sauvegarde", { error });
     if (error instanceof BackupRestoreError) {

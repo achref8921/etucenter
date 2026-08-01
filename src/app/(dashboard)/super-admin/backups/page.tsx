@@ -191,7 +191,13 @@ export default function SuperAdminBackupsPage() {
       if (!res.ok) {
         setError(data.error || "Erreur lors de la restauration");
       } else {
-        setSuccess(data.message || "Base de données restaurée avec succès");
+        const added = data.counts ? Object.entries(data.counts).filter(([, n]) => (n as number) > 0).map(([k, n]) => `${k}: ${n}`).join(", ") : "";
+        const mergedCount = data.merged ? Object.values(data.merged).reduce((a: number, b: any) => a + (Number(b) || 0), 0) : 0;
+        const temps = (data.tempPasswords || []).length;
+        let msg = data.message || "Base de données fusionnée avec succès";
+        if (mergedCount > 0 || added) msg += ` | ${mergedCount} existant(s) conservé(s)${added ? `, ajoutés → ${added}` : ""}`;
+        if (temps > 0) msg += ` | ${temps} compte(s) réactivé(s) avec mot de passe temporaire (voir journal)`;
+        setSuccess(msg);
         setRestoreTarget(null);
         setRestoreConfirm("");
         setRestoreConfirmChecked(false);
@@ -509,23 +515,24 @@ export default function SuperAdminBackupsPage() {
               </div>
             </div>
 
-            <div className="rounded-lg border border-red-200 bg-red-50 p-4 mb-4 dark:border-red-800 dark:bg-red-900/10">
-              <p className="text-sm text-red-700 dark:text-red-400">
-                <strong>Attention :</strong> toutes les données actuelles de toutes les bases (centres, utilisateurs, groupes, séances, présences, paiements, inscriptions, notifications…)
-                seront remplacées par celles de cette sauvegarde. Le journal d&apos;audit sera conservé. Cette action est irréversible.
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 mb-4 dark:border-amber-800 dark:bg-amber-900/10">
+              <p className="text-sm text-amber-700 dark:text-amber-400">
+                <strong>Fusion :</strong> les données actuelles de toutes les bases sont conservées. Les éléments de cette sauvegarde
+                (centres, utilisateurs, groupes, séances, présences, paiements, inscriptions, notifications…) qui n&apos;existent pas
+                encore seront <strong>ajoutés</strong> par-dessus. Rien n&apos;est supprimé ni remplacé.
               </p>
             </div>
 
             <div className="space-y-3">
-              <label className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/10">
+              <label className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/10">
                 <input
                   type="checkbox"
                   checked={restoreConfirmChecked}
                   onChange={(e) => setRestoreConfirmChecked(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-red-300 text-red-600 focus:ring-red-500"
+                  className="mt-0.5 h-4 w-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
                 />
-                <span className="text-xs text-red-700 dark:text-red-400">
-                  Je comprends que les données actuelles seront remplacées définitivement par la version v{restoreTarget.version}
+                <span className="text-xs text-amber-700 dark:text-amber-400">
+                  Je comprends que les données actuelles sont conservées et que les éléments manquants de la version v{restoreTarget.version} seront ajoutés
                 </span>
               </label>
               <div>

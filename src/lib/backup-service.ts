@@ -1,8 +1,10 @@
 import { createHash } from "node:crypto";
+import bcrypt from "bcryptjs";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { getBackupRetentionSetting } from "@/lib/settings";
+import { generateTemporaryPassword } from "@/lib/passwords";
 
 export const BACKUP_SCHEMA_VERSION = "1.0";
 export const BACKUP_KIND = "educenter-db-backup";
@@ -399,54 +401,17 @@ export async function deleteSystemBackup(id: string, actorId?: string | null): P
 
 // ─── Restauration ─────────────────────────────────────────────────────────────
 
-async function preserveActorLogin(tx: Prisma.TransactionClient, dump: DbDump, actorUser: any): Promise<{ needed: boolean; reason: string }> {
-  if (!actorUser) return { needed: false, reason: "compte_introuvable" };
-
-  const stillExists = dump.tables.utilisateurs?.some((u: any) => u.email === actorUser.email);
-  if (stillExists) return { needed: false, reason: "present_dans_la_sauvegarde" };
-
-  const existingCodes = new Set((dump.tables.centers || []).map((c: any) => c.code));
-  const existingSlugs = new Set((dump.tables.centers || []).map((c: any) => c.slug));
-
-  const generateCode = () => {
-    let code = "";
-    do {
-      code = Array.from({ length: 6 }, () => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[Math.floor(Math.random() * 36)]).join("");
-    } while (existingCodes.has(code));
-    return code;
-  };
-
-  let centerId = actorUser.centerId;
-  const centerExists = dump.tables.centers?.some((c: any) => c.id === centerId);
-
-  if (!centerExists) {
-    const fallback = dump.tables.centers?.[0];
-    if (fallback) {
-      centerId = fallback.id;
-    } else {
-      const slug = `centre-restaure-${Date.now()}`;
-      const code = generateCode();
-      await tx.center.create({
-        data: { id: actorUser.centerId, name: "Centre Restauré", slug, code, logo: null, phone: null, address: null, active: true },
-      });
-      existingSlugs.add(slug);
-      existingCodes.add(code);
-    }
-  }
-
-  await tx.utilisateur.create({
-    data: buildUtilisateur(actorUser, { centerId, actif: true }),
-  });
-
-  return { needed: true, reason: "compte_admin_preserve" };
-}
+const bump = (map: Record<string, number>, key: string) => {
+  map[key] = (map[key] || 0) + 1;
+};
 
 export async function restoreSystemBackup(opts: { id: string; actorId: string }): Promise<{
   version: number;
   type: BackupType;
   restoredAt: string;
   counts: Record<string, number>;
-  preserved: { needed: boolean; reason: string };
+  merged: Record<string, number>;
+  tempPasswords: { email: string; password: string }[];
 }> {
   const { id, actorId } = opts;
 
@@ -460,41 +425,171 @@ export async function restoreSystemBackup(opts: { id: string; actorId: string })
   }
 
   const dump = JSON.parse(backup.data) as DbDump;
-  const actorUser = await prisma.utilisateur.findUnique({ where: { id: actorId } });
 
   const result = await prisma.$transaction(
     async (tx) => {
-      // Suppression en ordre inverse des dépendances (enfants → parents)
-      await tx.presence.deleteMany({});
-      await tx.paiement.deleteMany({});
-      await tx.seance.deleteMany({});
-      await tx.inscription.deleteMany({});
-      await tx.tauxBenefice.deleteMany({});
-      await tx.notification.deleteMany({});
-      await tx.centerSubscription.deleteMany({});
-      await tx.groupe.deleteMany({});
-      await tx.matiere.deleteMany({});
-      await tx.utilisateur.deleteMany({});
-      await tx.center.deleteMany({});
+      const idMap: Record<string, string> = {};
+      const counts: Record<string, number> = {};
+      const merged: Record<string, number> = {};
+      const tempPasswords: { email: string; password: string }[] = [];
 
-      // Réinsertion en ordre de dépendance (parents → enfants), IDs conservés
-      for (const c of dump.tables.centers || []) await tx.center.create({ data: buildCenter(c) });
-      for (const u of dump.tables.utilisateurs || []) await tx.utilisateur.create({ data: buildUtilisateur(u) });
-      for (const m of dump.tables.matieres || []) await tx.matiere.create({ data: buildMatiere(m) });
-      for (const g of dump.tables.groupes || []) await tx.groupe.create({ data: buildGroupe(g) });
-      for (const i of dump.tables.inscriptions || []) await tx.inscription.create({ data: buildInscription(i) });
-      for (const s of dump.tables.seances || []) await tx.seance.create({ data: buildSeance(s) });
-      for (const p of dump.tables.presences || []) await tx.presence.create({ data: buildPresence(p) });
-      for (const p of dump.tables.paiements || []) await tx.paiement.create({ data: buildPaiement(p) });
-      for (const t of dump.tables.tauxBenefices || []) await tx.tauxBenefice.create({ data: buildTaux(t) });
-      for (const n of dump.tables.notifications || []) await tx.notification.create({ data: buildNotification(n) });
-      for (const s of dump.tables.centerSubscriptions || []) await tx.centerSubscription.create({ data: buildSubscription(s) });
+      // Fusion : on conserve les données actuelles et on ajoute les éléments de la
+      // sauvegarde qui n'existent pas déjà (clés naturelles), sans rien supprimer.
+      for (const c of dump.tables.centers || []) {
+        let live = await tx.center.findUnique({ where: { id: c.id } });
+        if (!live) live = await tx.center.findFirst({ where: { code: c.code } });
+        if (live) { idMap[c.id] = live.id; bump(merged, "centers"); continue; }
+        const created = await tx.center.create({ data: buildCenter(c) });
+        idMap[c.id] = created.id;
+        bump(counts, "centers");
+      }
 
-      const preserved = await preserveActorLogin(tx, dump, actorUser);
+      for (const u of dump.tables.utilisateurs || []) {
+        const centerId = idMap[u.centerId];
+        if (!centerId) continue;
+        const existing = await tx.utilisateur.findUnique({ where: { email: u.email } });
+        if (existing) { idMap[u.id] = existing.id; bump(merged, "utilisateurs"); continue; }
+
+        let codeEleve = str(u.codeEleve);
+        if (codeEleve) {
+          const clash = await tx.utilisateur.findFirst({ where: { centerId, codeEleve } });
+          if (clash) codeEleve = null;
+        }
+        let codeProf = str(u.codeProf);
+        if (codeProf) {
+          const clash = await tx.utilisateur.findFirst({ where: { centerId, codeProf } });
+          if (clash) codeProf = null;
+        }
+
+        let motDePasse = str(u.motDePasse);
+        let tempPassword: string | null = null;
+        if (!motDePasse) {
+          tempPassword = generateTemporaryPassword();
+          motDePasse = await bcrypt.hash(tempPassword, 12);
+        }
+
+        const created = await tx.utilisateur.create({
+          data: buildUtilisateur(u, {
+            centerId,
+            codeEleve,
+            codeProf,
+            motDePasse,
+            emailVerificationToken: null,
+            emailVerificationExpiry: null,
+            passwordResetToken: null,
+            passwordResetExpiry: null,
+          }),
+        });
+        idMap[u.id] = created.id;
+        bump(counts, "utilisateurs");
+        if (tempPassword) tempPasswords.push({ email: u.email, password: tempPassword });
+      }
+
+      for (const m of dump.tables.matieres || []) {
+        const centerId = idMap[m.centerId];
+        if (!centerId) continue;
+        const existing = await tx.matiere.findFirst({ where: { centerId, nom: m.nom } });
+        if (existing) { idMap[m.id] = existing.id; bump(merged, "matieres"); continue; }
+        const created = await tx.matiere.create({ data: { ...buildMatiere(m), centerId } });
+        idMap[m.id] = created.id;
+        bump(counts, "matieres");
+      }
+
+      for (const g of dump.tables.groupes || []) {
+        const centerId = idMap[g.centerId];
+        if (!centerId) continue;
+        const existing = await tx.groupe.findFirst({ where: { centerId, nom: g.nom } });
+        if (existing) { idMap[g.id] = existing.id; bump(merged, "groupes"); continue; }
+        const created = await tx.groupe.create({
+          data: {
+            ...buildGroupe(g),
+            centerId,
+            profId: g.profId ? idMap[g.profId] || null : null,
+            matiereId: g.matiereId ? idMap[g.matiereId] || null : null,
+          },
+        });
+        idMap[g.id] = created.id;
+        bump(counts, "groupes");
+      }
+
+      for (const s of dump.tables.seances || []) {
+        const groupeId = idMap[s.groupeId];
+        if (!groupeId) continue;
+        const date = toDate(s.date) ?? new Date();
+        const existing = await tx.seance.findFirst({ where: { groupeId, date } });
+        if (existing) { idMap[s.id] = existing.id; bump(merged, "seances"); continue; }
+        const created = await tx.seance.create({ data: { ...buildSeance(s), groupeId, date } });
+        idMap[s.id] = created.id;
+        bump(counts, "seances");
+      }
+
+      for (const i of dump.tables.inscriptions || []) {
+        const eleveId = idMap[i.eleveId];
+        const groupeId = idMap[i.groupeId];
+        if (!eleveId || !groupeId) continue;
+        const existing = await tx.inscription.findUnique({ where: { eleveId_groupeId: { eleveId, groupeId } } });
+        if (existing) { bump(merged, "inscriptions"); continue; }
+        await tx.inscription.create({ data: { ...buildInscription(i), eleveId, groupeId } });
+        bump(counts, "inscriptions");
+      }
+
+      for (const p of dump.tables.presences || []) {
+        const seanceId = idMap[p.seanceId];
+        const eleveId = idMap[p.eleveId];
+        if (!seanceId || !eleveId) continue;
+        const existing = await tx.presence.findUnique({ where: { seanceId_eleveId: { seanceId, eleveId } } });
+        if (existing) { bump(merged, "presences"); continue; }
+        await tx.presence.create({
+          data: {
+            ...buildPresence(p),
+            seanceId,
+            eleveId,
+            enregistrePar: p.enregistrePar ? idMap[p.enregistrePar] || null : null,
+          },
+        });
+        bump(counts, "presences");
+      }
+
+      for (const p of dump.tables.paiements || []) {
+        const eleveId = idMap[p.eleveId];
+        const groupeId = idMap[p.groupeId];
+        if (!eleveId || !groupeId) continue;
+        const datePaiement = toDate(p.datePaiement) ?? new Date();
+        const montant = Number(p.montant ?? 0);
+        const existing = await tx.paiement.findFirst({ where: { eleveId, groupeId, montant, datePaiement } });
+        if (existing) { bump(merged, "paiements"); continue; }
+        await tx.paiement.create({ data: { ...buildPaiement(p), eleveId, groupeId, montant, datePaiement } });
+        bump(counts, "paiements");
+      }
+
+      for (const t of dump.tables.tauxBenefices || []) {
+        const profId = idMap[t.profId];
+        if (!profId) continue;
+        const existing = await tx.tauxBenefice.findUnique({ where: { profId } });
+        if (existing) { bump(merged, "tauxBenefices"); continue; }
+        await tx.tauxBenefice.create({ data: { ...buildTaux(t), profId } });
+        bump(counts, "tauxBenefices");
+      }
+
+      for (const n of dump.tables.notifications || []) {
+        const destinataireId = idMap[n.destinataireId];
+        if (!destinataireId) continue;
+        const centerId = idMap[n.centerId] || n.centerId;
+        await tx.notification.create({ data: { ...buildNotification(n), centerId, destinataireId } });
+        bump(counts, "notifications");
+      }
+
+      for (const s of dump.tables.centerSubscriptions || []) {
+        const existing = await tx.centerSubscription.findUnique({ where: { id: s.id } });
+        if (existing) continue;
+        const centerId = idMap[s.centerId] || s.centerId;
+        await tx.centerSubscription.create({ data: { ...buildSubscription(s), centerId } });
+        bump(counts, "centerSubscriptions");
+      }
 
       await tx.systemBackup.update({ where: { id }, data: { status: "restaure", restoredAt: new Date() } });
 
-      return { counts: dump.counts || {}, preserved };
+      return { counts, merged, tempPasswords };
     },
     { timeout: 120_000 }
   );
@@ -504,12 +599,25 @@ export async function restoreSystemBackup(opts: { id: string; actorId: string })
       action: "backup_restored",
       entity: "SystemBackup",
       entityId: id,
-      details: { version: backup.version, type: backup.type, counts: result.counts, preserved: result.preserved },
+      details: {
+        version: backup.version,
+        type: backup.type,
+        counts: result.counts,
+        merged: result.merged,
+        tempPasswords: result.tempPasswords.length,
+      },
       userId: actorId,
     },
   });
 
-  logger.info("Sauvegarde restaurée", { version: backup.version, id });
+  logger.info("Sauvegarde restaurée (fusion)", { version: backup.version, id, counts: result.counts, merged: result.merged });
 
-  return { version: backup.version, type: backup.type, restoredAt: new Date().toISOString(), counts: result.counts, preserved: result.preserved };
+  return {
+    version: backup.version,
+    type: backup.type,
+    restoredAt: new Date().toISOString(),
+    counts: result.counts,
+    merged: result.merged,
+    tempPasswords: result.tempPasswords,
+  };
 }
