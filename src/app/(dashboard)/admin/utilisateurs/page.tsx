@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { Plus, Trash2, X, Loader2, Filter, ToggleLeft, ToggleRight, Search, Download, KeyRound } from "lucide-react";
 import PasswordInput from "@/components/password-input";
 import ConfirmDelete from "@/components/confirm-delete";
@@ -39,9 +38,6 @@ const filieres = [
 
 export default function UtilisateursPage() {
   const router = useRouter();
-  const { data: session } = useSession();
-  const currentUserRole = (session?.user as any)?.role;
-  const isSuperAdmin = currentUserRole === "super_admin";
   const [users, setUsers] = useState<Utilisateur[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -191,10 +187,6 @@ export default function UtilisateursPage() {
   };
 
   const handleToggleActif = async (id: string, currentActif: boolean) => {
-    if (!currentActif && !isSuperAdmin) {
-      setError("Seul un super admin peut réactiver un compte.");
-      return;
-    }
     try {
       setTogglingId(id);
       setError(null);
@@ -416,7 +408,7 @@ export default function UtilisateursPage() {
                       ) : "—"}
                     </td>
                     <td className="px-4 py-4">
-                      <button onClick={(e) => { e.stopPropagation(); handleToggleActif(user.id, user.actif); }} disabled={togglingId === user.id || (!user.actif && !isSuperAdmin)} className="flex items-center gap-1 disabled:opacity-40" title={!user.actif && !isSuperAdmin ? "Seul un super admin peut réactiver un compte" : (user.actif ? "Désactiver" : "Activer")}>
+                      <button onClick={(e) => { e.stopPropagation(); handleToggleActif(user.id, user.actif); }} disabled={togglingId === user.id} className="flex items-center gap-1 disabled:opacity-50" title={user.actif ? "Désactiver" : "Activer"}>
                         {togglingId === user.id ? <Loader2 className="h-4 w-4 animate-spin text-gray-400 dark:text-slate-500" /> : user.actif ? <ToggleRight className="h-6 w-6 text-green-500 dark:text-green-400" /> : <ToggleLeft className="h-6 w-6 text-gray-300 dark:text-slate-600" />}
                         <span className={`text-xs font-medium ${user.actif ? "text-green-600 dark:text-green-400" : "text-gray-400 dark:text-slate-500"}`}>{user.actif ? "Actif" : "Inactif"}</span>
                       </button>
