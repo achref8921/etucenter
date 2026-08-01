@@ -62,7 +62,7 @@ export default function DashboardLayoutClient({ children, user, centerName, cent
             <span className="hidden sm:inline">— يمكنك فقط مشاهدة معلوماتك</span>
           </div>
         )}
-        <main className={`p-4 sm:p-6 ${frozenState ? "pointer-events-none select-none" : ""}`}>{children}</main>
+        <main className={`p-4 sm:p-6 ${frozenState ? "frozen-mode" : ""}`}>{children}</main>
       </div>
     </div>
   );

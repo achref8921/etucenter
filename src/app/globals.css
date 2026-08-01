@@ -88,3 +88,13 @@ body {
   background-color: #3b82f633;
   color: #93c5fd;
 }
+
+.frozen-mode button,
+.frozen-mode input,
+.frozen-mode select,
+.frozen-mode textarea,
+.frozen-mode form,
+.frozen-mode [role="button"] {
+  pointer-events: none !important;
+  opacity: 0.6;
+}
