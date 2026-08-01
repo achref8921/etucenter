@@ -34,7 +34,7 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
-    const { session, error } = await requireActiveCenter();
+    const { session, error } = await requireActiveCenter(request.method);
     if (error) return error;
 
     const body = await request.json();

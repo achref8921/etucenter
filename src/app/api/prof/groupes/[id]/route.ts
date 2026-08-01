@@ -54,7 +54,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { session, error } = await requireActiveCenter();
+    const { session, error } = await requireActiveCenter(request.method);
     if (error) return error;
 
     const { id } = await params;

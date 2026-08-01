@@ -365,7 +365,7 @@ export default function SuperAdminCentersPage() {
       <ConfirmDelete
         open={!!showDelete}
         title="Supprimer le centre"
-        message={`Vous êtes sur le point de supprimer définitivement ${showDelete?.name} et toutes ses données : ${showDelete?._count.utilisateurs} utilisateur(s), ${showDelete?._count.groupes} groupe(s), ${showDelete?._count.matieres} matière(s).`}
+        message={`Vous êtes sur le point de supprimer ${showDelete?.name}. Le centre sera désactivé : les administrateurs pourront se connecter en lecture seule (compte gelé) et toutes les données seront conservées.`}
         onConfirm={handleDelete}
         onCancel={() => setShowDelete(null)}
         loading={deleting}

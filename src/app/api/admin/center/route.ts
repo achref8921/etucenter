@@ -21,7 +21,7 @@ export async function GET() {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const { session, error } = await requireActiveCenter();
+    const { session, error } = await requireActiveCenter(request.method);
     if (error) return error;
     const centerId = (session.user as any).centerId;
 

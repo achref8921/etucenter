@@ -38,7 +38,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { session, error } = await requireActiveCenter();
+    const { session, error } = await requireActiveCenter(request.method);
     if (error) return error;
 
     const body = await request.json();
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const { session, error } = await requireActiveCenter();
+    const { session, error } = await requireActiveCenter(request.method);
     if (error) return error;
 
     const body = await request.json();
@@ -125,7 +125,7 @@ export async function PATCH(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const { session, error } = await requireActiveCenter();
+    const { session, error } = await requireActiveCenter(request.method);
     if (error) return error;
 
     const { searchParams } = new URL(request.url);

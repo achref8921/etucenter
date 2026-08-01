@@ -35,7 +35,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { session, error } = await requireActiveCenter();
+    const { session, error } = await requireActiveCenter(request.method);
     if (error) return error;
 
     const body = await request.json();

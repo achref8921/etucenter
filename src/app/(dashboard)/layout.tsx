@@ -30,14 +30,13 @@ export default async function DashboardRootLayout({
   if (centerId) {
     const center = await prisma.center.findUnique({
       where: { id: centerId },
-      select: { name: true, logo: true, active: true },
+      select: { name: true, logo: true },
     });
-    if (!center || !center.active) {
-      redirect("/centre-suspendu");
-    }
-    centerName = center.name;
-    centerLogo = center.logo;
+    centerName = center?.name ?? "GestExam";
+    centerLogo = center?.logo ?? null;
   }
+
+  const frozen = (session.user as any).frozen === true;
 
   const user: SessionUser = {
     id: session.user.id,
@@ -46,10 +45,11 @@ export default async function DashboardRootLayout({
     role: session.user.role as SessionUser["role"],
     email: session.user.email ?? "",
     centerId: session.user.centerId,
+    frozen,
   };
 
   return (
-    <DashboardLayoutClient user={user} centerName={centerName} centerLogo={centerLogo}>
+    <DashboardLayoutClient user={user} centerName={centerName} centerLogo={centerLogo} frozen={frozen}>
       {children}
     </DashboardLayoutClient>
   );

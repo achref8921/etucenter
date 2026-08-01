@@ -15,18 +15,8 @@ async function findAndValidateUser(email: string) {
     where: { email },
   });
 
-  if (!user || !user.actif) {
+  if (!user || !user.motDePasse) {
     return null;
-  }
-
-  if (user.centerId && user.role !== "super_admin") {
-    const center = await prisma.center.findUnique({
-      where: { id: user.centerId },
-      select: { active: true },
-    });
-    if (!center || !center.active) {
-      return null;
-    }
   }
 
   return user;
@@ -212,17 +202,32 @@ export const authOptions: NextAuthOptions = {
         session.user.prenom = token.prenom as string;
         session.user.centerId = token.centerId as string;
 
-        const centerId = token.centerId as string | undefined;
         const role = token.role as string;
-        if (centerId && role !== "super_admin") {
-          const center = await prisma.center.findUnique({
-            where: { id: centerId },
-            select: { active: true },
+        const userId = token.id as string | undefined;
+        let frozen = false;
+
+        if (role !== "super_admin" && userId) {
+          const dbUser = await prisma.utilisateur.findUnique({
+            where: { id: userId },
+            select: { actif: true, centerId: true },
           });
-          if (!center || !center.active) {
-            (session.user as any).centerSuspended = true;
+
+          if (!dbUser || !dbUser.actif) {
+            frozen = true;
+          }
+
+          if (dbUser?.centerId) {
+            const center = await prisma.center.findUnique({
+              where: { id: dbUser.centerId },
+              select: { active: true },
+            });
+            if (!center || !center.active) {
+              frozen = true;
+            }
           }
         }
+
+        (session.user as any).frozen = frozen;
       }
       return session;
     },

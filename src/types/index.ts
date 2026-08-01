@@ -8,6 +8,7 @@ export interface SessionUser {
   role: Role;
   centerId: string;
   image?: string | null;
+  frozen?: boolean;
 }
 
 export interface DashboardStats {

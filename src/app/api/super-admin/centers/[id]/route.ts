@@ -117,9 +117,9 @@ export async function DELETE(
       subjectsDeleted: center._count.matieres,
     };
 
-    await prisma.center.delete({ where: { id } });
+    await prisma.center.update({ where: { id }, data: { active: false } });
 
-    logger.info("Centre supprimé", { superAdminId: (session.user as any).id, centerId: id });
+    logger.info("Centre supprimé (désactivé)", { superAdminId: (session.user as any).id, centerId: id });
 
     await prisma.systemLog.create({
       data: {
