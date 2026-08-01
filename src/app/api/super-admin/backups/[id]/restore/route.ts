@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { rateLimit, getRateLimitKey } from "@/lib/rate-limit";
-import { restoreSystemBackup } from "@/lib/backup-service";
+import { restoreSystemBackup, BackupRestoreError } from "@/lib/backup-service";
 
 export const maxDuration = 300;
 
@@ -39,10 +39,9 @@ export async function POST(
     return NextResponse.json({ success: true, message: `Base de données restaurée (version ${result.version})`, ...result });
   } catch (error: any) {
     logger.error("Erreur lors de la restauration de la sauvegarde", { error });
-    const message =
-      error?.message && !String(error?.message).includes("Erreur inconnue")
-        ? error.message
-        : "Erreur lors de la restauration de la base de données";
-    return NextResponse.json({ error: message }, { status: 500 });
+    if (error instanceof BackupRestoreError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+    return NextResponse.json({ error: "Erreur lors de la restauration de la base de données" }, { status: 500 });
   }
 }

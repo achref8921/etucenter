@@ -20,6 +20,7 @@ interface DbDump {
 }
 
 export class BackupBusyError extends Error {}
+export class BackupRestoreError extends Error {}
 
 export function getBackupRetention(): number {
   const raw = parseInt(process.env.BACKUP_RETENTION || "14", 10);
@@ -440,12 +441,12 @@ export async function restoreSystemBackup(opts: { id: string; actorId: string })
   const { id, actorId } = opts;
 
   const backup = await prisma.systemBackup.findUnique({ where: { id } });
-  if (!backup || !backup.data) throw new Error("Sauvegarde introuvable ou incomplète");
-  if (backup.status === "en_cours") throw new Error("Cette sauvegarde n'est pas encore terminée");
+  if (!backup || !backup.data) throw new BackupRestoreError("Sauvegarde introuvable ou incomplète");
+  if (backup.status === "en_cours") throw new BackupRestoreError("Cette sauvegarde n'est pas encore terminée");
 
   const verify = await verifySystemBackup(id);
   if (!verify.valid) {
-    throw new Error("Vérification d'intégrité échouée : la sauvegarde est corrompue. Restauration annulée.");
+    throw new BackupRestoreError("Vérification d'intégrité échouée : la sauvegarde est corrompue. Restauration annulée.");
   }
 
   const dump = JSON.parse(backup.data) as DbDump;
