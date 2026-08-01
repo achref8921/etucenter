@@ -11,6 +11,7 @@ import {
   Shield,
   BarChart3,
   Database,
+  Users,
 } from "lucide-react";
 
 interface NavItem {
@@ -22,6 +23,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: "Overview", href: "/super-admin", icon: LayoutDashboard },
   { label: "Centers", href: "/super-admin/centers", icon: Building2 },
+  { label: "Utilisateurs", href: "/super-admin/utilisateurs", icon: Users },
   { label: "Analytiques", href: "/super-admin/analytics", icon: BarChart3 },
   { label: "Sauvegardes", href: "/super-admin/backups", icon: Database },
   { label: "System Logs", href: "/super-admin/logs", icon: ScrollText },
