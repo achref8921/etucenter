@@ -489,7 +489,7 @@ export default function UtilisateursPage() {
           </div>
         </div>
       )}
-      <ConfirmDelete open={!!confirmDelete} title="Supprimer l'utilisateur" message="Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible." onConfirm={() => { if (confirmDelete) handleDelete(confirmDelete.id); setConfirmDelete(null); }} onCancel={() => setConfirmDelete(null)} loading={deletingId === confirmDelete?.id} />
+      <ConfirmDelete open={!!confirmDelete} title="Archiver l'utilisateur" message="L'utilisateur sera archivé : il ne pourra plus se connecter, mais toutes ses données (inscriptions, paiements, présences) seront conservées. Vous pourrez le réactiver à tout moment." onConfirm={() => { if (confirmDelete) handleDelete(confirmDelete.id); setConfirmDelete(null); }} onCancel={() => setConfirmDelete(null)} loading={deletingId === confirmDelete?.id} />
     </div>
   );
 }

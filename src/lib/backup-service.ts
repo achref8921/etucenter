@@ -150,6 +150,7 @@ function buildUtilisateur(u: any, overrides: Record<string, any> = {}) {
     image: str(u.image), dateNaissance: toDate(u.dateNaissance),
     actif: u.actif ?? false, codeEleve: str(u.codeEleve), codeProf: str(u.codeProf),
     niveau: str(u.niveau), classe: str(u.classe), filiere: str(u.filiere),
+    deletedAt: toDate(u.deletedAt),
     provider: u.provider ?? "credentials", providerId: str(u.providerId),
     emailVerified: toDate(u.emailVerified),
     emailVerificationToken: str(u.emailVerificationToken),

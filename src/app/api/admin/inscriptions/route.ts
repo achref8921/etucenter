@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     const centreId = (session.user as any).centerId;
 
     const [eleve, groupe] = await Promise.all([
-      prisma.utilisateur.findUnique({ where: { id: eleveId, role: "eleve", centerId: centreId } }),
+      prisma.utilisateur.findUnique({ where: { id: eleveId, role: "eleve", centerId: centreId, deletedAt: null } }),
       prisma.groupe.findUnique({ where: { id: groupeId, centerId: centreId } }),
     ]);
 

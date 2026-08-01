@@ -73,8 +73,8 @@ export async function calculateStudentStats(eleveId: string) {
 export async function getAdminStats(centerId: string) {
   const [totalStudents, totalTeachers, totalSeances, totalRevenue, totalUnpaid] =
     await Promise.all([
-      prisma.utilisateur.count({ where: { role: "eleve", centerId } }),
-      prisma.utilisateur.count({ where: { role: "prof", centerId } }),
+      prisma.utilisateur.count({ where: { role: "eleve", centerId, deletedAt: null } }),
+      prisma.utilisateur.count({ where: { role: "prof", centerId, deletedAt: null } }),
       prisma.seance.count({ where: { statut: "terminee", groupe: { centerId } } }),
       prisma.paiement.aggregate({ _sum: { montant: true }, where: { groupe: { centerId } } }),
       prisma.$queryRawUnsafe(

@@ -33,7 +33,7 @@ export async function GET(
     }
 
     const inscriptions = await prisma.inscription.findMany({
-      where: { groupeId: id },
+      where: { groupeId: id, eleve: { deletedAt: null } },
       include: {
         eleve: {
           select: {

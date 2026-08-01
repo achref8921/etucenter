@@ -26,6 +26,7 @@ export async function GET() {
       where: {
         groupeId: { in: groupeIds },
         statut: "actif",
+        eleve: { deletedAt: null },
       },
       include: {
         eleve: {

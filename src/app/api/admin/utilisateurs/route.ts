@@ -16,7 +16,7 @@ export async function GET() {
     const currentUserId = (session.user as any).id;
 
     const utilisateurs = await prisma.utilisateur.findMany({
-      where: { centerId, id: { not: currentUserId } },
+      where: { centerId, id: { not: currentUserId }, deletedAt: null },
       select: {
         id: true,
         nom: true,
@@ -159,7 +159,7 @@ export async function PATCH(request: NextRequest) {
 
     const updated = await prisma.utilisateur.update({
       where: { id },
-      data: { actif },
+      data: { actif, ...(actif ? { deletedAt: null } : {}) },
       select: { id: true, nom: true, prenom: true, email: true, role: true, actif: true },
     });
 
@@ -181,6 +181,12 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Paramètre id requis" }, { status: 400 });
     }
 
+    const currentUserId = (session.user as any).id;
+
+    if (id === currentUserId) {
+      return NextResponse.json({ error: "Vous ne pouvez pas archiver votre propre compte" }, { status: 403 });
+    }
+
     const existingUser = await prisma.utilisateur.findUnique({ where: { id } });
     if (!existingUser || existingUser.centerId !== (session.user as any).centerId) {
       return NextResponse.json({ error: "Utilisateur non trouvé" }, { status: 404 });
@@ -190,11 +196,16 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Seul un super admin peut supprimer un admin" }, { status: 403 });
     }
 
-    await prisma.utilisateur.delete({ where: { id } });
+    // Suppression douce (archivage) : les données liées (inscriptions, paiements,
+    // présences, notifications) sont conservées, l'utilisateur ne peut plus se connecter.
+    await prisma.utilisateur.update({
+      where: { id },
+      data: { deletedAt: new Date(), actif: false },
+    });
 
-    logger.info("Utilisateur supprimé", { adminId: (session.user as any).id, deletedUserId: id });
+    logger.info("Utilisateur archivé (suppression douce)", { adminId: currentUserId, archivedUserId: id });
 
-    return NextResponse.json({ message: "Utilisateur supprimé avec succès" });
+    return NextResponse.json({ message: "Utilisateur archivé avec succès. Ses données (inscriptions, paiements, présences) sont conservées." });
   } catch (error) {
     logger.error("Erreur lors de la suppression de l'utilisateur", { error });
     return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });

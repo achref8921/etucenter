@@ -10,7 +10,7 @@ export async function GET() {
     const centreId = (session.user as any).centerId;
 
     const profs = await prisma.utilisateur.findMany({
-      where: { role: "prof", centerId: centreId },
+      where: { role: "prof", centerId: centreId, deletedAt: null },
       select: {
         id: true,
         nom: true,

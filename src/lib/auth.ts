@@ -15,7 +15,7 @@ async function findAndValidateUser(email: string) {
     where: { email },
   });
 
-  if (!user || !user.motDePasse) {
+  if (!user || !user.motDePasse || user.deletedAt) {
     return null;
   }
 
@@ -48,6 +48,9 @@ async function findOrCreateGoogleUser(
   });
 
   if (user) {
+    if (user.deletedAt) {
+      throw new Error("Compte archivé : connexion impossible");
+    }
     if (user.provider === "credentials" && !user.providerId) {
       await prisma.utilisateur.update({
         where: { id: user.id },

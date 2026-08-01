@@ -39,9 +39,9 @@ export async function GET() {
       prisma.center.count(),
       prisma.center.count({ where: { active: true } }),
       prisma.center.count({ where: { active: false } }),
-      prisma.utilisateur.count({ where: { role: { not: "super_admin" } } }),
-      prisma.utilisateur.count({ where: { role: "eleve" } }),
-      prisma.utilisateur.count({ where: { role: "prof" } }),
+      prisma.utilisateur.count({ where: { role: { not: "super_admin" }, deletedAt: null } }),
+      prisma.utilisateur.count({ where: { role: "eleve", deletedAt: null } }),
+      prisma.utilisateur.count({ where: { role: "prof", deletedAt: null } }),
       prisma.groupe.count(),
       prisma.centerSubscription.aggregate({
         where: { statut: "active" },

@@ -17,7 +17,7 @@ export async function GET(
     const centreId = (session.user as any).centerId;
 
     const eleve = await prisma.utilisateur.findUnique({
-      where: { id, role: "eleve", centerId: centreId },
+      where: { id, role: "eleve", centerId: centreId, deletedAt: null },
       select: {
         id: true,
         nom: true,
