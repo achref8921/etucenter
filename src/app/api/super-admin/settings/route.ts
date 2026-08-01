@@ -50,8 +50,32 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
-    for (const key of [SETTING_KEYS.maintenanceMode, SETTING_KEYS.openRegistration]) {
+    for (const key of [SETTING_KEYS.maintenanceMode, SETTING_KEYS.openRegistration, SETTING_KEYS.monitorEnabled]) {
       if (clean[key] !== undefined) clean[key] = clean[key] === "true" ? "true" : "false";
+    }
+
+    if (clean[SETTING_KEYS.monitorIntervalMinutes] !== undefined) {
+      const n = parseInt(clean[SETTING_KEYS.monitorIntervalMinutes], 10);
+      if (!Number.isFinite(n) || n < 1 || n > 60) {
+        return NextResponse.json({ error: "L'intervalle de monitoring doit être entre 1 et 60 minutes" }, { status: 400 });
+      }
+    }
+
+    if (clean[SETTING_KEYS.alertEmails] !== undefined) {
+      const emails = clean[SETTING_KEYS.alertEmails].split(",").map((e) => e.trim()).filter(Boolean);
+      for (const e of emails) {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) {
+          return NextResponse.json({ error: `Adresse email invalide : ${e}` }, { status: 400 });
+        }
+      }
+    }
+
+    if (clean[SETTING_KEYS.alertWebhookUrl] !== undefined && clean[SETTING_KEYS.alertWebhookUrl] !== "") {
+      try {
+        new URL(clean[SETTING_KEYS.alertWebhookUrl]);
+      } catch {
+        return NextResponse.json({ error: "URL de webhook invalide" }, { status: 400 });
+      }
     }
 
     await setSettings(clean);

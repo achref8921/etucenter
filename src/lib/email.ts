@@ -93,3 +93,53 @@ export function emailVerificationEmail(name: string, verifyUrl: string): { subje
     `,
   };
 }
+
+export function monitorAlertEmail(subject: string, failures: { type: string; status: string; details: any }[]): { subject: string; html: string } {
+  const isRecovery = failures.length === 0;
+  const banner = isRecovery
+    ? `<div style="background: #10b981; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 24px;"><h1 style="color: white; margin: 0; font-size: 20px;">✅ Système rétabli</h1></div>`
+    : `<div style="background: #dc2626; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 24px;"><h1 style="color: white; margin: 0; font-size: 20px;">⚠️ Incident détecté</h1></div>`;
+
+  const rows = failures
+    .map(
+      (f) => `
+        <tr>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #334155;">${f.type}</td>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0;">
+            <span style="background: #fee2e2; color: #b91c1c; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600;">${f.status}</span>
+          </td>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-size: 13px; color: #64748b;">${f.details?.error ?? "ressource indisponible"}</td>
+        </tr>
+      `
+    )
+    .join("");
+
+  return {
+    subject,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 24px;">
+        ${banner}
+        <p style="color: #475569; line-height: 1.6;">
+          ${isRecovery ? "Tous les services surveillés sont de nouveau opérationnels. Aucune action n'est requise." : "Le monitoring automatique a détecté un problème sur un ou plusieurs composants de la plateforme."}
+        </p>
+        ${isRecovery ? "" : `
+          <table style="width: 100%; border-collapse: collapse; margin: 16px 0; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+            <thead>
+              <tr style="background: #f8fafc;">
+                <th style="text-align: left; padding: 10px 12px; font-size: 12px; text-transform: uppercase; color: #64748b;">Composant</th>
+                <th style="text-align: left; padding: 10px 12px; font-size: 12px; text-transform: uppercase; color: #64748b;">Statut</th>
+                <th style="text-align: left; padding: 10px 12px; font-size: 12px; text-transform: uppercase; color: #64748b;">Détail</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+          <p style="color: #94a3b8; font-size: 13px;">Horodatage : ${new Date().toLocaleString("fr-FR")}</p>
+        `}
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+        <p style="color: #94a3b8; font-size: 12px; text-align: center;">
+          GestExam - Centre de gestion scolaire
+        </p>
+      </div>
+    `,
+  };
+}

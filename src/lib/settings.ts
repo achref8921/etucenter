@@ -4,12 +4,20 @@ export const SETTING_KEYS = {
   backupRetention: "backupRetention",
   maintenanceMode: "maintenanceMode",
   openRegistration: "openRegistration",
+  monitorEnabled: "monitorEnabled",
+  monitorIntervalMinutes: "monitorIntervalMinutes",
+  alertEmails: "alertEmails",
+  alertWebhookUrl: "alertWebhookUrl",
 } as const;
 
 export const SETTING_DEFAULTS: Record<string, string> = {
   [SETTING_KEYS.backupRetention]: "14",
   [SETTING_KEYS.maintenanceMode]: "false",
   [SETTING_KEYS.openRegistration]: "true",
+  [SETTING_KEYS.monitorEnabled]: "true",
+  [SETTING_KEYS.monitorIntervalMinutes]: "5",
+  [SETTING_KEYS.alertEmails]: "",
+  [SETTING_KEYS.alertWebhookUrl]: "",
 };
 
 export async function getSetting(key: string): Promise<string | null> {
@@ -56,4 +64,35 @@ export async function isMaintenanceMode(): Promise<boolean> {
 
 export async function isRegistrationOpen(): Promise<boolean> {
   return (await getSetting(SETTING_KEYS.openRegistration)) !== "false";
+}
+
+export interface MonitorConfig {
+  enabled: boolean;
+  intervalMinutes: number;
+  alertEmails: string[];
+  alertWebhookUrl: string;
+}
+
+export async function getMonitorConfig(): Promise<MonitorConfig> {
+  const [enabled, interval, emails, webhook] = await Promise.all([
+    getSetting(SETTING_KEYS.monitorEnabled),
+    getSetting(SETTING_KEYS.monitorIntervalMinutes),
+    getSetting(SETTING_KEYS.alertEmails),
+    getSetting(SETTING_KEYS.alertWebhookUrl),
+  ]);
+
+  let intervalMinutes = parseInt(interval || "5", 10);
+  if (!Number.isFinite(intervalMinutes) || intervalMinutes < 1) intervalMinutes = 5;
+
+  const emailList = (emails || "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter((e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+
+  return {
+    enabled: enabled !== "false",
+    intervalMinutes,
+    alertEmails: emailList,
+    alertWebhookUrl: (webhook || "").trim(),
+  };
 }

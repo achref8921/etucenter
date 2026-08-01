@@ -376,4 +376,32 @@ model PlatformSetting {
   @@map("platform_settings")
 }
 
+// ─── Monitoring (Santé système, DB, ressources, erreurs) ──────────────────
+
+enum MonitorCheckType {
+  server
+  database
+  resources
+}
+
+enum MonitorStatus {
+  ok
+  warning
+  error
+}
+
+model MonitorCheck {
+  id             String            @id @default(uuid()) @db.Uuid
+  type           MonitorCheckType
+  status         MonitorStatus
+  responseTimeMs Int?              @map("response_time_ms")
+  details        Json?
+  checkedAt      DateTime          @default(now()) @map("checked_at")
+
+  @@index([type, checkedAt])
+  @@index([status, checkedAt])
+  @@map("monitor_checks")
+}
+
+
 

@@ -12,6 +12,7 @@ import {
   BarChart3,
   Database,
   Users,
+  Activity,
 } from "lucide-react";
 
 interface NavItem {
@@ -26,6 +27,7 @@ const navItems: NavItem[] = [
   { label: "Utilisateurs", href: "/super-admin/utilisateurs", icon: Users },
   { label: "Analytiques", href: "/super-admin/analytics", icon: BarChart3 },
   { label: "Sauvegardes", href: "/super-admin/backups", icon: Database },
+  { label: "Monitoring", href: "/super-admin/monitoring", icon: Activity },
   { label: "System Logs", href: "/super-admin/logs", icon: ScrollText },
   { label: "Settings", href: "/super-admin/settings", icon: Settings },
 ];
