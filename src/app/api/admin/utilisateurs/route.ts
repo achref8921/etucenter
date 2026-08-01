@@ -165,6 +165,10 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Seul un super admin peut modifier un admin" }, { status: 403 });
     }
 
+    if (motDePasse !== undefined && (session.user as any).role !== "super_admin") {
+      return NextResponse.json({ error: "Seul un super admin peut réinitialiser le mot de passe" }, { status: 403 });
+    }
+
     const data: any = {};
     if (actif !== undefined) data.actif = actif;
     if (actif === true) data.deletedAt = null;
