@@ -291,6 +291,40 @@ model SystemLog {
   @@map("system_logs")
 }
 
+// ─── SystemBackup (Base de données) ──────────────────────────────────────────
+
+enum BackupStatus {
+  en_cours
+  ok
+  echec
+  restaure
+}
+
+enum BackupType {
+  automatique
+  manuel
+}
+
+model SystemBackup {
+  id          String       @id @default(uuid()) @db.Uuid
+  version     Int
+  type        BackupType   @default(manuel)
+  status      BackupStatus @default(en_cours)
+  checksum    String?      @db.VarChar(64)
+  sizeBytes   Int?
+  rowCounts   Json?
+  data        String?      @db.Text
+  error       String?      @db.Text
+  createdBy   String?      @map("created_by") @db.Uuid
+  createdAt   DateTime     @default(now()) @map("created_at")
+  completedAt DateTime?    @map("completed_at")
+  restoredAt  DateTime?    @map("restored_at")
+
+  @@index([createdAt])
+  @@index([status])
+  @@map("system_backups")
+}
+
 // ─── CenterSubscription ──────────────────────────────────────────────────────
 
 enum SubscriptionStatus {
