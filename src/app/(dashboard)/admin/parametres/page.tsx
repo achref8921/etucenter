@@ -202,9 +202,7 @@ export default function AdminParametresPage() {
               {logo ? (
                 <img src={logo} alt="Logo" className="h-9 w-9 rounded-xl object-contain" />
               ) : (
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600">
-                  <Building2 className="h-5 w-5 text-white" />
-                </div>
+                <img src="/icon-192.png" alt="Logo" className="h-9 w-9 rounded-xl object-contain" />
               )}
               <div>
                 <span className="text-sm font-bold text-slate-900 dark:text-slate-100">{name || "Center Name"}</span>

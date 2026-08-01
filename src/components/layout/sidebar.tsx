@@ -18,7 +18,6 @@ import {
   TrendingUp,
   Bell,
   Settings,
-  Building2,
   BarChart3,
   Database,
 } from "lucide-react";
@@ -102,9 +101,7 @@ export default function Sidebar({ role, centerName, centerLogo, open, onClose }:
           {centerLogo ? (
             <img src={centerLogo} alt="Logo" className="h-9 w-9 rounded-xl object-contain shadow-sm" />
           ) : (
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 shadow-md shadow-blue-200 dark:shadow-blue-900/30">
-              <Building2 className="h-5 w-5 text-white" />
-            </div>
+            <img src="/icon-192.png" alt="Logo" className="h-9 w-9 rounded-xl object-contain shadow-sm" />
           )}
           <div className="min-w-0 flex-1">
             <span className="block truncate text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100">{centerName || "GestExam"}</span>

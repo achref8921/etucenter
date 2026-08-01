@@ -41,6 +41,11 @@ export default function Header({ centerLogo, onMenuToggle }: HeaderProps) {
             <Menu className="h-5 w-5" />
           </button>
         )}
+        <img
+          src={centerLogo || "/icon-192.png"}
+          alt="Logo"
+          className="h-8 w-8 rounded-lg object-contain md:hidden"
+        />
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3">
