@@ -119,6 +119,10 @@ model Utilisateur {
 
   @@index([centerId, role])
   @@index([centerId, email])
+  @@index([centerId, role, createdAt])
+  @@index([role])
+  @@index([codeEleve])
+  @@index([codeProf])
   @@unique([centerId, codeEleve])
   @@unique([centerId, codeProf])
   @@map("utilisateurs")
@@ -137,6 +141,7 @@ model Matiere {
   groupes Groupe[]
 
   @@index([centerId])
+  @@unique([centerId, nom])
   @@map("matieres")
 }
 
@@ -162,6 +167,7 @@ model Groupe {
   paiements    Paiement[]
 
   @@index([centerId, profId])
+  @@index([matiereId])
   @@map("groupes")
 }
 
@@ -179,6 +185,8 @@ model Inscription {
 
   @@unique([eleveId, groupeId])
   @@index([groupeId])
+  @@index([groupeId, statut])
+  @@index([eleveId, statut])
   @@map("inscriptions")
 }
 
@@ -198,6 +206,7 @@ model Seance {
   presences Presence[]
 
   @@index([groupeId, date])
+  @@index([date])
   @@map("seances")
 }
 
@@ -218,6 +227,7 @@ model Presence {
 
   @@unique([seanceId, eleveId])
   @@index([eleveId])
+  @@index([eleveId, statut])
   @@map("presences")
 }
 
@@ -238,6 +248,8 @@ model Paiement {
   groupe Groupe      @relation(fields: [groupeId], references: [id], onDelete: Cascade)
 
   @@index([eleveId, groupeId])
+  @@index([groupeId, datePaiement])
+  @@index([datePaiement])
   @@map("paiements")
 }
 
@@ -286,8 +298,9 @@ model SystemLog {
   userId    String?  @map("user_id") @db.Uuid
   createdAt DateTime @default(now()) @map("created_at")
 
-  @@index([action])
+  @@index([action, createdAt])
   @@index([createdAt])
+  @@index([userId])
   @@map("system_logs")
 }
 

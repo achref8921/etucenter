@@ -9,7 +9,7 @@ export async function GET() {
 
     const userId = (session.user as any).id;
 
-    const [tauxBenefice, groupes, presencesTerminees, paiements] = await Promise.all([
+    const [tauxBenefice, groupes, presencesTerminees, paiementsAgg] = await Promise.all([
       prisma.tauxBenefice.findUnique({ where: { profId: userId } }),
       prisma.groupe.findMany({
         where: { profId: userId },
@@ -29,11 +29,11 @@ export async function GET() {
           },
         },
       }),
-      prisma.paiement.findMany({
+      prisma.paiement.aggregate({
         where: {
           groupe: { profId: userId },
         },
-        select: { montant: true },
+        _sum: { montant: true },
       }),
     ]);
 
@@ -47,7 +47,7 @@ export async function GET() {
     const totalRevenuNet = totalRevenuBrut * (taux / 100);
     const totalEleves = groupes.reduce((sum, g) => sum + g._count.inscriptions, 0);
     const totalSeances = groupes.reduce((sum, g) => sum + g._count.seances, 0);
-    const totalPaiements = paiements.reduce((sum, p) => sum + Number(p.montant), 0);
+    const totalPaiements = Number(paiementsAgg._sum.montant || 0);
 
     return NextResponse.json({
       tauxPourcentage: taux,

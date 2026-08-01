@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
-import { calculateTotalDue, calculateTotalPaid, calculateUnpaid } from "@/lib/calculations";
 
 export async function GET() {
   try {
@@ -37,23 +36,47 @@ export async function GET() {
       orderBy: { nom: "asc" },
     });
 
-    const result = await Promise.all(
-      eleves.map(async (e) => {
-        const groupes = await Promise.all(
-          e.inscriptions.map(async (ins) => {
-            const totalDue = await calculateTotalDue(e.id, ins.groupeId);
-            const totalPaid = await calculateTotalPaid(e.id, ins.groupeId);
-            return {
-              groupe: { id: ins.groupe.id, nom: ins.groupe.nom, prixParSeance: Number(ins.groupe.prixParSeance) },
-              totalDue,
-              totalPaid,
-              unpaid: totalDue - totalPaid,
-            };
-          })
-        );
-        return { id: e.id, nom: e.nom, prenom: e.prenom, codeEleve: e.codeEleve, niveau: e.niveau, classe: e.classe, filiere: e.filiere, groupes };
-      })
-    );
+    const pairEleves: string[] = [];
+    const pairGroupes: string[] = [];
+    for (const e of eleves) {
+      for (const ins of e.inscriptions) {
+        pairEleves.push(e.id);
+        pairGroupes.push(ins.groupeId);
+      }
+    }
+
+    const paidRows = pairEleves.length
+      ? await prisma.$queryRawUnsafe<{ eleve_id: string; groupe_id: string; total: number }[]>(
+          `
+          SELECT p.eleve_id, p.groupe_id, SUM(p.montant)::float AS total
+          FROM paiements p
+          JOIN (SELECT unnest($1::uuid[]) AS eleve_id, unnest($2::uuid[]) AS groupe_id) x
+            ON x.eleve_id = p.eleve_id AND x.groupe_id = p.groupe_id
+          GROUP BY p.eleve_id, p.groupe_id
+          `,
+          pairEleves,
+          pairGroupes
+        )
+      : [];
+
+    const paidMap = new Map<string, number>();
+    for (const row of paidRows) {
+      paidMap.set(`${row.eleve_id}|${row.groupe_id}`, Number(row.total || 0));
+    }
+
+    const result = eleves.map((e) => {
+      const groupes = e.inscriptions.map((ins) => {
+        const totalDue = Number(ins.groupe.prixParSeance);
+        const totalPaid = paidMap.get(`${e.id}|${ins.groupeId}`) || 0;
+        return {
+          groupe: { id: ins.groupe.id, nom: ins.groupe.nom, prixParSeance: totalDue },
+          totalDue,
+          totalPaid,
+          unpaid: totalDue - totalPaid,
+        };
+      });
+      return { id: e.id, nom: e.nom, prenom: e.prenom, codeEleve: e.codeEleve, niveau: e.niveau, classe: e.classe, filiere: e.filiere, groupes };
+    });
 
     return NextResponse.json(result);
   } catch (error) {

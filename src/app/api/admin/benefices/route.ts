@@ -23,36 +23,63 @@ export async function GET(request: NextRequest) {
 
     const profs = await prisma.utilisateur.findMany({
       where: { role: "prof", centerId: centreId },
-      include: {
-        tauxBenefice: true,
-        groupesEnseigne: {
-          include: {
-            paiements: {
-              where: {
-                datePaiement: { gte: startDate, lte: endDate },
-              },
-              select: { montant: true },
-            },
-            inscriptions: {
-              where: { statut: "actif" },
-              select: { eleveId: true },
-            },
-          },
-        },
+      select: {
+        id: true,
+        nom: true,
+        prenom: true,
+        tauxBenefice: { select: { tauxPourcentage: true } },
       },
     });
 
+    const profIds = profs.map((p) => p.id);
+
+    const [monthPayments, eleveCounts, historyRows] = await Promise.all([
+      profIds.length
+        ? prisma.$queryRawUnsafe<{ prof_id: string | null; total: number }[]>(
+            `
+            SELECT g.prof_id, COALESCE(SUM(pa.montant), 0)::float AS total
+            FROM paiements pa JOIN groupes g ON pa.groupe_id = g.id
+            WHERE g.center_id = $1::uuid AND pa.date_paiement >= $2::timestamptz AND pa.date_paiement <= $3::timestamptz
+            GROUP BY g.prof_id
+            `,
+            centreId,
+            startDate,
+            endDate
+          )
+        : [],
+      profIds.length
+        ? prisma.$queryRawUnsafe<{ prof_id: string | null; nb: number }[]>(
+            `
+            SELECT g.prof_id, COUNT(DISTINCT i.eleve_id)::int AS nb
+            FROM inscriptions i JOIN groupes g ON i.groupe_id = g.id
+            WHERE g.center_id = $1::uuid AND i.statut = 'actif'
+            GROUP BY g.prof_id
+            `,
+            centreId
+          )
+        : [],
+      prisma.$queryRawUnsafe<{ month: string; prof_id: string | null; recu: number }[]>(
+        `
+        SELECT TO_CHAR(pa.date_paiement, 'YYYY-MM') AS month, g.prof_id, SUM(pa.montant)::float AS recu
+        FROM paiements pa JOIN groupes g ON pa.groupe_id = g.id
+        WHERE g.center_id = $1::uuid AND pa.date_paiement >= $2::timestamptz
+        GROUP BY TO_CHAR(pa.date_paiement, 'YYYY-MM'), g.prof_id
+        `,
+        centreId,
+        new Date(now.getFullYear(), now.getMonth() - 11, 1)
+      ),
+    ]);
+
+    const monthMap = new Map<string, number>();
+    for (const r of monthPayments) monthMap.set(r.prof_id ?? "", Number(r.total || 0));
+    const countMap = new Map<string, number>();
+    for (const r of eleveCounts) countMap.set(r.prof_id ?? "", Number(r.nb || 0));
+
     const profsData = profs.map((e) => {
       const taux = e.tauxBenefice ? Number(e.tauxBenefice.tauxPourcentage) : 0;
-      const totalRecu = e.groupesEnseigne.reduce(
-        (sum, g) => sum + g.paiements.reduce((pSum, p) => pSum + Number(p.montant), 0),
-        0
-      );
+      const totalRecu = monthMap.get(e.id) || 0;
       const beneficeCentre = totalRecu * taux / 100;
       const salaireProf = totalRecu - beneficeCentre;
-      const eleveIds = new Set(
-        e.groupesEnseigne.flatMap((g) => g.inscriptions.map((i) => i.eleveId))
-      );
 
       return {
         prof: { id: e.id, nom: e.nom, prenom: e.prenom },
@@ -60,7 +87,7 @@ export async function GET(request: NextRequest) {
         totalRecu,
         beneficeCentre,
         salaireProf,
-        nombreEleves: eleveIds.size,
+        nombreEleves: countMap.get(e.id) || 0,
       };
     });
 
@@ -68,46 +95,31 @@ export async function GET(request: NextRequest) {
     const totalBenefice = profsData.reduce((s, e) => s + e.beneficeCentre, 0);
     const totalSalaire = profsData.reduce((s, e) => s + e.salaireProf, 0);
 
+    const tauxMap = new Map<string, number>(
+      profs.map((p) => [p.id, p.tauxBenefice ? Number(p.tauxBenefice.tauxPourcentage) : 0])
+    );
+
+    const monthAgg = new Map<string, { recu: number; benefice: number }>();
+    for (const r of historyRows) {
+      const agg = monthAgg.get(r.month) ?? { recu: 0, benefice: 0 };
+      const recu = Number(r.recu || 0);
+      agg.recu += recu;
+      const taux = r.prof_id ? tauxMap.get(r.prof_id) || 0 : 0;
+      agg.benefice += recu * taux / 100;
+      monthAgg.set(r.month, agg);
+    }
+
     const monthlyHistory: { month: string; totalBenefice: number; totalRecu: number; totalSalaire: number }[] = [];
     for (let i = 11; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const mStart = new Date(d.getFullYear(), d.getMonth(), 1);
-      const mEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
       const mLabel = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-
-      const paiements = await prisma.paiement.findMany({
-        where: { datePaiement: { gte: mStart, lte: mEnd }, groupe: { centerId: centreId } },
-        select: {
-          montant: true,
-          groupe: {
-            select: {
-              prof: {
-                select: {
-                  id: true,
-                  tauxBenefice: { select: { tauxPourcentage: true } },
-                },
-              },
-            },
-          },
-        },
-      });
-
-      let mRecu = 0;
-      let mBenefice = 0;
-      for (const p of paiements) {
-        const montant = Number(p.montant);
-        mRecu += montant;
-        const taux = p.groupe.prof?.tauxBenefice
-          ? Number(p.groupe.prof.tauxBenefice.tauxPourcentage)
-          : 0;
-        mBenefice += montant * taux / 100;
-      }
+      const agg = monthAgg.get(mLabel) ?? { recu: 0, benefice: 0 };
 
       monthlyHistory.push({
         month: mLabel,
-        totalBenefice: mBenefice,
-        totalRecu: mRecu,
-        totalSalaire: mRecu - mBenefice,
+        totalBenefice: agg.benefice,
+        totalRecu: agg.recu,
+        totalSalaire: agg.recu - agg.benefice,
       });
     }
 

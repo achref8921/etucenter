@@ -14,6 +14,7 @@ export async function GET() {
     const paiements = await prisma.paiement.findMany({
       where: { groupe: { centerId } },
       orderBy: { datePaiement: "desc" },
+      take: 500,
       include: {
         eleve: {
           select: { id: true, nom: true, prenom: true },
