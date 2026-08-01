@@ -280,7 +280,16 @@ export async function createSystemBackup(opts: { type: BackupType; createdBy?: s
     await pruneBackups(createdBy);
 
     logger.info("Sauvegarde créée", { version, type, sizeBytes });
-    return backup;
+    return {
+      id: backup.id,
+      version: backup.version,
+      type: backup.type,
+      status: backup.status,
+      sizeBytes: backup.sizeBytes,
+      createdAt: backup.createdAt,
+      completedAt: backup.completedAt,
+      checksum: backup.checksum ? backup.checksum.slice(0, 16) : null,
+    };
   } catch (error: any) {
     await prisma.systemBackup
       .update({

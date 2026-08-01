@@ -141,15 +141,21 @@ export default function SuperAdminBackupsPage() {
     setCreating(true);
     try {
       const res = await fetch("/api/super-admin/backups", { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "Erreur lors de la création de la sauvegarde");
+      const text = await res.text();
+      let data: any = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = {};
+      }
+      if (!res.ok || !data.success) {
+        setError(data.error || `Erreur lors de la création de la sauvegarde (HTTP ${res.status})`);
       } else {
         setSuccess("Sauvegarde lancée. Elle apparaîtra dans la liste dès qu'elle sera terminée.");
       }
       await loadData(false);
     } catch {
-      setError("Erreur lors de la création de la sauvegarde");
+      setError("Erreur lors de la création de la sauvegarde (connexion interrompue)");
     }
     setCreating(false);
   }
