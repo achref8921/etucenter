@@ -150,7 +150,7 @@ export default function AdminBeneficesPage() {
   const chartData = beneficesData?.monthlyHistory.map((h) => ({
     name: formatMonthLabel(h.month),
     "Revenus": h.totalRecu,
-    "Arbiha Centre": h.totalBenefice,
+    "Bénéfices": h.totalBenefice,
     "Salaires": h.totalSalaire,
   })) || [];
 
@@ -168,7 +168,7 @@ export default function AdminBeneficesPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Arbiha Center</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Bénéfices du Centre</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">Tafsil taux de profit par prof + analyse mensuelle</p>
         </div>
         <div className="flex items-center gap-2">
@@ -205,7 +205,7 @@ export default function AdminBeneficesPage() {
           <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Arbiha Center</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Bénéfices</p>
                 <p className="mt-1 text-2xl font-semibold text-green-600 dark:text-green-400">{formatCurrency(beneficesData.totalBenefice)}</p>
               </div>
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-500 shadow-md shadow-green-200 dark:shadow-green-900/30">
@@ -300,7 +300,7 @@ export default function AdminBeneficesPage() {
       </div>
 
       <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
-        <h2 className="mb-4 text-sm font-semibold uppercase text-gray-400 dark:text-gray-500">Evolution des Arbiha (12 mois)</h2>
+        <h2 className="mb-4 text-sm font-semibold uppercase text-gray-400 dark:text-gray-500">Évolution des bénéfices (12 mois)</h2>
         {chartData.length > 0 ? (
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 60 }}>
@@ -319,7 +319,7 @@ export default function AdminBeneficesPage() {
               />
               <Legend />
               <Bar dataKey="Revenus" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="Arbiha Centre" fill="#22c55e" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Bénéfices" fill="#22c55e" radius={[4, 4, 0, 0]} />
               <Bar dataKey="Salaires" fill="#a855f7" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -331,7 +331,7 @@ export default function AdminBeneficesPage() {
       {beneficesData && beneficesData.profs.length > 0 && (
         <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
           <h2 className="mb-4 text-sm font-semibold uppercase text-gray-400 dark:text-gray-500">
-            Tafsil Arbiha — {formatMonthLabel(beneficesData.selectedMonth)}
+            Détail des bénéfices — {formatMonthLabel(beneficesData.selectedMonth)}
           </h2>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
@@ -341,7 +341,7 @@ export default function AdminBeneficesPage() {
                   <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Taux</th>
                   <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Nb Eleves</th>
                   <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Total Reçu</th>
-                  <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Arbiha Centre</th>
+                  <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Bénéfices</th>
                   <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Salaire Prof</th>
                 </tr>
               </thead>

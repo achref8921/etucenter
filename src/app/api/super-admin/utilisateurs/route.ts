@@ -18,9 +18,9 @@ export async function GET(request: NextRequest) {
     const centerId = searchParams.get("centerId") || "";
     const statut = searchParams.get("statut") || "TOUS";
 
-    const where: any = {};
+    const where: any = { role: { not: "super_admin" } };
 
-    if (role) where.role = role;
+    if (role && role !== "super_admin") where.role = role;
     if (centerId) where.centerId = centerId;
 
     if (statut === "ACTIF") {
