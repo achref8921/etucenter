@@ -74,7 +74,7 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
             <span className="hidden sm:inline">— vous pouvez uniquement consulter vos informations</span>
           </div>
         )}
-        <main className={`p-4 sm:p-6 ${navMode === "bottom" ? "pb-24" : ""} ${frozenState ? "frozen-mode" : ""}`}>
+        <main className={`p-4 sm:p-6 ${navMode === "bottom" ? "pb-28" : ""} ${frozenState ? "frozen-mode" : ""}`}>
           {children}
         </main>
       </div>

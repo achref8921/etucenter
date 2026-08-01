@@ -25,7 +25,7 @@ export default function BottomNav({ role }: { role: Role }) {
               title={item.label}
               aria-label={item.label}
               className={cn(
-                "flex min-w-0 flex-1 flex-col items-center justify-center gap-1 py-2.5 transition-colors",
+                "flex min-w-0 flex-1 flex-col items-center justify-center gap-1.5 py-3 transition-colors",
                 isActive
                   ? "text-blue-600 dark:text-blue-400"
                   : "text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
@@ -33,7 +33,7 @@ export default function BottomNav({ role }: { role: Role }) {
             >
               <item.icon
                 className={cn(
-                  "h-5 w-5 flex-shrink-0",
+                  "h-6 w-6 flex-shrink-0",
                   isActive ? "text-blue-600 dark:text-blue-400" : "text-slate-400 dark:text-slate-500"
                 )}
               />
