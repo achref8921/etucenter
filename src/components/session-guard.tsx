@@ -23,7 +23,7 @@ export default function SessionGuard() {
       return;
     }
     if (lockedRef.current && uid !== lockedRef.current) {
-      setMessage("تم فتح حساب آخر في تبويب آخر من هذا المتصفح.");
+      setMessage("Un autre compte a été ouvert dans un autre onglet de ce navigateur.");
       setConflict(true);
     }
   }, [session, status]);
@@ -36,10 +36,10 @@ export default function SessionGuard() {
         const data = await res.json();
         const freshId = data?.user?.id;
         if (freshId && lockedRef.current && freshId !== lockedRef.current) {
-          setMessage("تم فتح حساب آخر في تبويب آخر من هذا المتصفح.");
+          setMessage("Un autre compte a été ouvert dans un autre onglet de ce navigateur.");
           setConflict(true);
         } else if (!freshId && lockedRef.current) {
-          setMessage("تم تسجيل الخروج في تبويب آخر. جلسة الدخول مشتركة بين كل التبويبات.");
+          setMessage("Vous avez été déconnecté(e) dans un autre onglet. La session est partagée entre tous les onglets.");
           setConflict(true);
         }
       } catch {}
@@ -60,17 +60,18 @@ export default function SessionGuard() {
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4">
-      <div dir="rtl" className="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-2xl dark:bg-slate-900">
+      <div dir="ltr" className="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-2xl dark:bg-slate-900">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
           <AlertTriangle className="h-6 w-6 text-amber-600 dark:text-amber-400" />
         </div>
         <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-          الجلسة مشتركة بين كل تبويبات المتصفح
+          Session partagée entre tous les onglets du navigateur
         </h2>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{message}</p>
         <p className="mt-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-          لا يمكن فتح حسابين مختلفين في نفس المتصفح في نفس الوقت. لاستخدام حسابين معاً، افتح الحساب
-          الثاني في نافذة تصفح خاص أو في متصفح آخر (مثل Firefox أو Chrome في بروفايل منفصل).
+          Il est impossible d&apos;ouvrir deux comptes différents dans le même navigateur en même temps. Pour utiliser
+          deux comptes, ouvrez le second dans une fenêtre de navigation privée ou dans un autre navigateur (par exemple
+          Firefox ou Chrome avec un profil séparé).
         </p>
         <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
           <button
@@ -78,14 +79,14 @@ export default function SessionGuard() {
             className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
           >
             <RefreshCw className="h-4 w-4" />
-            الدخول بالحساب الجديد
+            Se connecter avec le nouveau compte
           </button>
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
             className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
           >
             <LogOut className="h-4 w-4" />
-            تسجيل الخروج
+            Se déconnecter
           </button>
         </div>
       </div>

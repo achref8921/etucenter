@@ -15,7 +15,7 @@ export async function requireActiveCenter(method: string = "GET") {
     return {
       session,
       error: NextResponse.json(
-        { error: "الحساب مجمد لا يستطيع التعديل عليه", frozen: true },
+        { error: "Compte gelé : aucune modification autorisée", frozen: true },
         { status: 403 }
       ),
     };

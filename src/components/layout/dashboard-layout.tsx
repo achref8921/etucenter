@@ -56,8 +56,8 @@ export default function DashboardLayoutClient({ children, user, centerName, cent
         <Header centerLogo={centerLogo} onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
         {frozenState && (
           <div className="flex items-center justify-center gap-2 bg-amber-100 px-4 py-2.5 text-center text-sm font-semibold text-amber-900 dark:bg-amber-900/40 dark:text-amber-200">
-            الحساب مجمد لا يستطيع التعديل عليه
-            <span className="hidden sm:inline">— يمكنك فقط مشاهدة معلوماتك</span>
+            Compte gelé : aucune modification autorisée
+            <span className="hidden sm:inline">— vous pouvez uniquement consulter vos informations</span>
           </div>
         )}
         <main className={`p-4 sm:p-6 ${frozenState ? "frozen-mode" : ""}`}>{children}</main>
