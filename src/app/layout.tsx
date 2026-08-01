@@ -1,11 +1,26 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Providers from "@/components/providers";
+import PwaRegister from "@/components/pwa-register";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Gestion Centre",
   description:
     "Système de gestion de centre - Suivi des présences et des absences des professeurs et élèves",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Gestion Centre",
+  },
+  icons: {
+    icon: "/icon-192.png",
+    apple: "/apple-icon.png",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#2563eb",
 };
 
 export default function RootLayout({
@@ -16,7 +31,10 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning>
       <body className="antialiased">
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <PwaRegister />
+        </Providers>
       </body>
     </html>
   );
