@@ -92,6 +92,22 @@ export const paiementSchema = z.object({
   notes: z.string().optional(),
 });
 
+export const teacherTransactionSchema = z.object({
+  teacherId: z.string().uuid(),
+  type: z.enum(["EARNING", "PAYMENT", "ADJUSTMENT"]),
+  amount: z.number().positive("Le montant doit être positif"),
+  credit: z.boolean().optional(),
+  date: z.string().optional(),
+  description: z.string().min(2, "La description doit contenir au moins 2 caractères"),
+  paymentMethod: z.enum(["especes", "virement", "cheque", "autre"]).optional().nullable(),
+  reference: z.string().optional().nullable(),
+  notes: z.string().optional().nullable(),
+});
+
+export const reverseTransactionSchema = z.object({
+  reason: z.string().min(3, "La raison doit contenir au moins 3 caractères"),
+});
+
 export const forgotPasswordSchema = z.object({
   email: z.string().email("Adresse email invalide"),
 });
@@ -113,5 +129,7 @@ export type GroupeInput = z.infer<typeof groupeSchema>;
 export type SeanceInput = z.infer<typeof seanceSchema>;
 export type PresenceInput = z.infer<typeof presenceSchema>;
 export type PaiementInput = z.infer<typeof paiementSchema>;
+export type TeacherTransactionInput = z.infer<typeof teacherTransactionSchema>;
+export type ReverseTransactionInput = z.infer<typeof reverseTransactionSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;

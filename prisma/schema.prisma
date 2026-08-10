@@ -40,6 +40,18 @@ enum MethodePaiement {
   autre
 }
 
+enum TeacherTransactionType {
+  EARNING
+  PAYMENT
+  ADJUSTMENT
+  REVERSAL
+}
+
+enum TeacherTransactionStatus {
+  active
+  reversed
+}
+
 enum NiveauScolaire {
   primaire
   college
@@ -69,11 +81,12 @@ model Center {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  utilisateurs  Utilisateur[]
-  groupes       Groupe[]
-  matieres      Matiere[]
-  notifications Notification[]
-  subscriptions CenterSubscription[]
+  utilisateurs        Utilisateur[]
+  groupes             Groupe[]
+  matieres            Matiere[]
+  notifications       Notification[]
+  subscriptions       CenterSubscription[]
+  teacherTransactions TeacherTransaction[]
   @@map("centers")
 }
 
@@ -117,6 +130,7 @@ model Utilisateur {
   paiements        Paiement[]
   tauxBenefice     TauxBenefice?
   notifications    Notification[]
+  teacherTransactions TeacherTransaction[] @relation("TeacherTransactions")
 
   @@index([centerId, role])
   @@index([centerId, email])
@@ -266,6 +280,41 @@ model TauxBenefice {
   prof Utilisateur @relation(fields: [profId], references: [id], onDelete: Cascade)
 
   @@map("taux_benefices")
+}
+
+// ─── TeacherTransaction (Comptabilité des professeurs) ──────────────────────
+
+model TeacherTransaction {
+  id            String                   @id @default(uuid()) @db.Uuid
+  centerId      String                   @map("center_id") @db.Uuid
+  teacherId     String                   @map("teacher_id") @db.Uuid
+  type          TeacherTransactionType
+  status        TeacherTransactionStatus @default(active)
+  amount        Decimal                  @db.Decimal(10, 2)
+  signedAmount  Decimal                  @map("signed_amount") @db.Decimal(10, 2)
+  description   String                   @db.Text
+  paymentMethod MethodePaiement?         @map("payment_method")
+  date          DateTime                 @db.Date
+  time          DateTime?                @db.Time
+  receiptNumber String?                  @map("receipt_number") @db.VarChar(50)
+  reference     String?                  @db.VarChar(100)
+  notes         String?                  @db.Text
+  createdBy     String?                  @map("created_by") @db.Uuid
+  reversalOfId  String?                  @map("reversal_of_id") @db.Uuid
+  reversedById  String?                  @map("reversed_by_id") @db.Uuid
+  reversedAt    DateTime?                @map("reversed_at")
+  createdAt     DateTime                 @default(now()) @map("created_at")
+
+  center     Center                 @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  teacher    Utilisateur            @relation("TeacherTransactions", fields: [teacherId], references: [id], onDelete: Cascade)
+  reversalOf TeacherTransaction?    @relation("TransactionReversal", fields: [reversalOfId], references: [id], onDelete: SetNull)
+  reversals  TeacherTransaction[]   @relation("TransactionReversal")
+
+  @@index([centerId, teacherId, date])
+  @@index([teacherId, date])
+  @@index([type, status])
+  @@index([centerId, type])
+  @@map("teacher_transactions")
 }
 
 // ─── Notification ────────────────────────────────────────────────────────────
