@@ -50,3 +50,6 @@ start.ps1
 ARCHITECTURE_REVIEW.txt
 DOCUMENTATION.txt
 PROJECT_MAP.md
+
+.vercel
+.env*
