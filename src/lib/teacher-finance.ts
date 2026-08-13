@@ -66,7 +66,7 @@ export interface CreateTeacherTransactionInput {
   type: "EARNING" | "PAYMENT" | "ADJUSTMENT";
   amount: number;
   credit?: boolean;
-  description: string;
+  description?: string;
   date?: Date;
   paymentMethod?: "especes" | "virement" | "cheque" | "autre" | null;
   reference?: string | null;
@@ -99,7 +99,7 @@ export async function createTeacherTransaction(input: CreateTeacherTransactionIn
       type: input.type,
       amount: round2(Math.abs(input.amount)),
       signedAmount,
-      description: input.description.trim(),
+      description: input.description?.trim() ?? "",
       paymentMethod: isPayment ? (input.paymentMethod ?? "especes") : input.paymentMethod ?? null,
       date,
       time,
@@ -176,7 +176,12 @@ export async function reverseTeacherTransaction(input: ReverseTeacherTransaction
         type: "REVERSAL",
         amount: Math.abs(Number(original.signedAmount)),
         signedAmount: round2(-Number(original.signedAmount)),
-        description: `Annulation de : ${original.description}`,
+        description:
+          original.description.trim()
+            ? `Annulation de : ${original.description}`
+            : original.receiptNumber
+              ? `Annulation du paiement ${original.receiptNumber}`
+              : "Transaction annulée",
         date: now,
         time: now,
         reference: original.reference ?? null,

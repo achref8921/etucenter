@@ -52,6 +52,18 @@ enum TeacherTransactionStatus {
   reversed
 }
 
+enum StudentTransactionType {
+  PREPAYMENT
+  COURSE_CONSUMPTION
+  ADJUSTMENT
+  REVERSAL
+}
+
+enum StudentTransactionStatus {
+  active
+  reversed
+}
+
 enum NiveauScolaire {
   primaire
   college
@@ -87,6 +99,8 @@ model Center {
   notifications       Notification[]
   subscriptions       CenterSubscription[]
   teacherTransactions TeacherTransaction[]
+  studentTransactions StudentTransaction[]
+  pushSubscriptions   PushSubscription[]
   @@map("centers")
 }
 
@@ -131,6 +145,8 @@ model Utilisateur {
   tauxBenefice     TauxBenefice?
   notifications    Notification[]
   teacherTransactions TeacherTransaction[] @relation("TeacherTransactions")
+  studentTransactions StudentTransaction[] @relation("StudentTransactions")
+  pushSubscriptions   PushSubscription[]
 
   @@index([centerId, role])
   @@index([centerId, email])
@@ -170,6 +186,8 @@ model Groupe {
   profId        String?  @map("prof_id") @db.Uuid
   matiereId      String?  @map("matiere_id") @db.Uuid
   prixParSeance  Decimal  @map("prix_par_seance") @db.Decimal(10, 2)
+  forfaitMontant Decimal? @map("forfait_montant") @db.Decimal(10, 2)
+  forfaitSeances Int?     @map("forfait_seances")
   capaciteMax    Int?     @map("capacite_max")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
@@ -239,6 +257,7 @@ model Presence {
   seance       Seance       @relation(fields: [seanceId], references: [id], onDelete: Cascade)
   eleve        Utilisateur  @relation("PresenceEleve", fields: [eleveId], references: [id], onDelete: Cascade)
   enregistreur Utilisateur? @relation("PresenceEnregistrePar", fields: [enregistrePar], references: [id], onDelete: SetNull)
+  studentTransactions StudentTransaction[] @relation("StudentTransactionAttendance")
 
   @@unique([seanceId, eleveId])
   @@index([eleveId])
@@ -317,6 +336,47 @@ model TeacherTransaction {
   @@map("teacher_transactions")
 }
 
+// ─── StudentTransaction (Crédit / Solde prépayé des élèves) ──────────────────
+
+model StudentTransaction {
+  id            String                  @id @default(uuid()) @db.Uuid
+  centerId      String                  @map("center_id") @db.Uuid
+  eleveId       String                  @map("eleve_id") @db.Uuid
+  type          StudentTransactionType
+  status        StudentTransactionStatus @default(active)
+  amount        Decimal                 @db.Decimal(10, 2)
+  signedAmount  Decimal                 @map("signed_amount") @db.Decimal(10, 2)
+  description   String                  @db.Text
+  paymentMethod MethodePaiement?        @map("payment_method")
+  date          DateTime                @db.Date
+  time          DateTime?               @db.Time
+  receiptNumber String?                 @map("receipt_number") @db.VarChar(50)
+  reference     String?                 @db.VarChar(100)
+  attendanceId  String?                 @map("attendance_id") @db.Uuid
+  idempotencyKey String?                @map("idempotency_key") @db.VarChar(64)
+  notes         String?                 @db.Text
+  createdBy     String?                 @map("created_by") @db.Uuid
+  reversalOfId  String?                 @map("reversal_of_id") @db.Uuid
+  reversedById  String?                 @map("reversed_by_id") @db.Uuid
+  reversedAt    DateTime?               @map("reversed_at")
+  createdAt     DateTime                @default(now()) @map("created_at")
+
+  center     Center              @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  eleve      Utilisateur         @relation("StudentTransactions", fields: [eleveId], references: [id], onDelete: Cascade)
+  attendance Presence?           @relation("StudentTransactionAttendance", fields: [attendanceId], references: [id], onDelete: SetNull)
+  reversalOf StudentTransaction? @relation("StudentTransactionReversal", fields: [reversalOfId], references: [id], onDelete: SetNull)
+  reversals  StudentTransaction[] @relation("StudentTransactionReversal")
+
+  @@unique([eleveId, attendanceId])
+  @@unique([idempotencyKey])
+  @@unique([reversalOfId])
+  @@index([centerId, eleveId, date])
+  @@index([eleveId, date])
+  @@index([type, status])
+  @@index([centerId, type])
+  @@map("student_transactions")
+}
+
 // ─── Notification ────────────────────────────────────────────────────────────
 
 model Notification {
@@ -335,6 +395,27 @@ model Notification {
   @@index([centerId, destinataireId])
   @@index([destinataireId, lu])
   @@map("notifications")
+}
+
+// ─── PushSubscription (Web Push) ────────────────────────────────────────────
+
+model PushSubscription {
+  id        String   @id @default(uuid()) @db.Uuid
+  centerId  String   @map("center_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  endpoint  String   @db.Text
+  p256dh    String   @db.VarChar(255)
+  auth      String   @db.VarChar(255)
+  userAgent String?  @map("user_agent") @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  center Center      @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  user   Utilisateur @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@unique([userId, endpoint])
+  @@map("push_subscriptions")
 }
 
 // ─── SystemLog (Audit) ────────────────────────────────────────────────────

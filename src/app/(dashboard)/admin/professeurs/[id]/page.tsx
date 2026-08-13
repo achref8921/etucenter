@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, User, Loader2, Wallet, FileText } from "lucide-react";
-import { formatDate, formatCurrency } from "@/lib/utils";
+import { formatDate, formatCurrency, formatTime } from "@/lib/utils";
 
 interface ProfesseurData {
   professeur: {
@@ -347,7 +347,7 @@ export default function AdminProfesseurDetailPage() {
                   <td className="px-6 py-4 font-medium">{s.groupe.nom}</td>
                   <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
                     {s.heureDebut && s.heureFin
-                      ? `${new Date(s.heureDebut).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })} - ${new Date(s.heureFin).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`
+                      ? `${formatTime(s.heureDebut)} - ${formatTime(s.heureFin)}`
                       : "—"}
                   </td>
                   <td className="px-6 py-4">

@@ -29,13 +29,18 @@ export function formatCurrency(amount: number): string {
   }).format(amount) + " DT";
 }
 
+export function formatTime(time: Date | string | null): string {
+  if (!time) return "";
+  const d = new Date(time);
+  return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`;
+}
+
 export function canModifyAttendance(
   seanceDate: Date | string,
   heureDebut: Date | string | null,
-  heureFin: Date | string | null
+  heureFin: Date | string | null,
+  now: Date = new Date()
 ): boolean {
-  const now = new Date();
-
   const dateStr = typeof seanceDate === "string" ? seanceDate.split("T")[0] : seanceDate.toISOString().split("T")[0];
 
   let start: Date;
@@ -59,6 +64,12 @@ export function canModifyAttendance(
   const deadline = new Date(end.getTime() + 30 * 60 * 1000);
 
   return now >= start && now <= deadline;
+}
+
+export function clientNowFromOffset(offsetMinutes?: number | null): Date {
+  const offset =
+    typeof offsetMinutes === "number" && Number.isFinite(offsetMinutes) ? offsetMinutes : 0;
+  return new Date(Date.now() - offset * 60 * 1000);
 }
 
 export function generateRandomCode(): string {

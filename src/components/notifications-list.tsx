@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bell, CheckCheck, Loader2, UserPlus, GraduationCap, DollarSign, Clock } from "lucide-react";
+import { Bell, CheckCheck, Loader2, UserPlus, GraduationCap, DollarSign, Clock, Calendar } from "lucide-react";
 
 interface Notification {
   id: string;
@@ -29,7 +29,10 @@ function typeIcon(type: string) {
   if (type === "inscription_prof") return <UserPlus className="h-5 w-5 text-purple-500" />;
   if (type === "modification_paiement") return <DollarSign className="h-5 w-5 text-orange-500" />;
   if (type === "paiement_recu") return <DollarSign className="h-5 w-5 text-green-500" />;
+  if (type === "paiement_eleve") return <DollarSign className="h-5 w-5 text-green-500" />;
+  if (type === "nouvelle_seance") return <Calendar className="h-5 w-5 text-violet-500" />;
   if (type === "subscription_expiring") return <Clock className="h-5 w-5 text-amber-500" />;
+  if (type === "message_admin") return <Bell className="h-5 w-5 text-blue-500" />;
   return <Bell className="h-5 w-5 text-gray-400 dark:text-slate-500" />;
 }
 

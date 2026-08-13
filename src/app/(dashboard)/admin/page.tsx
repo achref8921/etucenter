@@ -11,8 +11,10 @@ import {
   CreditCard,
   TrendingUp,
   Clock,
+  Wallet,
 } from "lucide-react";
 import { getAdminStats } from "@/lib/calculations";
+import { getStudentFinanceOverview } from "@/lib/student-finance";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
 import { getServerSession } from "next-auth";
@@ -21,7 +23,7 @@ import { authOptions } from "@/lib/auth";
 export default async function AdminDashboardPage() {
   const session = await getServerSession(authOptions);
   const centreId = (session?.user as any)?.centerId;
-  const [stats, totalGroups, totalMatieres, activeInscriptions, recentPaiements, seancesAVenir, topImpayes] =
+  const [stats, totalGroups, totalMatieres, activeInscriptions, recentPaiements, seancesAVenir, topImpayes, studentFinance] =
     await Promise.all([
       getAdminStats(centreId),
       prisma.groupe.count({ where: { centerId: centreId } }),
@@ -77,11 +79,28 @@ export default async function AdminDashboardPage() {
          WHERE COALESCE(due.due_total, 0) - COALESCE(paid.paid_total, 0) > 0
          ORDER BY unpaid DESC
          LIMIT 5`,
-        centreId
+         centreId
       ),
+      getStudentFinanceOverview(centreId),
     ]);
 
   const statCards = [
+    {
+      title: "Credit Disponible",
+      value: formatCurrency(studentFinance.availableCredits),
+      icon: Wallet,
+      color: "bg-teal-500",
+      shadow: "shadow-teal-200",
+      href: "/admin/finances",
+    },
+    {
+      title: "Dettes Eleves",
+      value: formatCurrency(studentFinance.studentDebt),
+      icon: AlertTriangle,
+      color: "bg-red-500",
+      shadow: "shadow-red-200",
+      href: "/admin/finances",
+    },
     {
       title: "Eleves",
       value: stats.totalStudents,

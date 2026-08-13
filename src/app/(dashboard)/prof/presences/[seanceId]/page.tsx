@@ -6,11 +6,11 @@ import { ArrowLeft, Loader2, Save, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 
 interface Presence {
-  id: string;
+  id: string | null;
   seanceId: string;
   eleveId: string;
-  statut: "present" | "absent";
-  dateCreation: string | Date;
+  statut: "present" | "absent" | null;
+  dateCreation: string | Date | null;
   eleve: {
     id: string;
     nom: string;
@@ -34,7 +34,9 @@ export default function AttendanceRecordingPage() {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(`/api/prof/presences?seanceId=${seanceId}`);
+      const res = await fetch(
+        `/api/prof/presences?seanceId=${seanceId}&timezoneOffset=${new Date().getTimezoneOffset()}`
+      );
       if (!res.ok) throw new Error("Erreur lors du chargement des présences");
       const data = await res.json();
       setPresences(data.presences);
@@ -58,6 +60,12 @@ export default function AttendanceRecordingPage() {
 
   const handleSave = async () => {
     try {
+      const marked = presences.filter((p) => p.statut !== null);
+      if (marked.length === 0) {
+        setError("Veuillez marquer au moins un élève (présent ou absent)");
+        setSuccess(null);
+        return;
+      }
       setSaving(true);
       setError(null);
       setSuccess(null);
@@ -66,9 +74,10 @@ export default function AttendanceRecordingPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           seanceId,
-          presences: presences.map((p) => ({
+          timezoneOffset: new Date().getTimezoneOffset(),
+          presences: marked.map((p) => ({
             eleveId: p.eleveId,
-            statut: p.statut,
+            statut: p.statut as "present" | "absent",
           })),
         }),
       });
@@ -126,9 +135,9 @@ export default function AttendanceRecordingPage() {
       )}
 
       {presences.length === 0 ? (
-        <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-8 text-center text-gray-500 dark:text-gray-400">
-          Aucun élève trouvé pour cette séance
-        </div>
+          <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-8 text-center text-gray-500 dark:text-gray-400">
+            Aucun élève inscrit dans ce groupe
+          </div>
       ) : (
         <>
           <div className="hidden md:block overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
@@ -188,10 +197,16 @@ export default function AttendanceRecordingPage() {
                     className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${
                       presence.statut === "present"
                         ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                        : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                        : presence.statut === "absent"
+                          ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                          : "bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-gray-300"
                     }`}
                   >
-                    {presence.statut === "present" ? "Présent" : "Absent"}
+                    {presence.statut === "present"
+                      ? "Présent"
+                      : presence.statut === "absent"
+                        ? "Absent"
+                        : "Non marqué"}
                   </span>
                 </div>
                 <div className="flex gap-2">

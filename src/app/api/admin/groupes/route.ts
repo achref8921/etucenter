@@ -49,7 +49,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: parsed.error.issues[0]?.message || "Données invalides" }, { status: 400 });
     }
 
-    const { nom, description, profId, matiereId, prixParSeance, capaciteMax } = parsed.data;
+    const {
+      nom,
+      description,
+      profId,
+      matiereId,
+      prixParSeance,
+      forfaitMontant,
+      forfaitSeances,
+      capaciteMax,
+    } = parsed.data;
+
+    const effectivePrixParSeance =
+      forfaitMontant && forfaitSeances
+        ? Math.round((forfaitMontant / forfaitSeances) * 100) / 100
+        : (prixParSeance as number);
 
     const groupe = await prisma.groupe.create({
       data: {
@@ -58,7 +72,9 @@ export async function POST(request: NextRequest) {
         description: description ?? null,
         profId: profId ?? null,
         matiereId: matiereId ?? null,
-        prixParSeance,
+        prixParSeance: effectivePrixParSeance,
+        forfaitMontant: forfaitMontant ?? null,
+        forfaitSeances: forfaitSeances ?? null,
         capaciteMax: capaciteMax ?? null,
       },
       include: {
@@ -89,7 +105,7 @@ export async function PATCH(request: NextRequest) {
     if (error) return error;
 
     const body = await request.json();
-    const { id, profId, matiereId, prixParSeance } = body;
+    const { id, nom, description, profId, matiereId, prixParSeance, forfaitMontant, forfaitSeances, capaciteMax } = body;
 
     if (!id) {
       return NextResponse.json({ error: "id requis" }, { status: 400 });
@@ -101,9 +117,37 @@ export async function PATCH(request: NextRequest) {
     }
 
     const data: Record<string, any> = {};
+    if (nom !== undefined) data.nom = nom;
+    if (description !== undefined) data.description = description;
     if (profId !== undefined) data.profId = profId || null;
     if (matiereId !== undefined) data.matiereId = matiereId || null;
-    if (prixParSeance !== undefined) data.prixParSeance = prixParSeance;
+    if (capaciteMax !== undefined) data.capaciteMax = capaciteMax;
+
+    const hasForfait = forfaitMontant !== undefined || forfaitSeances !== undefined;
+    if (hasForfait) {
+      if (
+        typeof forfaitMontant !== "number" ||
+        typeof forfaitSeances !== "number" ||
+        forfaitMontant <= 0 ||
+        forfaitSeances <= 0 ||
+        !Number.isInteger(forfaitSeances)
+      ) {
+        return NextResponse.json(
+          { error: "Montant et nombre de séances du forfait requis (entiers positifs)" },
+          { status: 400 }
+        );
+      }
+      data.forfaitMontant = forfaitMontant;
+      data.forfaitSeances = forfaitSeances;
+      data.prixParSeance = Math.round((forfaitMontant / forfaitSeances) * 100) / 100;
+    } else if (prixParSeance !== undefined) {
+      if (typeof prixParSeance !== "number" || prixParSeance <= 0) {
+        return NextResponse.json({ error: "Prix par séance invalide" }, { status: 400 });
+      }
+      data.prixParSeance = prixParSeance;
+      data.forfaitMontant = null;
+      data.forfaitSeances = null;
+    }
 
     const updated = await prisma.groupe.update({
       where: { id },

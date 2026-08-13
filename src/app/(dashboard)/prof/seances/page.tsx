@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, Plus, X, Loader2, Pencil, Trash2 } from "lucide-react";
-import { formatDate } from "@/lib/utils";
+import { Calendar, Plus, X, Loader2, Pencil, Trash2, CalendarPlus } from "lucide-react";
+import { formatDate, formatTime } from "@/lib/utils";
 import ConfirmDelete from "@/components/confirm-delete";
 
 interface Seance {
@@ -22,6 +22,13 @@ interface Groupe {
   nom: string;
 }
 
+interface EleveOption {
+  id: string;
+  prenom: string;
+  nom: string;
+  email: string;
+}
+
 export default function ProfSeancesPage() {
   const router = useRouter();
   const [seances, setSeances] = useState<Seance[]>([]);
@@ -35,6 +42,18 @@ export default function ProfSeancesPage() {
   const [error, setError] = useState<string | null>(null);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+
+  const [showRattrapageModal, setShowRattrapageModal] = useState(false);
+  const [rattrapageGroupeId, setRattrapageGroupeId] = useState("");
+  const [rattrapageEleves, setRattrapageEleves] = useState<EleveOption[]>([]);
+  const [rattrapageEleveId, setRattrapageEleveId] = useState("");
+  const [rattrapageDate, setRattrapageDate] = useState("");
+  const [rattrapageHeureDebut, setRattrapageHeureDebut] = useState("");
+  const [rattrapageHeureFin, setRattrapageHeureFin] = useState("");
+  const [rattrapageNotes, setRattrapageNotes] = useState("");
+  const [savingRattrapage, setSavingRattrapage] = useState(false);
+  const [rattrapageError, setRattrapageError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const [editSeance, setEditSeance] = useState<Seance | null>(null);
   const [editDate, setEditDate] = useState("");
@@ -126,6 +145,7 @@ export default function ProfSeancesPage() {
           heureFin: toISODateTime(editDate, editHeureFin),
           notes: editNotes || null,
           statut: editStatut,
+          timezoneOffset: new Date().getTimezoneOffset(),
         }),
       });
       if (!res.ok) {
@@ -146,7 +166,10 @@ export default function ProfSeancesPage() {
     try {
       setDeletingId(id);
       setError(null);
-      const res = await fetch(`/api/prof/seances/${id}`, { method: "DELETE" });
+      const res = await fetch(
+        `/api/prof/seances/${id}?timezoneOffset=${new Date().getTimezoneOffset()}`,
+        { method: "DELETE" }
+      );
       if (!res.ok) {
         const body = await res.json();
         throw new Error(body.error || "Erreur");
@@ -195,6 +218,85 @@ export default function ProfSeancesPage() {
     }
   };
 
+  const loadGroupEleves = async (groupeId: string) => {
+    setRattrapageEleves([]);
+    setRattrapageEleveId("");
+    if (!groupeId) return;
+    try {
+      const res = await fetch(`/api/prof/groupes/${groupeId}`);
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || "Erreur");
+      }
+      const data = await res.json();
+      const eleves: EleveOption[] = (data.inscriptions || []).map((ins: any) => ins.eleve);
+      setRattrapageEleves(eleves);
+    } catch (err) {
+      setRattrapageError(err instanceof Error ? err.message : "Erreur inconnue");
+    }
+  };
+
+  const openRattrapageModal = () => {
+    setRattrapageGroupeId("");
+    setRattrapageEleves([]);
+    setRattrapageEleveId("");
+    setRattrapageDate("");
+    setRattrapageHeureDebut("");
+    setRattrapageHeureFin("");
+    setRattrapageNotes("");
+    setRattrapageError(null);
+    setSuccess(null);
+    setShowRattrapageModal(true);
+  };
+
+  const handleSaveRattrapage = async () => {
+    if (!rattrapageGroupeId) {
+      setRattrapageError("Veuillez sélectionner un groupe");
+      return;
+    }
+    if (!rattrapageEleveId) {
+      setRattrapageError("Veuillez sélectionner un élève");
+      return;
+    }
+    if (!rattrapageDate) {
+      setRattrapageError("La date est requise");
+      return;
+    }
+    if (!rattrapageHeureDebut) {
+      setRattrapageError("L'heure de la séance est requise");
+      return;
+    }
+    try {
+      setSavingRattrapage(true);
+      setRattrapageError(null);
+      setError(null);
+      setSuccess(null);
+      const res = await fetch("/api/admin/seances/rattrapage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eleveId: rattrapageEleveId,
+          groupeId: rattrapageGroupeId,
+          date: rattrapageDate,
+          heureDebut: rattrapageHeureDebut,
+          heureFin: rattrapageHeureFin || undefined,
+          notes: rattrapageNotes || undefined,
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || "Erreur lors de l'ajout de la séance");
+      }
+      setShowRattrapageModal(false);
+      setSuccess("Séance de rattrapage ajoutée : l'élève a été notifié et le montant a été déduit de son compte.");
+      fetchSeances(dateFrom || undefined, dateTo || undefined);
+    } catch (err) {
+      setRattrapageError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setSavingRattrapage(false);
+    }
+  };
+
   const statusLabel = (s: string) => {
     if (s === "planifiee") return "Planifiée";
     if (s === "en_cours") return "En cours";
@@ -214,10 +316,10 @@ export default function ProfSeancesPage() {
     const dateStr = s.date.split("T")[0];
     let endDate: Date;
     if (s.heureFin) {
-      const timePart = s.heureFin.includes("T") ? s.heureFin.split("T")[1].substring(0, 8) : s.heureFin;
+      const timePart = s.heureFin.includes("T") ? s.heureFin.split("T")[1] : s.heureFin;
       endDate = new Date(`${dateStr}T${timePart}`);
     } else {
-      endDate = new Date(`${dateStr}T23:59:59`);
+      endDate = new Date(`${dateStr}T23:59:59Z`);
     }
     return now > endDate;
   };
@@ -236,10 +338,22 @@ export default function ProfSeancesPage() {
           <Plus className="h-4 w-4" />
           Nouvelle Séance
         </button>
+        <button
+          onClick={openRattrapageModal}
+          className="flex items-center gap-2 rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800"
+          title="Ajouter une séance passée pour un élève"
+        >
+          <CalendarPlus className="h-4 w-4" />
+          Séance passée
+        </button>
       </div>
 
       {error && (
         <div className="rounded-lg border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">{error}</div>
+      )}
+
+      {success && (
+        <div className="rounded-lg border border-green-200 dark:border-green-900/50 bg-green-50 dark:bg-green-900/20 p-4 text-sm text-green-700 dark:text-green-400">{success}</div>
       )}
 
       <form onSubmit={handleFilter} className="flex flex-wrap items-end gap-4">
@@ -281,7 +395,7 @@ export default function ProfSeancesPage() {
                       <td className="px-6 py-4 font-medium">{seance.groupe.nom}</td>
                       <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
                         {seance.heureDebut && seance.heureFin
-                          ? `${new Date(seance.heureDebut).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })} - ${new Date(seance.heureFin).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`
+                          ? `${formatTime(seance.heureDebut)} - ${formatTime(seance.heureFin)}`
                           : "—"}
                       </td>
                       <td className="px-6 py-4">
@@ -302,9 +416,9 @@ export default function ProfSeancesPage() {
                           </button>
                           <button
                             onClick={(e) => { e.stopPropagation(); setConfirmDelete(seance.id); }}
-                            disabled={deletingId === seance.id || isSessionPast(seance)}
+                            disabled={deletingId === seance.id || seance._count.presences > 0}
                             className="rounded p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-red-600 dark:hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-400"
-                            title={isSessionPast(seance) ? "Séance passée — suppression impossible" : "Supprimer"}
+                            title={seance._count.presences > 0 ? "Des présences sont enregistrées — suppression impossible" : "Supprimer"}
                           >
                             {deletingId === seance.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                           </button>
@@ -315,6 +429,101 @@ export default function ProfSeancesPage() {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {showRattrapageModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold dark:text-gray-100">Séance passée</h2>
+              <button onClick={() => setShowRattrapageModal(false)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"><X className="h-5 w-5" /></button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Groupe</label>
+                <select
+                  value={rattrapageGroupeId}
+                  onChange={(e) => { setRattrapageGroupeId(e.target.value); loadGroupEleves(e.target.value); }}
+                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="">Sélectionner un groupe</option>
+                  {groupes.map((g) => <option key={g.id} value={g.id}>{g.nom}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Élève</label>
+                <select
+                  value={rattrapageEleveId}
+                  onChange={(e) => setRattrapageEleveId(e.target.value)}
+                  disabled={!rattrapageGroupeId}
+                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
+                >
+                  <option value="">{rattrapageGroupeId ? "Sélectionner un élève" : "Choisissez d'abord un groupe"}</option>
+                  {rattrapageEleves.map((el) => <option key={el.id} value={el.id}>{el.prenom} {el.nom}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
+                <input
+                  type="date"
+                  value={rattrapageDate}
+                  onChange={(e) => setRattrapageDate(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Heure début</label>
+                  <input
+                    type="time"
+                    value={rattrapageHeureDebut}
+                    onChange={(e) => setRattrapageHeureDebut(e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Heure fin</label>
+                  <input
+                    type="time"
+                    value={rattrapageHeureFin}
+                    onChange={(e) => setRattrapageHeureFin(e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Notes</label>
+                <textarea
+                  value={rattrapageNotes}
+                  onChange={(e) => setRattrapageNotes(e.target.value)}
+                  rows={2}
+                  placeholder="Ex. séance de rattrapage non saisie"
+                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+              {rattrapageError && (
+                <div className="rounded-lg border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">{rattrapageError}</div>
+              )}
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowRattrapageModal(false)}
+                  className="rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleSaveRattrapage}
+                  disabled={savingRattrapage}
+                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {savingRattrapage && <Loader2 className="h-4 w-4 animate-spin" />}
+                  Ajouter et déduire
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

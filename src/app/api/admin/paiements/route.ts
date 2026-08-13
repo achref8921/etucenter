@@ -3,6 +3,8 @@ import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { paiementSchema } from "@/lib/validations";
+import { createStudentTransaction } from "@/lib/student-finance";
+import { sendPushToUser } from "@/lib/push";
 
 export async function GET() {
   try {
@@ -62,43 +64,90 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Groupe non trouvé" }, { status: 404 });
     }
 
-    const paiement = await prisma.paiement.create({
-      data: {
-        eleveId,
-        groupeId,
-        montant,
-        methodePaiement,
-        reference: reference ?? null,
-        notes: notes ?? null,
-      },
-      include: {
-        eleve: {
-          select: { id: true, nom: true, prenom: true },
+    const adminId = (session.user as any).id;
+
+    const { paiement, studentTransaction } = await prisma.$transaction(async (tx) => {
+      const created = await tx.paiement.create({
+        data: {
+          eleveId,
+          groupeId,
+          montant,
+          methodePaiement,
+          reference: reference ?? null,
+          notes: notes ?? null,
         },
-        groupe: {
-          select: { id: true, nom: true, profId: true },
+        include: {
+          eleve: {
+            select: { id: true, nom: true, prenom: true },
+          },
+          groupe: {
+            select: { id: true, nom: true, profId: true },
+          },
         },
-      },
+      });
+
+      const studentTransaction = await createStudentTransaction(
+        {
+          centerId,
+          eleveId,
+          type: "PREPAYMENT",
+          amount: Number(montant),
+          description: `Paiement reçu pour le groupe "${created.groupe.nom}"`,
+          paymentMethod: methodePaiement,
+          reference: reference ?? `paiement:${created.id}`,
+          notes: notes ?? null,
+          idempotencyKey: `paiement:${created.id}`,
+          createdBy: adminId,
+        },
+        tx
+      );
+
+      if (created.groupe.profId) {
+        await tx.notification.create({
+          data: {
+            centerId,
+            destinataireId: created.groupe.profId,
+            titre: "Nouveau paiement reçu",
+            message: `${created.eleve.prenom} ${created.eleve.nom} a payé ${Number(montant)} DT pour le groupe "${created.groupe.nom}".`,
+            type: "paiement_recu",
+          },
+        });
+      }
+
+      return { paiement: created, studentTransaction };
     });
 
     if (paiement.groupe.profId) {
-      await prisma.notification.create({
-        data: {
-          centerId: (session.user as any).centerId,
-          destinataireId: paiement.groupe.profId,
-          titre: "Nouveau paiement reçu",
-          message: `${paiement.eleve.prenom} ${paiement.eleve.nom} a payé ${Number(montant)} DT pour le groupe "${paiement.groupe.nom}".`,
-          type: "paiement_recu",
-        },
-      });
+      await sendPushToUser(paiement.groupe.profId, {
+        title: "Nouveau paiement reçu",
+        body: `${paiement.eleve.prenom} ${paiement.eleve.nom} a payé ${Number(montant)} DT pour le groupe "${paiement.groupe.nom}".`,
+        url: "/prof/notifications",
+      }).catch(() => {});
     }
 
+    await prisma.notification.create({
+      data: {
+        centerId,
+        destinataireId: paiement.eleveId,
+        titre: "Paiement enregistré",
+        message: `Votre paiement de ${Number(montant)} DT pour le groupe "${paiement.groupe.nom}" a été enregistré avec succès.`,
+        type: "paiement_eleve",
+      },
+    });
+    await sendPushToUser(paiement.eleveId, {
+      title: "Paiement enregistré",
+      body: `Votre paiement de ${Number(montant)} DT pour le groupe "${paiement.groupe.nom}" a été enregistré avec succès.`,
+      url: "/eleve/notifications",
+    }).catch(() => {});
+
     logger.info("Paiement créé", {
-      adminId: (session.user as any).id,
+      adminId,
       paiementId: paiement.id,
+      studentTransactionId: studentTransaction.id,
       eleveId,
       groupeId,
       montant: Number(montant),
+      balanceCredited: Number(studentTransaction.signedAmount),
     });
 
     return NextResponse.json(paiement, { status: 201 });

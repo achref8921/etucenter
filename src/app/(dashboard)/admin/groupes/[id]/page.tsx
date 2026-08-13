@@ -3,8 +3,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Users, Loader2, X, Search, Download } from "lucide-react";
-import { formatDate, formatCurrency } from "@/lib/utils";
+import { ArrowLeft, Users, Loader2, X, Search, Download, Trash2, CalendarPlus } from "lucide-react";
+import { formatDate, formatCurrency, formatTime } from "@/lib/utils";
+import ConfirmDelete from "@/components/confirm-delete";
 
 interface GroupeData {
   groupe: {
@@ -12,6 +13,8 @@ interface GroupeData {
     nom: string;
     description: string | null;
     prixParSeance: number;
+    forfaitMontant: number | null;
+    forfaitSeances: number | null;
     capaciteMax: number;
     prof: { id: string; nom: string; prenom: string } | null;
     matiere: { id: string; nom: string } | null;
@@ -63,6 +66,23 @@ export default function AdminGroupeDetailPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [showAddModal, setShowAddModal] = useState(false);
+  const [deletingSeanceId, setDeletingSeanceId] = useState<string | null>(null);
+  const [confirmDeleteSeance, setConfirmDeleteSeance] = useState<string | null>(null);
+  const [showRattrapageModal, setShowRattrapageModal] = useState(false);
+  const [rattrapageEleve, setRattrapageEleve] = useState<{ id: string; prenom: string; nom: string } | null>(null);
+  const [rattrapageDate, setRattrapageDate] = useState("");
+  const [rattrapageHeureDebut, setRattrapageHeureDebut] = useState("");
+  const [rattrapageHeureFin, setRattrapageHeureFin] = useState("");
+  const [rattrapageNotes, setRattrapageNotes] = useState("");
+  const [savingRattrapage, setSavingRattrapage] = useState(false);
+  const [rattrapageError, setRattrapageError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [showTarifModal, setShowTarifModal] = useState(false);
+  const [savingTarif, setSavingTarif] = useState(false);
+  const [tarifMode, setTarifMode] = useState<"forfait" | "fixe">("forfait");
+  const [tarifMontant, setTarifMontant] = useState(0);
+  const [tarifSeances, setTarifSeances] = useState(0);
+  const [tarifPrixSeance, setTarifPrixSeance] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<EleveSearch[]>([]);
   const [searching, setSearching] = useState(false);
@@ -133,6 +153,76 @@ export default function AdminGroupeDetailPage() {
     }
   };
 
+  const handleDeleteSeance = async (seanceId: string) => {
+    try {
+      setDeletingSeanceId(seanceId);
+      setError(null);
+      const res = await fetch(`/api/admin/seances/${seanceId}`, { method: "DELETE" });
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || "Erreur lors de la suppression");
+      }
+      setConfirmDeleteSeance(null);
+      fetchGroupe();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
+      setConfirmDeleteSeance(null);
+    } finally {
+      setDeletingSeanceId(null);
+    }
+  };
+
+  const openRattrapageModal = (eleve: { id: string; prenom: string; nom: string }) => {
+    setRattrapageEleve(eleve);
+    setRattrapageDate("");
+    setRattrapageHeureDebut("");
+    setRattrapageHeureFin("");
+    setRattrapageNotes("");
+    setRattrapageError(null);
+    setShowRattrapageModal(true);
+  };
+
+  const handleSaveRattrapage = async () => {
+    if (!rattrapageEleve) return;
+    if (!rattrapageDate) {
+      setRattrapageError("La date est requise");
+      return;
+    }
+    if (!rattrapageHeureDebut) {
+      setRattrapageError("L'heure de la séance est requise");
+      return;
+    }
+    try {
+      setSavingRattrapage(true);
+      setRattrapageError(null);
+      setError(null);
+      setSuccess(null);
+      const res = await fetch("/api/admin/seances/rattrapage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eleveId: rattrapageEleve.id,
+          groupeId: id,
+          date: rattrapageDate,
+          heureDebut: rattrapageHeureDebut,
+          heureFin: rattrapageHeureFin || undefined,
+          notes: rattrapageNotes || undefined,
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || "Erreur lors de l'ajout de la séance");
+      }
+      setShowRattrapageModal(false);
+      setSuccess("Séance de rattrapage ajoutée : l'élève a été notifié et le montant a été déduit de son compte.");
+      fetchGroupe();
+    } catch (err) {
+      setRattrapageError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setSavingRattrapage(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -157,6 +247,51 @@ export default function AdminGroupeDetailPage() {
 
   const g = groupe.groupe;
 
+  const computedTarifPrixSeance =
+    tarifMode === "forfait" && tarifMontant > 0 && tarifSeances > 0
+      ? Math.round((tarifMontant / tarifSeances) * 100) / 100
+      : 0;
+
+  const openTarifModal = () => {
+    const hasForfait = !!g.forfaitMontant && !!g.forfaitSeances;
+    setTarifMode(hasForfait ? "forfait" : "fixe");
+    setTarifMontant(hasForfait ? Number(g.forfaitMontant) : 0);
+    setTarifSeances(hasForfait ? Number(g.forfaitSeances) : 0);
+    setTarifPrixSeance(Number(g.prixParSeance) || 0);
+    setShowTarifModal(true);
+  };
+
+  const handleSaveTarif = async () => {
+    try {
+      setSavingTarif(true);
+      setError(null);
+      const body =
+        tarifMode === "forfait"
+          ? {
+              id,
+              forfaitMontant: tarifMontant,
+              forfaitSeances: tarifSeances,
+              prixParSeance: computedTarifPrixSeance,
+            }
+          : { id, prixParSeance: tarifPrixSeance };
+      const res = await fetch("/api/admin/groupes", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const b = await res.json();
+        throw new Error(b.error || "Erreur lors de la mise à jour");
+      }
+      setShowTarifModal(false);
+      fetchGroupe();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setSavingTarif(false);
+    }
+  };
+
   const handleDownloadExcel = () => {
     const headers = ["Nom", "Prénom", "Email", "Présences", "Absences", "Total Dû (DT)", "Total Payé (DT)", "Impayé (DT)"];
     const rows = groupe.inscriptions.map((ins) => [
@@ -174,7 +309,7 @@ export default function AdminGroupeDetailPage() {
       `Groupe: ${g.nom}`,
       `Prof: ${g.prof ? `${g.prof.prenom} ${g.prof.nom}` : "—"}`,
       `Matière: ${g.matiere?.nom ?? "—"}`,
-      `Prix/Mois: ${g.prixParSeance} DT`,
+      `Prix: ${g.forfaitMontant && g.forfaitSeances ? `${g.forfaitMontant} DT / ${g.forfaitSeances} séances` : `${g.prixParSeance} DT / séance`}`,
       "",
       headers.join(";"),
       ...rows.map((row) => row.join(";")),
@@ -203,6 +338,18 @@ export default function AdminGroupeDetailPage() {
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{g.nom}</h1>
       </div>
 
+      {success && (
+        <div className="rounded-lg border border-green-200 dark:border-green-900/50 bg-green-50 dark:bg-green-900/20 p-4 text-sm text-green-700 dark:text-green-400">
+          {success}
+        </div>
+      )}
+
+      {error && (
+        <div className="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">
+          {error}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
           <h2 className="mb-4 text-sm font-semibold uppercase text-gray-400 dark:text-slate-500">Informations</h2>
@@ -211,7 +358,26 @@ export default function AdminGroupeDetailPage() {
             {g.description && <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Description</span><span className="text-gray-900 dark:text-gray-100">{g.description}</span></div>}
             <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Prof</span><span className="font-medium text-gray-900 dark:text-gray-100">{g.prof ? `${g.prof.prenom} ${g.prof.nom}` : "—"}</span></div>
             <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Matière</span><span className="font-medium text-gray-900 dark:text-gray-100">{g.matiere?.nom ?? "—"}</span></div>
-            <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Prix/Mois</span><span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(g.prixParSeance)}</span></div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-500 dark:text-gray-400">Tarif</span>
+              <div className="flex items-center gap-2">
+                {g.forfaitMontant && g.forfaitSeances ? (
+                  <span className="text-right">
+                    <span className="block font-medium text-gray-900 dark:text-gray-100">
+                      {formatCurrency(g.forfaitMontant)} / {g.forfaitSeances} séances
+                    </span>
+                    <span className="block text-xs text-gray-500 dark:text-gray-400">
+                      {formatCurrency(g.prixParSeance)} / séance
+                    </span>
+                  </span>
+                ) : (
+                  <span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(g.prixParSeance)} / séance</span>
+                )}
+                <button onClick={openTarifModal} className="rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2.5 py-1 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
+                  Modifier
+                </button>
+              </div>
+            </div>
             <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Capacité max</span><span className="font-medium text-gray-900 dark:text-gray-100">{g.capaciteMax}</span></div>
           </div>
         </div>
@@ -264,11 +430,12 @@ export default function AdminGroupeDetailPage() {
               <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Dû</th>
               <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Payé</th>
               <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Impayé</th>
+              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
             {groupe.inscriptions.length === 0 ? (
-              <tr><td colSpan={8} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Aucun élève inscrit</td></tr>
+              <tr><td colSpan={9} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Aucun élève inscrit</td></tr>
             ) : (
               groupe.inscriptions.map((ins) => (
                 <tr key={ins.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
@@ -283,6 +450,15 @@ export default function AdminGroupeDetailPage() {
                   <td className="px-6 py-4 text-green-600 dark:text-green-400">{formatCurrency(ins.stats.totalPaid)}</td>
                   <td className="px-6 py-4">
                     <span className={`font-medium ${ins.stats.unpaid > 0 ? "text-red-600 dark:text-red-400" : "text-gray-900 dark:text-gray-100"}`}>{formatCurrency(ins.stats.unpaid)}</span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <button
+                      onClick={() => openRattrapageModal(ins.eleve)}
+                      className="flex items-center gap-1 rounded-lg border border-gray-300 dark:border-slate-600 px-2 py-1 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700"
+                      title="Ajouter une séance passée"
+                    >
+                      <CalendarPlus className="h-3.5 w-3.5" /> Séance passée
+                    </button>
                   </td>
                 </tr>
               ))
@@ -302,18 +478,19 @@ export default function AdminGroupeDetailPage() {
               <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Horaire</th>
               <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Statut</th>
               <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Présences</th>
+              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
             {groupe.seances.length === 0 ? (
-              <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Aucune séance</td></tr>
+              <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Aucune séance</td></tr>
             ) : (
               groupe.seances.map((s) => (
                 <tr key={s.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
                   <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{formatDate(s.date)}</td>
                   <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
                     {s.heureDebut && s.heureFin
-                      ? `${new Date(s.heureDebut).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })} - ${new Date(s.heureFin).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`
+                      ? `${formatTime(s.heureDebut)} - ${formatTime(s.heureFin)}`
                       : "—"}
                   </td>
                   <td className="px-6 py-4">
@@ -322,12 +499,204 @@ export default function AdminGroupeDetailPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{s.stats.presentsCount}/{s.stats.totalEleves}</td>
+                  <td className="px-6 py-4">
+                    <button
+                      onClick={() => setConfirmDeleteSeance(s.id)}
+                      disabled={deletingSeanceId === s.id || s.stats.totalEleves > 0}
+                      className="rounded p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-red-600 dark:hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-30"
+                      title={s.stats.totalEleves > 0 ? "Des présences sont enregistrées — suppression impossible" : "Supprimer"}
+                    >
+                      {deletingSeanceId === s.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                    </button>
+                  </td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
       </div>
+
+      {showTarifModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Modifier le tarif</h2>
+              <button onClick={() => setShowTarifModal(false)} className="text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setTarifMode("forfait")}
+                  className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium ${
+                    tarifMode === "forfait"
+                      ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300"
+                      : "border-gray-300 dark:border-slate-600 text-gray-600 dark:text-gray-400"
+                  }`}
+                >
+                  Forfait (110 DT / N séances)
+                </button>
+                <button
+                  onClick={() => setTarifMode("fixe")}
+                  className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium ${
+                    tarifMode === "fixe"
+                      ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300"
+                      : "border-gray-300 dark:border-slate-600 text-gray-600 dark:text-gray-400"
+                  }`}
+                >
+                  Prix fixe / séance
+                </button>
+              </div>
+
+              {tarifMode === "forfait" ? (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Montant (DT)</label>
+                      <input
+                        type="number"
+                        value={tarifMontant || ""}
+                        onChange={(e) => setTarifMontant(Number(e.target.value))}
+                        min={0}
+                        placeholder="110"
+                        className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre de séances</label>
+                      <input
+                        type="number"
+                        value={tarifSeances || ""}
+                        onChange={(e) => setTarifSeances(Number(e.target.value))}
+                        min={0}
+                        placeholder="5"
+                        className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+                  {computedTarifPrixSeance > 0 && (
+                    <p className="text-sm text-blue-600 dark:text-blue-400">
+                      = {computedTarifPrixSeance.toFixed(2)} DT / séance
+                    </p>
+                  )}
+                </>
+              ) : (
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Prix / séance (DT)</label>
+                  <input
+                    type="number"
+                    value={tarifPrixSeance}
+                    onChange={(e) => setTarifPrixSeance(Number(e.target.value))}
+                    min={0}
+                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowTarifModal(false)}
+                  className="rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleSaveTarif}
+                  disabled={savingTarif || (tarifMode === "forfait" && computedTarifPrixSeance <= 0) || (tarifMode === "fixe" && tarifPrixSeance <= 0)}
+                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {savingTarif && <Loader2 className="h-4 w-4 animate-spin" />}
+                  Enregistrer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showRattrapageModal && rattrapageEleve && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Ajouter une séance passée</h2>
+              <button onClick={() => setShowRattrapageModal(false)} className="text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="mb-4 rounded-lg border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-900/20 p-3 text-sm text-blue-700 dark:text-blue-400">
+              Élève : <strong>{rattrapageEleve.prenom} {rattrapageEleve.nom}</strong> — groupe « {g.nom} »
+            </div>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
+                  <input
+                    type="date"
+                    value={rattrapageDate}
+                    onChange={(e) => setRattrapageDate(e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Heure début</label>
+                  <input
+                    type="time"
+                    value={rattrapageHeureDebut}
+                    onChange={(e) => setRattrapageHeureDebut(e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Heure fin</label>
+                  <input
+                    type="time"
+                    value={rattrapageHeureFin}
+                    onChange={(e) => setRattrapageHeureFin(e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Notes</label>
+                <textarea
+                  value={rattrapageNotes}
+                  onChange={(e) => setRattrapageNotes(e.target.value)}
+                  rows={2}
+                  placeholder="Ex. séance de rattrapage non saisie"
+                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+              <p className="rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 p-3 text-sm text-gray-600 dark:text-gray-400">
+                Le montant de <strong>{formatCurrency(g.prixParSeance)}</strong> sera déduit du compte de l'élève et une notification lui sera envoyée.
+              </p>
+              {rattrapageError && (
+                <div className="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">
+                  {rattrapageError}
+                </div>
+              )}
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowRattrapageModal(false)}
+                  className="rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleSaveRattrapage}
+                  disabled={savingRattrapage}
+                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {savingRattrapage && <Loader2 className="h-4 w-4 animate-spin" />}
+                  Ajouter et déduire
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -374,6 +743,14 @@ export default function AdminGroupeDetailPage() {
           </div>
         </div>
       )}
+      <ConfirmDelete
+        open={!!confirmDeleteSeance}
+        title="Supprimer la séance"
+        message="Êtes-vous sûr de vouloir supprimer cette séance ? Aucune présence n'est enregistrée. Cette action est irréversible."
+        onConfirm={() => { if (confirmDeleteSeance) handleDeleteSeance(confirmDeleteSeance); }}
+        onCancel={() => setConfirmDeleteSeance(null)}
+        loading={deletingSeanceId === confirmDeleteSeance}
+      />
     </div>
   );
 }

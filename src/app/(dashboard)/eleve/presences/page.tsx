@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ClipboardCheck, Loader2 } from "lucide-react";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatTime } from "@/lib/utils";
 
 interface PresenceHistorique {
   id: string;
@@ -92,7 +92,7 @@ export default function ElevePresencesPage() {
                   </td>
                   <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
                     {presence.seance.heureDebut && presence.seance.heureFin
-                      ? `${new Date(presence.seance.heureDebut).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })} - ${new Date(presence.seance.heureFin).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`
+                      ? `${formatTime(presence.seance.heureDebut)} - ${formatTime(presence.seance.heureFin)}`
                       : "—"}
                   </td>
                   <td className="px-6 py-4">

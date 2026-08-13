@@ -1,9 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { DollarSign, AlertTriangle, TrendingUp, Loader2, Plus, X, Pencil, FileText } from "lucide-react";
-import { formatCurrency, formatDateTime } from "@/lib/utils";
+import { useEffect, useState, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import {
+  DollarSign,
+  AlertTriangle,
+  TrendingUp,
+  Loader2,
+  Plus,
+  X,
+  Pencil,
+  FileText,
+  Undo2,
+  Wallet,
+  Users,
+  Search,
+  Eye,
+  Coins,
+} from "lucide-react";
+import { formatCurrency, formatDateTime, formatDate } from "@/lib/utils";
 
 interface Stats {
   totalRevenue: number;
@@ -37,6 +53,63 @@ interface EleveOption {
   }[];
 }
 
+interface StudentRow {
+  id: string;
+  nom: string;
+  prenom: string;
+  email: string;
+  telephone: string | null;
+  codeEleve: string | null;
+  classe: string | null;
+  actif: boolean;
+  balance: number;
+}
+
+interface TransactionRow {
+  id: string;
+  type: string;
+  status: string;
+  amount: number;
+  signedAmount: number;
+  description: string;
+  paymentMethod: string | null;
+  date: string;
+  receiptNumber: string | null;
+  reference: string | null;
+  notes: string | null;
+  createdAt: string;
+  eleve: { id: string; nom: string; prenom: string; codeEleve: string | null };
+  attendance: {
+    seance: {
+      id: string;
+      date: string;
+      groupe: { id: string; nom: string; matiere: { nom: string } | null };
+    };
+  } | null;
+  reversalOf: { id: string; type: string; amount: number; receiptNumber: string | null } | null;
+}
+
+const TYPE_LABEL: Record<string, string> = {
+  PREPAYMENT: "Pré-paiement",
+  COURSE_CONSUMPTION: "Consommation",
+  ADJUSTMENT: "Ajustement",
+  REVERSAL: "Annulation",
+};
+
+const TYPE_BADGE: Record<string, string> = {
+  PREPAYMENT: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+  COURSE_CONSUMPTION: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+  ADJUSTMENT: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
+  REVERSAL: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+};
+
+const METHODE_LABEL: Record<string, string> = {
+  especes: "Espèces",
+  virement: "Virement",
+  cheque: "Chèque",
+  autre: "Autre",
+};
+
 const classesByNiveau: Record<string, string[]> = {
   primaire: ["1ère année", "2ème année", "3ème année", "4ème année", "5ème année", "6ème année"],
   college: ["7ème", "8ème", "9ème"],
@@ -53,6 +126,9 @@ const filieres = [
 ];
 
 export default function FinancesPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [stats, setStats] = useState<Stats | null>(null);
   const [paiements, setPaiements] = useState<Paiement[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,6 +146,7 @@ export default function FinancesPage() {
   const [filterNiveau, setFilterNiveau] = useState("");
   const [filterClasse, setFilterClasse] = useState("");
   const [filterFiliere, setFilterFiliere] = useState("");
+  const [searchEleve, setSearchEleve] = useState("");
 
   const [editModal, setEditModal] = useState(false);
   const [editPaiement, setEditPaiement] = useState<Paiement | null>(null);
@@ -77,9 +154,53 @@ export default function FinancesPage() {
   const [editRaison, setEditRaison] = useState("");
   const [editSubmitting, setEditSubmitting] = useState(false);
 
+  const [students, setStudents] = useState<StudentRow[]>([]);
+  const [loadingStudents, setLoadingStudents] = useState(true);
+  const [search, setSearch] = useState("");
+
+  const selectedId = searchParams.get("studentId") || "";
+  const [transactions, setTransactions] = useState<TransactionRow[]>([]);
+  const [balance, setBalance] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loadingLedger, setLoadingLedger] = useState(false);
+
+  const [filters, setFilters] = useState({ type: "", from: "", to: "" });
+
+  const [showCreditModal, setShowCreditModal] = useState(false);
+  const [creditSubmitting, setCreditSubmitting] = useState(false);
+  const [creditSearch, setCreditSearch] = useState("");
+  const [idempotencyKey, setIdempotencyKey] = useState("");
+  const [creditForm, setCreditForm] = useState({
+    type: "PREPAYMENT",
+    studentId: "",
+    amount: 0,
+    credit: true,
+    date: "",
+    time: "",
+    paymentMethod: "especes",
+    notes: "",
+  });
+
+  const [showDetail, setShowDetail] = useState(false);
+  const [detailTx, setDetailTx] = useState<TransactionRow | null>(null);
+
+  const [showReverseModal, setShowReverseModal] = useState(false);
+  const [reverseTarget, setReverseTarget] = useState<TransactionRow | null>(null);
+  const [reverseReason, setReverseReason] = useState("");
+  const [reversing, setReversing] = useState(false);
+
+  const refreshAll = async () => {
+    await Promise.all([
+      fetchData(),
+      fetchStudents(false),
+      selectedId ? fetchLedger(selectedId, page, filters) : Promise.resolve(),
+    ]);
+  };
+
   const fetchData = async () => {
     try {
-      setLoading(true);
       setError(null);
       const [statsRes, paiementsRes] = await Promise.all([
         fetch("/api/admin/stats"),
@@ -94,14 +215,90 @@ export default function FinancesPage() {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur inconnue");
-    } finally {
-      setLoading(false);
     }
   };
 
+  const fetchStudents = useCallback(
+    async (selectFirst = true) => {
+      try {
+        setLoadingStudents(true);
+        const res = await fetch("/api/admin/student-finance/summary");
+        if (!res.ok) throw new Error("Erreur lors du chargement");
+        const data = await res.json();
+        setStudents(data);
+        if (selectFirst && !selectedId && data.length > 0) {
+          router.replace(`/admin/finances?studentId=${data[0].id}`);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Erreur inconnue");
+      } finally {
+        setLoadingStudents(false);
+      }
+    },
+    [selectedId, router]
+  );
+
+  const fetchLedger = useCallback(
+    async (studentId: string, pageNum: number, extra: { type?: string; from?: string; to?: string } = {}) => {
+      try {
+        setLoadingLedger(true);
+        setError(null);
+        const params = new URLSearchParams({ studentId, page: String(pageNum) });
+        if (extra.type) params.set("type", extra.type);
+        if (extra.from) params.set("from", extra.from);
+        if (extra.to) params.set("to", extra.to);
+        const res = await fetch(`/api/admin/student-finance?${params.toString()}`);
+        if (!res.ok) throw new Error("Erreur lors du chargement");
+        const data = await res.json();
+        setTransactions(data.transactions);
+        setBalance(data.balance);
+        setTotal(data.total);
+        setPage(data.page);
+        setTotalPages(data.totalPages);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Erreur inconnue");
+      } finally {
+        setLoadingLedger(false);
+      }
+    },
+    []
+  );
+
   useEffect(() => {
-    fetchData();
-  }, []);
+    (async () => {
+      setLoading(true);
+      await Promise.all([fetchData(), fetchStudents(true)]);
+      setLoading(false);
+    })();
+  }, [fetchStudents]);
+
+  useEffect(() => {
+    if (selectedId) {
+      fetchLedger(selectedId, 1, filters);
+    }
+  }, [selectedId, fetchLedger, filters]);
+
+  const selectedStudent = students.find((s) => s.id === selectedId);
+
+  const filteredStudents = students.filter((s) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      `${s.prenom} ${s.nom}`.toLowerCase().includes(q) ||
+      (s.codeEleve || "").toLowerCase().includes(q) ||
+      s.email.toLowerCase().includes(q)
+    );
+  });
+
+  const filteredCreditStudents = students.filter((s) => {
+    const q = creditSearch.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      `${s.prenom} ${s.nom}`.toLowerCase().includes(q) ||
+      (s.codeEleve || "").toLowerCase().includes(q) ||
+      s.email.toLowerCase().includes(q)
+    );
+  });
 
   const fetchEleves = async () => {
     try {
@@ -126,6 +323,7 @@ export default function FinancesPage() {
     setFilterNiveau("");
     setFilterClasse("");
     setFilterFiliere("");
+    setSearchEleve("");
     fetchEleves();
   };
 
@@ -138,6 +336,12 @@ export default function FinancesPage() {
     if (filterNiveau && e.niveau !== filterNiveau) return false;
     if (filterClasse && e.classe !== filterClasse) return false;
     if (filterFiliere && e.filiere !== filterFiliere) return false;
+    const q = searchEleve.trim().toLowerCase();
+    if (q) {
+      const fullName = `${e.prenom} ${e.nom}`.toLowerCase();
+      const code = (e.codeEleve || "").toLowerCase();
+      if (!fullName.includes(q) && !code.includes(q)) return false;
+    }
     return true;
   });
 
@@ -167,7 +371,7 @@ export default function FinancesPage() {
         throw new Error(body.error || "Erreur lors de la modification");
       }
       setEditModal(false);
-      fetchData();
+      await refreshAll();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur inconnue");
     } finally {
@@ -198,12 +402,111 @@ export default function FinancesPage() {
         throw new Error(body.error || "Erreur lors de l'enregistrement");
       }
       setShowModal(false);
-      fetchData();
+      if (selectedId !== selectedEleveId) {
+        router.replace(`/admin/finances?studentId=${selectedEleveId}`);
+      }
+      await refreshAll();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur inconnue");
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const openCreditModal = () => {
+    setCreditForm({
+      type: "PREPAYMENT",
+      studentId: selectedId || (students[0]?.id ?? ""),
+      amount: 0,
+      credit: true,
+      date: new Date().toISOString().slice(0, 10),
+      time: new Date().toTimeString().slice(0, 5),
+      paymentMethod: "especes",
+      notes: "",
+    });
+    setIdempotencyKey(crypto.randomUUID());
+    setCreditSearch("");
+    setShowCreditModal(true);
+  };
+
+  const handleCreditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!creditForm.studentId || creditForm.amount <= 0) return;
+    try {
+      setCreditSubmitting(true);
+      setError(null);
+      const res = await fetch("/api/admin/student-finance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          studentId: creditForm.studentId,
+          type: creditForm.type,
+          amount: creditForm.amount,
+          credit: creditForm.credit,
+          date: creditForm.date,
+          time: creditForm.time,
+          paymentMethod: creditForm.paymentMethod,
+          notes: creditForm.notes || null,
+          idempotencyKey,
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || "Erreur lors de l'enregistrement");
+      }
+      setShowCreditModal(false);
+      if (creditForm.studentId !== selectedId) {
+        router.replace(`/admin/finances?studentId=${creditForm.studentId}`);
+      }
+      await refreshAll();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setCreditSubmitting(false);
+    }
+  };
+
+  const openDetail = (tx: TransactionRow) => {
+    setDetailTx(tx);
+    setShowDetail(true);
+  };
+
+  const openReverse = (tx: TransactionRow) => {
+    setReverseTarget(tx);
+    setReverseReason("");
+    setShowReverseModal(true);
+  };
+
+  const handleReverse = async () => {
+    if (!reverseTarget || !reverseReason.trim()) return;
+    try {
+      setReversing(true);
+      setError(null);
+      const res = await fetch(`/api/admin/student-finance/${reverseTarget.id}/reverse`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: reverseReason }),
+      });
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || "Erreur lors de l'annulation");
+      }
+      setShowReverseModal(false);
+      setReverseTarget(null);
+      await refreshAll();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setReversing(false);
+    }
+  };
+
+  const openReceipt = (tx: TransactionRow) => {
+    window.open(`/api/admin/student-finance/${tx.id}/receipt`, "_blank");
+  };
+
+  const applyFilters = () => {
+    if (selectedId) fetchLedger(selectedId, 1, filters);
   };
 
   if (loading) {
@@ -218,13 +521,22 @@ export default function FinancesPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Finances</h1>
-        <button
-          onClick={openModal}
-          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-        >
-          <Plus className="h-4 w-4" />
-          Enregistrer un paiement
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={openModal}
+            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+          >
+            <Plus className="h-4 w-4" />
+            Enregistrer un paiement
+          </button>
+          <button
+            onClick={openCreditModal}
+            className="flex items-center gap-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700"
+          >
+            <Coins className="h-4 w-4" />
+            Ajouter un crédit
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -276,6 +588,339 @@ export default function FinancesPage() {
           </div>
         </div>
       )}
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+          <div className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
+              <Users className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+              Élèves ({filteredStudents.length})
+            </h2>
+          </div>
+          <div className="border-b border-gray-200 dark:border-slate-700 p-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Rechercher..."
+                className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 pl-9 pr-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+          </div>
+          <div className="max-h-[520px] overflow-y-auto">
+            {loadingStudents ? (
+              <p className="px-6 py-8 text-center">
+                <Loader2 className="mx-auto h-6 w-6 animate-spin text-blue-600" />
+              </p>
+            ) : filteredStudents.length === 0 ? (
+              <p className="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                Aucun élève
+              </p>
+            ) : (
+              filteredStudents.map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() =>
+                    router.replace(`/admin/finances?studentId=${s.id}`)
+                  }
+                  className={`block w-full border-b border-gray-100 dark:border-slate-800 px-4 py-3 text-left transition-colors ${
+                    selectedId === s.id
+                      ? "bg-blue-50 dark:bg-blue-900/20"
+                      : "hover:bg-gray-50 dark:hover:bg-slate-800"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {s.prenom} {s.nom}
+                      </p>
+                      <p className="truncate text-xs text-gray-500 dark:text-gray-400">
+                        {s.codeEleve ? `#${s.codeEleve}` : ""} {s.classe ? `· ${s.classe}` : ""}
+                      </p>
+                    </div>
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-xs font-semibold ${
+                        s.balance > 0
+                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                          : s.balance < 0
+                            ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                            : "bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-gray-200"
+                      }`}
+                    >
+                      {s.balance > 0 ? "+" : ""}
+                      {s.balance.toLocaleString("fr-TN", { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+
+        <div className="space-y-6 lg:col-span-2">
+          {!selectedId ? (
+            <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-12 text-center">
+              <Coins className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600" />
+              <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+                Sélectionnez un élève pour voir son compte financier
+              </p>
+            </div>
+          ) : (
+            <>
+              <div
+                className={`rounded-lg border p-6 shadow-sm ${
+                  balance > 0
+                    ? "border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-900/10"
+                    : balance < 0
+                      ? "border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-900/10"
+                      : "border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`flex h-12 w-12 items-center justify-center rounded-lg ${
+                        balance > 0
+                          ? "bg-green-500"
+                          : balance < 0
+                            ? "bg-red-500"
+                            : "bg-gray-400 dark:bg-slate-600"
+                      }`}
+                    >
+                      <Wallet className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        Solde du compte
+                      </p>
+                      <p
+                        className={`text-3xl font-bold ${
+                          balance > 0
+                            ? "text-green-700 dark:text-green-400"
+                            : balance < 0
+                              ? "text-red-700 dark:text-red-400"
+                              : "text-gray-900 dark:text-gray-100"
+                        }`}
+                      >
+                        {balance > 0 ? "+" : ""}
+                        {formatCurrency(balance)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    {selectedStudent && (
+                      <Link
+                        href={`/admin/eleves/${selectedStudent.id}`}
+                        className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                      >
+                        Profil élève
+                      </Link>
+                    )}
+                  </div>
+                </div>
+                <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">
+                  {balance > 0
+                    ? "Solde prépayé disponible pour l'élève."
+                    : balance < 0
+                      ? `L'élève doit ${formatCurrency(Math.abs(balance))} au centre.`
+                      : "Solde épuisé."}
+                </p>
+              </div>
+
+              <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+                <div className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                      Grand livre des transactions ({total})
+                    </h2>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <select
+                        value={filters.type}
+                        onChange={(e) => setFilters({ ...filters, type: e.target.value })}
+                        className="rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1.5 text-xs text-gray-900 dark:text-gray-100"
+                      >
+                        <option value="">Tous les types</option>
+                        <option value="PREPAYMENT">Pré-paiement</option>
+                        <option value="COURSE_CONSUMPTION">Consommation</option>
+                        <option value="ADJUSTMENT">Ajustement</option>
+                        <option value="REVERSAL">Annulation</option>
+                      </select>
+                      <input
+                        type="date"
+                        value={filters.from}
+                        onChange={(e) => setFilters({ ...filters, from: e.target.value })}
+                        className="rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1.5 text-xs text-gray-900 dark:text-gray-100"
+                      />
+                      <span className="text-xs text-gray-400">→</span>
+                      <input
+                        type="date"
+                        value={filters.to}
+                        onChange={(e) => setFilters({ ...filters, to: e.target.value })}
+                        className="rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1.5 text-xs text-gray-900 dark:text-gray-100"
+                      />
+                      <button
+                        onClick={applyFilters}
+                        className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
+                      >
+                        Filtrer
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="border-b border-gray-200 dark:border-slate-700">
+                      <tr>
+                        <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Date</th>
+                        <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Type</th>
+                        <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Description</th>
+                        <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Méthode</th>
+                        <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Montant</th>
+                        <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Reçu</th>
+                        <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+                      {loadingLedger ? (
+                        <tr>
+                          <td colSpan={7} className="px-6 py-10 text-center">
+                            <Loader2 className="mx-auto h-6 w-6 animate-spin text-blue-600" />
+                          </td>
+                        </tr>
+                      ) : transactions.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
+                            Aucune transaction
+                          </td>
+                        </tr>
+                      ) : (
+                        transactions.map((tx) => (
+                          <tr
+                            key={tx.id}
+                            onClick={() => openDetail(tx)}
+                            className={`cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800 ${
+                              tx.status === "reversed" ? "opacity-50" : ""
+                            }`}
+                          >
+                            <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                              {formatDate(tx.date)}
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                    TYPE_BADGE[tx.type] || ""
+                                  }`}
+                                >
+                                  {TYPE_LABEL[tx.type] || tx.type}
+                                </span>
+                                {tx.status === "reversed" && (
+                                  <span className="inline-block rounded-full bg-red-100 dark:bg-red-900/30 px-2 py-0.5 text-xs font-medium text-red-700 dark:text-red-400">
+                                    Annulé
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="max-w-[220px] px-6 py-4">
+                              <p className="truncate text-gray-900 dark:text-gray-100">{tx.description}</p>
+                              {tx.attendance && (
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                  {tx.attendance.seance.groupe.nom}
+                                </p>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                              {tx.paymentMethod ? (METHODE_LABEL[tx.paymentMethod] || tx.paymentMethod) : "—"}
+                            </td>
+                            <td className="px-6 py-4">
+                              <span
+                                className={`font-semibold ${
+                                  tx.signedAmount >= 0
+                                    ? "text-green-600 dark:text-green-400"
+                                    : "text-red-600 dark:text-red-400"
+                                }`}
+                              >
+                                {tx.signedAmount >= 0 ? "+" : ""}
+                                {formatCurrency(tx.signedAmount)}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                              {tx.receiptNumber || "—"}
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={(ev) => {
+                                    ev.stopPropagation();
+                                    openDetail(tx);
+                                  }}
+                                  title="Détails"
+                                  className="rounded-lg p-1.5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </button>
+                                <button
+                                  onClick={(ev) => {
+                                    ev.stopPropagation();
+                                    openReceipt(tx);
+                                  }}
+                                  title="Reçu"
+                                  className="rounded-lg p-1.5 text-blue-600 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-slate-700"
+                                >
+                                  <FileText className="h-4 w-4" />
+                                </button>
+                                {tx.type !== "REVERSAL" && tx.status === "active" && (
+                                  <button
+                                    onClick={(ev) => {
+                                      ev.stopPropagation();
+                                      openReverse(tx);
+                                    }}
+                                    title="Annuler"
+                                    className="rounded-lg p-1.5 text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-slate-700"
+                                  >
+                                    <Undo2 className="h-4 w-4" />
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between border-t border-gray-200 dark:border-slate-700 px-6 py-3">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Page {page} / {totalPages}
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => fetchLedger(selectedId, page - 1, filters)}
+                        disabled={page <= 1}
+                        className="rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-1.5 text-sm disabled:opacity-40"
+                      >
+                        Précédent
+                      </button>
+                      <button
+                        onClick={() => fetchLedger(selectedId, page + 1, filters)}
+                        disabled={page >= totalPages}
+                        className="rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-1.5 text-sm disabled:opacity-40"
+                      >
+                        Suivant
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
 
       <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
         <div className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
@@ -407,6 +1052,22 @@ export default function FinancesPage() {
                     Réinitialiser le filtre
                   </button>
                 )}
+              </div>
+
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchEleve}
+                  onChange={(e) => {
+                    setSearchEleve(e.target.value);
+                    setSelectedEleveId("");
+                    setSelectedGroupeId("");
+                    setMontant(0);
+                  }}
+                  placeholder="Rechercher un élève par nom ou code..."
+                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 pl-9 pr-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                />
               </div>
 
               <div>
@@ -628,6 +1289,344 @@ export default function FinancesPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showCreditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-lg rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                Ajouter un crédit
+              </h2>
+              <button
+                onClick={() => setShowCreditModal(false)}
+                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <form onSubmit={handleCreditSubmit} className="space-y-4">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Élève
+                  {filteredCreditStudents.length > 0 && (
+                    <span className="ml-1 text-xs text-gray-400 dark:text-gray-500">({filteredCreditStudents.length})</span>
+                  )}
+                </label>
+                <div className="relative mb-2">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    value={creditSearch}
+                    onChange={(e) => {
+                      setCreditSearch(e.target.value);
+                      setCreditForm({ ...creditForm, studentId: "" });
+                    }}
+                    placeholder="Rechercher un élève par nom ou code..."
+                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 pl-9 pr-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+                <select
+                  value={creditForm.studentId}
+                  onChange={(e) => setCreditForm({ ...creditForm, studentId: e.target.value })}
+                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                >
+                  <option value="">Sélectionner un élève</option>
+                  {filteredCreditStudents.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.prenom} {s.nom} {s.codeEleve ? `(#${s.codeEleve})` : ""}
+                    </option>
+                  ))}
+                </select>
+                {filteredCreditStudents.length === 0 && (
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Aucun élève trouvé pour cette recherche.</p>
+                )}
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Type
+                </label>
+                <select
+                  value={creditForm.type}
+                  onChange={(e) => setCreditForm({ ...creditForm, type: e.target.value })}
+                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                >
+                  <option value="PREPAYMENT">Pré-paiement (crédit du solde)</option>
+                  <option value="ADJUSTMENT">Ajustement (correction manuelle)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Montant (DT)
+                </label>
+                <input
+                  type="number"
+                  value={creditForm.amount || ""}
+                  onChange={(e) => setCreditForm({ ...creditForm, amount: Number(e.target.value) })}
+                  min={0}
+                  step="0.01"
+                  required
+                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                />
+              </div>
+
+              {creditForm.type === "ADJUSTMENT" && (
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Sens
+                  </label>
+                  <select
+                    value={creditForm.credit ? "credit" : "debit"}
+                    onChange={(e) => setCreditForm({ ...creditForm, credit: e.target.value === "credit" })}
+                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  >
+                    <option value="credit">Crédit (+ augmente le solde)</option>
+                    <option value="debit">Débit (− diminue le solde)</option>
+                  </select>
+                </div>
+              )}
+
+              {creditForm.type === "PREPAYMENT" && (
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Méthode de paiement
+                  </label>
+                  <select
+                    value={creditForm.paymentMethod}
+                    onChange={(e) => setCreditForm({ ...creditForm, paymentMethod: e.target.value })}
+                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  >
+                    <option value="especes">Espèces</option>
+                    <option value="virement">Virement</option>
+                    <option value="cheque">Chèque</option>
+                    <option value="autre">Autre</option>
+                  </select>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Date
+                  </label>
+                  <input
+                    type="date"
+                    value={creditForm.date}
+                    onChange={(e) => setCreditForm({ ...creditForm, date: e.target.value })}
+                    required
+                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Heure
+                  </label>
+                  <input
+                    type="time"
+                    value={creditForm.time}
+                    onChange={(e) => setCreditForm({ ...creditForm, time: e.target.value })}
+                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Notes
+                </label>
+                <textarea
+                  value={creditForm.notes}
+                  onChange={(e) => setCreditForm({ ...creditForm, notes: e.target.value })}
+                  rows={2}
+                  placeholder="Optionnel (ex : Paiement anticipé de plusieurs mois)"
+                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowCreditModal(false)}
+                  className="rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  disabled={creditSubmitting || creditForm.amount <= 0 || !creditForm.studentId}
+                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {creditSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                  Enregistrer
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showDetail && detailTx && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                Détails de la transaction
+              </h2>
+              <button
+                onClick={() => setShowDetail(false)}
+                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-500 dark:text-gray-400">Type</span>
+                <span className="font-medium">{TYPE_LABEL[detailTx.type] || detailTx.type}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500 dark:text-gray-400">Date</span>
+                <span className="font-medium">{formatDate(detailTx.date)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500 dark:text-gray-400">Montant</span>
+                <span
+                  className={`font-semibold ${
+                    detailTx.signedAmount >= 0
+                      ? "text-green-600 dark:text-green-400"
+                      : "text-red-600 dark:text-red-400"
+                  }`}
+                >
+                  {detailTx.signedAmount >= 0 ? "+" : ""}
+                  {formatCurrency(detailTx.signedAmount)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500 dark:text-gray-400">Description</span>
+                <span className="max-w-[60%] text-right font-medium">{detailTx.description || "—"}</span>
+              </div>
+              {detailTx.attendance && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500 dark:text-gray-400">Cours lié</span>
+                  <span className="max-w-[60%] text-right font-medium">
+                    {detailTx.attendance.seance.groupe.nom}
+                    {detailTx.attendance.seance.groupe.matiere?.nom
+                      ? ` — ${detailTx.attendance.seance.groupe.matiere.nom}`
+                      : ""}
+                    <span className="block text-xs text-gray-500 dark:text-gray-400">
+                      {formatDate(detailTx.attendance.seance.date)}
+                    </span>
+                  </span>
+                </div>
+              )}
+              {detailTx.paymentMethod && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500 dark:text-gray-400">Méthode</span>
+                  <span className="font-medium">
+                    {METHODE_LABEL[detailTx.paymentMethod] || detailTx.paymentMethod}
+                  </span>
+                </div>
+              )}
+              {detailTx.receiptNumber && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500 dark:text-gray-400">Reçu</span>
+                  <span className="font-mono font-medium">{detailTx.receiptNumber}</span>
+                </div>
+              )}
+              {detailTx.reference && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500 dark:text-gray-400">Référence</span>
+                  <span className="max-w-[60%] truncate font-mono font-medium">{detailTx.reference}</span>
+                </div>
+              )}
+              {detailTx.reversalOf && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500 dark:text-gray-400">Annule</span>
+                  <span className="font-medium">
+                    {detailTx.reversalOf.receiptNumber
+                      ? detailTx.reversalOf.receiptNumber
+                      : detailTx.reversalOf.id.slice(0, 8)}
+                  </span>
+                </div>
+              )}
+              {detailTx.notes && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500 dark:text-gray-400">Notes</span>
+                  <span className="max-w-[60%] text-right font-medium">{detailTx.notes}</span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span className="text-gray-500 dark:text-gray-400">Créée le</span>
+                <span className="font-medium">{new Date(detailTx.createdAt).toLocaleString("fr-FR")}</span>
+              </div>
+            </div>
+            <div className="mt-5 flex justify-end">
+              <button
+                onClick={() => openReceipt(detailTx)}
+                className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+              >
+                <FileText className="h-4 w-4" />
+                Reçu
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showReverseModal && reverseTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                Annuler la transaction
+              </h2>
+              <button
+                onClick={() => setShowReverseModal(false)}
+                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="mb-4 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 p-3 text-sm">
+              <p className="font-medium text-gray-900 dark:text-gray-100">
+                {TYPE_LABEL[reverseTarget.type] || reverseTarget.type} —{" "}
+                {formatCurrency(Math.abs(reverseTarget.signedAmount))}
+              </p>
+              <p className="mt-1 text-gray-600 dark:text-gray-400">{reverseTarget.description || "—"}</p>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Raison de l&apos;annulation
+              </label>
+              <textarea
+                value={reverseReason}
+                onChange={(e) => setReverseReason(e.target.value)}
+                rows={3}
+                required
+                placeholder="Ex : Erreur de saisie, annulation du paiement..."
+                className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+            <div className="mt-5 flex justify-end gap-3">
+              <button
+                onClick={() => setShowReverseModal(false)}
+                className="rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700"
+              >
+                Retour
+              </button>
+              <button
+                onClick={handleReverse}
+                disabled={reversing || !reverseReason.trim()}
+                className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                {reversing && <Loader2 className="h-4 w-4 animate-spin" />}
+                Confirmer l&apos;annulation
+              </button>
+            </div>
           </div>
         </div>
       )}

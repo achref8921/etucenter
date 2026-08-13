@@ -23,6 +23,8 @@ export interface StudentGroupStat {
   groupeId: string;
   groupeNom: string;
   prixParSeance: number;
+  forfaitMontant?: number | null;
+  forfaitSeances?: number | null;
   presencesCount: number;
   absencesCount: number;
   totalDue: number;

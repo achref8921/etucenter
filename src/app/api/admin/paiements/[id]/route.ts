@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
+import { createStudentTransaction } from "@/lib/student-finance";
+import { sendPushToUser } from "@/lib/push";
 
 export async function PATCH(
   request: NextRequest,
@@ -22,6 +24,7 @@ export async function PATCH(
     }
 
     const centreId = (session.user as any).centerId;
+    const adminId = (session.user as any).id;
 
     const paiement = await prisma.paiement.findUnique({
       where: { id },
@@ -36,28 +39,54 @@ export async function PATCH(
     }
 
     const ancienMontant = Number(paiement.montant);
-
-    const updated = await prisma.paiement.update({
-      where: { id },
-      data: { montant },
-      include: {
-        eleve: { select: { id: true, nom: true, prenom: true } },
-        groupe: { select: { id: true, nom: true } },
-      },
-    });
-
     const diff = montant - ancienMontant;
-    const diffLabel = diff > 0 ? `+${diff}` : `${diff}`;
 
-    await prisma.notification.create({
-      data: {
-        centerId: (session.user as any).centerId,
-        destinataireId: paiement.eleveId,
-        titre: "Modification de paiement",
-        message: `Votre paiement pour le groupe "${paiement.groupe.nom}" a été modifié par l'administration. Montant: ${ancienMontant} DT → ${montant} DT (${diffLabel} DT). Raison: ${raison.trim()}`,
-        type: "modification_paiement",
-      },
+    const updated = await prisma.$transaction(async (tx) => {
+      const updated = await tx.paiement.update({
+        where: { id },
+        data: { montant },
+        include: {
+          eleve: { select: { id: true, nom: true, prenom: true } },
+          groupe: { select: { id: true, nom: true } },
+        },
+      });
+
+      if (diff !== 0) {
+        await createStudentTransaction(
+          {
+            centerId: centreId,
+            eleveId: paiement.eleveId,
+            type: "ADJUSTMENT",
+            amount: Math.abs(diff),
+            credit: diff > 0,
+            description: `Modification du paiement pour le groupe "${paiement.groupe.nom}"`,
+            reference: `paiement:${id}`,
+            notes: raison.trim(),
+            idempotencyKey: `paiement-edit:${id}:${Date.now()}`,
+            createdBy: adminId,
+          },
+          tx
+        );
+      }
+
+      await tx.notification.create({
+        data: {
+          centerId: centreId,
+          destinataireId: paiement.eleveId,
+          titre: "Modification de paiement",
+          message: `Votre paiement pour le groupe "${paiement.groupe.nom}" a été modifié par l'administration. Montant: ${ancienMontant} DT → ${montant} DT (${diff > 0 ? "+" : ""}${diff} DT). Raison: ${raison.trim()}`,
+          type: "modification_paiement",
+        },
+      });
+
+      return updated;
     });
+
+    await sendPushToUser(paiement.eleveId, {
+      title: "Modification de paiement",
+      body: `Votre paiement pour le groupe "${paiement.groupe.nom}" a été modifié par l'administration. Montant: ${ancienMontant} DT → ${montant} DT (${diff > 0 ? "+" : ""}${diff} DT). Raison: ${raison.trim()}`,
+      url: "/eleve/notifications",
+    }).catch(() => {});
 
     return NextResponse.json(updated);
   } catch (error) {

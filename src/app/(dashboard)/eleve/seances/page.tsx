@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Calendar, Clock, Loader2 } from "lucide-react";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatTime } from "@/lib/utils";
 
 interface Seance {
   id: string;
@@ -87,15 +87,9 @@ export default function EleveSeancesPage() {
                     {seance.heureDebut && seance.heureFin ? (
                       <span className="flex items-center gap-1">
                         <Clock className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
-                        {new Date(seance.heureDebut).toLocaleTimeString("fr-FR", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}{" "}
+                        {formatTime(seance.heureDebut)}{" "}
                         —{" "}
-                        {new Date(seance.heureFin).toLocaleTimeString("fr-FR", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {formatTime(seance.heureFin)}
                       </span>
                     ) : (
                       "\u2014"

@@ -79,7 +79,6 @@ export default function FinancesProfesseursPage() {
     amount: 0,
     credit: true,
     date: "",
-    description: "",
     paymentMethod: "especes",
     reference: "",
     notes: "",
@@ -149,7 +148,6 @@ export default function FinancesProfesseursPage() {
       amount: 0,
       credit: true,
       date: new Date().toISOString().slice(0, 10),
-      description: "",
       paymentMethod: "especes",
       reference: "",
       notes: "",
@@ -159,7 +157,7 @@ export default function FinancesProfesseursPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedId || form.amount <= 0 || !form.description.trim()) return;
+    if (!selectedId || form.amount <= 0) return;
     try {
       setSubmitting(true);
       setError(null);
@@ -172,7 +170,6 @@ export default function FinancesProfesseursPage() {
           amount: form.amount,
           credit: form.credit,
           date: form.date,
-          description: form.description,
           paymentMethod: form.paymentMethod,
           reference: form.reference || null,
           notes: form.notes || null,
@@ -634,20 +631,6 @@ export default function FinancesProfesseursPage() {
 
               <div>
                 <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Description <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  required
-                  placeholder="Ex : Salaire du mois de juin"
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Référence
                 </label>
                 <input
@@ -682,7 +665,7 @@ export default function FinancesProfesseursPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting || form.amount <= 0 || !form.description.trim()}
+                  disabled={submitting || form.amount <= 0}
                   className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
                 >
                   {submitting && <Loader2 className="h-4 w-4 animate-spin" />}

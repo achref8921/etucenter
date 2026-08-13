@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, User, Loader2 } from "lucide-react";
+import { ArrowLeft, User, Loader2, Wallet, ArrowUpRight } from "lucide-react";
 import { formatDate, formatDateTime, formatCurrency } from "@/lib/utils";
 
 interface EleveData {
@@ -40,6 +40,8 @@ export default function AdminEleveDetailPage() {
   const [eleve, setEleve] = useState<EleveData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [financeBalance, setFinanceBalance] = useState<number | null>(null);
+  const [financeLoading, setFinanceLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,6 +60,24 @@ export default function AdminEleveDetailPage() {
     };
 
     fetchData();
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+    const fetchBalance = async () => {
+      try {
+        setFinanceLoading(true);
+        const res = await fetch(`/api/admin/student-finance?studentId=${id}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        setFinanceBalance(data.balance);
+      } catch {
+        setFinanceBalance(null);
+      } finally {
+        setFinanceLoading(false);
+      }
+    };
+    fetchBalance();
   }, [id]);
 
   if (loading) {
@@ -154,6 +174,66 @@ export default function AdminEleveDetailPage() {
           <div>
             <p className="text-xs font-medium uppercase text-gray-400 dark:text-gray-500">Filière</p>
             <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{e.filiere ? e.filiere.charAt(0).toUpperCase() + e.filiere.slice(1) : "—"}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div
+              className={`flex h-12 w-12 items-center justify-center rounded-lg ${
+                financeBalance === null
+                  ? "bg-gray-400 dark:bg-slate-600"
+                  : financeBalance > 0
+                    ? "bg-green-500"
+                    : financeBalance < 0
+                      ? "bg-red-500"
+                      : "bg-gray-400 dark:bg-slate-600"
+              }`}
+            >
+              <Wallet className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Compte financier</h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Solde prépayé</p>
+            </div>
+          </div>
+          <Link
+            href={`/admin/finances?studentId=${e.id}`}
+            className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            Voir le grand livre <ArrowUpRight className="h-4 w-4" />
+          </Link>
+        </div>
+        <div className="mt-4 flex items-end justify-between">
+          <div>
+            <p
+              className={`text-3xl font-bold ${
+                financeBalance === null
+                  ? "text-gray-400 dark:text-gray-500"
+                  : financeBalance > 0
+                    ? "text-green-600 dark:text-green-400"
+                    : financeBalance < 0
+                      ? "text-red-600 dark:text-red-400"
+                      : "text-gray-900 dark:text-gray-100"
+              }`}
+            >
+              {financeLoading
+                ? "..."
+                : financeBalance === null
+                  ? "—"
+                  : `${financeBalance > 0 ? "+" : ""}${formatCurrency(financeBalance)}`}
+            </p>
+            {!financeLoading && financeBalance !== null && (
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                {financeBalance > 0
+                  ? "Solde prépayé disponible"
+                  : financeBalance < 0
+                    ? `L'élève doit ${formatCurrency(Math.abs(financeBalance))} au centre`
+                    : "Solde épuisé"}
+              </p>
+            )}
           </div>
         </div>
       </div>

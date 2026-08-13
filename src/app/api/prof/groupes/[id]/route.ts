@@ -75,7 +75,7 @@ export async function PUT(
 
     const updated = await prisma.groupe.update({
       where: { id },
-      data: { prixParSeance },
+      data: { prixParSeance, forfaitMontant: null, forfaitSeances: null },
       select: { id: true, nom: true, prixParSeance: true },
     });
 

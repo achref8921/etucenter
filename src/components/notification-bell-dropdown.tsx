@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { Bell, CheckCheck, UserPlus, GraduationCap, DollarSign, Trash2, Clock } from "lucide-react";
+import { Bell, CheckCheck, UserPlus, GraduationCap, DollarSign, Trash2, Clock, Calendar } from "lucide-react";
 
 interface Notification {
   id: string;
@@ -116,11 +116,21 @@ export default function NotificationBellDropdown({ role }: { role: string }) {
     if (type === "inscription_prof") return <UserPlus className="h-4 w-4 text-purple-500" />;
     if (type === "modification_paiement") return <DollarSign className="h-4 w-4 text-orange-500" />;
     if (type === "paiement_recu") return <DollarSign className="h-4 w-4 text-green-500" />;
+    if (type === "paiement_eleve") return <DollarSign className="h-4 w-4 text-green-500" />;
+    if (type === "nouvelle_seance") return <Calendar className="h-4 w-4 text-violet-500" />;
     if (type === "subscription_expiring") return <Clock className="h-4 w-4 text-amber-500" />;
+    if (type === "message_admin") return <Bell className="h-4 w-4 text-blue-500" />;
     return <Bell className="h-4 w-4 text-gray-400 dark:text-gray-500" />;
   };
 
-  if (role !== "admin" && role !== "prof") return null;
+  if (role !== "admin" && role !== "prof" && role !== "eleve") return null;
+
+  const allLink =
+    role === "eleve"
+      ? "/eleve/notifications"
+      : role === "prof"
+        ? "/prof/notifications"
+        : "/admin/notifications";
 
   return (
     <div ref={ref} className="relative">
@@ -205,7 +215,7 @@ export default function NotificationBellDropdown({ role }: { role: string }) {
           </div>
 
           <Link
-            href="/admin/notifications"
+            href={allLink}
             onClick={() => setOpen(false)}
             className="block border-t border-gray-100 bg-gray-50 px-4 py-2.5 text-center text-xs font-medium text-blue-600 hover:bg-gray-100 dark:border-slate-700 dark:bg-slate-800 dark:text-blue-400 dark:hover:bg-slate-700"
           >

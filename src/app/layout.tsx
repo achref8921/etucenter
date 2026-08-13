@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Providers from "@/components/providers";
 import PwaRegister from "@/components/pwa-register";
+import PushSetup from "@/components/push-setup";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -41,6 +42,7 @@ export default function RootLayout({
         <Providers>
           {children}
           <PwaRegister />
+          <PushSetup />
         </Providers>
       </body>
     </html>

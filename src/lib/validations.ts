@@ -61,9 +61,33 @@ export const groupeSchema = z.object({
   description: z.string().optional(),
   profId: z.string().uuid().optional().nullable(),
   matiereId: z.string().uuid().optional().nullable(),
-  prixParSeance: z.number().positive(),
+  prixParSeance: z.number().positive().optional(),
+  forfaitMontant: z.number().positive().optional(),
+  forfaitSeances: z.number().int().positive().optional(),
   capaciteMax: z.number().int().positive().optional(),
-});
+}).refine(
+  (data) => {
+    if (data.forfaitMontant !== undefined || data.forfaitSeances !== undefined) {
+      return data.forfaitMontant !== undefined && data.forfaitSeances !== undefined;
+    }
+    return true;
+  },
+  {
+    message: "Le montant et le nombre de séances du forfait doivent être fournis ensemble",
+    path: ["forfaitMontant"],
+  }
+).refine(
+  (data) => {
+    if (data.forfaitMontant !== undefined || data.prixParSeance !== undefined) {
+      return true;
+    }
+    return false;
+  },
+  {
+    message: "Le prix par séance ou le forfait est requis",
+    path: ["prixParSeance"],
+  }
+);
 
 export const seanceSchema = z.object({
   groupeId: z.string().uuid(),
@@ -81,6 +105,16 @@ export const presenceSchema = z.object({
       statut: z.enum(["present", "absent"]),
     })
   ),
+  timezoneOffset: z.number().optional(),
+});
+
+export const rattrapageSchema = z.object({
+  eleveId: z.string().uuid(),
+  groupeId: z.string().uuid(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date invalide"),
+  heureDebut: z.string().regex(/^\d{1,2}:\d{2}$/, "Heure de début invalide").optional(),
+  heureFin: z.string().regex(/^\d{1,2}:\d{2}$/, "Heure de fin invalide").optional(),
+  notes: z.string().optional(),
 });
 
 export const paiementSchema = z.object({
@@ -98,7 +132,7 @@ export const teacherTransactionSchema = z.object({
   amount: z.number().positive("Le montant doit être positif"),
   credit: z.boolean().optional(),
   date: z.string().optional(),
-  description: z.string().min(2, "La description doit contenir au moins 2 caractères"),
+  description: z.string().optional(),
   paymentMethod: z.enum(["especes", "virement", "cheque", "autre"]).optional().nullable(),
   reference: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
@@ -106,6 +140,25 @@ export const teacherTransactionSchema = z.object({
 
 export const reverseTransactionSchema = z.object({
   reason: z.string().min(3, "La raison doit contenir au moins 3 caractères"),
+});
+
+export const studentTransactionSchema = z.object({
+  studentId: z.string().uuid(),
+  type: z.enum(["PREPAYMENT", "ADJUSTMENT"]),
+  amount: z.number().positive("Le montant doit être positif"),
+  credit: z.boolean().optional(),
+  date: z.string().optional(),
+  time: z.string().optional(),
+  paymentMethod: z.enum(["especes", "virement", "cheque", "autre"]).optional().nullable(),
+  reference: z.string().optional().nullable(),
+  notes: z.string().optional().nullable(),
+  idempotencyKey: z.string().min(8, "Clé d'idempotence invalide").max(64).optional().nullable(),
+});
+
+export const notificationSendSchema = z.object({
+  titre: z.string().min(2, "Le titre doit contenir au moins 2 caractères").max(255, "Le titre est trop long"),
+  message: z.string().min(1, "Le message est requis").max(2000, "Le message est trop long"),
+  destinataires: z.array(z.string().uuid("Identifiant invalide")).min(1, "Sélectionnez au moins un élève").max(200, "Trop de destinataires"),
 });
 
 export const forgotPasswordSchema = z.object({
@@ -128,8 +181,11 @@ export type MatiereInput = z.infer<typeof matiereSchema>;
 export type GroupeInput = z.infer<typeof groupeSchema>;
 export type SeanceInput = z.infer<typeof seanceSchema>;
 export type PresenceInput = z.infer<typeof presenceSchema>;
+export type RattrapageInput = z.infer<typeof rattrapageSchema>;
 export type PaiementInput = z.infer<typeof paiementSchema>;
 export type TeacherTransactionInput = z.infer<typeof teacherTransactionSchema>;
 export type ReverseTransactionInput = z.infer<typeof reverseTransactionSchema>;
+export type StudentTransactionInput = z.infer<typeof studentTransactionSchema>;
+export type NotificationSendInput = z.infer<typeof notificationSendSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;

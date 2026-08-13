@@ -3,7 +3,8 @@ import { requireActiveCenter, PROF_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { presenceSchema } from "@/lib/validations";
-import { canModifyAttendance } from "@/lib/utils";
+import { canModifyAttendance, clientNowFromOffset } from "@/lib/utils";
+import { consumeCourseAttendance, reverseCourseAttendance } from "@/lib/student-finance";
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,6 +17,9 @@ export async function GET(request: NextRequest) {
     if (!seanceId) {
       return NextResponse.json({ error: "Paramètre seanceId requis" }, { status: 400 });
     }
+
+    const timezoneOffset = Number(searchParams.get("timezoneOffset") ?? "0");
+    const clientNow = clientNowFromOffset(timezoneOffset);
 
     const seance = await prisma.seance.findUnique({
       where: { id: seanceId },
@@ -34,17 +38,37 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Vous n'êtes pas le prof de ce groupe" }, { status: 403 });
     }
 
-    const presences = await prisma.presence.findMany({
-      where: { seanceId },
-      include: {
-        eleve: {
-          select: { id: true, nom: true, prenom: true, email: true },
+    const [inscriptions, existingPresences] = await Promise.all([
+      prisma.inscription.findMany({
+        where: { groupeId: seance.groupe.id, statut: "actif" },
+        include: {
+          eleve: { select: { id: true, nom: true, prenom: true, email: true } },
         },
-      },
-      orderBy: { dateCreation: "asc" },
+      }),
+      prisma.presence.findMany({
+        where: { seanceId },
+        include: {
+          eleve: { select: { id: true, nom: true, prenom: true, email: true } },
+        },
+      }),
+    ]);
+
+    const presences = inscriptions.map((ins) => {
+      const existing = existingPresences.find((p) => p.eleveId === ins.eleveId);
+      if (existing) return existing;
+      return {
+        id: null,
+        seanceId,
+        eleveId: ins.eleve.id,
+        statut: null,
+        dateCreation: null,
+        eleve: ins.eleve,
+      };
     });
 
-    const canModify = canModifyAttendance(seance.date, seance.heureDebut, seance.heureFin);
+    presences.sort((a, b) => `${a.eleve.nom} ${a.eleve.prenom}`.localeCompare(`${b.eleve.nom} ${b.eleve.prenom}`));
+
+    const canModify = canModifyAttendance(seance.date, seance.heureDebut, seance.heureFin, clientNow);
 
     logger.info("Présences récupérées", { profId: (session.user as any).id, seanceId, count: presences.length });
 
@@ -68,7 +92,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: parsed.error.issues[0]?.message || "Données invalides" }, { status: 400 });
     }
 
-    const { seanceId, presences } = parsed.data;
+    const { seanceId, presences, timezoneOffset } = parsed.data;
+    const userId = (session.user as any).id;
+    const clientNow = clientNowFromOffset(timezoneOffset);
 
     const seance = await prisma.seance.findUnique({
       where: { id: seanceId },
@@ -77,7 +103,15 @@ export async function POST(request: NextRequest) {
         date: true,
         heureDebut: true,
         heureFin: true,
-        groupe: { select: { id: true, profId: true } },
+        statut: true,
+        groupe: {
+          select: {
+            id: true,
+            profId: true,
+            centerId: true,
+            prixParSeance: true,
+          },
+        },
       },
     });
 
@@ -85,7 +119,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Séance non trouvée" }, { status: 404 });
     }
 
-    if (seance.groupe.profId !== (session.user as any).id) {
+    if (seance.groupe.profId !== userId) {
       return NextResponse.json({ error: "Vous n'êtes pas le prof de ce groupe" }, { status: 403 });
     }
 
@@ -93,45 +127,77 @@ export async function POST(request: NextRequest) {
       where: { seanceId },
     });
 
-    const results = await Promise.all(
-      presences.map(async (presence: any) => {
+    const results = await prisma.$transaction(async (tx) => {
+      const out: any[] = [];
+
+      for (const presence of presences as any[]) {
         const existing = existingPresences.find((p: any) => p.eleveId === presence.eleveId);
 
+        let saved: any;
+
         if (existing) {
-          if (!canModifyAttendance(seance.date, seance.heureDebut, seance.heureFin)) {
+          if (!canModifyAttendance(seance.date, seance.heureDebut, seance.heureFin, clientNow)) {
             logger.warn("Tentative de modification de présence en dehors de la fenêtre autorisée", {
-              profId: (session.user as any).id,
+              profId: userId,
               presenceId: existing.id,
             });
-            return existing;
+            out.push(existing);
+            continue;
           }
 
-          return prisma.presence.update({
+          saved = await tx.presence.update({
             where: { id: existing.id },
             data: {
               statut: presence.statut,
               dateModification: new Date(),
             },
           });
+        } else {
+          if (!canModifyAttendance(seance.date, seance.heureDebut, seance.heureFin, clientNow)) {
+            out.push(null);
+            continue;
+          }
+
+          saved = await tx.presence.create({
+            data: {
+              seanceId,
+              eleveId: presence.eleveId,
+              statut: presence.statut,
+              enregistrePar: userId,
+            },
+          });
         }
 
-        if (!canModifyAttendance(seance.date, seance.heureDebut, seance.heureFin)) {
-          return null;
+        if (presence.statut === "present") {
+          await consumeCourseAttendance(
+            {
+              centerId: seance.groupe.centerId,
+              eleveId: presence.eleveId,
+              attendanceId: saved.id,
+              actorId: userId,
+            },
+            tx
+          );
+        } else if (presence.statut === "absent") {
+          await reverseCourseAttendance(
+            {
+              centerId: seance.groupe.centerId,
+              eleveId: presence.eleveId,
+              attendanceId: saved.id,
+              actorId: userId,
+            },
+            tx
+          );
         }
 
-        return prisma.presence.create({
-          data: {
-            seanceId,
-            eleveId: presence.eleveId,
-            statut: presence.statut,
-            enregistrePar: (session.user as any).id,
-          },
-        });
-      })
-    );
+        out.push(saved);
+      }
+
+      return out;
+    });
 
     logger.info("Présences enregistrées", {
-      profId: (session.user as any).id,
+      profId: userId,
       seanceId,
       count: results.length,
     });

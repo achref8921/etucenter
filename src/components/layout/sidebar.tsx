@@ -41,6 +41,7 @@ export const navItemsByRole: Record<Role, NavItem[]> = {
     { label: "Finances", href: "/admin/finances", icon: Wallet },
     { label: "Benefices", href: "/admin/benefices", icon: TrendingUp },
     { label: "Comptes Profs", href: "/admin/finances-professeurs", icon: CreditCard },
+    { label: "Notifications", href: "/admin/notifications", icon: Bell },
     { label: "Backup & Restauration", href: "/admin/backup", icon: Database },
     { label: "Parametres", href: "/admin/parametres", icon: Settings },
     { label: "Mon Profil", href: "/profil", icon: User },
@@ -60,8 +61,10 @@ export const navItemsByRole: Record<Role, NavItem[]> = {
     { label: "Mes Groupes", href: "/eleve/groupes", icon: GraduationCap },
     { label: "Mes Seances", href: "/eleve/seances", icon: Calendar },
     { label: "Mes Paiements", href: "/eleve/paiements", icon: FileText },
+    { label: "Mon Compte", href: "/eleve/compte", icon: Wallet },
     { label: "Mon Profil", href: "/profil", icon: User },
     { label: "Mes Presences", href: "/eleve/presences", icon: ClipboardCheck },
+    { label: "Notifications", href: "/eleve/notifications", icon: Bell },
   ],
 };
 
