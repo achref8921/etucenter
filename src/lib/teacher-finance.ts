@@ -4,6 +4,18 @@ import { logger } from "@/lib/logger";
 
 export const TEACHER_CREATABLE_TYPES = ["EARNING", "PAYMENT", "ADJUSTMENT"] as const;
 
+export const DEFAULT_CENTER_SHARE = 20;
+
+export function centerSharePercent(
+  tauxBenefice?: { tauxPourcentage?: Prisma.Decimal | number | null } | null
+): number {
+  if (tauxBenefice && tauxBenefice.tauxPourcentage != null) {
+    const t = Number(tauxBenefice.tauxPourcentage);
+    return Math.min(100, Math.max(0, t));
+  }
+  return DEFAULT_CENTER_SHARE;
+}
+
 export function round2(value: number): number {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
@@ -141,6 +153,141 @@ export async function createTeacherTransaction(input: CreateTeacherTransactionIn
   });
 
   return transaction;
+}
+
+export interface CreditTeacherForPaymentInput {
+  centerId: string;
+  teacherId: string;
+  amount: number;
+  description?: string;
+  date?: Date;
+  paymentMethod?: "especes" | "virement" | "cheque" | "autre" | null;
+  reference?: string | null;
+  notes?: string | null;
+  createdBy?: string | null;
+  db?: Prisma.TransactionClient;
+}
+
+export async function creditTeacherForPayment(input: CreditTeacherForPaymentInput) {
+  const { centerId, teacherId, amount, db = prisma } = input;
+
+  const teacher = await db.utilisateur.findUnique({
+    where: { id: teacherId },
+    select: {
+      id: true,
+      role: true,
+      centerId: true,
+      tauxBenefice: { select: { tauxPourcentage: true } },
+    },
+  });
+
+  if (!teacher || teacher.role !== "prof" || teacher.centerId !== centerId) {
+    throw new Error("PROFESSEUR_INTROUVABLE");
+  }
+
+  const centreShare = centerSharePercent(teacher.tauxBenefice);
+  const profShare = round2((Math.abs(amount) * (100 - centreShare)) / 100);
+  if (profShare <= 0) return null;
+
+  const date = input.date ?? new Date();
+
+  const transaction = await db.teacherTransaction.create({
+    data: {
+      centerId,
+      teacherId,
+      type: "EARNING",
+      status: "active",
+      amount: profShare,
+      signedAmount: profShare,
+      description: input.description?.trim() ?? "Paiement élève",
+      date,
+      time: date,
+      reference: input.reference?.trim() || null,
+      notes: input.notes?.trim() || null,
+      createdBy: input.createdBy ?? null,
+    },
+    include: {
+      teacher: {
+        select: { id: true, nom: true, prenom: true },
+      },
+    },
+  });
+
+  await db.systemLog.create({
+    data: {
+      action: "finance.teacher.earning.auto",
+      entity: "teacher_transaction",
+      entityId: transaction.id,
+      userId: input.createdBy ?? null,
+      details: {
+        teacherId,
+        paymentRef: input.reference,
+        amount: Number(transaction.amount),
+        centreShare,
+      },
+    },
+  });
+
+  logger.info("Gain professeur crédité automatiquement (paiement élève)", {
+    userId: input.createdBy,
+    transactionId: transaction.id,
+    teacherId,
+    amount: Number(transaction.amount),
+    centreShare,
+  });
+
+  return transaction;
+}
+
+export async function reverseTeacherEarningsForReference(
+  input: {
+    centerId: string;
+    reference: string;
+    actorId?: string | null;
+    reason?: string | null;
+  },
+  db: Prisma.TransactionClient
+) {
+  const existing = await db.teacherTransaction.findMany({
+    where: {
+      centerId: input.centerId,
+      reference: input.reference,
+      type: "EARNING",
+      status: "active",
+    },
+  });
+
+  const now = new Date();
+  const reversals: any[] = [];
+
+  for (const txn of existing) {
+    const reversal = await db.teacherTransaction.create({
+      data: {
+        centerId: txn.centerId,
+        teacherId: txn.teacherId,
+        type: "REVERSAL",
+        status: "active",
+        amount: Math.abs(Number(txn.signedAmount)),
+        signedAmount: round2(-Number(txn.signedAmount)),
+        description: "Annulation du gain lié au paiement élève",
+        date: now,
+        time: now,
+        reference: txn.reference,
+        notes: input.reason?.trim() || "Modification du paiement",
+        createdBy: input.actorId ?? null,
+        reversalOfId: txn.id,
+      },
+    });
+
+    await db.teacherTransaction.update({
+      where: { id: txn.id },
+      data: { status: "reversed", reversedById: input.actorId ?? null, reversedAt: now },
+    });
+
+    reversals.push(reversal);
+  }
+
+  return reversals;
 }
 
 export interface ReverseTeacherTransactionInput {

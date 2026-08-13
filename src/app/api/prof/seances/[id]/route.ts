@@ -3,6 +3,9 @@ import { requireActiveCenter, PROF_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { sendPushToUsers } from "@/lib/push";
 import { clientNowFromOffset } from "@/lib/utils";
+import { reverseCourseAttendance, consumeCourseAttendance } from "@/lib/student-finance";
+
+const VALID_SEANCE_STATUTS = ["planifiee", "en_cours", "terminee", "annulee"];
 
 async function assertOwnSeance(userId: string, seanceId: string) {
   const seance = await prisma.seance.findUnique({
@@ -106,10 +109,75 @@ export async function PATCH(
     if (heureDebut !== undefined) data.heureDebut = heureDebut ? new Date(heureDebut) : null;
     if (heureFin !== undefined) data.heureFin = heureFin ? new Date(heureFin) : null;
     if (notes !== undefined) data.notes = notes || null;
-    if (statut !== undefined) data.statut = statut;
+
+    if (Object.keys(data).length === 0 && statut === undefined) {
+      return NextResponse.json({ error: "Aucune donnée à modifier" }, { status: 400 });
+    }
+
+    if (statut !== undefined && !VALID_SEANCE_STATUTS.includes(statut)) {
+      return NextResponse.json({ error: "Statut de séance invalide" }, { status: 400 });
+    }
+
+    const userId = (session.user as any).id;
+
+    if (statut !== undefined) {
+      const current = await prisma.seance.findUnique({
+        where: { id },
+        select: { statut: true, groupe: { select: { centerId: true } } },
+      });
+
+      if (current && statut !== current.statut) {
+        if (statut === "annulee") {
+          await prisma.$transaction(async (tx) => {
+            const presences = await tx.presence.findMany({
+              where: { seanceId: id, statut: "present" },
+              select: { id: true, eleveId: true },
+            });
+            for (const p of presences) {
+              await reverseCourseAttendance(
+                {
+                  centerId: current.groupe.centerId,
+                  eleveId: p.eleveId,
+                  attendanceId: p.id,
+                  actorId: userId,
+                },
+                tx
+              );
+            }
+            await tx.seance.update({ where: { id }, data: { statut } });
+          });
+        } else {
+          await prisma.$transaction(async (tx) => {
+            await tx.seance.update({ where: { id }, data: { statut } });
+            const presences = await tx.presence.findMany({
+              where: { seanceId: id, statut: "present" },
+              select: { id: true, eleveId: true },
+            });
+            for (const p of presences) {
+              await consumeCourseAttendance(
+                {
+                  centerId: current.groupe.centerId,
+                  eleveId: p.eleveId,
+                  attendanceId: p.id,
+                  actorId: userId,
+                },
+                tx
+              );
+            }
+          });
+        }
+      }
+    }
 
     if (Object.keys(data).length === 0) {
-      return NextResponse.json({ error: "Aucune donnée à modifier" }, { status: 400 });
+      const updated = await prisma.seance.findUnique({
+        where: { id },
+        include: {
+          groupe: { select: { id: true, nom: true } },
+          _count: { select: { presences: true } },
+        },
+      });
+      return NextResponse.json(updated);
     }
 
     const updated = await prisma.seance.update({

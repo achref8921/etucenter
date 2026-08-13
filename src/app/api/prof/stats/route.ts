@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireActiveCenter, PROF_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
+import { DEFAULT_CENTER_SHARE } from "@/lib/teacher-finance";
 
 export async function GET() {
   try {
@@ -37,20 +38,21 @@ export async function GET() {
       }),
     ]);
 
-    const taux = tauxBenefice ? Number(tauxBenefice.tauxPourcentage) : 0;
+    const centreShare = tauxBenefice ? Number(tauxBenefice.tauxPourcentage) : DEFAULT_CENTER_SHARE;
+    const profShare = Math.max(0, Math.min(100, 100 - centreShare));
 
     let totalRevenuBrut = 0;
     for (const g of groupes) {
       totalRevenuBrut += g._count.inscriptions * Number(g.prixParSeance);
     }
 
-    const totalRevenuNet = totalRevenuBrut * (taux / 100);
+    const totalRevenuNet = totalRevenuBrut * (profShare / 100);
     const totalEleves = groupes.reduce((sum, g) => sum + g._count.inscriptions, 0);
     const totalSeances = groupes.reduce((sum, g) => sum + g._count.seances, 0);
     const totalPaiements = Number(paiementsAgg._sum.montant || 0);
 
     return NextResponse.json({
-      tauxPourcentage: taux,
+      tauxPourcentage: profShare,
       totalRevenuBrut,
       totalRevenuNet,
       totalEleves,

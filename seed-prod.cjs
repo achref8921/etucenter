@@ -1,17 +1,20 @@
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 
-const DATABASE_URL = "postgresql://neondb_owner:npg_MI5QSKHnzZT3@ep-sweet-frost-axfip50d.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require";
+if (!process.env.DATABASE_URL) {
+  console.error("ERROR: DATABASE_URL is required (set it in the environment or a local .env).");
+  process.exit(1);
+}
 
-process.env.DATABASE_URL = DATABASE_URL;
-const prisma = new PrismaClient({ datasources: { db: { url: DATABASE_URL } } });
+const prisma = new PrismaClient({ datasources: { db: { url: process.env.DATABASE_URL } } });
 
 async function main() {
   console.log("Connecting...");
   await prisma.$connect();
   console.log("Connected!\n");
 
-  const hash = await bcrypt.hash("123456", 10);
+  const password = process.env.SEED_PASSWORD || "123456";
+  const hash = await bcrypt.hash(password, 10);
 
   // ─── Super Admin ───────────────────────────────────────────────
   const defaultCenter = await prisma.center.upsert({
@@ -286,10 +289,13 @@ async function main() {
   console.log(`✅ Paiements: ${payCount}`);
 
   console.log("\n🎉 ─── SEED TERMINÉ ───────────────────────────");
-  console.log("📧 Super Admin: superadmin@test.com / 123456");
-  console.log("📧 Admins: admin@ghodhbeni.com, admin@centre-el-fath.com, admin@centre-ennour.com / 123456");
-  console.log("📧 Profs: enseignant@*.com, sami.enseignant@*.com, fatma.enseignante@*.com / 123456");
-  console.log("📧 Eleves: mohamed.eleve@*.com, amira.eleve@*.com, youssef.eleve@*.com, ines.eleve@*.com, omar.eleve@*.com / 123456");
+  console.log("📧 Super Admin: superadmin@test.com");
+  console.log("📧 Admins: admin@ghodhbeni.com, admin@centre-el-fath.com, admin@centre-ennour.com");
+  console.log("📧 Profs: enseignant@*.com, sami.enseignant@*.com, fatma.enseignante@*.com");
+  console.log("📧 Eleves: mohamed.eleve@*.com, amira.eleve@*.com, youssef.eleve@*.com, ines.eleve@*.com, omar.eleve@*.com");
+  if (!process.env.SEED_PASSWORD) {
+    console.log("⚠️  Mot de passe par défaut (123456) utilisé — définissez SEED_PASSWORD pour en choisir un autre.");
+  }
 }
 
 main()

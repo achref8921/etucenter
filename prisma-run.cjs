@@ -15,7 +15,7 @@ const env = {
   PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING: '1',
   CHECKPOINT_DISABLE: '1',
   PRISMA_TELEMETRY_DISABLED: '1',
-  NODE_TLS_REJECT_UNAUTHORIZED: '0',
+  ...(process.env.PRISMA_INSECURE_TLS === '1' ? { NODE_TLS_REJECT_UNAUTHORIZED: '0' } : {}),
 };
 
 const args = process.argv.slice(2);

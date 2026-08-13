@@ -127,11 +127,27 @@ export async function POST(request: NextRequest) {
       where: { seanceId },
     });
 
+    const activeInscriptions = await prisma.inscription.findMany({
+      where: { groupeId: seance.groupe.id, statut: "actif" },
+      select: { eleveId: true },
+    });
+    const activeEleveIds = new Set(activeInscriptions.map((i) => i.eleveId));
+
     const results = await prisma.$transaction(async (tx) => {
       const out: any[] = [];
 
       for (const presence of presences as any[]) {
         const existing = existingPresences.find((p: any) => p.eleveId === presence.eleveId);
+
+        if (!activeEleveIds.has(presence.eleveId)) {
+          logger.warn("Tentative d'enregistrement d'une présence pour un élève non inscrit activement", {
+            profId: userId,
+            eleveId: presence.eleveId,
+            seanceId,
+          });
+          out.push(existing ?? null);
+          continue;
+        }
 
         let saved: any;
 

@@ -226,14 +226,15 @@ model Inscription {
 // ─── Seance ──────────────────────────────────────────────────────────────────
 
 model Seance {
-  id          String       @id @default(uuid()) @db.Uuid
-  groupeId    String       @map("groupe_id") @db.Uuid
-  date        DateTime     @db.Date
-  heureDebut  DateTime?    @map("heure_debut") @db.Time
-  heureFin    DateTime?    @map("heure_fin") @db.Time
-  statut      SeanceStatut @default(planifiee)
-  notes       String?
-  createdAt   DateTime     @default(now()) @map("created_at")
+  id            String        @id @default(uuid()) @db.Uuid
+  groupeId      String        @map("groupe_id") @db.Uuid
+  date          DateTime      @db.Date
+  heureDebut    DateTime?     @map("heure_debut") @db.Time
+  heureFin      DateTime?     @map("heure_fin") @db.Time
+  statut        SeanceStatut  @default(planifiee)
+  notes         String?
+  prixParSeance Decimal?      @map("prix_par_seance") @db.Decimal(10, 2)
+  createdAt     DateTime      @default(now()) @map("created_at")
 
   groupe    Groupe       @relation(fields: [groupeId], references: [id], onDelete: Cascade)
   presences Presence[]

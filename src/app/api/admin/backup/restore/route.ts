@@ -155,6 +155,7 @@ export async function POST(request: Request) {
                   heureDebut: s.heureDebut ? new Date(s.heureDebut) : null,
                   heureFin: s.heureFin ? new Date(s.heureFin) : null,
                   statut: s.statut || "planifiee", notes: s.notes || null,
+                  prixParSeance: s.prixParSeance != null ? Number(s.prixParSeance) : null,
                 },
               });
               idMap[s.id] = created_.id;

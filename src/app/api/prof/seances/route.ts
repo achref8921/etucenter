@@ -131,6 +131,7 @@ export async function POST(request: NextRequest) {
         heureDebut: heureDebut ? new Date(heureDebut) : null,
         heureFin: heureFin ? new Date(heureFin) : null,
         notes: notes ?? null,
+        prixParSeance: groupe.prixParSeance ?? null,
       },
       include: {
         groupe: {

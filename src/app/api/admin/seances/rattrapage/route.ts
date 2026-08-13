@@ -78,6 +78,20 @@ export async function POST(request: NextRequest) {
     const seanceDate = new Date(`${date}T00:00:00.000Z`);
     const buildTime = (t?: string) => (t ? new Date(`${date}T${t}:00.000Z`) : null);
 
+    const existingPresence = await prisma.presence.findFirst({
+      where: {
+        eleveId,
+        seance: { groupeId, date: seanceDate },
+      },
+      include: { seance: { select: { id: true, date: true } } },
+    });
+    if (existingPresence) {
+      return NextResponse.json(
+        { error: "Une séance est déjà enregistrée pour cet élève à cette date" },
+        { status: 409 }
+      );
+    }
+
     const { seance, presence, consumption } = await prisma.$transaction(async (tx) => {
       const s = await tx.seance.create({
         data: {
@@ -87,6 +101,7 @@ export async function POST(request: NextRequest) {
           heureFin: buildTime(heureFin),
           statut: "terminee",
           notes: notes?.trim() || `Séance de rattrapage — ${eleve.prenom} ${eleve.nom}`,
+          prixParSeance: groupe.prixParSeance ?? null,
         },
       });
       const p = await tx.presence.create({
@@ -101,7 +116,7 @@ export async function POST(request: NextRequest) {
 
     const when = heureDebut ? `le ${formatDateFr(date)} à ${heureDebut}` : `le ${formatDateFr(date)}`;
     const titre = "Séance de rattrapage ajoutée";
-    const message = `Une séance a été ajoutée pour vous ${when} dans le groupe "${groupe.nom}". Le montant de ${price.toFixed(2)} DT a été déduit de votre compte.`;
+    const message = `Une séance a été ajoutée pour vous ${when} dans le groupe "${groupe.nom}". Elle est facturée ${price.toFixed(2)} DT (comptabilisée dans votre dossier).`;
 
     await prisma.notification.create({
       data: {

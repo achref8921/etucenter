@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
+import { DEFAULT_CENTER_SHARE } from "@/lib/teacher-finance";
 
 export async function GET(request: NextRequest) {
   try {
@@ -76,7 +77,7 @@ export async function GET(request: NextRequest) {
     for (const r of eleveCounts) countMap.set(r.prof_id ?? "", Number(r.nb || 0));
 
     const profsData = profs.map((e) => {
-      const taux = e.tauxBenefice ? Number(e.tauxBenefice.tauxPourcentage) : 0;
+      const taux = e.tauxBenefice ? Number(e.tauxBenefice.tauxPourcentage) : DEFAULT_CENTER_SHARE;
       const totalRecu = monthMap.get(e.id) || 0;
       const beneficeCentre = totalRecu * taux / 100;
       const salaireProf = totalRecu - beneficeCentre;
@@ -96,7 +97,7 @@ export async function GET(request: NextRequest) {
     const totalSalaire = profsData.reduce((s, e) => s + e.salaireProf, 0);
 
     const tauxMap = new Map<string, number>(
-      profs.map((p) => [p.id, p.tauxBenefice ? Number(p.tauxBenefice.tauxPourcentage) : 0])
+      profs.map((p) => [p.id, p.tauxBenefice ? Number(p.tauxBenefice.tauxPourcentage) : DEFAULT_CENTER_SHARE])
     );
 
     const monthAgg = new Map<string, { recu: number; benefice: number }>();
@@ -104,7 +105,7 @@ export async function GET(request: NextRequest) {
       const agg = monthAgg.get(r.month) ?? { recu: 0, benefice: 0 };
       const recu = Number(r.recu || 0);
       agg.recu += recu;
-      const taux = r.prof_id ? tauxMap.get(r.prof_id) || 0 : 0;
+      const taux = r.prof_id ? (tauxMap.get(r.prof_id) ?? DEFAULT_CENTER_SHARE) : 0;
       agg.benefice += recu * taux / 100;
       monthAgg.set(r.month, agg);
     }

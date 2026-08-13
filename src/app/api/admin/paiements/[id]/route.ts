@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { createStudentTransaction } from "@/lib/student-finance";
+import { creditTeacherForPayment, reverseTeacherEarningsForReference } from "@/lib/teacher-finance";
 import { sendPushToUser } from "@/lib/push";
 
 export async function PATCH(
@@ -30,7 +31,7 @@ export async function PATCH(
       where: { id },
       include: {
         eleve: { select: { id: true, nom: true, prenom: true } },
-        groupe: { select: { id: true, nom: true, centerId: true } },
+        groupe: { select: { id: true, nom: true, centerId: true, profId: true } },
       },
     });
 
@@ -47,7 +48,7 @@ export async function PATCH(
         data: { montant },
         include: {
           eleve: { select: { id: true, nom: true, prenom: true } },
-          groupe: { select: { id: true, nom: true } },
+          groupe: { select: { id: true, nom: true, profId: true } },
         },
       });
 
@@ -69,6 +70,31 @@ export async function PATCH(
         );
       }
 
+      let teacherEarning = null;
+      if (updated.groupe.profId) {
+        await reverseTeacherEarningsForReference(
+          {
+            centerId: centreId,
+            reference: `paiement:${id}`,
+            actorId: adminId,
+            reason: `Montant du paiement modifié : ${ancienMontant} DT → ${montant} DT`,
+          },
+          tx
+        );
+
+        teacherEarning = await creditTeacherForPayment({
+          centerId: centreId,
+          teacherId: updated.groupe.profId,
+          amount: montant,
+          description: `Part du prof — paiement de ${updated.eleve.prenom} ${updated.eleve.nom} pour le groupe "${updated.groupe.nom}"`,
+          paymentMethod: updated.methodePaiement,
+          reference: `paiement:${id}`,
+          notes: raison.trim(),
+          createdBy: adminId,
+          db: tx,
+        });
+      }
+
       await tx.notification.create({
         data: {
           centerId: centreId,
@@ -79,7 +105,7 @@ export async function PATCH(
         },
       });
 
-      return updated;
+      return { ...updated, teacherEarning };
     });
 
     await sendPushToUser(paiement.eleveId, {

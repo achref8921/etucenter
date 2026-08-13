@@ -63,10 +63,25 @@ export async function generateStudentReceiptNumber(
   return `RC-${year}-${String(count + 1).padStart(4, "0")}`;
 }
 
+export function studentCreditBalanceWhere(
+  centerId: string,
+  eleveId?: string
+): Prisma.StudentTransactionWhereInput {
+  return {
+    centerId,
+    ...(eleveId ? { eleveId } : {}),
+    type: { not: "COURSE_CONSUMPTION" },
+    NOT: {
+      type: "REVERSAL",
+      reversalOf: { type: "COURSE_CONSUMPTION" },
+    },
+  };
+}
+
 export async function getStudentBalance(centerId: string, eleveId: string): Promise<number> {
   const agg = await prisma.studentTransaction.aggregate({
     _sum: { signedAmount: true },
-    where: { centerId, eleveId },
+    where: studentCreditBalanceWhere(centerId, eleveId),
   });
   return round2(Number(agg._sum.signedAmount ?? 0));
 }
@@ -216,22 +231,9 @@ async function reactivateConsumption(db: DbClient, consumption: any) {
   if (!reversal || reversal.type !== "REVERSAL") return;
 
   const now = new Date();
-  await db.studentTransaction.create({
-    data: {
-      centerId: consumption.centerId,
-      eleveId: consumption.eleveId,
-      type: "REVERSAL",
-      status: "active",
-      amount: Math.abs(Number(reversal.signedAmount)),
-      signedAmount: round2(-Number(reversal.signedAmount)),
-      description: "Reprise de la consommation annulée",
-      date: now,
-      time: now,
-      reference: consumption.reference,
-      notes: "L'élève est de nouveau présent",
-      createdBy: null,
-      reversalOfId: reversal.id,
-    },
+  await db.studentTransaction.update({
+    where: { id: reversal.id },
+    data: { status: "reversed", reversedById: null, reversedAt: now },
   });
 
   await db.studentTransaction.update({
@@ -260,7 +262,12 @@ export async function consumeCourseAttendance(
     where: { id: attendanceId },
     include: {
       seance: {
-        include: {
+        select: {
+          id: true,
+          statut: true,
+          date: true,
+          heureDebut: true,
+          prixParSeance: true,
           groupe: {
             select: {
               id: true,
@@ -284,7 +291,15 @@ export async function consumeCourseAttendance(
   if (attendance.statut !== "present") return null;
   if (seance.statut === "annulee") return null;
 
-  const price = Number(groupe.prixParSeance);
+  const activeInscription = await db.inscription.findFirst({
+    where: { eleveId, groupeId: groupe.id, statut: "actif" },
+    select: { id: true },
+  });
+  if (!activeInscription) return null;
+
+  const price = Number(
+    seance.prixParSeance != null ? seance.prixParSeance : groupe.prixParSeance
+  );
   if (!price || price <= 0) return null;
 
   const amount = round2(price);
@@ -345,9 +360,44 @@ export async function reverseCourseAttendance(
 
   const consumption = await findConsumption(db, eleveId, attendanceId);
   if (!consumption || consumption.type !== "COURSE_CONSUMPTION") return null;
-  if (consumption.status === "reversed") return consumption;
+
+  const existingReversal = await db.studentTransaction.findUnique({
+    where: { reversalOfId: consumption.id },
+  });
+
+  if (consumption.status === "reversed") {
+    if (existingReversal && existingReversal.status === "active") {
+      return consumption;
+    }
+  }
 
   const now = new Date();
+
+  if (existingReversal) {
+    const reversal = await db.studentTransaction.update({
+      where: { id: existingReversal.id },
+      data: { status: "active", reversedById: actorId ?? null, reversedAt: null },
+      include: { eleve: { select: ELEVE_SELECT } },
+    });
+
+    await db.studentTransaction.update({
+      where: { id: consumption.id },
+      data: { status: "reversed", reversedById: actorId ?? null, reversedAt: now },
+    });
+
+    await db.systemLog.create({
+      data: {
+        action: "finance.student.consume.reverse",
+        entity: "student_transaction",
+        entityId: consumption.id,
+        userId: actorId ?? null,
+        details: { eleveId, attendanceId, reversalId: reversal.id },
+      },
+    });
+
+    return reversal;
+  }
+
   const reversal = await db.studentTransaction.create({
     data: {
       centerId,
@@ -536,7 +586,7 @@ export async function listStudentsWithBalance(centerId: string) {
 
   const rows = await prisma.studentTransaction.groupBy({
     by: ["eleveId"],
-    where: { centerId },
+    where: studentCreditBalanceWhere(centerId),
     _sum: { signedAmount: true },
   });
 
@@ -570,7 +620,7 @@ export async function getStudentFinanceOverview(centerId: string) {
     }),
     prisma.studentTransaction.groupBy({
       by: ["eleveId"],
-      where: { centerId },
+      where: studentCreditBalanceWhere(centerId),
       _sum: { signedAmount: true },
     }),
   ]);

@@ -1,6 +1,16 @@
 const { PrismaClient } = require('@prisma/client');
-const DATABASE_URL = "postgresql://neondb_owner:npg_MI5QSKHnzZT3@ep-sweet-frost-axfip50d.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require";
-const p = new PrismaClient({ datasources: { db: { url: DATABASE_URL } } });
+
+if (!process.env.DATABASE_URL) {
+  console.error("ERROR: DATABASE_URL is required (set it in the environment or a local .env).");
+  process.exit(1);
+}
+
+if (process.env.CONFIRM_DESTRUCTIVE !== '1') {
+  console.error("ERROR: this script DELETES PRODUCTION DATA. Set CONFIRM_DESTRUCTIVE=1 to run.");
+  process.exit(1);
+}
+
+const p = new PrismaClient({ datasources: { db: { url: process.env.DATABASE_URL } } });
 
 (async () => {
   await p.presence.deleteMany(); console.log('cleared presences');

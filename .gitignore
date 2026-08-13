@@ -26,9 +26,11 @@ node_modules/.cache/prisma/
 activate-admin.cjs
 backfill-centers.cjs
 check-data.cjs
+check-samar.cjs
 check-superadmin.cjs
 check-table.cjs
 check-user.cjs
+clear-prod.cjs
 create-center.cjs
 create-superadmin.cjs
 create-superadmin2.cjs
@@ -38,8 +40,10 @@ fix-orphans.cjs
 fix-password.cjs
 generate-codes.cjs
 seed-full.cjs
-seed-test-data.cjs
+seed-payments.cjs
+seed-prod.cjs
 seed-realistic.cjs
+seed-test-data.cjs
 test-center.cjs
 test-centers.cjs
 test-login.cjs

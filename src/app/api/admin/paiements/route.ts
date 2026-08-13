@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { paiementSchema } from "@/lib/validations";
 import { createStudentTransaction } from "@/lib/student-finance";
+import { creditTeacherForPayment } from "@/lib/teacher-finance";
 import { sendPushToUser } from "@/lib/push";
 
 export async function GET() {
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest) {
 
     const adminId = (session.user as any).id;
 
-    const { paiement, studentTransaction } = await prisma.$transaction(async (tx) => {
+    const { paiement, studentTransaction, teacherTransaction } = await prisma.$transaction(async (tx) => {
       const created = await tx.paiement.create({
         data: {
           eleveId,
@@ -102,6 +103,20 @@ export async function POST(request: NextRequest) {
         tx
       );
 
+      const teacherTransaction = created.groupe.profId
+        ? await creditTeacherForPayment({
+            centerId,
+            teacherId: created.groupe.profId,
+            amount: Number(montant),
+            description: `Part du prof — paiement de ${created.eleve.prenom} ${created.eleve.nom} pour le groupe "${created.groupe.nom}"`,
+            paymentMethod: methodePaiement,
+            reference: `paiement:${created.id}`,
+            notes: notes ?? null,
+            createdBy: adminId,
+            db: tx,
+          })
+        : null;
+
       if (created.groupe.profId) {
         await tx.notification.create({
           data: {
@@ -114,7 +129,7 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      return { paiement: created, studentTransaction };
+      return { paiement: created, studentTransaction, teacherTransaction };
     });
 
     if (paiement.groupe.profId) {
@@ -144,13 +159,18 @@ export async function POST(request: NextRequest) {
       adminId,
       paiementId: paiement.id,
       studentTransactionId: studentTransaction.id,
+      teacherTransactionId: teacherTransaction?.id ?? null,
       eleveId,
       groupeId,
       montant: Number(montant),
       balanceCredited: Number(studentTransaction.signedAmount),
+      profCredited: Number(teacherTransaction?.signedAmount ?? 0),
     });
 
-    return NextResponse.json(paiement, { status: 201 });
+    return NextResponse.json(
+      { paiement, teacherTransaction },
+      { status: 201 }
+    );
   } catch (error) {
     logger.error("Erreur lors de la création du paiement", { error });
     return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });

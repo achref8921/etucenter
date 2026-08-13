@@ -187,6 +187,7 @@ function buildSeance(s: any) {
     id: s.id, groupeId: s.groupeId, date: toDate(s.date) ?? new Date(),
     heureDebut: toDate(s.heureDebut), heureFin: toDate(s.heureFin),
     statut: s.statut, notes: str(s.notes), createdAt: toDate(s.createdAt) ?? new Date(),
+    prixParSeance: s.prixParSeance != null ? Number(s.prixParSeance) : null,
   };
 }
 
