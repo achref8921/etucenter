@@ -138,9 +138,9 @@ export async function GET() {
 
       for (const grp of student.groupes) {
         const finishedCount = finishedSeanceMap.get(grp.id) || 0;
-        const due = grp.prixParSeance;
-        const paid = paymentMap.get(`${stId}-${grp.id}`) || 0;
         const pres = presenceMap.get(`${stId}-${grp.id}`) || { total: 0, present: 0, absent: 0 };
+        const due = grp.prixParSeance * (pres.present || 0);
+        const paid = paymentMap.get(`${stId}-${grp.id}`) || 0;
 
         totalDue += due;
         totalPaid += paid;

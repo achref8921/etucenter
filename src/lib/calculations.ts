@@ -19,7 +19,7 @@ export async function calculateTotalDue(eleveId: string, groupeId: string): Prom
 
   if (!groupe) return 0;
 
-  return Number(groupe.prixParSeance);
+  return Number(groupe.prixParSeance) * presencesCount;
 }
 
 export async function calculateTotalPaid(eleveId: string, groupeId: string): Promise<number> {
@@ -88,7 +88,7 @@ export async function getAdminStats(centerId: string) {
               ELSE 0 
             END as remaining
           FROM (
-            SELECT pr.eleve_id, s.groupe_id, g.prix_par_seance as due_total
+            SELECT pr.eleve_id, s.groupe_id, g.prix_par_seance * COUNT(*) as due_total
             FROM presences pr
             JOIN seances s ON pr.seance_id = s.id
             JOIN groupes g ON s.groupe_id = g.id

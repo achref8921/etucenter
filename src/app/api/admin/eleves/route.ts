@@ -64,12 +64,33 @@ export async function GET() {
       paidMap.set(`${row.eleve_id}|${row.groupe_id}`, Number(row.total || 0));
     }
 
+    const presentRows = pairEleves.length
+      ? await prisma.$queryRawUnsafe<{ eleve_id: string; groupe_id: string; n: number }[]>(
+          `
+          SELECT pr.eleve_id, s.groupe_id, COUNT(*)::int AS n
+          FROM presences pr
+          JOIN seances s ON pr.seance_id = s.id
+          WHERE pr.statut = 'present' AND s.statut = 'terminee'
+            AND pr.eleve_id = ANY($1::uuid[]) AND s.groupe_id = ANY($2::uuid[])
+          GROUP BY pr.eleve_id, s.groupe_id
+          `,
+          pairEleves,
+          pairGroupes
+        )
+      : [];
+
+    const presentMap = new Map<string, number>();
+    for (const row of presentRows) {
+      presentMap.set(`${row.eleve_id}|${row.groupe_id}`, Number(row.n || 0));
+    }
+
     const result = eleves.map((e) => {
       const groupes = e.inscriptions.map((ins) => {
-        const totalDue = Number(ins.groupe.prixParSeance);
+        const prixParSeance = Number(ins.groupe.prixParSeance);
+        const totalDue = prixParSeance * (presentMap.get(`${e.id}|${ins.groupeId}`) || 0);
         const totalPaid = paidMap.get(`${e.id}|${ins.groupeId}`) || 0;
         return {
-          groupe: { id: ins.groupe.id, nom: ins.groupe.nom, prixParSeance: totalDue },
+          groupe: { id: ins.groupe.id, nom: ins.groupe.nom, prixParSeance },
           totalDue,
           totalPaid,
           unpaid: totalDue - totalPaid,

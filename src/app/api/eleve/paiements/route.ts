@@ -35,15 +35,24 @@ export async function GET() {
       paidByGroupe.set(p.groupeId, (paidByGroupe.get(p.groupeId) || 0) + Number(p.montant));
     }
 
-    const groupes = inscriptions.map((ins) => {
-      const totalPaid = paidByGroupe.get(ins.groupeId) || 0;
-      const totalDue = Number(ins.groupe.prixParSeance);
-      return {
-        groupe: { id: ins.groupe.id, nom: ins.groupe.nom },
-        totalPaid,
-        unpaid: Math.max(0, totalDue - totalPaid),
-      };
-    });
+    const groupes = await Promise.all(
+      inscriptions.map(async (ins) => {
+        const totalPaid = paidByGroupe.get(ins.groupeId) || 0;
+        const presencesCount = await prisma.presence.count({
+          where: {
+            eleveId,
+            statut: "present",
+            seance: { groupeId: ins.groupeId, statut: "terminee" },
+          },
+        });
+        const totalDue = Number(ins.groupe.prixParSeance) * presencesCount;
+        return {
+          groupe: { id: ins.groupe.id, nom: ins.groupe.nom },
+          totalPaid,
+          unpaid: Math.max(0, totalDue - totalPaid),
+        };
+      })
+    );
 
     logger.info("Paiements élève récupérés", {
       eleveId,
