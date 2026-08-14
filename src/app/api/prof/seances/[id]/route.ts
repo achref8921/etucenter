@@ -44,7 +44,8 @@ async function notifyGroupeStudents(
   groupeNom: string,
   titre: string,
   message: string,
-  url: string
+  url: string,
+  type: string = "nouvelle_seance"
 ) {
   const inscriptions = await prisma.inscription.findMany({
     where: { groupeId, statut: "actif" },
@@ -59,7 +60,7 @@ async function notifyGroupeStudents(
       destinataireId,
       titre,
       message,
-      type: "nouvelle_seance",
+      type,
     })),
   });
   await sendPushToUsers(eleveIds, { title: titre, body: message, url }).catch(() => {});
@@ -224,15 +225,46 @@ export async function DELETE(
     const result = await assertOwnSeance((session.user as any).id, id);
     if (result.error) return NextResponse.json({ error: result.error }, { status: result.status });
 
-    const presencesCount = await prisma.presence.count({ where: { seanceId: id } });
-    if (presencesCount > 0) {
-      return NextResponse.json(
-        { error: "Impossible de supprimer une séance qui contient des présences enregistrées" },
-        { status: 400 }
-      );
-    }
+    const seance = result.seance!;
 
-    await prisma.seance.delete({ where: { id } });
+    await prisma.$transaction(async (tx) => {
+      const presences = await tx.presence.findMany({
+        where: { seanceId: id },
+        select: { id: true },
+      });
+      const presenceIds = presences.map((p) => p.id);
+
+      if (presenceIds.length > 0) {
+        const consumptions = await tx.studentTransaction.findMany({
+          where: { attendanceId: { in: presenceIds } },
+          select: { id: true },
+        });
+        const consumptionIds = consumptions.map((c) => c.id);
+        if (consumptionIds.length > 0) {
+          await tx.studentTransaction.deleteMany({
+            where: {
+              OR: [{ id: { in: consumptionIds } }, { reversalOfId: { in: consumptionIds } }],
+            },
+          });
+        }
+      }
+
+      await tx.seance.delete({ where: { id } });
+    });
+
+    const dateStr = formatDateFr(seance.date);
+    const timeStr = formatTimeFr(seance.heureDebut);
+    const when = timeStr ? `le ${dateStr} à ${timeStr}` : `le ${dateStr}`;
+
+    await notifyGroupeStudents(
+      seance.groupe.centerId,
+      seance.groupe.id,
+      seance.groupe.nom,
+      "Séance supprimée",
+      `La séance du groupe "${seance.groupe.nom}" prévue ${when} a été supprimée.`,
+      "/eleve/notifications",
+      "seance_supprimee"
+    );
 
     return NextResponse.json({ message: "Séance supprimée" });
   } catch (error) {

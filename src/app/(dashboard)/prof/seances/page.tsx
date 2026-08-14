@@ -422,9 +422,9 @@ export default function ProfSeancesPage() {
                           </button>
                           <button
                             onClick={(e) => { e.stopPropagation(); setConfirmDelete(seance.id); }}
-                            disabled={deletingId === seance.id || seance._count.presences > 0}
+                            disabled={deletingId === seance.id}
                             className="rounded p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-red-600 dark:hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-400"
-                            title={seance._count.presences > 0 ? "Des présences sont enregistrées — suppression impossible" : "Supprimer"}
+                            title="Supprimer"
                           >
                             {deletingId === seance.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                           </button>
@@ -632,7 +632,7 @@ export default function ProfSeancesPage() {
       <ConfirmDelete
         open={!!confirmDelete}
         title="Supprimer la séance"
-        message="Êtes-vous sûr de vouloir supprimer cette séance ? Cette action est irréversible."
+        message="Êtes-vous sûr de vouloir supprimer cette séance ? Les présences et les transactions financières liées seront également supprimées. Les élèves du groupe seront notifiés. Cette action est irréversible."
         onConfirm={() => { if (confirmDelete) handleDelete(confirmDelete); setConfirmDelete(null); }}
         onCancel={() => setConfirmDelete(null)}
         loading={!!confirmDelete && deletingId === confirmDelete}
