@@ -32,16 +32,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { eleveId, groupeId, date, heureDebut, heureFin, notes } = parsed.data;
+    const { eleveId, eleveIds, groupeId, date, heureDebut, heureFin, notes } = parsed.data;
+    const eleveIdList = eleveIds && eleveIds.length > 0 ? [...new Set(eleveIds)] : eleveId ? [eleveId] : [];
 
-    const eleve = await prisma.utilisateur.findFirst({
+    if (eleveIdList.length === 0) {
+      return NextResponse.json({ error: "Sélectionnez au moins un élève" }, { status: 400 });
+    }
+
+    const eleves = await prisma.utilisateur.findMany({
       where: isProf
-        ? { id: eleveId, role: "eleve", deletedAt: null }
-        : { id: eleveId, centerId, role: "eleve", deletedAt: null },
+        ? { id: { in: eleveIdList }, role: "eleve", deletedAt: null }
+        : { id: { in: eleveIdList }, centerId, role: "eleve", deletedAt: null },
       select: { id: true, prenom: true, nom: true },
     });
-    if (!eleve) {
-      return NextResponse.json({ error: "Élève non trouvé" }, { status: 404 });
+    if (eleves.length !== eleveIdList.length) {
+      return NextResponse.json({ error: "Un ou plusieurs élèves introuvables" }, { status: 404 });
     }
 
     const groupe = isProf
@@ -57,12 +62,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Groupe non trouvé" }, { status: 404 });
     }
 
-    const inscription = await prisma.inscription.findFirst({
-      where: { eleveId, groupeId, statut: "actif" },
+    const inscriptions = await prisma.inscription.findMany({
+      where: { eleveId: { in: eleveIdList }, groupeId, statut: "actif" },
+      select: { eleveId: true },
     });
-    if (!inscription) {
+    if (inscriptions.length !== eleveIdList.length) {
       return NextResponse.json(
-        { error: "L'élève n'est pas inscrit dans ce groupe" },
+        { error: "Un ou plusieurs élèves ne sont pas inscrits dans ce groupe" },
         { status: 400 }
       );
     }
@@ -80,19 +86,21 @@ export async function POST(request: NextRequest) {
 
     const existingPresence = await prisma.presence.findFirst({
       where: {
-        eleveId,
+        eleveId: { in: eleveIdList },
         seance: { groupeId, date: seanceDate },
       },
       include: { seance: { select: { id: true, date: true } } },
     });
     if (existingPresence) {
       return NextResponse.json(
-        { error: "Une séance est déjà enregistrée pour cet élève à cette date" },
+        { error: "Un de ces élèves a déjà une séance enregistrée à cette date pour ce groupe" },
         { status: 409 }
       );
     }
 
-    const { seance, presence, consumption } = await prisma.$transaction(async (tx) => {
+    const names = eleves.map((el) => `${el.prenom} ${el.nom}`).join(", ");
+
+    const { seance, presences, consumptions } = await prisma.$transaction(async (tx) => {
       const s = await tx.seance.create({
         data: {
           groupeId,
@@ -100,34 +108,40 @@ export async function POST(request: NextRequest) {
           heureDebut: buildTime(heureDebut),
           heureFin: buildTime(heureFin),
           statut: "terminee",
-          notes: notes?.trim() || `Séance de rattrapage — ${eleve.prenom} ${eleve.nom}`,
+          notes: notes?.trim() || `Séance de rattrapage — ${names}`,
           prixParSeance: groupe.prixParSeance ?? null,
         },
       });
-      const p = await tx.presence.create({
-        data: { seanceId: s.id, eleveId, statut: "present", enregistrePar: adminId },
-      });
-      const c = await consumeCourseAttendance(
-        { centerId, eleveId, attendanceId: p.id, actorId: adminId },
-        tx
-      );
-      return { seance: s, presence: p, consumption: c };
+      const createdPresences: any[] = [];
+      const createdConsumptions: any[] = [];
+      for (const el of eleves) {
+        const p = await tx.presence.create({
+          data: { seanceId: s.id, eleveId: el.id, statut: "present", enregistrePar: adminId },
+        });
+        const c = await consumeCourseAttendance(
+          { centerId, eleveId: el.id, attendanceId: p.id, actorId: adminId },
+          tx
+        );
+        createdPresences.push(p);
+        createdConsumptions.push(c);
+      }
+      return { seance: s, presences: createdPresences, consumptions: createdConsumptions };
     });
 
     const when = heureDebut ? `le ${formatDateFr(date)} à ${heureDebut}` : `le ${formatDateFr(date)}`;
     const titre = "Séance de rattrapage ajoutée";
     const message = `Une séance a été ajoutée pour vous ${when} dans le groupe "${groupe.nom}". Elle est facturée ${price.toFixed(2)} DT (comptabilisée dans votre dossier).`;
 
-    await prisma.notification.create({
-      data: {
+    await prisma.notification.createMany({
+      data: eleves.map((el) => ({
         centerId,
-        destinataireId: eleveId,
+        destinataireId: el.id,
         titre,
         message,
         type: "nouvelle_seance",
-      },
+      })),
     });
-    await sendPushToUsers([eleveId], {
+    await sendPushToUsers(eleveIdList, {
       title: titre,
       body: message,
       url: "/eleve/notifications",
@@ -135,13 +149,13 @@ export async function POST(request: NextRequest) {
 
     logger.info("Séance de rattrapage ajoutée", {
       adminId,
-      eleveId,
+      eleveIds: eleveIdList,
       seanceId: seance.id,
       groupeId,
       price,
     });
 
-    return NextResponse.json({ seance, presence, consumption }, { status: 201 });
+    return NextResponse.json({ seance, presences, consumptions }, { status: 201 });
   } catch (error) {
     logger.error("Erreur lors de l'ajout d'une séance de rattrapage", { error });
     return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });

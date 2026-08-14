@@ -50,7 +50,7 @@ export default function ProfSeancesPage() {
   const [showRattrapageModal, setShowRattrapageModal] = useState(false);
   const [rattrapageGroupeId, setRattrapageGroupeId] = useState("");
   const [rattrapageEleves, setRattrapageEleves] = useState<EleveOption[]>([]);
-  const [rattrapageEleveId, setRattrapageEleveId] = useState("");
+  const [rattrapageEleveIds, setRattrapageEleveIds] = useState<string[]>([]);
   const [rattrapageDate, setRattrapageDate] = useState("");
   const [rattrapageHeureDebut, setRattrapageHeureDebut] = useState("");
   const [rattrapageHeureFin, setRattrapageHeureFin] = useState("");
@@ -240,7 +240,7 @@ export default function ProfSeancesPage() {
 
   const loadGroupEleves = async (groupeId: string) => {
     setRattrapageEleves([]);
-    setRattrapageEleveId("");
+    setRattrapageEleveIds([]);
     if (!groupeId) return;
     try {
       const res = await fetch(`/api/prof/groupes/${groupeId}`);
@@ -259,7 +259,7 @@ export default function ProfSeancesPage() {
   const openRattrapageModal = () => {
     setRattrapageGroupeId("");
     setRattrapageEleves([]);
-    setRattrapageEleveId("");
+    setRattrapageEleveIds([]);
     setRattrapageDate("");
     setRattrapageHeureDebut("");
     setRattrapageHeureFin("");
@@ -274,8 +274,8 @@ export default function ProfSeancesPage() {
       setRattrapageError("Veuillez sélectionner un groupe");
       return;
     }
-    if (!rattrapageEleveId) {
-      setRattrapageError("Veuillez sélectionner un élève");
+    if (rattrapageEleveIds.length === 0) {
+      setRattrapageError("Sélectionnez au moins un élève");
       return;
     }
     if (!rattrapageDate) {
@@ -295,7 +295,7 @@ export default function ProfSeancesPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          eleveId: rattrapageEleveId,
+          eleveIds: rattrapageEleveIds,
           groupeId: rattrapageGroupeId,
           date: rattrapageDate,
           heureDebut: rattrapageHeureDebut,
@@ -308,8 +308,15 @@ export default function ProfSeancesPage() {
         throw new Error(body.error || "Erreur lors de l'ajout de la séance");
       }
       setShowRattrapageModal(false);
-      setSuccess("Séance de rattrapage ajoutée : l'élève a été notifié et le montant a été déduit de son compte.");
-      toast("success", "Séance de rattrapage ajoutée et montant déduit du compte de l'élève");
+      setSuccess(
+        rattrapageEleveIds.length > 1
+          ? `Séance de rattrapage ajoutée pour ${rattrapageEleveIds.length} élèves : ils ont été notifiés et le montant a été déduit de leur compte.`
+          : "Séance de rattrapage ajoutée : l'élève a été notifié et le montant a été déduit de son compte."
+      );
+      toast(
+        "success",
+        `Séance de rattrapage ajoutée pour ${rattrapageEleveIds.length} élève${rattrapageEleveIds.length > 1 ? "s" : ""} et montant déduit du compte`
+      );
       fetchSeances(dateFrom || undefined, dateTo || undefined);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Erreur inconnue";
@@ -318,6 +325,18 @@ export default function ProfSeancesPage() {
     } finally {
       setSavingRattrapage(false);
     }
+  };
+
+  const toggleRattrapageEleve = (id: string) => {
+    setRattrapageEleveIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAllRattrapage = () => {
+    setRattrapageEleveIds((prev) =>
+      prev.length === rattrapageEleves.length ? [] : rattrapageEleves.map((el) => el.id)
+    );
   };
 
   const statusLabel = (s: string) => {
@@ -503,16 +522,54 @@ export default function ProfSeancesPage() {
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Élève</label>
-                <select
-                  value={rattrapageEleveId}
-                  onChange={(e) => setRattrapageEleveId(e.target.value)}
-                  disabled={!rattrapageGroupeId}
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
-                >
-                  <option value="">{rattrapageGroupeId ? "Sélectionner un élève" : "Choisissez d'abord un groupe"}</option>
-                  {rattrapageEleves.map((el) => <option key={el.id} value={el.id}>{el.prenom} {el.nom}</option>)}
-                </select>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Élèves
+                </label>
+                <div className="overflow-hidden rounded-lg border border-gray-300 dark:border-slate-600">
+                  {rattrapageEleves.length === 0 ? (
+                    <p className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">Choisissez d'abord un groupe</p>
+                  ) : (
+                    <div className="max-h-44 divide-y divide-gray-100 overflow-y-auto dark:divide-slate-700/50">
+                      {rattrapageEleves.map((el) => {
+                        const checked = rattrapageEleveIds.includes(el.id);
+                        return (
+                          <label
+                            key={el.id}
+                            className={`flex cursor-pointer items-center gap-2.5 px-3 py-2 text-sm transition-colors ${
+                              checked
+                                ? "bg-blue-50 dark:bg-blue-900/30"
+                                : "hover:bg-gray-50 dark:hover:bg-slate-800"
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => toggleRattrapageEleve(el.id)}
+                              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            />
+                            <span className={`font-medium ${checked ? "text-blue-700 dark:text-blue-300" : "text-gray-700 dark:text-gray-300"}`}>
+                              {el.prenom} {el.nom}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+                {rattrapageEleves.length > 0 && (
+                  <div className="mt-1.5 flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={toggleSelectAllRattrapage}
+                      className="text-xs font-medium text-blue-600 hover:underline dark:text-blue-400"
+                    >
+                      {rattrapageEleveIds.length === rattrapageEleves.length ? "Tout désélectionner" : "Tout sélectionner"}
+                    </button>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {rattrapageEleveIds.length} sélectionné{rattrapageEleveIds.length > 1 ? "s" : ""}
+                    </span>
+                  </div>
+                )}
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>

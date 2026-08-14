@@ -108,14 +108,23 @@ export const presenceSchema = z.object({
   timezoneOffset: z.number().optional(),
 });
 
-export const rattrapageSchema = z.object({
-  eleveId: z.string().uuid(),
-  groupeId: z.string().uuid(),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date invalide"),
-  heureDebut: z.string().regex(/^\d{1,2}:\d{2}$/, "Heure de début invalide").optional(),
-  heureFin: z.string().regex(/^\d{1,2}:\d{2}$/, "Heure de fin invalide").optional(),
-  notes: z.string().optional(),
-});
+export const rattrapageSchema = z
+  .object({
+    eleveIds: z.array(z.string().uuid()).optional(),
+    eleveId: z.string().uuid().optional(),
+    groupeId: z.string().uuid(),
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date invalide"),
+    heureDebut: z.string().regex(/^\d{1,2}:\d{2}$/, "Heure de début invalide").optional(),
+    heureFin: z.string().regex(/^\d{1,2}:\d{2}$/, "Heure de fin invalide").optional(),
+    notes: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      const ids = data.eleveIds && data.eleveIds.length > 0 ? data.eleveIds : data.eleveId ? [data.eleveId] : [];
+      return ids.length > 0;
+    },
+    { message: "Sélectionnez au moins un élève", path: ["eleveIds"] }
+  );
 
 export const paiementSchema = z.object({
   eleveId: z.string().uuid(),
