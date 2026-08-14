@@ -2,13 +2,19 @@ import { NextResponse } from "next/server";
 import { requireActiveCenter, PROF_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
+import { clientNowFromOffset } from "@/lib/utils";
+import { finalizePassedSeances } from "@/lib/seance-finalizer";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const { session, error } = await requireActiveCenter("GET", PROF_ROLES);
     if (error) return error;
 
     const userId = (session.user as any).id;
+
+    const { searchParams } = new URL(request.url);
+    const timezoneOffset = Number(searchParams.get("timezoneOffset") ?? "0");
+    await finalizePassedSeances((session.user as any).centerId, clientNowFromOffset(timezoneOffset));
 
     // Get all groups this teacher teaches
     const groupes = await prisma.groupe.findMany({

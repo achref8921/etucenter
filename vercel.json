@@ -5,6 +5,10 @@
       "schedule": "30 2 * * *"
     },
     {
+      "path": "/api/cron/seances",
+      "schedule": "45 3 * * *"
+    },
+    {
       "path": "/api/cron/backup",
       "schedule": "17 3 * * *"
     },

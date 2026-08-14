@@ -74,6 +74,7 @@ export default function ProfSeancesPage() {
       setLoading(true);
       setError(null);
       const params = new URLSearchParams();
+      params.set("timezoneOffset", String(new Date().getTimezoneOffset()));
       if (from) params.set("dateFrom", from);
       if (to) params.set("dateTo", to);
       const res = await fetch(`/api/prof/seances?${params.toString()}`);

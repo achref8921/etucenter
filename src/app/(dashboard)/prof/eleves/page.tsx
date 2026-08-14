@@ -59,7 +59,7 @@ export default function ProfElevesPage() {
   const [filter, setFilter] = useState<"all" | "paid" | "unpaid">("all");
 
   useEffect(() => {
-    fetch("/api/prof/eleves")
+    fetch(`/api/prof/eleves?timezoneOffset=${new Date().getTimezoneOffset()}`)
       .then((r) => r.json())
       .then((data) => {
         setStudents(data);

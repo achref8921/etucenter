@@ -5,6 +5,7 @@ import { logger } from "@/lib/logger";
 import { presenceSchema } from "@/lib/validations";
 import { canModifyAttendance, clientNowFromOffset } from "@/lib/utils";
 import { consumeCourseAttendance, reverseCourseAttendance } from "@/lib/student-finance";
+import { finalizePassedSeances } from "@/lib/seance-finalizer";
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,7 +26,7 @@ export async function GET(request: NextRequest) {
       where: { id: seanceId },
       include: {
         groupe: {
-          select: { id: true, profId: true },
+          select: { id: true, profId: true, centerId: true },
         },
       },
     });
@@ -37,6 +38,8 @@ export async function GET(request: NextRequest) {
     if (seance.groupe.profId !== (session.user as any).id) {
       return NextResponse.json({ error: "Vous n'êtes pas le prof de ce groupe" }, { status: 403 });
     }
+
+    await finalizePassedSeances(seance.groupe.centerId, clientNow);
 
     const [inscriptions, existingPresences] = await Promise.all([
       prisma.inscription.findMany({
@@ -217,6 +220,8 @@ export async function POST(request: NextRequest) {
       seanceId,
       count: results.length,
     });
+
+    await finalizePassedSeances(seance.groupe.centerId, clientNow);
 
     return NextResponse.json(results);
   } catch (error) {

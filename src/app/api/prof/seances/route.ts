@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { seanceSchema } from "@/lib/validations";
 import { sendPushToUsers } from "@/lib/push";
+import { clientNowFromOffset } from "@/lib/utils";
+import { finalizePassedSeances } from "@/lib/seance-finalizer";
 
 function formatDateFr(date: Date): string {
   return new Date(date).toLocaleDateString("fr-TN", {
@@ -56,6 +58,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const dateFrom = searchParams.get("dateFrom");
     const dateTo = searchParams.get("dateTo");
+
+    const timezoneOffset = Number(searchParams.get("timezoneOffset") ?? "0");
+    await finalizePassedSeances((session.user as any).centerId, clientNowFromOffset(timezoneOffset));
 
     const groupes = await prisma.groupe.findMany({
       where: { profId: (session.user as any).id },
