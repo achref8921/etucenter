@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
-import { round2 } from "@/lib/teacher-finance";
+import { round2, reverseTeacherEarningsForReference } from "@/lib/teacher-finance";
 
 export const STUDENT_CREATABLE_TYPES = ["PREPAYMENT", "ADJUSTMENT"] as const;
 
@@ -486,6 +486,30 @@ export async function reverseStudentTransaction(input: ReverseStudentTransaction
       data: { status: "reversed", reversedById: input.actorId ?? null, reversedAt: now },
     });
 
+    let linkedPaiement = null;
+    if (original.type === "PREPAYMENT" && original.reference?.startsWith("paiement:")) {
+      const paiementId = original.reference.slice("paiement:".length);
+      linkedPaiement = await tx.paiement.findFirst({
+        where: { id: paiementId, groupe: { centerId: input.centerId } },
+        include: { groupe: { select: { profId: true } } },
+      });
+
+      if (linkedPaiement) {
+        if (linkedPaiement.groupe.profId) {
+          await reverseTeacherEarningsForReference(
+            {
+              centerId: input.centerId,
+              reference: `paiement:${paiementId}`,
+              actorId: input.actorId ?? null,
+              reason: input.reason,
+            },
+            tx
+          );
+        }
+        await tx.paiement.delete({ where: { id: paiementId } });
+      }
+    }
+
     await tx.systemLog.create({
       data: {
         action: "finance.student.reverse",
@@ -497,6 +521,7 @@ export async function reverseStudentTransaction(input: ReverseStudentTransaction
           transactionId: original.id,
           reversalId: reversal.id,
           reason: input.reason,
+          linkedPaiementDeleted: linkedPaiement ? linkedPaiement.id : null,
         },
       },
     });
@@ -590,6 +615,33 @@ export async function listStudentsWithBalance(centerId: string) {
     _sum: { signedAmount: true },
   });
 
+  const inscriptions = await prisma.inscription.findMany({
+    where: { statut: "actif", groupe: { centerId } },
+    select: {
+      eleveId: true,
+      groupe: {
+        select: {
+          id: true,
+          nom: true,
+          prixParSeance: true,
+          matiere: { select: { nom: true } },
+        },
+      },
+    },
+  });
+
+  const groupsByStudent = new Map<string, { id: string; nom: string; prixParSeance: number | null; matiere: string | null }[]>();
+  for (const ins of inscriptions) {
+    const list = groupsByStudent.get(ins.eleveId) ?? [];
+    list.push({
+      id: ins.groupe.id,
+      nom: ins.groupe.nom,
+      prixParSeance: Number(ins.groupe.prixParSeance ?? 0) || null,
+      matiere: ins.groupe.matiere?.nom ?? null,
+    });
+    groupsByStudent.set(ins.eleveId, list);
+  }
+
   const balanceMap = new Map<string, number>();
   for (const row of rows) {
     balanceMap.set(row.eleveId, round2(Number(row._sum.signedAmount ?? 0)));
@@ -605,6 +657,7 @@ export async function listStudentsWithBalance(centerId: string) {
     classe: s.classe,
     actif: s.actif,
     balance: balanceMap.get(s.id) ?? 0,
+    inscriptions: groupsByStudent.get(s.id) ?? [],
   }));
 }
 

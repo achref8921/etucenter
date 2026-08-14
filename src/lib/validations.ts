@@ -145,6 +145,7 @@ export const reverseTransactionSchema = z.object({
 export const studentTransactionSchema = z.object({
   studentId: z.string().uuid(),
   type: z.enum(["PREPAYMENT", "ADJUSTMENT"]),
+  groupeId: z.string().uuid("Identifiant de groupe invalide").optional().nullable(),
   amount: z.number().positive("Le montant doit être positif"),
   credit: z.boolean().optional(),
   date: z.string().optional(),

@@ -3,8 +3,7 @@ import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { paiementSchema } from "@/lib/validations";
-import { createStudentTransaction } from "@/lib/student-finance";
-import { creditTeacherForPayment } from "@/lib/teacher-finance";
+import { processStudentPayment } from "@/lib/payments";
 import { sendPushToUser } from "@/lib/push";
 
 export async function GET() {
@@ -67,70 +66,21 @@ export async function POST(request: NextRequest) {
 
     const adminId = (session.user as any).id;
 
-    const { paiement, studentTransaction, teacherTransaction } = await prisma.$transaction(async (tx) => {
-      const created = await tx.paiement.create({
-        data: {
-          eleveId,
-          groupeId,
-          montant,
-          methodePaiement,
-          reference: reference ?? null,
-          notes: notes ?? null,
-        },
-        include: {
-          eleve: {
-            select: { id: true, nom: true, prenom: true },
-          },
-          groupe: {
-            select: { id: true, nom: true, profId: true },
-          },
-        },
-      });
-
-      const studentTransaction = await createStudentTransaction(
-        {
-          centerId,
-          eleveId,
-          type: "PREPAYMENT",
-          amount: Number(montant),
-          description: `Paiement reçu pour le groupe "${created.groupe.nom}"`,
-          paymentMethod: methodePaiement,
-          reference: reference ?? `paiement:${created.id}`,
-          notes: notes ?? null,
-          idempotencyKey: `paiement:${created.id}`,
-          createdBy: adminId,
-        },
-        tx
-      );
-
-      const teacherTransaction = created.groupe.profId
-        ? await creditTeacherForPayment({
-            centerId,
-            teacherId: created.groupe.profId,
-            amount: Number(montant),
-            description: `Part du prof — paiement de ${created.eleve.prenom} ${created.eleve.nom} pour le groupe "${created.groupe.nom}"`,
-            paymentMethod: methodePaiement,
-            reference: `paiement:${created.id}`,
-            notes: notes ?? null,
-            createdBy: adminId,
-            db: tx,
-          })
-        : null;
-
-      if (created.groupe.profId) {
-        await tx.notification.create({
-          data: {
-            centerId,
-            destinataireId: created.groupe.profId,
-            titre: "Nouveau paiement reçu",
-            message: `${created.eleve.prenom} ${created.eleve.nom} a payé ${Number(montant)} DT pour le groupe "${created.groupe.nom}".`,
-            type: "paiement_recu",
-          },
-        });
-      }
-
-      return { paiement: created, studentTransaction, teacherTransaction };
+    const { paiement, teacherTransaction } = await processStudentPayment({
+      centerId,
+      eleveId,
+      groupeId,
+      montant,
+      methodePaiement,
+      reference,
+      notes,
+      createdBy: adminId,
     });
+
+    if (!paiement) {
+      logger.error("Paiement non créé pour un appel POST paiements", { adminId });
+      return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });
+    }
 
     if (paiement.groupe.profId) {
       await sendPushToUser(paiement.groupe.profId, {
@@ -158,12 +108,10 @@ export async function POST(request: NextRequest) {
     logger.info("Paiement créé", {
       adminId,
       paiementId: paiement.id,
-      studentTransactionId: studentTransaction.id,
       teacherTransactionId: teacherTransaction?.id ?? null,
       eleveId,
       groupeId,
       montant: Number(montant),
-      balanceCredited: Number(studentTransaction.signedAmount),
       profCredited: Number(teacherTransaction?.signedAmount ?? 0),
     });
 

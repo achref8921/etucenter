@@ -63,6 +63,7 @@ interface StudentRow {
   classe: string | null;
   actif: boolean;
   balance: number;
+  inscriptions: { id: string; nom: string; prixParSeance: number | null; matiere: string | null }[];
 }
 
 interface TransactionRow {
@@ -175,6 +176,7 @@ export default function FinancesPage() {
   const [creditForm, setCreditForm] = useState({
     type: "PREPAYMENT",
     studentId: "",
+    groupeId: "",
     amount: 0,
     credit: true,
     date: "",
@@ -300,6 +302,9 @@ export default function FinancesPage() {
     );
   });
 
+  const creditStudentGroups = (studentId: string) =>
+    students.find((s) => s.id === studentId)?.inscriptions ?? [];
+
   const fetchEleves = async () => {
     try {
       const res = await fetch("/api/admin/eleves");
@@ -414,9 +419,12 @@ export default function FinancesPage() {
   };
 
   const openCreditModal = () => {
+    const defaultStudentId = selectedId || (students[0]?.id ?? "");
+    const defaultGroups = creditStudentGroups(defaultStudentId);
     setCreditForm({
       type: "PREPAYMENT",
-      studentId: selectedId || (students[0]?.id ?? ""),
+      studentId: defaultStudentId,
+      groupeId: defaultGroups.length === 1 ? defaultGroups[0].id : "",
       amount: 0,
       credit: true,
       date: new Date().toISOString().slice(0, 10),
@@ -441,6 +449,7 @@ export default function FinancesPage() {
         body: JSON.stringify({
           studentId: creditForm.studentId,
           type: creditForm.type,
+          groupeId: creditForm.groupeId || null,
           amount: creditForm.amount,
           credit: creditForm.credit,
           date: creditForm.date,
@@ -1330,7 +1339,15 @@ export default function FinancesPage() {
                 </div>
                 <select
                   value={creditForm.studentId}
-                  onChange={(e) => setCreditForm({ ...creditForm, studentId: e.target.value })}
+                  onChange={(e) => {
+                    const sid = e.target.value;
+                    const groups = creditStudentGroups(sid);
+                    setCreditForm({
+                      ...creditForm,
+                      studentId: sid,
+                      groupeId: groups.length === 1 ? groups[0].id : "",
+                    });
+                  }}
                   className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                 >
                   <option value="">Sélectionner un élève</option>
@@ -1387,6 +1404,43 @@ export default function FinancesPage() {
                     <option value="credit">Crédit (+ augmente le solde)</option>
                     <option value="debit">Débit (− diminue le solde)</option>
                   </select>
+                </div>
+              )}
+
+              {creditForm.type === "PREPAYMENT" && (
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Groupe
+                  </label>
+                  {(() => {
+                    const groups = creditStudentGroups(creditForm.studentId);
+                    if (groups.length === 0) {
+                      return (
+                        <p className="text-xs text-amber-600 dark:text-amber-400">
+                          Aucun groupe actif pour cet élève — le crédit sera enregistré sur son solde
+                          sans attribution à un groupe ni à un professeur.
+                        </p>
+                      );
+                    }
+                    return (
+                      <select
+                        value={creditForm.groupeId}
+                        onChange={(e) =>
+                          setCreditForm({ ...creditForm, groupeId: e.target.value })
+                        }
+                        className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                      >
+                        <option value="">Sélectionner un groupe</option>
+                        {groups.map((g) => (
+                          <option key={g.id} value={g.id}>
+                            {g.matiere ? `${g.matiere} — ` : ""}
+                            {g.nom}
+                            {g.prixParSeance ? ` (${g.prixParSeance} DT)` : ""}
+                          </option>
+                        ))}
+                      </select>
+                    );
+                  })()}
                 </div>
               )}
 

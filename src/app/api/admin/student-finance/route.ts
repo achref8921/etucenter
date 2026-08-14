@@ -8,6 +8,7 @@ import {
   getStudentBalance,
   listStudentTransactions,
 } from "@/lib/student-finance";
+import { processStudentPayment } from "@/lib/payments";
 
 export async function GET(request: NextRequest) {
   try {
@@ -85,8 +86,73 @@ export async function POST(request: NextRequest) {
       reference,
       notes,
       idempotencyKey,
+      groupeId,
     } = parsed.data;
     const centerId = (session.user as any).centerId;
+    const adminId = (session.user as any).id;
+
+    if (type === "PREPAYMENT") {
+      let resolvedGroupeId: string | null = groupeId || null;
+
+      if (!resolvedGroupeId) {
+        const inscriptions = await prisma.inscription.findMany({
+          where: { eleveId: studentId, statut: "actif", groupe: { centerId } },
+          select: { groupeId: true },
+        });
+        if (inscriptions.length === 1) {
+          resolvedGroupeId = inscriptions[0].groupeId;
+        } else if (inscriptions.length > 1) {
+          return NextResponse.json(
+            {
+              error:
+                "Cet élève est inscrit dans plusieurs groupes — précisez le groupe de ce paiement.",
+            },
+            { status: 400 }
+          );
+        }
+      }
+
+      if (resolvedGroupeId) {
+        const { paiement, studentTransaction, teacherTransaction } =
+          await processStudentPayment({
+            centerId,
+            eleveId: studentId,
+            groupeId: resolvedGroupeId,
+            montant: amount,
+            methodePaiement: paymentMethod ?? "especes",
+            reference: reference ?? undefined,
+            notes: notes ?? null,
+            date: date ? new Date(`${date}T00:00:00`) : undefined,
+            createdBy: adminId,
+            idempotencyKey: idempotencyKey ?? null,
+          });
+
+        return NextResponse.json(
+          { transaction: studentTransaction, paiement, teacherTransaction },
+          { status: 201 }
+        );
+      }
+
+      const walletTransaction = await createStudentTransaction({
+        centerId,
+        eleveId: studentId,
+        type,
+        amount,
+        credit,
+        date: date ? new Date(`${date}T00:00:00`) : undefined,
+        time,
+        paymentMethod,
+        reference,
+        notes,
+        idempotencyKey,
+        createdBy: adminId,
+      });
+
+      return NextResponse.json(
+        { transaction: walletTransaction, paiement: null, teacherTransaction: null },
+        { status: 201 }
+      );
+    }
 
     const transaction = await createStudentTransaction({
       centerId,
@@ -100,10 +166,10 @@ export async function POST(request: NextRequest) {
       reference,
       notes,
       idempotencyKey,
-      createdBy: (session.user as any).id,
+      createdBy: adminId,
     });
 
-    return NextResponse.json(transaction, { status: 201 });
+    return NextResponse.json({ transaction }, { status: 201 });
   } catch (error) {
     const message =
       error instanceof Error && error.message === "ELEVE_INTROUVABLE"
