@@ -1,29 +1,27 @@
 import Link from "next/link";
 import {
-  Users,
-  GraduationCap,
-  Calendar,
-  DollarSign,
-  AlertTriangle,
-  BookOpen,
-  UserCheck,
   ArrowRight,
   CreditCard,
   TrendingUp,
-  Clock,
-  Wallet,
 } from "lucide-react";
 import { getAdminStats } from "@/lib/calculations";
 import { getStudentFinanceOverview } from "@/lib/student-finance";
 import { prisma } from "@/lib/prisma";
-import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
+import { formatCurrency, formatDateTime } from "@/lib/utils";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { StatCards, SeancesUpcoming, TopImpayes } from "./admin-widgets";
 
 export default async function AdminDashboardPage() {
   const session = await getServerSession(authOptions);
   const centreId = (session?.user as any)?.centerId;
-  const [stats, totalGroups, totalMatieres, activeInscriptions, recentPaiements, seancesAVenir, topImpayes, studentFinance] =
+  const serverNow = new Date();
+  const startOfToday = new Date(serverNow.getFullYear(), serverNow.getMonth(), serverNow.getDate());
+  const startOfTomorrow = new Date(serverNow.getFullYear(), serverNow.getMonth(), serverNow.getDate() + 1);
+  const startOfMonth = new Date(serverNow.getFullYear(), serverNow.getMonth(), 1);
+  const startOfLastMonth = new Date(serverNow.getFullYear(), serverNow.getMonth() - 1, 1);
+
+  const [stats, totalGroups, totalMatieres, activeInscriptions, recentPaiements, seancesAVenir, topImpayes, studentFinance, seancesAujourdhui, monthRevenueAgg, lastMonthRevenueAgg] =
     await Promise.all([
       getAdminStats(centreId),
       prisma.groupe.count({ where: { centerId: centreId } }),
@@ -82,29 +80,55 @@ export default async function AdminDashboardPage() {
          centreId
       ),
       getStudentFinanceOverview(centreId),
+      prisma.seance.count({
+        where: {
+          groupe: { centerId: centreId },
+          date: { gte: startOfToday, lt: startOfTomorrow },
+        },
+      }),
+      prisma.paiement.aggregate({
+        _sum: { montant: true },
+        where: { groupe: { centerId: centreId }, datePaiement: { gte: startOfMonth } },
+      }),
+      prisma.paiement.aggregate({
+        _sum: { montant: true },
+        where: { groupe: { centerId: centreId }, datePaiement: { gte: startOfLastMonth, lt: startOfMonth } },
+      }),
     ]);
+
+  const monthRevenue = Number(monthRevenueAgg._sum.montant ?? 0);
+  const lastMonth = Number(lastMonthRevenueAgg._sum.montant ?? 0);
+  const revenueTrend =
+    lastMonth > 0 ? Math.round(((monthRevenue - lastMonth) / lastMonth) * 100) : null;
 
   const statCards = [
     {
-      title: "Credit Disponible",
-      value: formatCurrency(studentFinance.availableCredits),
-      icon: Wallet,
+      title: "Crédit Disponible",
+      value: studentFinance.availableCredits,
+      format: "currency" as const,
+      icon: "wallet",
       color: "bg-teal-500",
       shadow: "shadow-teal-200",
       href: "/admin/finances",
+      sub: `${studentFinance.positiveCount} élève${studentFinance.positiveCount > 1 ? "s" : ""} en crédit`,
+      subTone: "good" as const,
     },
     {
-      title: "Dettes Eleves",
-      value: formatCurrency(studentFinance.studentDebt),
-      icon: AlertTriangle,
+      title: "Dettes Élèves",
+      value: studentFinance.studentDebt,
+      format: "currency" as const,
+      icon: "alert",
       color: "bg-red-500",
       shadow: "shadow-red-200",
       href: "/admin/finances",
+      sub: `${studentFinance.negativeCount} élève${studentFinance.negativeCount > 1 ? "s" : ""} concerné${studentFinance.negativeCount > 1 ? "s" : ""}`,
+      subTone: "bad" as const,
     },
     {
-      title: "Eleves",
+      title: "Élèves",
       value: stats.totalStudents,
-      icon: Users,
+      format: "number" as const,
+      icon: "users",
       color: "bg-blue-500",
       shadow: "shadow-blue-200",
       href: "/admin/utilisateurs",
@@ -112,7 +136,8 @@ export default async function AdminDashboardPage() {
     {
       title: "Prof",
       value: stats.totalTeachers,
-      icon: GraduationCap,
+      format: "number" as const,
+      icon: "prof",
       color: "bg-green-500",
       shadow: "shadow-green-200",
       href: "/admin/utilisateurs",
@@ -120,15 +145,17 @@ export default async function AdminDashboardPage() {
     {
       title: "Groupes",
       value: totalGroups,
-      icon: UserCheck,
+      format: "number" as const,
+      icon: "groups",
       color: "bg-indigo-500",
       shadow: "shadow-indigo-200",
       href: "/admin/groupes",
     },
     {
-      title: "Matieres",
+      title: "Matières",
       value: totalMatieres,
-      icon: BookOpen,
+      format: "number" as const,
+      icon: "book",
       color: "bg-orange-500",
       shadow: "shadow-orange-200",
       href: "/admin/matieres",
@@ -136,31 +163,41 @@ export default async function AdminDashboardPage() {
     {
       title: "Inscriptions Actives",
       value: activeInscriptions,
-      icon: UserCheck,
+      format: "number" as const,
+      icon: "check",
       color: "bg-teal-500",
       shadow: "shadow-teal-200",
       href: "/admin/groupes",
     },
     {
-      title: "Seances Terminees",
+      title: "Séances Terminées",
       value: stats.totalSeances,
-      icon: Calendar,
+      format: "number" as const,
+      icon: "calendar",
       color: "bg-purple-500",
       shadow: "shadow-purple-200",
       href: "/admin/groupes",
+      sub: `${seancesAujourdhui} aujourd'hui`,
+      subTone: "neutral" as const,
     },
     {
       title: "Revenus Totaux",
-      value: formatCurrency(stats.totalRevenue),
-      icon: DollarSign,
+      value: stats.totalRevenue,
+      format: "currency" as const,
+      icon: "dollar",
       color: "bg-emerald-500",
       shadow: "shadow-emerald-200",
       href: "/admin/finances",
+      sub: `${formatCurrency(monthRevenue)} ce mois${
+        revenueTrend !== null ? ` · ${revenueTrend >= 0 ? "+" : ""}${revenueTrend}% vs mois dern.` : ""
+      }`,
+      subTone: "good" as const,
     },
     {
-      title: "Impayes",
-      value: formatCurrency(stats.totalUnpaid),
-      icon: AlertTriangle,
+      title: "Impayés",
+      value: stats.totalUnpaid,
+      format: "currency" as const,
+      icon: "alert",
       color: "bg-red-500",
       shadow: "shadow-red-200",
       href: "/admin/finances",
@@ -187,28 +224,7 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {statCards.map((card) => (
-          <Link
-            key={card.title}
-            href={card.href}
-            className="group rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 shadow-sm transition-all hover:border-blue-300 hover:shadow-md"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{card.title}</p>
-                <p className="mt-1 text-xl font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-600">{card.value}</p>
-              </div>
-              <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${card.color} shadow-md ${card.shadow}`}>
-                <card.icon className="h-5 w-5 text-white" />
-              </div>
-            </div>
-            <div className="mt-2 flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 opacity-0 transition-opacity group-hover:opacity-100">
-              Voir details <ArrowRight className="h-3 w-3" />
-            </div>
-          </Link>
-        ))}
-      </div>
+      <StatCards cards={statCards} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm">
@@ -240,86 +256,24 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm">
-          <div className="flex items-center justify-between border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-5 py-3">
-            <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Prochaines Seances</h2>
-            <Link href="/admin/groupes" className="flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800">
-              Tout voir <ArrowRight className="h-3 w-3" />
-            </Link>
-          </div>
-          <div className="divide-y divide-gray-100 dark:divide-slate-700">
-            {seancesAVenir.length === 0 ? (
-              <p className="px-5 py-6 text-center text-sm text-gray-500 dark:text-gray-400">Aucune seance planifiee</p>
-            ) : (
-              seancesAVenir.map((s) => (
-                <div key={s.id} className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 dark:hover:bg-slate-800">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/20">
-                      <Clock className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{s.groupe.nom}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {s.groupe.prof ? `${s.groupe.prof.prenom} ${s.groupe.prof.nom}` : "—"} · {formatDate(s.date)}
-                      </p>
-                    </div>
-                  </div>
-                  <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                    s.statut === "planifiee" ? "bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300" : "bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300"
-                  }`}>
-                    {s.statut === "planifiee" ? "Planifiee" : "En cours"}
-                  </span>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+        <SeancesUpcoming
+          seances={seancesAVenir.map((s) => ({
+            id: s.id,
+            date: s.date.toISOString(),
+            heureFin: s.heureFin ? s.heureFin.toISOString() : null,
+            statut: s.statut,
+            groupe: {
+              id: s.groupe.id,
+              nom: s.groupe.nom,
+              prof: s.groupe.prof
+                ? { id: s.groupe.prof.id, nom: s.groupe.prof.nom, prenom: s.groupe.prof.prenom }
+                : null,
+            },
+          }))}
+        />
       </div>
 
-      <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm">
-        <div className="flex items-center justify-between border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-5 py-3">
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Top Impayes</h2>
-          <Link href="/admin/finances" className="flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800">
-            Tout voir <ArrowRight className="h-3 w-3" />
-          </Link>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 dark:border-slate-700">
-                <th className="px-5 py-2.5 font-medium text-gray-500 dark:text-gray-400">Eleve</th>
-                <th className="px-5 py-2.5 font-medium text-gray-500 dark:text-gray-400">Groupe</th>
-                <th className="px-5 py-2.5 font-medium text-gray-500 dark:text-gray-400">Du</th>
-                <th className="px-5 py-2.5 font-medium text-gray-500 dark:text-gray-400">Paye</th>
-                <th className="px-5 py-2.5 font-medium text-gray-500 dark:text-gray-400">Impaye</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
-              {(topImpayes as any[]).length === 0 ? (
-                <tr><td colSpan={5} className="px-5 py-6 text-center text-gray-500 dark:text-gray-400">Aucun impaye</td></tr>
-              ) : (
-                (topImpayes as any[]).map((item: any, idx: number) => (
-                  <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-slate-800">
-                    <td className="px-5 py-3">
-                      <Link href={`/admin/eleves/${item.eleve_id}`} className="font-medium text-blue-600 dark:text-blue-400 hover:underline">
-                        {item.eleve_prenom} {item.eleve_nom}
-                      </Link>
-                    </td>
-                    <td className="px-5 py-3">
-                      <Link href={`/admin/groupes/${item.groupe_id}`} className="text-gray-600 dark:text-gray-400 hover:text-blue-600 hover:underline">
-                        {item.groupe_nom}
-                      </Link>
-                    </td>
-                    <td className="px-5 py-3 text-gray-600 dark:text-gray-400">{formatCurrency(Number(item.due_total))}</td>
-                    <td className="px-5 py-3 text-green-600 dark:text-green-400">{formatCurrency(Number(item.paid_total))}</td>
-                    <td className="px-5 py-3 font-semibold text-red-600 dark:text-red-400">{formatCurrency(Number(item.unpaid))}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <TopImpayes rows={topImpayes as any[]} />
     </div>
   );
 }
