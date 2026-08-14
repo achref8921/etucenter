@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Calendar, Plus, X, Loader2, Pencil, Trash2, CalendarPlus } from "lucide-react";
 import { formatDate, formatTime } from "@/lib/utils";
 import ConfirmDelete from "@/components/confirm-delete";
+import { useToast } from "@/components/ui/toast";
+import { SkeletonPage } from "@/components/ui/skeleton";
 
 interface Seance {
   id: string;
@@ -31,8 +33,10 @@ interface EleveOption {
 
 export default function ProfSeancesPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [seances, setSeances] = useState<Seance[]>([]);
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -160,9 +164,12 @@ export default function ProfSeancesPage() {
         throw new Error(body.error || "Erreur");
       }
       setShowEditModal(false);
+      toast("success", "Séance modifiée avec succès");
       fetchSeances(dateFrom || undefined, dateTo || undefined);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur inconnue");
+      const msg = err instanceof Error ? err.message : "Erreur inconnue";
+      setError(msg);
+      toast("error", msg);
     } finally {
       setSubmitting(false);
     }
@@ -181,9 +188,12 @@ export default function ProfSeancesPage() {
         const body = await res.json();
         throw new Error(body.error || "Erreur");
       }
+      toast("success", "Séance supprimée : les élèves du groupe ont été notifiés");
       fetchSeances(dateFrom || undefined, dateTo || undefined);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur inconnue");
+      const msg = err instanceof Error ? err.message : "Erreur inconnue";
+      setError(msg);
+      toast("error", msg);
     } finally {
       setDeletingId(null);
     }
@@ -217,9 +227,12 @@ export default function ProfSeancesPage() {
       setShowCreateModal(false);
       setCreateGroupeId(""); setCreateDate(""); setCreateHeureDebut(""); setCreateHeureFin(""); setCreateNotes("");
       setCreateErrors({});
+      toast("success", "Nouvelle séance créée — les élèves du groupe ont été notifiés");
       fetchSeances();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur inconnue");
+      const msg = err instanceof Error ? err.message : "Erreur inconnue";
+      setError(msg);
+      toast("error", msg);
     } finally {
       setSubmitting(false);
     }
@@ -296,9 +309,12 @@ export default function ProfSeancesPage() {
       }
       setShowRattrapageModal(false);
       setSuccess("Séance de rattrapage ajoutée : l'élève a été notifié et le montant a été déduit de son compte.");
+      toast("success", "Séance de rattrapage ajoutée et montant déduit du compte de l'élève");
       fetchSeances(dateFrom || undefined, dateTo || undefined);
     } catch (err) {
-      setRattrapageError(err instanceof Error ? err.message : "Erreur inconnue");
+      const msg = err instanceof Error ? err.message : "Erreur inconnue";
+      setRattrapageError(msg);
+      toast("error", msg);
     } finally {
       setSavingRattrapage(false);
     }
@@ -330,6 +346,8 @@ export default function ProfSeancesPage() {
     }
     return now > endDate;
   };
+
+  const filteredSeances = statusFilter === "all" ? seances : seances.filter((s) => s.statut === statusFilter);
 
   return (
     <div className="space-y-6">
@@ -376,8 +394,33 @@ export default function ProfSeancesPage() {
         <button type="button" onClick={() => { setDateFrom(""); setDateTo(""); fetchSeances(); }} className="rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800">Réinitialiser</button>
       </form>
 
+      <div className="flex flex-wrap items-center gap-2">
+        {[
+          { key: "all", label: "Toutes" },
+          { key: "planifiee", label: "Planifiées" },
+          { key: "en_cours", label: "En cours" },
+          { key: "terminee", label: "Terminées" },
+          { key: "annulee", label: "Annulées" },
+        ].map((f) => (
+          <button
+            key={f.key}
+            onClick={() => setStatusFilter(f.key)}
+            className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all ${
+              statusFilter === f.key
+                ? "bg-blue-600 text-white shadow-sm"
+                : "border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 dark:border-slate-600 dark:bg-slate-900 dark:text-gray-300 dark:hover:bg-slate-800"
+            }`}
+          >
+            {f.label}
+            {f.key !== "all" && (
+              <span className="ml-1 opacity-70">{seances.filter((s) => s.statut === f.key).length}</span>
+            )}
+          </button>
+        ))}
+      </div>
+
       {loading ? (
-        <div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" /></div>
+        <SkeletonPage />
       ) : (
         <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
           <div className="overflow-x-auto">
@@ -393,10 +436,10 @@ export default function ProfSeancesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
-                {seances.length === 0 ? (
+                {filteredSeances.length === 0 ? (
                   <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Aucune séance trouvée</td></tr>
                 ) : (
-                  seances.map((seance) => (
+                  filteredSeances.map((seance) => (
                     <tr key={seance.id} className="cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800" onClick={() => router.push(`/prof/presences/${seance.id}`)}>
                       <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{formatDate(seance.date)}</td>
                       <td className="px-6 py-4 font-medium">{seance.groupe.nom}</td>

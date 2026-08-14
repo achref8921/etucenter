@@ -6,6 +6,7 @@ import Header from "./header";
 import BottomNav from "./bottom-nav";
 import { NavModeProvider, useNavMode } from "@/components/nav-mode-provider";
 import SessionGuard from "@/components/session-guard";
+import { ToastProvider } from "@/components/ui/toast";
 import { Role } from "@prisma/client";
 
 interface DashboardLayoutProps {
@@ -75,7 +76,7 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
           </div>
         )}
         <main className={`p-4 sm:p-6 ${navMode === "bottom" ? "pb-28" : ""} ${frozenState ? "frozen-mode" : ""}`}>
-          {children}
+          <ToastProvider>{children}</ToastProvider>
         </main>
       </div>
 

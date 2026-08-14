@@ -8,7 +8,6 @@ import {
   Calendar,
   ClipboardCheck,
   FolderOpen,
-  Loader2,
   Users,
   DollarSign,
   TrendingUp,
@@ -18,6 +17,7 @@ import {
 } from "lucide-react";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import type { SessionUser } from "@/types";
+import { SkeletonPage } from "@/components/ui/skeleton";
 
 interface GroupeStats {
   id: string;
@@ -68,6 +68,7 @@ function StatCard({
   iconBg,
   href,
   hint,
+  delay = 0,
 }: {
   label: string;
   value: React.ReactNode;
@@ -75,21 +76,23 @@ function StatCard({
   iconBg: string;
   href: string;
   hint: string;
+  delay?: number;
 }) {
   return (
     <Link
       href={href}
-      className="group rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md"
+      style={{ animationDelay: `${delay}ms` }}
+      className="group animate-fade-in-up rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-lg"
     >
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{label}</p>
           <p className="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">{value}</p>
           <p className="mt-1 flex items-center gap-1 text-xs font-medium text-blue-600 opacity-0 transition-opacity group-hover:opacity-100 dark:text-blue-400">
-            {hint} <ChevronRight className="h-3 w-3" />
+            {hint} <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
           </p>
         </div>
-        <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${iconBg}`}>{icon}</div>
+        <div className={`flex h-12 w-12 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-110 ${iconBg}`}>{icon}</div>
       </div>
     </Link>
   );
@@ -103,6 +106,12 @@ export default function ProfDashboardPage() {
   const [seances, setSeances] = useState<Seance[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -139,12 +148,26 @@ export default function ProfDashboardPage() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
-      </div>
-    );
+    return <SkeletonPage />;
   }
+
+  const sessionTiming = (s: Seance): { label: string; live: boolean } | null => {
+    const start = new Date(s.date);
+    if (s.statut === "annulee") return null;
+    if (s.statut === "en_cours") return { label: "En cours", live: true };
+    if (start <= now) {
+      const end = s.heureFin ? new Date(s.heureFin) : null;
+      if (end && now < end) return { label: "En cours", live: true };
+      return null;
+    }
+    const diff = start.getTime() - now.getTime();
+    const mins = Math.round(diff / 60000);
+    if (mins <= 0) return { label: "Imminent", live: true };
+    if (mins < 60) return { label: `Dans ${mins} min`, live: false };
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return { label: m === 0 ? `Dans ${h}h` : `Dans ${h}h ${m.toString().padStart(2, "0")}`, live: false };
+  };
 
   return (
     <div className="space-y-6">
@@ -167,6 +190,7 @@ export default function ProfDashboardPage() {
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard
+              delay={0}
               label="Revenu Reçu"
               value={formatCurrency(stats.totalRevenuRecu)}
               icon={<DollarSign className="h-6 w-6 text-white" />}
@@ -175,6 +199,7 @@ export default function ProfDashboardPage() {
               hint="Voir mon compte"
             />
             <StatCard
+              delay={50}
               label={`Ma Part Nette (${stats.tauxPourcentage}%)`}
               value={<span className="text-green-600 dark:text-green-400">{formatCurrency(stats.totalRevenuNet)}</span>}
               icon={<TrendingUp className="h-6 w-6 text-white" />}
@@ -183,6 +208,7 @@ export default function ProfDashboardPage() {
               hint="Voir mes gains"
             />
             <StatCard
+              delay={100}
               label="Mes Élèves"
               value={stats.totalEleves}
               icon={<Users className="h-6 w-6 text-white" />}
@@ -191,6 +217,7 @@ export default function ProfDashboardPage() {
               hint="Voir la liste"
             />
             <StatCard
+              delay={150}
               label="Séances"
               value={stats.totalSeances}
               icon={<Calendar className="h-6 w-6 text-white" />}
@@ -202,6 +229,7 @@ export default function ProfDashboardPage() {
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <StatCard
+              delay={200}
               label="Groupes"
               value={stats.groupes.length}
               icon={<FolderOpen className="h-6 w-6 text-white" />}
@@ -210,6 +238,7 @@ export default function ProfDashboardPage() {
               hint="Gérer mes groupes"
             />
             <StatCard
+              delay={250}
               label="Présences enregistrées"
               value={stats.totalSeancesTerminees}
               icon={<ClipboardCheck className="h-6 w-6 text-white" />}
@@ -302,7 +331,9 @@ export default function ProfDashboardPage() {
                   </td>
                 </tr>
               ) : (
-                seances.map((seance) => (
+                seances.map((seance) => {
+                  const timing = sessionTiming(seance);
+                  return (
                   <tr
                     key={seance.id}
                     onClick={() => router.push(`/prof/presences/${seance.id}`)}
@@ -321,19 +352,33 @@ export default function ProfDashboardPage() {
                     </td>
                     <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{seance._count.presences}</td>
                     <td className="px-6 py-4">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          router.push(`/prof/presences/${seance.id}`);
-                        }}
-                        className="flex items-center gap-1 rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100 dark:bg-blue-900/40 dark:text-blue-300 dark:hover:bg-blue-900/60"
-                      >
-                        <ClipboardList className="h-3.5 w-3.5" />
-                        {seance.statut === "terminee" ? "Voir présences" : "Prendre présences"}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        {timing && (
+                          <span
+                            className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                              timing.live
+                                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                                : "bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+                            }`}
+                          >
+                            {timing.label}
+                          </span>
+                        )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/prof/presences/${seance.id}`);
+                          }}
+                          className="flex items-center gap-1 rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-100 dark:bg-blue-900/40 dark:text-blue-300 dark:hover:bg-blue-900/60"
+                        >
+                          <ClipboardList className="h-3.5 w-3.5" />
+                          {seance.statut === "terminee" ? "Voir présences" : "Prendre présences"}
+                        </button>
+                      </div>
                     </td>
                   </tr>
-                ))
+                  );
+                })
               )}
             </tbody>
           </table>

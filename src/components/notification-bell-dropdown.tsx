@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { Bell, CheckCheck, UserPlus, GraduationCap, DollarSign, Trash2, Clock, Calendar, CalendarX } from "lucide-react";
+import { Bell, CheckCheck, UserPlus, GraduationCap, DollarSign, Trash2, Clock, Calendar, CalendarX, UserX } from "lucide-react";
 
 interface Notification {
   id: string;
@@ -119,6 +119,7 @@ export default function NotificationBellDropdown({ role }: { role: string }) {
     if (type === "paiement_eleve") return <DollarSign className="h-4 w-4 text-green-500" />;
     if (type === "nouvelle_seance") return <Calendar className="h-4 w-4 text-violet-500" />;
     if (type === "seance_supprimee") return <CalendarX className="h-4 w-4 text-red-500" />;
+    if (type === "absence") return <UserX className="h-4 w-4 text-orange-500" />;
     if (type === "subscription_expiring") return <Clock className="h-4 w-4 text-amber-500" />;
     if (type === "message_admin") return <Bell className="h-4 w-4 text-blue-500" />;
     return <Bell className="h-4 w-4 text-gray-400 dark:text-gray-500" />;

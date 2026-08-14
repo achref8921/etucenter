@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ClipboardCheck, Loader2 } from "lucide-react";
+import { ClipboardCheck, ChevronRight } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { SkeletonPage } from "@/components/ui/skeleton";
 
 interface Seance {
   id: string;
@@ -40,11 +41,7 @@ export default function ProfPresencesSelectPage() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
-      </div>
-    );
+    return <SkeletonPage />;
   }
 
   return (
@@ -80,7 +77,7 @@ export default function ProfPresencesSelectPage() {
               </tr>
             ) : (
               seances.map((seance) => (
-                <tr key={seance.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
+                <tr key={seance.id} className="transition-colors hover:bg-blue-50/60 dark:hover:bg-blue-950/30">
                   <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{formatDate(seance.date)}</td>
                   <td className="px-6 py-4 font-medium">{seance.groupe.nom}</td>
                   <td className="px-6 py-4">
@@ -105,13 +102,15 @@ export default function ProfPresencesSelectPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <Link
-                      href={`/prof/presences/${seance.id}`}
-                      className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
-                    >
-                      <ClipboardCheck className="h-3.5 w-3.5" />
-                      Enregistrer Présence
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/prof/presences/${seance.id}`}
+                        className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-blue-700 hover:shadow-md"
+                      >
+                        <ClipboardCheck className="h-3.5 w-3.5" />
+                        {seance.statut === "terminee" ? "Voir les présences" : "Enregistrer Présence"}
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -131,36 +130,41 @@ export default function ProfPresencesSelectPage() {
             <Link
               key={seance.id}
               href={`/prof/presences/${seance.id}`}
-              className="block rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 shadow-sm"
+              className="block rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:hover:border-blue-700"
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-bold text-gray-900 dark:text-gray-100">{seance.groupe.nom}</p>
                   <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{formatDate(seance.date)}</p>
                 </div>
-                <span
-                  className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                    seance.statut === "planifiee"
-                      ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                <div className="flex shrink-0 items-center gap-2">
+                  <span
+                    className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                      seance.statut === "planifiee"
+                        ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                        : seance.statut === "en_cours"
+                          ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
+                          : seance.statut === "terminee"
+                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                            : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+                    }`}
+                  >
+                    {seance.statut === "planifiee"
+                      ? "Planifiée"
                       : seance.statut === "en_cours"
-                        ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
+                        ? "En cours"
                         : seance.statut === "terminee"
-                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                          : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
-                  }`}
-                >
-                  {seance.statut === "planifiee"
-                    ? "Planifiée"
-                    : seance.statut === "en_cours"
-                      ? "En cours"
-                      : seance.statut === "terminee"
-                        ? "Terminée"
-                        : "Annulée"}
-                </span>
+                          ? "Terminée"
+                          : "Annulée"}
+                  </span>
+                  <ChevronRight className="h-4 w-4 text-gray-300 dark:text-slate-600" />
+                </div>
               </div>
               <div className="mt-3 flex items-center gap-2 border-t border-gray-100 pt-3 dark:border-slate-700">
                 <ClipboardCheck className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">Enregistrer Présence</span>
+                <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
+                  {seance.statut === "terminee" ? "Voir les présences" : "Enregistrer Présence"}
+                </span>
               </div>
             </Link>
           ))

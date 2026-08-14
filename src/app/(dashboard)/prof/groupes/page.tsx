@@ -4,6 +4,8 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { GraduationCap, Loader2, Save, Users, Calendar, Edit3, X } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { useToast } from "@/components/ui/toast";
+import { SkeletonPage } from "@/components/ui/skeleton";
 
 interface GroupeList {
   id: string;
@@ -29,6 +31,7 @@ interface GroupeDetail {
 }
 
 export default function ProfGroupesPage() {
+  const { toast } = useToast();
   const [groupes, setGroupes] = useState<GroupeList[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [groupe, setGroupe] = useState<GroupeDetail | null>(null);
@@ -114,10 +117,13 @@ export default function ProfGroupesPage() {
         throw new Error(body.error || "Erreur");
       }
       setEditingId(null);
+      toast("success", "Tarif du groupe mis à jour");
       fetchGroupes();
       if (selectedId === id) fetchDetail(id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur inconnue");
+      const msg = err instanceof Error ? err.message : "Erreur inconnue";
+      setError(msg);
+      toast("error", msg);
     } finally {
       setSavingId(null);
     }
@@ -172,10 +178,13 @@ export default function ProfGroupesPage() {
         throw new Error(body.error || "Erreur");
       }
       setEditingDetail(false);
+      toast("success", "Groupe mis à jour avec succès");
       fetchGroupes();
       fetchDetail(groupe.id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur inconnue");
+      const msg = err instanceof Error ? err.message : "Erreur inconnue";
+      setError(msg);
+      toast("error", msg);
     } finally {
       setSavingDetail(false);
     }
@@ -187,11 +196,7 @@ export default function ProfGroupesPage() {
       : formatCurrency(g.prixParSeance);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
-      </div>
-    );
+    return <SkeletonPage />;
   }
 
   return (
@@ -224,7 +229,7 @@ export default function ProfGroupesPage() {
               {groupes.map((g) => {
                 const hasForfait = !!g.forfaitMontant && !!g.forfaitSeances;
                 return (
-                <tr key={g.id} className={`hover:bg-gray-50 dark:hover:bg-slate-800 ${selectedId === g.id ? "bg-blue-50 dark:bg-blue-900/20" : ""}`}>
+                <tr key={g.id} className={`transition-colors duration-150 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800 ${selectedId === g.id ? "bg-blue-50 dark:bg-blue-900/20" : ""}`}>
                   <td className="px-6 py-4">
                     <button
                       onClick={() => setSelectedId(g.id)}

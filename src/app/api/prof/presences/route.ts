@@ -6,6 +6,7 @@ import { presenceSchema } from "@/lib/validations";
 import { canModifyAttendance, clientNowFromOffset } from "@/lib/utils";
 import { consumeCourseAttendance, reverseCourseAttendance } from "@/lib/student-finance";
 import { finalizePassedSeances } from "@/lib/seance-finalizer";
+import { sendPushToUsers } from "@/lib/push";
 
 export async function GET(request: NextRequest) {
   try {
@@ -113,6 +114,7 @@ export async function POST(request: NextRequest) {
             profId: true,
             centerId: true,
             prixParSeance: true,
+            nom: true,
           },
         },
       },
@@ -135,6 +137,7 @@ export async function POST(request: NextRequest) {
       select: { eleveId: true },
     });
     const activeEleveIds = new Set(activeInscriptions.map((i) => i.eleveId));
+    const absentEleveIds = new Set<string>();
 
     const results = await prisma.$transaction(async (tx) => {
       const out: any[] = [];
@@ -209,6 +212,10 @@ export async function POST(request: NextRequest) {
           );
         }
 
+        if (presence.statut === "absent" && saved?.id) {
+          absentEleveIds.add(presence.eleveId);
+        }
+
         out.push(saved);
       }
 
@@ -222,6 +229,28 @@ export async function POST(request: NextRequest) {
     });
 
     await finalizePassedSeances(seance.groupe.centerId, clientNow);
+
+    if (absentEleveIds.size > 0) {
+      const eleveIds = Array.from(absentEleveIds);
+      const dateStr = new Date(seance.date).toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+      const titre = "Absence signalée";
+      const message = `Vous avez été marqué absent à la séance du ${dateStr} (${seance.groupe.nom}).`;
+      await prisma.notification.createMany({
+        data: eleveIds.map((destinataireId) => ({
+          centerId: seance.groupe.centerId,
+          destinataireId,
+          titre,
+          message,
+          type: "absence",
+        })),
+      });
+      await sendPushToUsers(eleveIds, { title: titre, body: message, url: "/eleve/presences" }).catch(() => {});
+      logger.info("Notifications d'absence envoyées", { seanceId, count: eleveIds.length });
+    }
 
     return NextResponse.json(results);
   } catch (error) {

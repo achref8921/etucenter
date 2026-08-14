@@ -98,3 +98,38 @@ body {
   pointer-events: none !important;
   opacity: 0.6;
 }
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(24px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+.animate-toast-in { animation: toast-in 0.25s ease-out both; }
+.animate-fade-in-up { animation: fade-in-up 0.35s ease-out both; }
+.animate-fade-in { animation: fade-in 0.3s ease-out both; }
+.animate-pop-in { animation: pop-in 0.2s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-toast-in,
+  .animate-fade-in-up,
+  .animate-fade-in,
+  .animate-pop-in {
+    animation: none;
+  }
+}
+

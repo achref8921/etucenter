@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Wallet, FileText, ArrowLeft } from "lucide-react";
+import { Wallet, FileText, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { formatDate, formatCurrency } from "@/lib/utils";
+import { SkeletonPage } from "@/components/ui/skeleton";
 
 interface TransactionRow {
   id: string;
@@ -39,6 +40,25 @@ export default function ProfComptePage() {
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [displayBalance, setDisplayBalance] = useState(0);
+
+  useEffect(() => {
+    if (balance === 0) {
+      setDisplayBalance(0);
+      return;
+    }
+    const start = performance.now();
+    const duration = 700;
+    let raf = 0;
+    const tick = (t: number) => {
+      const p = Math.min((t - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setDisplayBalance(balance * eased);
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [balance]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,11 +80,7 @@ export default function ProfComptePage() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
-      </div>
-    );
+    return <SkeletonPage />;
   }
 
   const openReceipt = (tx: TransactionRow) => {
@@ -91,7 +107,7 @@ export default function ProfComptePage() {
       )}
 
       <div
-        className={`rounded-lg border p-6 shadow-sm ${
+        className={`animate-fade-in-up rounded-lg border p-6 shadow-sm ${
           balance >= 0
             ? "border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20"
             : "border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20"
@@ -116,7 +132,7 @@ export default function ProfComptePage() {
               }`}
             >
               {balance !== 0 && (balance > 0 ? "+" : "−")}
-              {formatCurrency(Math.abs(balance))}
+              {formatCurrency(Math.abs(displayBalance))}
             </p>
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {balance > 0

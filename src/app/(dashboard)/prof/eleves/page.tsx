@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Users,
   Search,
@@ -15,8 +16,10 @@ import {
   Loader2,
   TrendingUp,
   AlertTriangle,
+  Eye,
 } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import { SkeletonPage } from "@/components/ui/skeleton";
 
 interface GroupeDetail {
   id: string;
@@ -51,12 +54,33 @@ interface StudentData {
   solde: number;
 }
 
+interface SessionHistory {
+  presenceId: string;
+  statut: "present" | "absent";
+  seance: {
+    id: string;
+    date: string;
+    heureDebut: string | null;
+    heureFin: string | null;
+    statut: string;
+    prixParSeance: number | null;
+    groupe: { id: string; nom: string };
+  };
+}
+
+interface HistoryState {
+  loading: boolean;
+  sessions: SessionHistory[] | null;
+}
+
 export default function ProfElevesPage() {
+  const router = useRouter();
   const [students, setStudents] = useState<StudentData[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "paid" | "unpaid">("all");
+  const [historyMap, setHistoryMap] = useState<Record<string, HistoryState>>({});
 
   useEffect(() => {
     fetch(`/api/prof/eleves?timezoneOffset=${new Date().getTimezoneOffset()}`)
@@ -66,6 +90,27 @@ export default function ProfElevesPage() {
         setLoading(false);
       });
   }, []);
+
+  const loadHistory = async (studentId: string) => {
+    setHistoryMap((prev) => ({ ...prev, [studentId]: { loading: true, sessions: null } }));
+    try {
+      const res = await fetch(`/api/prof/eleves/${studentId}/presences`);
+      if (!res.ok) throw new Error("Erreur");
+      const data = await res.json();
+      setHistoryMap((prev) => ({ ...prev, [studentId]: { loading: false, sessions: data.sessions || [] } }));
+    } catch {
+      setHistoryMap((prev) => ({ ...prev, [studentId]: { loading: false, sessions: [] } }));
+    }
+  };
+
+  const toggleExpand = (student: StudentData) => {
+    if (expandedId === student.id) {
+      setExpandedId(null);
+    } else {
+      setExpandedId(student.id);
+      if (!historyMap[student.id]) loadHistory(student.id);
+    }
+  };
 
   const filtered = students.filter((s) => {
     const matchSearch =
@@ -86,11 +131,7 @@ export default function ProfElevesPage() {
   const totalUnpaidAmount = students.reduce((acc, s) => acc + s.impayeTotal, 0);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
-      </div>
-    );
+    return <SkeletonPage />;
   }
 
   return (
@@ -193,6 +234,7 @@ export default function ProfElevesPage() {
         ) : (
           filtered.map((student) => {
             const isExpanded = expandedId === student.id;
+            const history = historyMap[student.id];
             const avgPresence =
               student.groupes.length > 0
                 ? Math.round(
@@ -208,7 +250,7 @@ export default function ProfElevesPage() {
               >
                 {/* Main Row */}
                 <button
-                  onClick={() => setExpandedId(isExpanded ? null : student.id)}
+                  onClick={() => toggleExpand(student)}
                   className="flex w-full items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left"
                 >
                   <div className="flex items-center gap-4">
@@ -302,7 +344,7 @@ export default function ProfElevesPage() {
 
                 {/* Expanded Details */}
                 {isExpanded && (
-                  <div className="border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-5 space-y-4">
+                  <div className="animate-fade-in-up border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-5 space-y-4">
                     {/* Contact Info */}
                     <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                       <div className="flex items-center gap-2">
@@ -490,6 +532,83 @@ export default function ProfElevesPage() {
                           ))}
                         </tbody>
                       </table>
+                    </div>
+
+                    {/* Session history */}
+                    <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-2.5">
+                        <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                          Historique des présences
+                        </h4>
+                        {history && history.sessions && history.sessions.length > 0 && (
+                          <div className="flex items-center gap-2 text-xs">
+                            <span className="inline-flex items-center gap-1 font-medium text-emerald-600 dark:text-emerald-400">
+                              <CheckCircle2 className="h-3.5 w-3.5" />
+                              {history.sessions.filter((s) => s.statut === "present").length} présences
+                            </span>
+                            <span className="inline-flex items-center gap-1 font-medium text-red-500 dark:text-red-400">
+                              <XCircle className="h-3.5 w-3.5" />
+                              {history.sessions.filter((s) => s.statut === "absent").length} absences
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      {history?.loading ? (
+                        <div className="flex items-center justify-center py-6">
+                          <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+                        </div>
+                      ) : !history || !history.sessions || history.sessions.length === 0 ? (
+                        <p className="px-4 py-6 text-center text-sm text-slate-400 dark:text-slate-500">
+                          Aucun historique de présences
+                        </p>
+                      ) : (
+                        <div className="max-h-72 overflow-y-auto">
+                          <ul className="divide-y divide-slate-100 dark:divide-slate-700">
+                            {history.sessions.map((s) => (
+                              <li
+                                key={s.presenceId}
+                                className="flex items-center justify-between gap-2 px-4 py-2.5 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
+                              >
+                                <div className="flex min-w-0 items-center gap-3">
+                                  <span
+                                    className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                                      s.statut === "present"
+                                        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400"
+                                        : "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+                                    }`}
+                                  >
+                                    {s.statut === "present" ? (
+                                      <CheckCircle2 className="h-3 w-3" />
+                                    ) : (
+                                      <XCircle className="h-3 w-3" />
+                                    )}
+                                    {s.statut === "present" ? "Présent" : "Absent"}
+                                  </span>
+                                  <span className="truncate text-sm text-slate-600 dark:text-slate-400">
+                                    {formatDate(s.seance.date)}
+                                    {s.seance.heureDebut &&
+                                      ` · ${new Date(s.seance.heureDebut).toLocaleTimeString("fr-FR", {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                      })}`}
+                                  </span>
+                                </div>
+                                <div className="flex shrink-0 items-center gap-2">
+                                  <span className="hidden text-xs text-slate-400 sm:inline dark:text-slate-500">
+                                    {s.seance.groupe.nom}
+                                  </span>
+                                  <button
+                                    onClick={() => router.push(`/prof/presences/${s.seance.id}`)}
+                                    className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-100 dark:bg-blue-900/40 dark:text-blue-300 dark:hover:bg-blue-900/60"
+                                  >
+                                    <Eye className="h-3.5 w-3.5" /> Voir
+                                  </button>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
