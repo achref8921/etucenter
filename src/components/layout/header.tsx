@@ -31,7 +31,7 @@ export default function Header({ centerLogo, onMenuToggle }: HeaderProps) {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white/80 backdrop-blur-md px-4 sm:px-6 dark:border-slate-700 dark:bg-slate-900/80">
+    <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-slate-200 bg-white/80 backdrop-blur-md px-4 sm:px-6 md:h-16 dark:border-slate-700 dark:bg-slate-900/80">
       <div className="flex items-center gap-1.5">
         {onMenuToggle && (
           <button
@@ -44,7 +44,7 @@ export default function Header({ centerLogo, onMenuToggle }: HeaderProps) {
         <img
           src={centerLogo || "/icon-192.png"}
           alt="Logo"
-          className="h-8 w-8 rounded-lg object-contain md:hidden"
+          className="h-9 w-9 rounded-lg object-contain md:hidden"
         />
       </div>
 
