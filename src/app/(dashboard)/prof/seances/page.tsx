@@ -103,6 +103,12 @@ export default function ProfSeancesPage() {
     fetchGroupes();
   }, []);
 
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.search.includes("creer=1")) {
+      setShowCreateModal(true);
+    }
+  }, []);
+
   const handleFilter = (e: React.FormEvent) => {
     e.preventDefault();
     fetchSeances(dateFrom || undefined, dateTo || undefined);

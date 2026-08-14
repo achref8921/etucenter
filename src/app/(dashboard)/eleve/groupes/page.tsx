@@ -1,8 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { GraduationCap, Loader2 } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import Link from "next/link";
+import {
+  GraduationCap,
+  Loader2,
+  ChevronDown,
+  ChevronUp,
+  Calendar,
+  User,
+  BookOpen,
+  Phone,
+  Mail,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  ChevronRight,
+} from "lucide-react";
+import { formatCurrency, formatDate } from "@/lib/utils";
 
 interface GroupeData {
   inscription: {
@@ -15,7 +30,7 @@ interface GroupeData {
     nom: string;
     description: string | null;
     prixParSeance: number;
-    prof: { id: string; nom: string; prenom: string } | null;
+    prof: { id: string; nom: string; prenom: string; telephone: string | null; email: string } | null;
     matiere: { id: string; nom: string } | null;
   };
   stats: {
@@ -23,13 +38,15 @@ interface GroupeData {
     totalPaid: number;
     unpaid: number;
   };
+  seances: { total: number; aVenir: number };
+  presences: { present: number; absent: number };
 }
 
 export default function EleveGroupesPage() {
   const [groupes, setGroupes] = useState<GroupeData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -64,6 +81,9 @@ export default function EleveGroupesPage() {
         <GraduationCap className="h-6 w-6 text-blue-600" />
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Mes Groupes</h1>
       </div>
+      <p className="-mt-3 text-sm text-gray-500 dark:text-gray-400">
+        Cliquez sur un groupe pour plus de détails.
+      </p>
 
       {error && (
         <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">
@@ -76,66 +96,166 @@ export default function EleveGroupesPage() {
           Vous n&apos;êtes inscrit à aucun groupe
         </div>
       ) : (
-        <div className="space-y-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {groupes.map((g) => (
-            <div key={g.groupe.id}>
-            <div
-              className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm"
-            >
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{g.groupe.nom}</h3>
-              {g.groupe.description && (
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{g.groupe.description}</p>
-              )}
+          {groupes.map((g) => {
+            const isExpanded = expandedId === g.groupe.id;
+            const payPercent =
+              g.stats.totalDue > 0 ? Math.min(100, Math.round((g.stats.totalPaid / g.stats.totalDue) * 100)) : 0;
+            return (
+              <div
+                key={g.groupe.id}
+                className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm transition-all hover:shadow-md"
+              >
+                <button
+                  onClick={() => setExpandedId(isExpanded ? null : g.groupe.id)}
+                  className="w-full p-6 text-left transition-colors hover:bg-blue-50/60 dark:hover:bg-blue-950/30"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-400">{g.groupe.nom}</h3>
+                      {g.groupe.matiere && (
+                        <p className="mt-0.5 flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+                          <BookOpen className="h-3.5 w-3.5" /> {g.groupe.matiere.nom}
+                        </p>
+                      )}
+                    </div>
+                    {isExpanded ? (
+                      <ChevronUp className="h-5 w-5 flex-shrink-0 text-gray-400 dark:text-gray-500" />
+                    ) : (
+                      <ChevronDown className="h-5 w-5 flex-shrink-0 text-gray-400 dark:text-gray-500" />
+                    )}
+                  </div>
 
-              <div className="mt-4 space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-500 dark:text-gray-400">Matière</span>
-                  <span className="font-medium text-gray-900 dark:text-gray-100">
-                    {g.groupe.matiere?.nom ?? "—"}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500 dark:text-gray-400">Prof</span>
-                  <span className="font-medium text-gray-900 dark:text-gray-100">
-                    {g.groupe.prof
-                      ? `${g.groupe.prof.prenom} ${g.groupe.prof.nom}`
-                      : "—"}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500 dark:text-gray-400">Prix/Mois</span>
-                  <span className="font-medium text-gray-900 dark:text-gray-100">
-                    {formatCurrency(g.groupe.prixParSeance)}
-                  </span>
-                </div>
-              </div>
+                  <div className="mt-4 space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500 dark:text-gray-400">Prof</span>
+                      <span className="font-medium text-gray-900 dark:text-gray-100">
+                        {g.groupe.prof ? `${g.groupe.prof.prenom} ${g.groupe.prof.nom}` : "—"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500 dark:text-gray-400">Prix/Séance</span>
+                      <span className="font-medium text-gray-900 dark:text-gray-100">
+                        {formatCurrency(g.groupe.prixParSeance)}
+                      </span>
+                    </div>
+                  </div>
 
-              <div className="mt-4 border-t border-gray-100 dark:border-slate-700 pt-4">
-                <h4 className="text-xs font-semibold uppercase text-gray-400 dark:text-gray-500">Finances</h4>
-                <div className="mt-2 space-y-1 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500 dark:text-gray-400">Total dû</span>
-                    <span className="text-gray-900 dark:text-gray-100">{formatCurrency(g.stats.totalDue)}</span>
+                  <div className="mt-4 border-t border-gray-100 dark:border-slate-700 pt-4">
+                    <div className="mb-1 flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                      <span>Réglé à {payPercent}%</span>
+                      <span>
+                        {formatCurrency(g.stats.totalPaid)} / {formatCurrency(g.stats.totalDue)}
+                      </span>
+                    </div>
+                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-slate-700">
+                      <div
+                        className={`h-full rounded-full transition-all ${
+                          g.stats.unpaid > 0 ? "bg-amber-500" : "bg-emerald-500"
+                        }`}
+                        style={{ width: `${payPercent}%` }}
+                      />
+                    </div>
+                    <div className="mt-2 flex items-center justify-between text-sm">
+                      <span className="text-gray-500 dark:text-gray-400">Impayé</span>
+                      <span
+                        className={`font-semibold ${
+                          g.stats.unpaid > 0 ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"
+                        }`}
+                      >
+                        {formatCurrency(g.stats.unpaid)}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500 dark:text-gray-400">Total payé</span>
-                    <span className="text-green-600 dark:text-green-400">{formatCurrency(g.stats.totalPaid)}</span>
+                </button>
+
+                {isExpanded && (
+                  <div className="border-t border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 p-6">
+                    {g.groupe.description && (
+                      <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">{g.groupe.description}</p>
+                    )}
+
+                    <div className="mb-4 space-y-2 text-sm">
+                      <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                        <Calendar className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                        Inscrit le :{" "}
+                        <span className="font-medium text-gray-900 dark:text-gray-100">
+                          {formatDate(g.inscription.dateInscription)}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                        <Clock className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                        Séances :{" "}
+                        <span className="font-medium text-gray-900 dark:text-gray-100">
+                          {g.seances.total} au total
+                          {g.seances.aVenir > 0 && (
+                            <span className="text-blue-600 dark:text-blue-400"> — {g.seances.aVenir} à venir</span>
+                          )}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
+                        <User className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                        Présences :
+                        <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                          <CheckCircle2 className="h-3.5 w-3.5" /> {g.presences.present}
+                        </span>
+                        <span className="flex items-center gap-1 text-red-500 dark:text-red-400">
+                          <XCircle className="h-3.5 w-3.5" /> {g.presences.absent}
+                        </span>
+                      </div>
+                    </div>
+
+                    {g.groupe.prof && (
+                      <div className="mb-4 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3">
+                        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                          Contacter le prof
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {g.groupe.prof.telephone && (
+                            <a
+                              href={`tel:${g.groupe.prof.telephone}`}
+                              className="flex items-center gap-1.5 rounded-md bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
+                            >
+                              <Phone className="h-3.5 w-3.5" /> Appeler
+                            </a>
+                          )}
+                          {g.groupe.prof.email && (
+                            <a
+                              href={`mailto:${g.groupe.prof.email}`}
+                              className="flex items-center gap-1.5 rounded-md bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400"
+                            >
+                              <Mail className="h-3.5 w-3.5" /> Email
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex flex-wrap gap-2">
+                      <Link
+                        href="/eleve/seances"
+                        className="flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700"
+                      >
+                        <Calendar className="h-3.5 w-3.5" /> Mes séances
+                      </Link>
+                      <Link
+                        href="/eleve/presences"
+                        className="flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-100 dark:border-slate-600 dark:text-gray-300 dark:hover:bg-slate-800"
+                      >
+                        Présences <ChevronRight className="h-3.5 w-3.5" />
+                      </Link>
+                      <Link
+                        href="/eleve/paiements"
+                        className="flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-100 dark:border-slate-600 dark:text-gray-300 dark:hover:bg-slate-800"
+                      >
+                        Paiements <ChevronRight className="h-3.5 w-3.5" />
+                      </Link>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500 dark:text-gray-400">Impayé</span>
-                    <span
-                      className={`font-medium ${g.stats.unpaid > 0 ? "text-red-600 dark:text-red-400" : "text-gray-900 dark:text-gray-100"}`}
-                    >
-                      {formatCurrency(g.stats.unpaid)}
-                    </span>
-                  </div>
-                </div>
+                )}
               </div>
-            </div>
-          </div>
-          ))}
-        </div>
+            );
+          })}
         </div>
       )}
     </div>

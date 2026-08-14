@@ -36,7 +36,12 @@ export async function GET() {
       },
       include: {
         groupe: {
-          select: { id: true, nom: true },
+          select: {
+            id: true,
+            nom: true,
+            matiere: { select: { id: true, nom: true } },
+            prof: { select: { id: true, nom: true, prenom: true, telephone: true, email: true } },
+          },
         },
       },
       orderBy: { date: "asc" },

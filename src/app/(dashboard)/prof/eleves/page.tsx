@@ -292,11 +292,29 @@ export default function ProfElevesPage() {
                     <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                       <div className="flex items-center gap-2">
                         <Mail className="h-4 w-4 text-slate-400 dark:text-slate-500" />
-                        <span className="text-sm text-slate-600 dark:text-slate-400 truncate">{student.email}</span>
+                        {student.email ? (
+                          <a
+                            href={`mailto:${student.email}`}
+                            className="text-sm text-blue-600 hover:underline dark:text-blue-400 truncate"
+                          >
+                            {student.email}
+                          </a>
+                        ) : (
+                          <span className="text-sm text-slate-600 dark:text-slate-400 truncate">—</span>
+                        )}
                       </div>
                       <div className="flex items-center gap-2">
                         <Phone className="h-4 w-4 text-slate-400 dark:text-slate-500" />
-                        <span className="text-sm text-slate-600 dark:text-slate-400">{student.telephone || "—"}</span>
+                        {student.telephone ? (
+                          <a
+                            href={`tel:${student.telephone}`}
+                            className="text-sm text-blue-600 hover:underline dark:text-blue-400"
+                          >
+                            {student.telephone}
+                          </a>
+                        ) : (
+                          <span className="text-sm text-slate-600 dark:text-slate-400">—</span>
+                        )}
                       </div>
                       <div className="flex items-center gap-2">
                         <GraduationCap className="h-4 w-4 text-slate-400 dark:text-slate-500" />
@@ -311,6 +329,28 @@ export default function ProfElevesPage() {
                         </span>
                       </div>
                     </div>
+
+                    {/* Contact actions */}
+                    {(student.telephone || student.email) && (
+                      <div className="flex flex-wrap gap-2">
+                        {student.telephone && (
+                          <a
+                            href={`tel:${student.telephone}`}
+                            className="flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
+                          >
+                            <Phone className="h-3.5 w-3.5" /> Appeler
+                          </a>
+                        )}
+                        {student.email && (
+                          <a
+                            href={`mailto:${student.email}`}
+                            className="flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400"
+                          >
+                            <Mail className="h-3.5 w-3.5" /> Envoyer un email
+                          </a>
+                        )}
+                      </div>
+                    )}
 
                     {/* Summary */}
                     <div className="flex gap-4">
