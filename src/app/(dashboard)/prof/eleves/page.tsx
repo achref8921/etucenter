@@ -24,7 +24,10 @@ interface GroupeDetail {
   matiere: string;
   prixParSeance: number;
   seancesTotalies: number;
+  due: number;
+  paye: number;
   impaye: number;
+  avance: number;
   presences: number;
   absences: number;
   tauxPresence: number;
@@ -358,6 +361,9 @@ export default function ProfElevesPage() {
                               Dû
                             </th>
                             <th className="px-4 py-2.5 font-medium text-slate-500 dark:text-slate-400 text-right">
+                              Payé
+                            </th>
+                            <th className="px-4 py-2.5 font-medium text-slate-500 dark:text-slate-400 text-right">
                               Impayé
                             </th>
                           </tr>
@@ -394,7 +400,17 @@ export default function ProfElevesPage() {
                                 </span>
                               </td>
                               <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-400">
-                                {formatCurrency(g.seancesTotalies * g.prixParSeance)}
+                                {formatCurrency(g.due)}
+                              </td>
+                              <td className="px-4 py-3 text-right">
+                                <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                                  {formatCurrency(g.paye)}
+                                </span>
+                                {g.avance > 0 && (
+                                  <span className="ml-1 text-[10px] text-emerald-500 dark:text-emerald-400">
+                                    (avance {formatCurrency(g.avance)})
+                                  </span>
+                                )}
                               </td>
                               <td className="px-4 py-3 text-right">
                                 <span

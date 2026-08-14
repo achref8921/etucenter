@@ -36,6 +36,15 @@ export default function ProfGroupesPage() {
   const [editPrice, setEditPrice] = useState<number>(0);
   const [savingId, setSavingId] = useState<string | null>(null);
 
+  const [editingDetail, setEditingDetail] = useState(false);
+  const [detailForm, setDetailForm] = useState({
+    nom: "",
+    description: "",
+    capaciteMax: 0,
+    prixParSeance: 0,
+  });
+  const [savingDetail, setSavingDetail] = useState(false);
+
 
   const fetchGroupes = useCallback(async () => {
     try {
@@ -89,6 +98,50 @@ export default function ProfGroupesPage() {
       setError(err instanceof Error ? err.message : "Erreur inconnue");
     } finally {
       setSavingId(null);
+    }
+  };
+
+  const startEditDetail = () => {
+    if (!groupe) return;
+    setDetailForm({
+      nom: groupe.nom,
+      description: groupe.description ?? "",
+      capaciteMax: groupe.capaciteMax,
+      prixParSeance: groupe.prixParSeance,
+    });
+    setEditingDetail(true);
+  };
+
+  const handleSaveDetail = async () => {
+    if (!groupe) return;
+    if (!detailForm.nom.trim()) {
+      setError("Le nom du groupe est requis");
+      return;
+    }
+    try {
+      setSavingDetail(true);
+      setError(null);
+      const res = await fetch(`/api/prof/groupes/${groupe.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nom: detailForm.nom,
+          description: detailForm.description || null,
+          capaciteMax: detailForm.capaciteMax,
+          prixParSeance: detailForm.prixParSeance,
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || "Erreur");
+      }
+      setEditingDetail(false);
+      fetchGroupes();
+      fetchDetail(groupe.id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setSavingDetail(false);
     }
   };
 
@@ -199,28 +252,103 @@ export default function ProfGroupesPage() {
           <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{groupe.nom}</h2>
-              <Link
-                href={`/prof/seances?groupeId=${groupe.id}`}
-                className="flex items-center gap-1 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-purple-700"
-              >
-                <Calendar className="h-3.5 w-3.5" /> Creer une seance
-              </Link>
+              <div className="flex items-center gap-2">
+                {!editingDetail ? (
+                  <button
+                    onClick={startEditDetail}
+                    className="flex items-center gap-1 rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800"
+                  >
+                    <Edit3 className="h-3.5 w-3.5" /> Modifier
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleSaveDetail}
+                      disabled={savingDetail}
+                      className="flex items-center gap-1 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+                    >
+                      {savingDetail ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                      Enregistrer
+                    </button>
+                    <button
+                      onClick={() => setEditingDetail(false)}
+                      className="rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </>
+                )}
+                <Link
+                  href={`/prof/seances?groupeId=${groupe.id}`}
+                  className="flex items-center gap-1 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-purple-700"
+                >
+                  <Calendar className="h-3.5 w-3.5" /> Creer une seance
+                </Link>
+              </div>
             </div>
-            {groupe.description && <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">{groupe.description}</p>}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-              <div>
-                <span className="text-gray-500 dark:text-gray-400">Matiere</span>
-                <p className="font-medium text-gray-900 dark:text-gray-100">{groupe.matiere?.nom ?? "—"}</p>
+            {editingDetail ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Nom du groupe</label>
+                    <input
+                      type="text"
+                      value={detailForm.nom}
+                      onChange={(e) => setDetailForm({ ...detailForm, nom: e.target.value })}
+                      className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Capacité maximale</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={detailForm.capaciteMax || ""}
+                      onChange={(e) => setDetailForm({ ...detailForm, capaciteMax: Number(e.target.value) })}
+                      className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Prix / séance (DT)</label>
+                    <input
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      value={detailForm.prixParSeance || ""}
+                      onChange={(e) => setDetailForm({ ...detailForm, prixParSeance: Number(e.target.value) })}
+                      className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Description</label>
+                  <textarea
+                    value={detailForm.description}
+                    onChange={(e) => setDetailForm({ ...detailForm, description: e.target.value })}
+                    rows={2}
+                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
               </div>
-              <div>
-                <span className="text-gray-500 dark:text-gray-400">Capacite</span>
-                <p className="font-medium text-gray-900 dark:text-gray-100">{groupe.capaciteMax}</p>
-              </div>
-              <div>
-                <span className="text-gray-500 dark:text-gray-400">Prix actuel</span>
-                <p className="font-bold text-blue-600 dark:text-blue-400">{formatCurrency(groupe.prixParSeance)}</p>
-              </div>
-            </div>
+            ) : (
+              <>
+                {groupe.description && <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">{groupe.description}</p>}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-500 dark:text-gray-400">Matiere</span>
+                    <p className="font-medium text-gray-900 dark:text-gray-100">{groupe.matiere?.nom ?? "—"}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 dark:text-gray-400">Capacite</span>
+                    <p className="font-medium text-gray-900 dark:text-gray-100">{groupe.capaciteMax}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 dark:text-gray-400">Prix actuel</span>
+                    <p className="font-bold text-blue-600 dark:text-blue-400">{formatCurrency(groupe.prixParSeance)}</p>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

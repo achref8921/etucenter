@@ -86,14 +86,16 @@ export async function GET() {
       _count: { id: true },
     });
 
-    // Get attendance per student per group
+    // Get attendance + due per student per group (same price snapshot logic as the admin)
     const presenceData = await prisma.$queryRawUnsafe(
       `SELECT pr.eleve_id, s.groupe_id,
               COUNT(*)::int as total_seances,
               SUM(CASE WHEN pr.statut = 'present' THEN 1 ELSE 0 END)::int as present_count,
-              SUM(CASE WHEN pr.statut = 'absent' THEN 1 ELSE 0 END)::int as absent_count
+              SUM(CASE WHEN pr.statut = 'absent' THEN 1 ELSE 0 END)::int as absent_count,
+              COALESCE(SUM(CASE WHEN pr.statut = 'present' THEN COALESCE(s.prix_par_seance, g.prix_par_seance) ELSE 0 END), 0)::numeric(12,2) as due_total
        FROM presences pr
        JOIN seances s ON pr.seance_id = s.id
+       JOIN groupes g ON s.groupe_id = g.id
        WHERE pr.eleve_id = ANY($1::uuid[]) AND s.groupe_id = ANY($2::uuid[]) AND s.statut = 'terminee'
        GROUP BY pr.eleve_id, s.groupe_id`,
       studentIds,
@@ -123,10 +125,18 @@ export async function GET() {
     }
 
     // Build presence map
-    const presenceMap = new Map<string, { total: number; present: number; absent: number }>();
+    const presenceMap = new Map<
+      string,
+      { total: number; present: number; absent: number; due: number }
+    >();
     for (const p of presenceData as any[]) {
       const key = `${p.eleve_id}-${p.groupe_id}`;
-      presenceMap.set(key, { total: p.total_seances, present: p.present_count, absent: p.absent_count });
+      presenceMap.set(key, {
+        total: p.total_seances,
+        present: p.present_count,
+        absent: p.absent_count,
+        due: Number(p.due_total || 0),
+      });
     }
 
     // Build final result
@@ -138,8 +148,8 @@ export async function GET() {
 
       for (const grp of student.groupes) {
         const finishedCount = finishedSeanceMap.get(grp.id) || 0;
-        const pres = presenceMap.get(`${stId}-${grp.id}`) || { total: 0, present: 0, absent: 0 };
-        const due = grp.prixParSeance * (pres.present || 0);
+        const pres = presenceMap.get(`${stId}-${grp.id}`) || { total: 0, present: 0, absent: 0, due: 0 };
+        const due = pres.due;
         const paid = paymentMap.get(`${stId}-${grp.id}`) || 0;
 
         totalDue += due;
@@ -148,7 +158,10 @@ export async function GET() {
         groupeDetails.push({
           ...grp,
           seancesTotalies: finishedCount,
+          due,
+          paye: paid,
           impaye: Math.max(0, due - paid),
+          avance: Math.max(0, paid - due),
           presences: pres.present,
           absences: pres.absent,
           tauxPresence: pres.total > 0 ? Math.round((pres.present / pres.total) * 100) : 0,

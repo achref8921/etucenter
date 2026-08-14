@@ -59,7 +59,7 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
-    const { prixParSeance } = body;
+    const { nom, description, capaciteMax, prixParSeance } = body;
 
     const groupe = await prisma.groupe.findFirst({
       where: { id, profId: (session.user as any).id },
@@ -69,14 +69,48 @@ export async function PUT(
       return NextResponse.json({ error: "Groupe non trouvé ou non autorisé" }, { status: 404 });
     }
 
-    if (prixParSeance === undefined || typeof prixParSeance !== "number" || prixParSeance < 0) {
-      return NextResponse.json({ error: "Prix invalide" }, { status: 400 });
+    const data: Record<string, unknown> = {};
+    if (nom !== undefined) {
+      if (typeof nom !== "string" || !nom.trim()) {
+        return NextResponse.json({ error: "Nom invalide" }, { status: 400 });
+      }
+      data.nom = nom.trim();
+    }
+    if (description !== undefined) {
+      if (typeof description !== "string") {
+        return NextResponse.json({ error: "Description invalide" }, { status: 400 });
+      }
+      data.description = description.trim() || null;
+    }
+    if (capaciteMax !== undefined) {
+      if (typeof capaciteMax !== "number" || capaciteMax < 0) {
+        return NextResponse.json({ error: "Capacité invalide" }, { status: 400 });
+      }
+      data.capaciteMax = capaciteMax;
+    }
+    if (prixParSeance !== undefined) {
+      if (typeof prixParSeance !== "number" || prixParSeance < 0) {
+        return NextResponse.json({ error: "Prix invalide" }, { status: 400 });
+      }
+      data.prixParSeance = prixParSeance;
+      data.forfaitMontant = null;
+      data.forfaitSeances = null;
+    }
+
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json({ error: "Aucune modification fournie" }, { status: 400 });
     }
 
     const updated = await prisma.groupe.update({
       where: { id },
-      data: { prixParSeance, forfaitMontant: null, forfaitSeances: null },
-      select: { id: true, nom: true, prixParSeance: true },
+      data,
+      select: {
+        id: true,
+        nom: true,
+        description: true,
+        prixParSeance: true,
+        capaciteMax: true,
+      },
     });
 
     return NextResponse.json(updated);
