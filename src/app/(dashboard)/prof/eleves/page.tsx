@@ -301,8 +301,8 @@ export default function ProfElevesPage() {
                       </span>
                     </div>
 
-                    {/* Account balance (prepaid − consumed) */}
-                    <div className="hidden sm:block text-right min-w-[110px]">
+                    {/* Account balance (payé − dû sur vos groupes) */}
+                    <div className="hidden sm:block text-right min-w-[110px]" title="Solde = Payé − Dû sur vos groupes. Positif = avance, négatif = dette.">
                       <p className="text-[10px] uppercase text-slate-400 dark:text-slate-500">Solde</p>
                       <p
                         className={`text-sm font-bold ${
@@ -320,7 +320,7 @@ export default function ProfElevesPage() {
                       {student.impayeTotal > 0 ? (
                         <>
                           <p className="text-sm font-bold text-red-600 dark:text-red-400">
-                            −{formatCurrency(student.impayeTotal)}
+                            {formatCurrency(student.impayeTotal)}
                           </p>
                           <p className="text-[10px] text-red-400 dark:text-red-500">impayé</p>
                         </>
@@ -410,6 +410,14 @@ export default function ProfElevesPage() {
                     )}
 
                     {/* Summary */}
+                    <div className="flex items-center justify-between">
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                        Récapitulatif financier
+                      </p>
+                      <p className="text-[11px] text-slate-400 dark:text-slate-500">
+                        Solde = Payé − Dû (vos groupes)
+                      </p>
+                    </div>
                     <div className="flex gap-4">
                       <div className="rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-4 py-2">
                         <p className="text-[10px] uppercase text-slate-400 dark:text-slate-500">Dû total</p>
@@ -423,7 +431,10 @@ export default function ProfElevesPage() {
                           {formatCurrency(student.totalPaid)}
                         </p>
                       </div>
-                      <div className="rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-4 py-2">
+                      <div
+                        className="rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-4 py-2"
+                        title="Montant restant dû = Dû − Payé (0 si payé en avance)"
+                      >
                         <p className="text-[10px] uppercase text-slate-400 dark:text-slate-500">Impayé</p>
                         <p
                           className={`text-sm font-bold ${
@@ -433,7 +444,10 @@ export default function ProfElevesPage() {
                           {formatCurrency(student.impayeTotal)}
                         </p>
                       </div>
-                      <div className="rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-4 py-2">
+                      <div
+                        className="rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-4 py-2"
+                        title="Solde = Payé − Dû sur vos groupes. Positif = avance, négatif = dette."
+                      >
                         <p className="text-[10px] uppercase text-slate-400 dark:text-slate-500">Solde</p>
                         <p
                           className={`text-sm font-bold ${
