@@ -182,7 +182,6 @@ export async function GET(request: Request) {
         totalDue,
         totalPaid,
         impayeTotal: Math.max(0, totalDue - totalPaid),
-        solde: Math.round((totalPaid - totalDue) * 100) / 100,
       });
     }
 

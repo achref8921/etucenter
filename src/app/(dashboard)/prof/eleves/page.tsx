@@ -51,7 +51,6 @@ interface StudentData {
   totalDue: number;
   totalPaid: number;
   impayeTotal: number;
-  solde: number;
 }
 
 interface SessionHistory {
@@ -301,20 +300,6 @@ export default function ProfElevesPage() {
                       </span>
                     </div>
 
-                    {/* Account balance (payé − dû sur vos groupes) */}
-                    <div className="hidden sm:block text-right min-w-[110px]" title="Solde = Payé − Dû sur vos groupes. Positif = avance, négatif = dette.">
-                      <p className="text-[10px] uppercase text-slate-400 dark:text-slate-500">Solde</p>
-                      <p
-                        className={`text-sm font-bold ${
-                          student.solde >= 0
-                            ? "text-emerald-600 dark:text-emerald-400"
-                            : "text-red-600 dark:text-red-400"
-                        }`}
-                      >
-                        {formatCurrency(student.solde)}
-                      </p>
-                    </div>
-
                     {/* Payment status */}
                     <div className="text-right min-w-[120px]">
                       {student.impayeTotal > 0 ? (
@@ -412,10 +397,10 @@ export default function ProfElevesPage() {
                     {/* Summary */}
                     <div className="flex items-center justify-between">
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                        Récapitulatif financier
+                        Récapitulatif financier (vos groupes)
                       </p>
                       <p className="text-[11px] text-slate-400 dark:text-slate-500">
-                        Solde = Payé − Dû (vos groupes)
+                        Impayé = Dû − Payé
                       </p>
                     </div>
                     <div className="flex gap-4">
@@ -442,19 +427,6 @@ export default function ProfElevesPage() {
                           }`}
                         >
                           {formatCurrency(student.impayeTotal)}
-                        </p>
-                      </div>
-                      <div
-                        className="rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-4 py-2"
-                        title="Solde = Payé − Dû sur vos groupes. Positif = avance, négatif = dette."
-                      >
-                        <p className="text-[10px] uppercase text-slate-400 dark:text-slate-500">Solde</p>
-                        <p
-                          className={`text-sm font-bold ${
-                            student.solde >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
-                          }`}
-                        >
-                          {formatCurrency(student.solde)}
                         </p>
                       </div>
                     </div>
