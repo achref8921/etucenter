@@ -48,6 +48,7 @@ interface StudentData {
   totalDue: number;
   totalPaid: number;
   impayeTotal: number;
+  solde: number;
 }
 
 export default function ProfElevesPage() {
@@ -258,6 +259,20 @@ export default function ProfElevesPage() {
                       </span>
                     </div>
 
+                    {/* Account balance (prepaid − consumed) */}
+                    <div className="hidden sm:block text-right min-w-[110px]">
+                      <p className="text-[10px] uppercase text-slate-400 dark:text-slate-500">Solde</p>
+                      <p
+                        className={`text-sm font-bold ${
+                          student.solde >= 0
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-red-600 dark:text-red-400"
+                        }`}
+                      >
+                        {formatCurrency(student.solde)}
+                      </p>
+                    </div>
+
                     {/* Payment status */}
                     <div className="text-right min-w-[120px]">
                       {student.impayeTotal > 0 ? (
@@ -374,6 +389,16 @@ export default function ProfElevesPage() {
                           }`}
                         >
                           {formatCurrency(student.impayeTotal)}
+                        </p>
+                      </div>
+                      <div className="rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-4 py-2">
+                        <p className="text-[10px] uppercase text-slate-400 dark:text-slate-500">Solde</p>
+                        <p
+                          className={`text-sm font-bold ${
+                            student.solde >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
+                          }`}
+                        >
+                          {formatCurrency(student.solde)}
                         </p>
                       </div>
                     </div>
