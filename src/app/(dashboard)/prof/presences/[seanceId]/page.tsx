@@ -130,7 +130,7 @@ export default function AttendanceRecordingPage() {
       {isLocked && (
         <div className="flex items-center gap-2 rounded-lg border border-orange-200 dark:border-orange-800/50 bg-orange-50 dark:bg-orange-900/20 p-4 text-sm text-orange-700 dark:text-orange-400">
           <AlertTriangle className="h-5 w-5 flex-shrink-0" />
-          Fenêtre de modification fermée — les présences ne peuvent être modifiées que pendant la séance et jusqu&apos;à 30 minutes après sa fin.
+          Fenêtre de modification fermée — les présences ne peuvent être enregistrées ou modifiées que dans les 7 jours suivant la séance.
         </div>
       )}
 

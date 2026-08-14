@@ -37,33 +37,19 @@ export function formatTime(time: Date | string | null): string {
 
 export function canModifyAttendance(
   seanceDate: Date | string,
-  heureDebut: Date | string | null,
-  heureFin: Date | string | null,
+  _heureDebut?: Date | string | null,
+  _heureFin?: Date | string | null,
   now: Date = new Date()
 ): boolean {
   const dateStr = typeof seanceDate === "string" ? seanceDate.split("T")[0] : seanceDate.toISOString().split("T")[0];
 
-  let start: Date;
-  if (heureDebut) {
-    const timeStr = typeof heureDebut === "string" ? heureDebut : heureDebut.toISOString();
-    const timePart = timeStr.includes("T") ? timeStr.split("T")[1] : timeStr;
-    start = new Date(`${dateStr}T${timePart}`);
-  } else {
-    start = new Date(`${dateStr}T00:00:00`);
-  }
+  const dayStart = new Date(`${dateStr}T00:00:00`);
+  const dayEnd = new Date(`${dateStr}T23:59:59`);
 
-  let end: Date;
-  if (heureFin) {
-    const timeStr = typeof heureFin === "string" ? heureFin : heureFin.toISOString();
-    const timePart = timeStr.includes("T") ? timeStr.split("T")[1] : timeStr;
-    end = new Date(`${dateStr}T${timePart}`);
-  } else {
-    end = new Date(start.getTime() + 60 * 60 * 1000);
-  }
+  // Attendance can be recorded/modified from the seance day until 7 days after it.
+  const windowEnd = new Date(dayEnd.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-  const deadline = new Date(end.getTime() + 30 * 60 * 1000);
-
-  return now >= start && now <= deadline;
+  return now >= dayStart && now <= windowEnd;
 }
 
 export function clientNowFromOffset(offsetMinutes?: number | null): Date {
