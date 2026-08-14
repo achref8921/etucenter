@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import Sidebar from "./sidebar";
 import Header from "./header";
 import BottomNav from "./bottom-nav";
 import { NavModeProvider, useNavMode } from "@/components/nav-mode-provider";
 import SessionGuard from "@/components/session-guard";
 import { ToastProvider } from "@/components/ui/toast";
+import BackButton from "@/components/ui/back-button";
 import { Role } from "@prisma/client";
 
 interface DashboardLayoutProps {
@@ -37,6 +39,18 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
   const { navMode } = useNavMode();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [frozenState, setFrozenState] = useState(!!frozen);
+  const pathname = usePathname();
+
+  const roleHome =
+    user.role === "admin"
+      ? "/admin"
+      : user.role === "eleve"
+        ? "/eleve"
+        : user.role === "super_admin"
+          ? "/super-admin"
+          : "/prof";
+
+  const showBackButton = pathname !== roleHome;
 
   useEffect(() => {
     if (!user.centerId) return;
@@ -76,6 +90,11 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
           </div>
         )}
         <main className={`p-4 sm:p-6 ${navMode === "bottom" ? "pb-28" : ""} ${frozenState ? "frozen-mode" : ""}`}>
+          {showBackButton && (
+            <div className="mb-3 md:hidden">
+              <BackButton fallbackHref={roleHome} />
+            </div>
+          )}
           <ToastProvider>{children}</ToastProvider>
         </main>
       </div>
