@@ -84,7 +84,7 @@ export default function ProfComptePage() {
   }
 
   const openReceipt = (tx: TransactionRow) => {
-    window.open(`/api/admin/teacher-finance/${tx.id}/receipt`, "_blank");
+    window.open(`/api/prof/teacher-finance/${tx.id}/receipt`, "_blank");
   };
 
   return (

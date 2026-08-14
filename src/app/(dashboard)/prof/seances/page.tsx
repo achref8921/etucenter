@@ -291,7 +291,7 @@ export default function ProfSeancesPage() {
       setRattrapageError(null);
       setError(null);
       setSuccess(null);
-      const res = await fetch("/api/admin/seances/rattrapage", {
+      const res = await fetch("/api/prof/seances/rattrapage", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

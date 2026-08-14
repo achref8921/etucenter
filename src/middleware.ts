@@ -54,14 +54,14 @@ export default withAuth(
 
     if (!hasAccess(pathname, role)) {
       if (pathname.startsWith("/api/")) {
-        return NextResponse.json({ error: "Session expirée" }, { status: 401 });
+        return NextResponse.json({ error: "Session expirée ou accès non autorisé" }, { status: 401 });
       }
       return NextResponse.redirect(new URL("/login?error=session_conflict", req.url));
     }
 
     if (role === "super_admin" && !pathname.startsWith("/super-admin") && !pathname.startsWith("/api/super-admin") && !pathname.startsWith("/api/notifications")) {
       if (pathname.startsWith("/api/")) {
-        return NextResponse.json({ error: "Session expirée" }, { status: 401 });
+        return NextResponse.json({ error: "Session expirée ou accès non autorisé" }, { status: 401 });
       }
       return NextResponse.redirect(new URL("/login?error=session_conflict", req.url));
     }
