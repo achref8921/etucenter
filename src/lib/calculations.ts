@@ -1,7 +1,7 @@
 import { prisma } from "./prisma";
 
 export async function calculateTotalDue(eleveId: string, groupeId: string): Promise<number> {
-  const presencesCount = await prisma.presence.count({
+  const presences = await prisma.presence.findMany({
     where: {
       eleveId,
       statut: "present",
@@ -10,16 +10,22 @@ export async function calculateTotalDue(eleveId: string, groupeId: string): Prom
         statut: "terminee",
       },
     },
+    select: {
+      seance: {
+        select: {
+          prixParSeance: true,
+          groupe: { select: { prixParSeance: true } },
+        },
+      },
+    },
   });
 
-  const groupe = await prisma.groupe.findUnique({
-    where: { id: groupeId },
-    select: { prixParSeance: true },
-  });
-
-  if (!groupe) return 0;
-
-  return Number(groupe.prixParSeance) * presencesCount;
+  let total = 0;
+  for (const p of presences) {
+    const price = p.seance.prixParSeance ?? p.seance.groupe.prixParSeance;
+    total += Number(price ?? 0);
+  }
+  return total;
 }
 
 export async function calculateTotalPaid(eleveId: string, groupeId: string): Promise<number> {
@@ -88,7 +94,7 @@ export async function getAdminStats(centerId: string) {
               ELSE 0 
             END as remaining
           FROM (
-            SELECT pr.eleve_id, s.groupe_id, g.prix_par_seance * COUNT(*) as due_total
+            SELECT pr.eleve_id, s.groupe_id, COALESCE(s.prix_par_seance, g.prix_par_seance) * COUNT(*) as due_total
             FROM presences pr
             JOIN seances s ON pr.seance_id = s.id
             JOIN groupes g ON s.groupe_id = g.id

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { Calendar, ClipboardCheck, Clock, Loader2, Users, DollarSign, TrendingUp, Wallet } from "lucide-react";
+import { Calendar, ClipboardCheck, FolderOpen, Loader2, Users, DollarSign, TrendingUp } from "lucide-react";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import type { SessionUser } from "@/types";
 
@@ -16,12 +16,11 @@ interface GroupeStats {
 
 interface Stats {
   tauxPourcentage: number;
-  totalRevenuBrut: number;
+  totalRevenuRecu: number;
   totalRevenuNet: number;
   totalEleves: number;
   totalSeances: number;
   totalSeancesTerminees: number;
-  totalPaiementsRecus: number;
   groupes: GroupeStats[];
 }
 
@@ -103,8 +102,8 @@ export default function ProfDashboardPage() {
             <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Revenu Brut</p>
-                  <p className="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(stats.totalRevenuBrut)}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Revenu Reçu</p>
+                  <p className="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(stats.totalRevenuRecu)}</p>
                 </div>
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-500">
                   <DollarSign className="h-6 w-6 text-white" />
@@ -115,7 +114,7 @@ export default function ProfDashboardPage() {
             <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Revenu Net ({stats.tauxPourcentage}%)</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Ma Part Nette ({stats.tauxPourcentage}%)</p>
                   <p className="mt-1 text-2xl font-semibold text-green-600 dark:text-green-400">{formatCurrency(stats.totalRevenuNet)}</p>
                 </div>
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-500">
@@ -139,11 +138,11 @@ export default function ProfDashboardPage() {
             <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Paiements Reçus</p>
-                  <p className="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(stats.totalPaiementsRecus)}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Séances</p>
+                  <p className="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">{stats.totalSeances}</p>
                 </div>
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-500">
-                  <Wallet className="h-6 w-6 text-white" />
+                  <Calendar className="h-6 w-6 text-white" />
                 </div>
               </div>
             </div>
@@ -153,11 +152,11 @@ export default function ProfDashboardPage() {
             <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Séances ce mois</p>
-                  <p className="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">{stats.totalSeances}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Groupes</p>
+                  <p className="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">{stats.groupes.length}</p>
                 </div>
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-500">
-                  <Calendar className="h-6 w-6 text-white" />
+                  <FolderOpen className="h-6 w-6 text-white" />
                 </div>
               </div>
             </div>
