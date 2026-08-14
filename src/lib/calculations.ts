@@ -99,7 +99,7 @@ export async function getAdminStats(centerId: string) {
             JOIN seances s ON pr.seance_id = s.id
             JOIN groupes g ON s.groupe_id = g.id
             WHERE pr.statut = 'present' AND s.statut = 'terminee' AND g.center_id = $1::uuid
-            GROUP BY pr.eleve_id, s.groupe_id, g.prix_par_seance
+            GROUP BY pr.eleve_id, s.groupe_id, s.prix_par_seance, g.prix_par_seance
           ) due
           LEFT JOIN (
             SELECT pai.eleve_id, pai.groupe_id, SUM(pai.montant) as paid_total
