@@ -31,6 +31,8 @@ export async function GET(
         classe: true,
         filiere: true,
         dateNaissance: true,
+        actif: true,
+        emailVerified: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -105,12 +107,36 @@ export async function GET(
       orderBy: { datePaiement: "desc" },
     });
 
+    const presences = await prisma.presence.findMany({
+      where: { eleveId: id },
+      select: {
+        id: true,
+        statut: true,
+        seance: {
+          select: {
+            id: true,
+            date: true,
+            statut: true,
+            groupe: {
+              select: {
+                id: true,
+                nom: true,
+                matiere: { select: { nom: true } },
+                prof: { select: { id: true, nom: true, prenom: true } },
+              },
+            },
+          },
+        },
+      },
+      orderBy: { seance: { date: "desc" } },
+    });
+
     logger.info("Détails élève récupérés", {
       adminId: (session.user as any).id,
       eleveId: id,
     });
 
-    return NextResponse.json({ eleve, inscriptions: inscriptionsWithStats, paiements });
+    return NextResponse.json({ eleve, inscriptions: inscriptionsWithStats, paiements, presences });
   } catch (error) {
     logger.error("Erreur lors de la récupération des détails élève", { error });
     return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });
