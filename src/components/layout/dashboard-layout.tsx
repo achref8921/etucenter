@@ -91,7 +91,7 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
         )}
         <main className={`p-4 sm:p-6 ${navMode === "bottom" ? "pb-28" : ""} ${frozenState ? "frozen-mode" : ""}`}>
           {showBackButton && (
-            <div className="mb-3 md:hidden">
+            <div className="mb-3">
               <BackButton fallbackHref={roleHome} />
             </div>
           )}
