@@ -29,8 +29,8 @@ interface GroupeStats {
 
 interface Stats {
   tauxPourcentage: number;
-  unpaidTeacherNet: number;
-  claimableBalance: number;
+  impayeNet: number;
+  claimable: number;
   totalEleves: number;
   totalSeances: number;
   totalSeancesTerminees: number;
@@ -191,21 +191,21 @@ export default function ProfDashboardPage() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard
               delay={0}
-              label="Montants Impayés"
-              value={formatCurrency(stats.unpaidTeacherNet)}
+              label={`Impayé Total (net ${stats.tauxPourcentage}%)`}
+              value={formatCurrency(stats.impayeNet)}
               icon={<AlertTriangle className="h-6 w-6 text-white" />}
               iconBg="bg-amber-500"
               href="/prof/eleves"
-              hint="Séances non payées par les élèves"
+              hint="Part nette des impayés élèves"
             />
             <StatCard
               delay={50}
-              label="Solde à Encaisser"
-              value={<span className="text-green-600 dark:text-green-400">{formatCurrency(stats.claimableBalance)}</span>}
+              label={`À Encaisser (net ${stats.tauxPourcentage}%)`}
+              value={<span className="text-green-600 dark:text-green-400">{formatCurrency(stats.claimable)}</span>}
               icon={<TrendingUp className="h-6 w-6 text-white" />}
               iconBg="bg-green-500"
               href="/prof/compte"
-              hint="Montant net à réclamer au centre"
+              hint="Ce que le centre vous doit"
             />
             <StatCard
               delay={100}

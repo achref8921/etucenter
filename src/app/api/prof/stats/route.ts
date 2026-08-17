@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireActiveCenter, PROF_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
-import {
-  DEFAULT_CENTER_SHARE,
-  getUnpaidTeacherNet,
-  getClaimableTeacherBalance,
-} from "@/lib/teacher-finance";
+import { DEFAULT_CENTER_SHARE, centerSharePercent, getTeacherDashboardFinance } from "@/lib/teacher-finance";
 
 export async function GET() {
   try {
@@ -16,7 +12,7 @@ export async function GET() {
     const userId = user.id;
     const centerId = user.centerId;
 
-    const [tauxBenefice, groupes, presencesTerminees, unpaidTeacherNet, claimableBalance] =
+    const [tauxBenefice, groupes, presencesTerminees, dashboardFinance] =
       await Promise.all([
         prisma.tauxBenefice.findUnique({ where: { profId: userId } }),
         prisma.groupe.findMany({
@@ -42,13 +38,10 @@ export async function GET() {
             },
           },
         }),
-        getUnpaidTeacherNet(centerId, userId),
-        getClaimableTeacherBalance(centerId, userId),
+        getTeacherDashboardFinance(centerId, userId),
       ]);
 
-    const centreShare = tauxBenefice
-      ? Number(tauxBenefice.tauxPourcentage)
-      : DEFAULT_CENTER_SHARE;
+    const centreShare = centerSharePercent(tauxBenefice);
     const profShare = Math.max(0, Math.min(100, 100 - centreShare));
 
     const totalEleves = groupes.reduce(
@@ -62,8 +55,8 @@ export async function GET() {
 
     return NextResponse.json({
       tauxPourcentage: profShare,
-      unpaidTeacherNet,
-      claimableBalance,
+      impayeNet: dashboardFinance.impayeNet,
+      claimable: dashboardFinance.claimable,
       totalEleves,
       totalSeances,
       totalSeancesTerminees: presencesTerminees,

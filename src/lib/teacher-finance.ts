@@ -72,31 +72,45 @@ export async function getTeacherBalance(centerId: string, teacherId: string): Pr
   return round2(Number(agg._sum.signedAmount ?? 0));
 }
 
-export async function getUnpaidTeacherNet(centerId: string, teacherId: string): Promise<number> {
-  const rows = await prisma.$queryRaw<{ total: number }[]>`
-    SELECT COALESCE(SUM(sub.net_earning), 0) AS total
-    FROM (
-      SELECT
-        p.seance_id,
-        COALESCE(s.prix_par_seance, g.prix_par_seance) * (1 - COALESCE(tb.taux_pourcentage, ${DEFAULT_CENTER_SHARE}) / 100) AS net_earning
-      FROM presences p
-      INNER JOIN seances s ON s.id = p.seance_id
-      INNER JOIN groupes g ON g.id = s.groupe_id
-      LEFT JOIN taux_benefices tb ON tb.prof_id = g.prof_id
-      LEFT JOIN student_transactions st ON st.attendance_id = p.id AND st.type = 'COURSE_CONSUMPTION' AND st.status = 'active'
-      WHERE p.statut = 'present'
-        AND s.statut = 'terminee'
-        AND g.prof_id = ${teacherId}::uuid
-        AND g.center_id = ${centerId}::uuid
-        AND st.id IS NULL
-    ) sub
-  `;
-  return round2(Number(rows[0]?.total ?? 0));
-}
+export async function getTeacherDashboardFinance(
+  centerId: string,
+  teacherId: string
+): Promise<{ impayeNet: number; claimable: number }> {
+  const taux = await prisma.tauxBenefice.findUnique({
+    where: { profId: teacherId },
+  });
+  const profShare = 1 - centerSharePercent(taux) / 100;
 
-export async function getClaimableTeacherBalance(centerId: string, teacherId: string): Promise<number> {
-  const teacherBalance = await getTeacherBalance(centerId, teacherId);
-  return round2(teacherBalance);
+  const rows = await prisma.$queryRaw<{ impaye_net: number; claimable: number }[]>`
+    WITH teacher_due AS (
+      SELECT pr.eleve_id, s.groupe_id,
+             SUM(COALESCE(s.prix_par_seance, g.prix_par_seance))::numeric AS due
+      FROM presences pr
+      JOIN seances s ON pr.seance_id = s.id
+      JOIN groupes g ON s.groupe_id = g.id
+      WHERE pr.statut = 'present' AND s.statut = 'terminee'
+        AND g.prof_id = ${teacherId}::uuid AND g.center_id = ${centerId}::uuid
+      GROUP BY pr.eleve_id, s.groupe_id
+    ),
+    student_paid AS (
+      SELECT p.eleve_id, p.groupe_id,
+             SUM(p.montant)::numeric AS paid
+      FROM paiements p
+      JOIN groupes g ON p.groupe_id = g.id
+      WHERE g.prof_id = ${teacherId}::uuid AND g.center_id = ${centerId}::uuid
+      GROUP BY p.eleve_id, p.groupe_id
+    )
+    SELECT
+      COALESCE(SUM(GREATEST(d.due - COALESCE(sp.paid, 0), 0) * ${profShare}::numeric), 0)::numeric AS impaye_net,
+      COALESCE(SUM(LEAST(COALESCE(sp.paid, 0), d.due) * ${profShare}::numeric), 0)::numeric AS claimable
+    FROM teacher_due d
+    LEFT JOIN student_paid sp ON d.eleve_id = sp.eleve_id AND d.groupe_id = sp.groupe_id
+  `;
+
+  return {
+    impayeNet: round2(Number(rows[0]?.impaye_net ?? 0)),
+    claimable: round2(Number(rows[0]?.claimable ?? 0)),
+  };
 }
 
 export interface CreateTeacherTransactionInput {
