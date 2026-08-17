@@ -36,6 +36,7 @@ interface GroupeData {
   stats: {
     totalDue: number;
     totalPaid: number;
+    remainingCredit: number;
     unpaid: number;
   };
   seances: { total: number; aVenir: number };
@@ -99,8 +100,6 @@ export default function EleveGroupesPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {groupes.map((g) => {
             const isExpanded = expandedId === g.groupe.id;
-            const payPercent =
-              g.stats.totalDue > 0 ? Math.min(100, Math.round((g.stats.totalPaid / g.stats.totalDue) * 100)) : 0;
             return (
               <div
                 key={g.groupe.id}
@@ -142,28 +141,18 @@ export default function EleveGroupesPage() {
                   </div>
 
                   <div className="mt-4 border-t border-gray-100 dark:border-slate-700 pt-4">
-                    <div className="mb-1 flex justify-between text-xs text-gray-500 dark:text-gray-400">
-                      <span>Réglé à {payPercent}%</span>
-                      <span>
-                        {formatCurrency(g.stats.totalPaid)} / {formatCurrency(g.stats.totalDue)}
-                      </span>
-                    </div>
-                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-slate-700">
-                      <div
-                        className={`h-full rounded-full transition-all ${
-                          g.stats.unpaid > 0 ? "bg-amber-500" : "bg-emerald-500"
-                        }`}
-                        style={{ width: `${payPercent}%` }}
-                      />
-                    </div>
                     <div className="mt-2 flex items-center justify-between text-sm">
-                      <span className="text-gray-500 dark:text-gray-400">Impayé</span>
+                      <span className="text-gray-500 dark:text-gray-400">Solde</span>
                       <span
                         className={`font-semibold ${
-                          g.stats.unpaid > 0 ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"
+                          g.stats.remainingCredit > 0
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : g.stats.remainingCredit < 0
+                              ? "text-red-600 dark:text-red-400"
+                              : "text-gray-900 dark:text-gray-100"
                         }`}
                       >
-                        {formatCurrency(g.stats.unpaid)}
+                        {g.stats.remainingCredit > 0 ? "+" : ""}{formatCurrency(g.stats.remainingCredit)}
                       </span>
                     </div>
                   </div>

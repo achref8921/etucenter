@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireActiveCenter, ELEVE_ROLES } from "@/lib/auth-helpers";
 import {
   getStudentBalance,
+  getStudentNetBalance,
   listStudentTransactions,
 } from "@/lib/student-finance";
 
@@ -22,9 +23,10 @@ export async function GET(request: NextRequest) {
     const from = fromRaw ? new Date(`${fromRaw}T00:00:00`) : undefined;
     const to = toRaw ? new Date(`${toRaw}T23:59:59`) : undefined;
 
-    const [ledger, balance] = await Promise.all([
+    const [ledger, balance, netBalance] = await Promise.all([
       listStudentTransactions({ centerId, eleveId, from, to, type, page }),
       getStudentBalance(centerId, eleveId),
+      getStudentNetBalance(centerId, eleveId),
     ]);
 
     return NextResponse.json({
@@ -34,6 +36,7 @@ export async function GET(request: NextRequest) {
       pageSize: ledger.pageSize,
       totalPages: ledger.totalPages,
       balance,
+      netBalance,
       filters: { type, from: fromRaw ?? null, to: toRaw ?? null },
     });
   } catch (error) {

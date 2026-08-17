@@ -86,6 +86,14 @@ export async function getStudentBalance(centerId: string, eleveId: string): Prom
   return round2(Number(agg._sum.signedAmount ?? 0));
 }
 
+export async function getStudentNetBalance(centerId: string, eleveId: string): Promise<number> {
+  const agg = await prisma.studentTransaction.aggregate({
+    _sum: { signedAmount: true },
+    where: { centerId, eleveId, status: "active" },
+  });
+  return round2(Number(agg._sum.signedAmount ?? 0));
+}
+
 function parseTime(value?: string | null): Date | null {
   if (!value) return null;
   const match = /^(\d{1,2}):(\d{2})$/.exec(value.trim());

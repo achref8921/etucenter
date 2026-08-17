@@ -87,6 +87,7 @@ export async function GET() {
           stats: {
             totalDue,
             totalPaid,
+            remainingCredit: totalPaid - totalDue,
             unpaid,
           },
           seances: {

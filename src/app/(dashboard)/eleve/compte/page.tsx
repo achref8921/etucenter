@@ -49,6 +49,7 @@ const METHODE_LABEL: Record<string, string> = {
 export default function EleveComptePage() {
   const [transactions, setTransactions] = useState<CompteTransaction[]>([]);
   const [balance, setBalance] = useState(0);
+  const [netBalance, setNetBalance] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState("");
@@ -64,6 +65,7 @@ export default function EleveComptePage() {
         const data = await res.json();
         setTransactions(data.transactions);
         setBalance(data.balance);
+        setNetBalance(data.netBalance ?? data.balance);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Erreur inconnue");
       } finally {
@@ -97,9 +99,9 @@ export default function EleveComptePage() {
 
       <div
         className={`rounded-lg border p-6 shadow-sm ${
-          balance > 0
+          netBalance > 0
             ? "border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-900/10"
-            : balance < 0
+            : netBalance < 0
               ? "border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-900/10"
               : "border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900"
         }`}
@@ -107,32 +109,32 @@ export default function EleveComptePage() {
         <div className="flex items-center gap-3">
           <div
             className={`flex h-12 w-12 items-center justify-center rounded-lg ${
-              balance > 0 ? "bg-green-500" : balance < 0 ? "bg-red-500" : "bg-gray-400 dark:bg-slate-600"
+              netBalance > 0 ? "bg-green-500" : netBalance < 0 ? "bg-red-500" : "bg-gray-400 dark:bg-slate-600"
             }`}
           >
             <Wallet className="h-6 w-6 text-white" />
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Mon solde prépayé</p>
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Mon solde</p>
             <p
               className={`text-3xl font-bold ${
-                balance > 0
+                netBalance > 0
                   ? "text-green-700 dark:text-green-400"
-                  : balance < 0
+                  : netBalance < 0
                     ? "text-red-700 dark:text-red-400"
                     : "text-gray-900 dark:text-gray-100"
               }`}
             >
-              {balance > 0 ? "+" : ""}
-              {formatCurrency(balance)}
+              {netBalance > 0 ? "+" : ""}
+              {formatCurrency(netBalance)}
             </p>
           </div>
         </div>
         <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">
-          {balance > 0
-            ? "Solde prépayé disponible pour vos cours."
-            : balance < 0
-              ? `Vous devez ${formatCurrency(Math.abs(balance))} au centre.`
+          {netBalance > 0
+            ? "Solde disponible pour vos cours."
+            : netBalance < 0
+              ? `Vous devez ${formatCurrency(Math.abs(netBalance))} au centre.`
               : "Votre solde est épuisé."}
         </p>
       </div>

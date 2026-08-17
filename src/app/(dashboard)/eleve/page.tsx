@@ -36,6 +36,7 @@ interface GroupeData {
   stats: {
     totalDue: number;
     totalPaid: number;
+    remainingCredit: number;
     unpaid: number;
   };
 }
@@ -68,7 +69,7 @@ export default function EleveDashboardPage() {
     fetchData();
   }, []);
 
-  const totalPaid = groupes.reduce((sum, g) => sum + g.stats.totalPaid, 0);
+  const totalRemaining = groupes.reduce((sum, g) => sum + g.stats.remainingCredit, 0);
   const totalUnpaid = groupes.reduce((sum, g) => sum + g.stats.unpaid, 0);
 
   if (loading) {
@@ -116,17 +117,33 @@ export default function EleveDashboardPage() {
         </Link>
         <Link
           href="/eleve/paiements"
-          className="group rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-green-300 dark:hover:border-green-700 hover:shadow-md"
+          className={`group rounded-lg border dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${
+            totalRemaining > 0
+              ? "border-green-200 dark:hover:border-green-700"
+              : totalRemaining < 0
+                ? "border-red-200 dark:hover:border-red-700"
+                : "border-gray-200 dark:hover:border-gray-600"
+          }`}
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Payé</p>
-              <p className="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(totalPaid)}</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Mon Solde</p>
+              <p className={`mt-1 text-2xl font-semibold ${
+                totalRemaining > 0
+                  ? "text-green-600 dark:text-green-400"
+                  : totalRemaining < 0
+                    ? "text-red-600 dark:text-red-400"
+                    : "text-gray-900 dark:text-gray-100"
+              }`}>
+                {totalRemaining > 0 ? "+" : ""}{formatCurrency(totalRemaining)}
+              </p>
               <p className="mt-1 flex items-center gap-1 text-xs font-medium text-blue-600 opacity-0 transition-opacity group-hover:opacity-100 dark:text-blue-400">
                 Voir mes paiements <ChevronRight className="h-3 w-3" />
               </p>
             </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-500">
+            <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${
+              totalRemaining > 0 ? "bg-green-500" : totalRemaining < 0 ? "bg-red-500" : "bg-gray-400"
+            }`}>
               <DollarSign className="h-6 w-6 text-white" />
             </div>
           </div>
@@ -182,16 +199,11 @@ export default function EleveDashboardPage() {
               ) : (
                 groupes.map((g) => {
                   const isExpanded = expandedId === g.groupe.id;
-                  const payPercent =
-                    g.stats.totalDue > 0
-                      ? Math.min(100, Math.round((g.stats.totalPaid / g.stats.totalDue) * 100))
-                      : 0;
                   return (
                     <FragmentRow
                       key={g.groupe.id}
                       g={g}
                       isExpanded={isExpanded}
-                      payPercent={payPercent}
                       onToggle={() => setExpandedId(isExpanded ? null : g.groupe.id)}
                       onOpen={() => router.push("/eleve/groupes")}
                     />
@@ -209,13 +221,11 @@ export default function EleveDashboardPage() {
 function FragmentRow({
   g,
   isExpanded,
-  payPercent,
   onToggle,
   onOpen,
 }: {
   g: GroupeData;
   isExpanded: boolean;
-  payPercent: number;
   onToggle: () => void;
   onOpen: () => void;
 }) {
@@ -306,22 +316,6 @@ function FragmentRow({
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
                   Ma situation financière
                 </h3>
-                <div>
-                  <div className="mb-1 flex justify-between text-xs text-gray-500 dark:text-gray-400">
-                    <span>Réglé à {payPercent}%</span>
-                    <span>
-                      {formatCurrency(g.stats.totalPaid)} / {formatCurrency(g.stats.totalDue)}
-                    </span>
-                  </div>
-                  <div className="h-2.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-slate-700">
-                    <div
-                      className={`h-full rounded-full transition-all ${
-                        g.stats.unpaid > 0 ? "bg-amber-500" : "bg-emerald-500"
-                      }`}
-                      style={{ width: `${payPercent}%` }}
-                    />
-                  </div>
-                </div>
                 <div className="grid grid-cols-3 gap-3">
                   <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2">
                     <p className="text-[10px] uppercase text-gray-400 dark:text-gray-500">Total dû</p>
@@ -336,13 +330,17 @@ function FragmentRow({
                     </p>
                   </div>
                   <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2">
-                    <p className="text-[10px] uppercase text-gray-400 dark:text-gray-500">Impayé</p>
+                    <p className="text-[10px] uppercase text-gray-400 dark:text-gray-500">Solde</p>
                     <p
                       className={`text-sm font-bold ${
-                        g.stats.unpaid > 0 ? "text-red-600 dark:text-red-400" : "text-gray-900 dark:text-gray-100"
+                        g.stats.remainingCredit > 0
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : g.stats.remainingCredit < 0
+                            ? "text-red-600 dark:text-red-400"
+                            : "text-gray-900 dark:text-gray-100"
                       }`}
                     >
-                      {formatCurrency(g.stats.unpaid)}
+                      {g.stats.remainingCredit > 0 ? "+" : ""}{formatCurrency(g.stats.remainingCredit)}
                     </p>
                   </div>
                 </div>
