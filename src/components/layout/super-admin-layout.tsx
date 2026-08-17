@@ -9,12 +9,12 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
+    <div className="min-h-screen bg-neutral-50 dark:bg-[#0f1114]">
       <SessionGuard />
       <SuperAdminSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="md:pl-64">
         <SuperAdminHeader onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
-        <main className="p-4 sm:p-6">{children}</main>
+        <main className="p-4 sm:p-5 lg:p-6">{children}</main>
       </div>
     </div>
   );

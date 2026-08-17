@@ -68,7 +68,7 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
   }, [user.centerId, user.id]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
+    <div className="min-h-screen bg-neutral-50 dark:bg-[#0f1114]">
       <SessionGuard />
       <Sidebar
         role={user.role}
@@ -84,12 +84,12 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
           onMenuToggle={navMode === "sidebar" ? () => setSidebarOpen(!sidebarOpen) : undefined}
         />
         {frozenState && (
-          <div className="flex items-center justify-center gap-2 bg-amber-100 px-4 py-2.5 text-center text-sm font-semibold text-amber-900 dark:bg-amber-900/40 dark:text-amber-200">
+          <div className="flex items-center justify-center gap-2 bg-amber-50 px-4 py-2 text-center text-[13px] font-medium text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
             Compte gelé : aucune modification autorisée
             <span className="hidden sm:inline">— vous pouvez uniquement consulter vos informations</span>
           </div>
         )}
-        <main className={`p-4 sm:p-6 ${navMode === "bottom" ? "pb-28" : ""} ${frozenState ? "frozen-mode" : ""}`}>
+        <main className={`p-4 sm:p-5 lg:p-6 ${navMode === "bottom" ? "pb-28" : ""} ${frozenState ? "frozen-mode" : ""}`}>
           {showBackButton && (
             <div className="mb-3">
               <BackButton fallbackHref={roleHome} />
