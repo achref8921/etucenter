@@ -72,6 +72,33 @@ export async function getTeacherBalance(centerId: string, teacherId: string): Pr
   return round2(Number(agg._sum.signedAmount ?? 0));
 }
 
+export async function getUnpaidTeacherNet(centerId: string, teacherId: string): Promise<number> {
+  const rows = await prisma.$queryRaw<{ total: number }[]>`
+    SELECT COALESCE(SUM(sub.net_earning), 0) AS total
+    FROM (
+      SELECT
+        p.seance_id,
+        COALESCE(s.prix_par_seance, g.prix_par_seance) * (1 - COALESCE(tb.taux_pourcentage, ${DEFAULT_CENTER_SHARE}) / 100) AS net_earning
+      FROM presences p
+      INNER JOIN seances s ON s.id = p.seance_id
+      INNER JOIN groupes g ON g.id = s.groupe_id
+      LEFT JOIN taux_benefices tb ON tb.prof_id = g.prof_id
+      LEFT JOIN student_transactions st ON st.attendance_id = p.id AND st.type = 'COURSE_CONSUMPTION' AND st.status = 'active'
+      WHERE p.statut = 'present'
+        AND s.statut = 'terminee'
+        AND g.prof_id = ${teacherId}::uuid
+        AND g.center_id = ${centerId}::uuid
+        AND st.id IS NULL
+    ) sub
+  `;
+  return round2(Number(rows[0]?.total ?? 0));
+}
+
+export async function getClaimableTeacherBalance(centerId: string, teacherId: string): Promise<number> {
+  const teacherBalance = await getTeacherBalance(centerId, teacherId);
+  return round2(teacherBalance);
+}
+
 export interface CreateTeacherTransactionInput {
   centerId: string;
   teacherId: string;

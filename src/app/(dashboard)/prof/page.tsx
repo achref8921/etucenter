@@ -9,11 +9,11 @@ import {
   ClipboardCheck,
   FolderOpen,
   Users,
-  DollarSign,
   TrendingUp,
   ChevronRight,
   ClipboardList,
   Plus,
+  AlertTriangle,
 } from "lucide-react";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import type { SessionUser } from "@/types";
@@ -29,8 +29,8 @@ interface GroupeStats {
 
 interface Stats {
   tauxPourcentage: number;
-  totalRevenuRecu: number;
-  totalRevenuNet: number;
+  unpaidTeacherNet: number;
+  claimableBalance: number;
   totalEleves: number;
   totalSeances: number;
   totalSeancesTerminees: number;
@@ -191,21 +191,21 @@ export default function ProfDashboardPage() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard
               delay={0}
-              label="Revenu Reçu"
-              value={formatCurrency(stats.totalRevenuRecu)}
-              icon={<DollarSign className="h-6 w-6 text-white" />}
-              iconBg="bg-blue-500"
-              href="/prof/compte"
-              hint="Voir mon compte"
+              label="Montants Impayés"
+              value={formatCurrency(stats.unpaidTeacherNet)}
+              icon={<AlertTriangle className="h-6 w-6 text-white" />}
+              iconBg="bg-amber-500"
+              href="/prof/eleves"
+              hint="Séances non payées par les élèves"
             />
             <StatCard
               delay={50}
-              label={`Ma Part Nette (${stats.tauxPourcentage}%)`}
-              value={<span className="text-green-600 dark:text-green-400">{formatCurrency(stats.totalRevenuNet)}</span>}
+              label="Solde à Encaisser"
+              value={<span className="text-green-600 dark:text-green-400">{formatCurrency(stats.claimableBalance)}</span>}
               icon={<TrendingUp className="h-6 w-6 text-white" />}
               iconBg="bg-green-500"
               href="/prof/compte"
-              hint="Voir mes gains"
+              hint="Montant net à réclamer au centre"
             />
             <StatCard
               delay={100}
@@ -221,7 +221,7 @@ export default function ProfDashboardPage() {
               label="Séances"
               value={stats.totalSeances}
               icon={<Calendar className="h-6 w-6 text-white" />}
-              iconBg="bg-amber-500"
+              iconBg="bg-blue-500"
               href="/prof/seances"
               hint="Gérer mes séances"
             />
