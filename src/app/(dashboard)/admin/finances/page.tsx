@@ -529,18 +529,18 @@ export default function FinancesPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Finances</h1>
+        <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Finances</h1>
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={openModal}
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700"
           >
             <Plus className="h-4 w-4" />
             Enregistrer un paiement
           </button>
           <button
             onClick={openCreditModal}
-            className="flex items-center gap-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700"
+            className="flex items-center gap-2 rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
           >
             <Coins className="h-4 w-4" />
             Ajouter un crédit
@@ -556,11 +556,11 @@ export default function FinancesPage() {
 
       {stats && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Revenus Totaux</p>
-                <p className="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                <p className="text-[13px] text-neutral-500 dark:text-neutral-400">Revenus Totaux</p>
+                <p className="mt-1 text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
                   {formatCurrency(stats.totalRevenue)}
                 </p>
               </div>
@@ -569,11 +569,11 @@ export default function FinancesPage() {
               </div>
             </div>
           </div>
-          <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Payé</p>
-                <p className="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                <p className="text-[13px] text-neutral-500 dark:text-neutral-400">Total Payé</p>
+                <p className="mt-1 text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
                   {formatCurrency(stats.totalPaid)}
                 </p>
               </div>
@@ -582,11 +582,11 @@ export default function FinancesPage() {
               </div>
             </div>
           </div>
-          <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Impayés</p>
-                <p className="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                <p className="text-[13px] text-neutral-500 dark:text-neutral-400">Impayés</p>
+                <p className="mt-1 text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
                   {formatCurrency(stats.totalUnpaid)}
                 </p>
               </div>
@@ -598,23 +598,23 @@ export default function FinancesPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-          <div className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
-            <h2 className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
-              <Users className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+      <div className="grid grid-cols-1 gap-6lg:grid-cols-3">
+        <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+          <div className="border-b border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+              <Users className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
               Élèves ({filteredStudents.length})
             </h2>
           </div>
-          <div className="border-b border-gray-200 dark:border-slate-700 p-3">
+          <div className="border-b border-neutral-200 dark:border-[#2a2d35] p-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Rechercher..."
-                className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 pl-9 pr-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:outline-none"
+                className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] pl-9 pr-3 py-2 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-blue-500 focus:outline-none"
               />
             </div>
           </div>
@@ -624,7 +624,7 @@ export default function FinancesPage() {
                 <Loader2 className="mx-auto h-6 w-6 animate-spin text-blue-600" />
               </p>
             ) : filteredStudents.length === 0 ? (
-              <p className="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+              <p className="px-6 py-8 text-center text-sm text-neutral-500 dark:text-neutral-400">
                 Aucun élève
               </p>
             ) : (
@@ -634,18 +634,18 @@ export default function FinancesPage() {
                   onClick={() =>
                     router.replace(`/admin/finances?studentId=${s.id}`)
                   }
-                  className={`block w-full border-b border-gray-100 dark:border-slate-800 px-4 py-3 text-left transition-colors ${
+                  className={`block w-full border-b border-neutral-100 dark:border-[#2a2d35] px-4 py-3 text-left transition-colors ${
                     selectedId === s.id
                       ? "bg-blue-50 dark:bg-blue-900/20"
-                      : "hover:bg-gray-50 dark:hover:bg-slate-800"
+                      : "hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
+                      <p className="truncate text-sm font-medium text-neutral-900 dark:text-neutral-100">
                         {s.prenom} {s.nom}
                       </p>
-                      <p className="truncate text-xs text-gray-500 dark:text-gray-400">
+                      <p className="truncate text-xs text-neutral-500 dark:text-neutral-400">
                         {s.codeEleve ? `#${s.codeEleve}` : ""} {s.classe ? `· ${s.classe}` : ""}
                       </p>
                     </div>
@@ -655,7 +655,7 @@ export default function FinancesPage() {
                           ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
                           : s.balance < 0
                             ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-                            : "bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-gray-200"
+                            : "bg-neutral-100 text-neutral-700 dark:bg-[#2a2d35] dark:text-neutral-200"
                       }`}
                     >
                       {s.balance > 0 ? "+" : ""}
@@ -670,21 +670,21 @@ export default function FinancesPage() {
 
         <div className="space-y-6 lg:col-span-2">
           {!selectedId ? (
-            <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-12 text-center">
-              <Coins className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600" />
-              <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+            <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-12 text-center">
+              <Coins className="mx-auto h-12 w-12 text-neutral-300 dark:text-neutral-600" />
+              <p className="mt-4 text-sm text-neutral-500 dark:text-neutral-400">
                 Sélectionnez un élève pour voir son compte financier
               </p>
             </div>
           ) : (
             <>
               <div
-                className={`rounded-lg border p-6 shadow-sm ${
+                className={`rounded-lg border p-6 ${
                   balance > 0
                     ? "border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-900/10"
                     : balance < 0
                       ? "border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-900/10"
-                      : "border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                      : "border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]"
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -695,13 +695,13 @@ export default function FinancesPage() {
                           ? "bg-green-500"
                           : balance < 0
                             ? "bg-red-500"
-                            : "bg-gray-400 dark:bg-slate-600"
+                            : "bg-neutral-400 dark:bg-[#1e2128]"
                       }`}
                     >
                       <Wallet className="h-6 w-6 text-white" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      <p className="text-[13px] text-neutral-500 dark:text-neutral-400">
                         Solde du compte
                       </p>
                       <p
@@ -710,7 +710,7 @@ export default function FinancesPage() {
                             ? "text-green-700 dark:text-green-400"
                             : balance < 0
                               ? "text-red-700 dark:text-red-400"
-                              : "text-gray-900 dark:text-gray-100"
+                              : "text-neutral-900 dark:text-neutral-100"
                         }`}
                       >
                         {balance > 0 ? "+" : ""}
@@ -729,7 +729,7 @@ export default function FinancesPage() {
                     )}
                   </div>
                 </div>
-                <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">
+                <p className="mt-3 text-sm text-neutral-600 dark:text-neutral-400">
                   {balance > 0
                     ? "Solde prépayé disponible pour l'élève."
                     : balance < 0
@@ -738,17 +738,17 @@ export default function FinancesPage() {
                 </p>
               </div>
 
-              <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-                <div className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
+              <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+                <div className="border-b border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
                       Grand livre des transactions ({total})
                     </h2>
                     <div className="flex flex-wrap items-center gap-2">
                       <select
                         value={filters.type}
                         onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-                        className="rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1.5 text-xs text-gray-900 dark:text-gray-100"
+                        className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-2 py-1.5 text-xs text-neutral-900 dark:text-neutral-100"
                       >
                         <option value="">Tous les types</option>
                         <option value="PREPAYMENT">Pré-paiement</option>
@@ -760,14 +760,14 @@ export default function FinancesPage() {
                         type="date"
                         value={filters.from}
                         onChange={(e) => setFilters({ ...filters, from: e.target.value })}
-                        className="rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1.5 text-xs text-gray-900 dark:text-gray-100"
+                        className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-2 py-1.5 text-xs text-neutral-900 dark:text-neutral-100"
                       />
-                      <span className="text-xs text-gray-400">→</span>
+                      <span className="text-xs text-neutral-400">→</span>
                       <input
                         type="date"
                         value={filters.to}
                         onChange={(e) => setFilters({ ...filters, to: e.target.value })}
-                        className="rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1.5 text-xs text-gray-900 dark:text-gray-100"
+                        className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-2 py-1.5 text-xs text-neutral-900 dark:text-neutral-100"
                       />
                       <button
                         onClick={applyFilters}
@@ -781,18 +781,18 @@ export default function FinancesPage() {
 
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm">
-                    <thead className="border-b border-gray-200 dark:border-slate-700">
+                    <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
                       <tr>
-                        <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Date</th>
-                        <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Type</th>
-                        <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Description</th>
-                        <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Méthode</th>
-                        <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Montant</th>
-                        <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Reçu</th>
-                        <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400"></th>
+                        <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Date</th>
+                        <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Type</th>
+                        <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Description</th>
+                        <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Méthode</th>
+                        <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Montant</th>
+                        <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Reçu</th>
+                        <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500"></th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+                    <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
                       {loadingLedger ? (
                         <tr>
                           <td colSpan={7} className="px-6 py-10 text-center">
@@ -801,7 +801,7 @@ export default function FinancesPage() {
                         </tr>
                       ) : transactions.length === 0 ? (
                         <tr>
-                          <td colSpan={7} className="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
+                          <td colSpan={7} className="px-6 py-10 text-center text-neutral-500 dark:text-neutral-400">
                             Aucune transaction
                           </td>
                         </tr>
@@ -810,14 +810,14 @@ export default function FinancesPage() {
                           <tr
                             key={tx.id}
                             onClick={() => openDetail(tx)}
-                            className={`cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800 ${
+                            className={`cursor-pointer hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] ${
                               tx.status === "reversed" ? "opacity-50" : ""
                             }`}
                           >
-                            <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                            <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
                               {formatDate(tx.date)}
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-4 py-2.5">
                               <div className="flex items-center gap-2">
                                 <span
                                   className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${
@@ -833,18 +833,18 @@ export default function FinancesPage() {
                                 )}
                               </div>
                             </td>
-                            <td className="max-w-[220px] px-6 py-4">
-                              <p className="truncate text-gray-900 dark:text-gray-100">{tx.description}</p>
+                            <td className="max-w-[220px] px-4 py-2.5">
+                              <p className="truncate text-neutral-900 dark:text-neutral-100">{tx.description}</p>
                               {tx.attendance && (
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                <p className="text-xs text-neutral-500 dark:text-neutral-400">
                                   {tx.attendance.seance.groupe.nom}
                                 </p>
                               )}
                             </td>
-                            <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                            <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
                               {tx.paymentMethod ? (METHODE_LABEL[tx.paymentMethod] || tx.paymentMethod) : "—"}
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-4 py-2.5">
                               <span
                                 className={`font-semibold ${
                                   tx.signedAmount >= 0
@@ -856,10 +856,10 @@ export default function FinancesPage() {
                                 {formatCurrency(tx.signedAmount)}
                               </span>
                             </td>
-                            <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                            <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
                               {tx.receiptNumber || "—"}
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-4 py-2.5">
                               <div className="flex items-center gap-1">
                                 <button
                                   onClick={(ev) => {
@@ -867,7 +867,7 @@ export default function FinancesPage() {
                                     openDetail(tx);
                                   }}
                                   title="Détails"
-                                  className="rounded-lg p-1.5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700"
+                                  className="rounded-lg p-1.5 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]"
                                 >
                                   <Eye className="h-4 w-4" />
                                 </button>
@@ -877,7 +877,7 @@ export default function FinancesPage() {
                                     openReceipt(tx);
                                   }}
                                   title="Reçu"
-                                  className="rounded-lg p-1.5 text-blue-600 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-slate-700"
+                                  className="rounded-lg p-1.5 text-blue-600 dark:text-blue-400 hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]"
                                 >
                                   <FileText className="h-4 w-4" />
                                 </button>
@@ -888,7 +888,7 @@ export default function FinancesPage() {
                                       openReverse(tx);
                                     }}
                                     title="Annuler"
-                                    className="rounded-lg p-1.5 text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-slate-700"
+                                    className="rounded-lg p-1.5 text-red-600 dark:text-red-400 hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]"
                                   >
                                     <Undo2 className="h-4 w-4" />
                                   </button>
@@ -903,22 +903,22 @@ export default function FinancesPage() {
                 </div>
 
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-between border-t border-gray-200 dark:border-slate-700 px-6 py-3">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center justify-between border-t border-neutral-200 dark:border-[#2a2d35] px-4 py-2.5">
+                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
                       Page {page} / {totalPages}
                     </p>
                     <div className="flex gap-2">
                       <button
                         onClick={() => fetchLedger(selectedId, page - 1, filters)}
                         disabled={page <= 1}
-                        className="rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-1.5 text-sm disabled:opacity-40"
+                        className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-3 py-1.5 text-sm disabled:opacity-40"
                       >
                         Précédent
                       </button>
                       <button
                         onClick={() => fetchLedger(selectedId, page + 1, filters)}
                         disabled={page >= totalPages}
-                        className="rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-1.5 text-sm disabled:opacity-40"
+                        className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-3 py-1.5 text-sm disabled:opacity-40"
                       >
                         Suivant
                       </button>
@@ -931,36 +931,36 @@ export default function FinancesPage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-        <div className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Historique des Paiements</h2>
+      <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+        <div className="border-b border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
+          <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Historique des Paiements</h2>
         </div>
         <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-gray-200 dark:border-slate-700">
+          <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
             <tr>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Date</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Élève</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Groupe</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Montant</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Méthode</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400"></th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Date</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Élève</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Montant</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Méthode</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+          <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
             {paiements.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                <td colSpan={6} className="px-6 py-8 text-center text-neutral-500 dark:text-neutral-400">
                   Aucune transaction trouvée
                 </td>
               </tr>
             ) : (
               paiements.map((paiement) => (
-                <tr key={paiement.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                <tr key={paiement.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
+                  <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
                     {formatDateTime(paiement.datePaiement)}
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 py-2.5">
                     <Link
                       href={`/admin/eleves/${paiement.eleve.id}`}
                       className="text-blue-600 dark:text-blue-400 hover:underline"
@@ -968,25 +968,25 @@ export default function FinancesPage() {
                       {paiement.eleve.prenom} {paiement.eleve.nom}
                     </Link>
                   </td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{paiement.groupe.nom}</td>
-                  <td className="px-6 py-4 font-medium">{formatCurrency(paiement.montant)}</td>
-                  <td className="px-6 py-4">
-                    <span className="inline-block rounded-full bg-gray-100 dark:bg-slate-700 px-2.5 py-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">
+                  <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{paiement.groupe.nom}</td>
+                  <td className="px-4 py-2.5 font-medium">{formatCurrency(paiement.montant)}</td>
+                  <td className="px-4 py-2.5">
+                    <span className="inline-block rounded-full bg-neutral-100 dark:bg-[#1e2128] px-2.5 py-0.5 text-xs font-medium text-neutral-800 dark:text-neutral-200">
                       {paiement.methodePaiement}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 py-2.5">
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => window.open(`/api/paiements/${paiement.id}/facture`, "_blank")}
-                        className="rounded p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-emerald-600 dark:hover:text-emerald-400"
+                        className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] hover:text-emerald-600 dark:hover:text-emerald-400"
                         title="Générer la facture"
                       >
                         <FileText className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => openEditModal(paiement)}
-                        className="rounded p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400"
+                        className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] hover:text-blue-600 dark:hover:text-blue-400"
                         title="Modifier le montant"
                       >
                         <Pencil className="h-4 w-4" />
@@ -1003,12 +1003,12 @@ export default function FinancesPage() {
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-lg rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl">
+          <div className="w-full max-w-lg rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Enregistrer un paiement</h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
+                className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -1021,7 +1021,7 @@ export default function FinancesPage() {
                     <select
                       value={filterNiveau}
                       onChange={(e) => { setFilterNiveau(e.target.value); setFilterClasse(""); setFilterFiliere(""); setSelectedEleveId(""); setSelectedGroupeId(""); setMontant(0); }}
-                      className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-2 py-1.5 text-xs focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                      className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-2 py-1.5 text-xs focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                     >
                       <option value="">Niveau</option>
                       <option value="primaire">Primaire</option>
@@ -1034,7 +1034,7 @@ export default function FinancesPage() {
                       value={filterClasse}
                       onChange={(e) => { setFilterClasse(e.target.value); setFilterFiliere(""); setSelectedEleveId(""); setSelectedGroupeId(""); setMontant(0); }}
                       disabled={!filterNiveau}
-                      className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-2 py-1.5 text-xs focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50"
+                      className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-2 py-1.5 text-xs focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50"
                     >
                       <option value="">Classe</option>
                       {availableClasses.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -1045,7 +1045,7 @@ export default function FinancesPage() {
                       value={filterFiliere}
                       onChange={(e) => { setFilterFiliere(e.target.value); setSelectedEleveId(""); setSelectedGroupeId(""); setMontant(0); }}
                       disabled={!showFiliere}
-                      className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-2 py-1.5 text-xs focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50"
+                      className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-2 py-1.5 text-xs focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50"
                     >
                       <option value="">Filière</option>
                       {filieres.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
@@ -1064,7 +1064,7 @@ export default function FinancesPage() {
               </div>
 
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
                 <input
                   type="text"
                   value={searchEleve}
@@ -1075,15 +1075,15 @@ export default function FinancesPage() {
                     setMontant(0);
                   }}
                   placeholder="Rechercher un élève par nom ou code..."
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 pl-9 pr-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 pl-9 pr-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                   Élève
                   {filteredEleves.length > 0 && (
-                    <span className="ml-1 text-xs text-gray-400 dark:text-gray-500">({filteredEleves.length})</span>
+                    <span className="ml-1 text-xs text-neutral-400 dark:text-neutral-500">({filteredEleves.length})</span>
                   )}
                 </label>
                 <select
@@ -1094,7 +1094,7 @@ export default function FinancesPage() {
                     setMontant(0);
                   }}
                   required
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 >
                   <option value="">Sélectionner un élève</option>
                   {filteredEleves.map((e) => (
@@ -1104,13 +1104,13 @@ export default function FinancesPage() {
                   ))}
                 </select>
                 {filteredEleves.length === 0 && (
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Aucun élève trouvé pour ce filtre.</p>
+                  <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">Aucun élève trouvé pour ce filtre.</p>
                 )}
               </div>
 
               {selectedEleve && selectedEleve.groupes.length > 0 && (
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Groupe</label>
+                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Groupe</label>
                   <select
                     value={selectedGroupeId}
                     onChange={(e) => {
@@ -1121,7 +1121,7 @@ export default function FinancesPage() {
                       if (gd) setMontant(gd.unpaid > 0 ? gd.unpaid : 0);
                     }}
                     required
-                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                   >
                     <option value="">Sélectionner un groupe</option>
                     {selectedEleve.groupes.map((g) => (
@@ -1134,21 +1134,21 @@ export default function FinancesPage() {
               )}
 
               {selectedEleve && selectedEleve.groupes.length === 0 && (
-                <p className="text-sm text-gray-500 dark:text-gray-400">Cet élève n&apos;est inscrit à aucun groupe.</p>
+                <p className="text-sm text-neutral-500 dark:text-neutral-400">Cet élève n&apos;est inscrit à aucun groupe.</p>
               )}
 
               {selectedGroupeData && (
-                <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 p-4 text-sm">
+                <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-4 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Total dû</span>
+                    <span className="text-neutral-600 dark:text-neutral-400">Total dû</span>
                     <span className="font-medium">{formatCurrency(selectedGroupeData.totalDue)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Total payé</span>
+                    <span className="text-neutral-600 dark:text-neutral-400">Total payé</span>
                     <span className="font-medium text-green-600 dark:text-green-400">{formatCurrency(selectedGroupeData.totalPaid)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Impayé</span>
+                    <span className="text-neutral-600 dark:text-neutral-400">Impayé</span>
                     <span className={`font-medium ${selectedGroupeData.unpaid > 0 ? "text-red-600 dark:text-red-400" : ""}`}>
                       {formatCurrency(selectedGroupeData.unpaid)}
                     </span>
@@ -1157,23 +1157,23 @@ export default function FinancesPage() {
               )}
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Montant (DT)</label>
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Montant (DT)</label>
                 <input
                   type="number"
                   value={montant || ""}
                   onChange={(e) => setMontant(Number(e.target.value))}
                   min={0}
                   required
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Méthode de paiement</label>
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Méthode de paiement</label>
                 <select
                   value={methodePaiement}
                   onChange={(e) => setMethodePaiement(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 >
                   <option value="especes">Espèces</option>
                   <option value="virement">Virement</option>
@@ -1183,24 +1183,24 @@ export default function FinancesPage() {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Référence</label>
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Référence</label>
                 <input
                   type="text"
                   value={reference}
                   onChange={(e) => setReference(e.target.value)}
                   placeholder="Numéro de référence (optionnel)"
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Notes</label>
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Notes</label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={2}
                   placeholder="Notes (optionnel)"
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
               </div>
 
@@ -1208,14 +1208,14 @@ export default function FinancesPage() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700"
+                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={submitting || !selectedEleveId || !selectedGroupeId || montant <= 0}
-                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                 >
                   {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
                   Enregistrer
@@ -1228,35 +1228,35 @@ export default function FinancesPage() {
 
       {editModal && editPaiement && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl">
+          <div className="w-full max-w-md rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Modifier le paiement</h2>
-              <button onClick={() => setEditModal(false)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400">
+              <button onClick={() => setEditModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="mb-4 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 p-3 text-sm">
-              <p className="text-gray-600 dark:text-gray-400">
+            <div className="mb-4 rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3 text-sm">
+              <p className="text-neutral-600 dark:text-neutral-400">
                 <span className="font-medium">{editPaiement.eleve.prenom} {editPaiement.eleve.nom}</span>
                 {" — "}
                 {editPaiement.groupe.nom}
               </p>
-              <p className="mt-1 text-gray-500 dark:text-gray-400">
-                Montant actuel: <span className="font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(editPaiement.montant)}</span>
+              <p className="mt-1 text-neutral-500 dark:text-neutral-400">
+                Montant actuel: <span className="font-semibold text-neutral-900 dark:text-neutral-100">{formatCurrency(editPaiement.montant)}</span>
               </p>
             </div>
 
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Nouveau montant (DT)</label>
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Nouveau montant (DT)</label>
                 <input
                   type="number"
                   value={editMontant || ""}
                   onChange={(e) => setEditMontant(Number(e.target.value))}
                   min={0}
                   required
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
                 {editMontant !== Number(editPaiement.montant) && (
                   <p className={`mt-1 text-xs ${editMontant > Number(editPaiement.montant) ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
@@ -1267,7 +1267,7 @@ export default function FinancesPage() {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                   Raison de la modification <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -1276,7 +1276,7 @@ export default function FinancesPage() {
                   rows={3}
                   required
                   placeholder="Expliquez la raison de cette modification..."
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
               </div>
 
@@ -1284,14 +1284,14 @@ export default function FinancesPage() {
                 <button
                   type="button"
                   onClick={() => setEditModal(false)}
-                  className="rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700"
+                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={editSubmitting || editMontant <= 0 || !editRaison.trim() || editMontant === Number(editPaiement.montant)}
-                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                 >
                   {editSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
                   Enregistrer
@@ -1304,28 +1304,28 @@ export default function FinancesPage() {
 
       {showCreditModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-lg rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl">
+          <div className="w-full max-w-lg rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6shadow-xl">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
                 Ajouter un crédit
               </h2>
               <button
                 onClick={() => setShowCreditModal(false)}
-                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
+                className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
             <form onSubmit={handleCreditSubmit} className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                   Élève
                   {filteredCreditStudents.length > 0 && (
-                    <span className="ml-1 text-xs text-gray-400 dark:text-gray-500">({filteredCreditStudents.length})</span>
+                    <span className="ml-1 text-xs text-neutral-400 dark:text-neutral-500">({filteredCreditStudents.length})</span>
                   )}
                 </label>
                 <div className="relative mb-2">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
                   <input
                     type="text"
                     value={creditSearch}
@@ -1334,7 +1334,7 @@ export default function FinancesPage() {
                       setCreditForm({ ...creditForm, studentId: "" });
                     }}
                     placeholder="Rechercher un élève par nom ou code..."
-                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 pl-9 pr-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 pl-9 pr-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
                   />
                 </div>
                 <select
@@ -1348,7 +1348,7 @@ export default function FinancesPage() {
                       groupeId: groups.length === 1 ? groups[0].id : "",
                     });
                   }}
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
                 >
                   <option value="">Sélectionner un élève</option>
                   {filteredCreditStudents.map((s) => (
@@ -1358,18 +1358,18 @@ export default function FinancesPage() {
                   ))}
                 </select>
                 {filteredCreditStudents.length === 0 && (
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Aucun élève trouvé pour cette recherche.</p>
+                  <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">Aucun élève trouvé pour cette recherche.</p>
                 )}
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                   Type
                 </label>
                 <select
                   value={creditForm.type}
                   onChange={(e) => setCreditForm({ ...creditForm, type: e.target.value })}
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
                 >
                   <option value="PREPAYMENT">Pré-paiement (crédit du solde)</option>
                   <option value="ADJUSTMENT">Ajustement (correction manuelle)</option>
@@ -1377,7 +1377,7 @@ export default function FinancesPage() {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                   Montant (DT)
                 </label>
                 <input
@@ -1387,19 +1387,19 @@ export default function FinancesPage() {
                   min={0}
                   step="0.01"
                   required
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
                 />
               </div>
 
               {creditForm.type === "ADJUSTMENT" && (
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Sens
                   </label>
                   <select
                     value={creditForm.credit ? "credit" : "debit"}
                     onChange={(e) => setCreditForm({ ...creditForm, credit: e.target.value === "credit" })}
-                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
                   >
                     <option value="credit">Crédit (+ augmente le solde)</option>
                     <option value="debit">Débit (− diminue le solde)</option>
@@ -1409,7 +1409,7 @@ export default function FinancesPage() {
 
               {creditForm.type === "PREPAYMENT" && (
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Groupe
                   </label>
                   {(() => {
@@ -1428,7 +1428,7 @@ export default function FinancesPage() {
                         onChange={(e) =>
                           setCreditForm({ ...creditForm, groupeId: e.target.value })
                         }
-                        className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                        className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
                       >
                         <option value="">Sélectionner un groupe</option>
                         {groups.map((g) => (
@@ -1446,13 +1446,13 @@ export default function FinancesPage() {
 
               {creditForm.type === "PREPAYMENT" && (
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Méthode de paiement
                   </label>
                   <select
                     value={creditForm.paymentMethod}
                     onChange={(e) => setCreditForm({ ...creditForm, paymentMethod: e.target.value })}
-                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
                   >
                     <option value="especes">Espèces</option>
                     <option value="virement">Virement</option>
@@ -1464,7 +1464,7 @@ export default function FinancesPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Date
                   </label>
                   <input
@@ -1472,24 +1472,24 @@ export default function FinancesPage() {
                     value={creditForm.date}
                     onChange={(e) => setCreditForm({ ...creditForm, date: e.target.value })}
                     required
-                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Heure
                   </label>
                   <input
                     type="time"
                     value={creditForm.time}
                     onChange={(e) => setCreditForm({ ...creditForm, time: e.target.value })}
-                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                   Notes
                 </label>
                 <textarea
@@ -1497,7 +1497,7 @@ export default function FinancesPage() {
                   onChange={(e) => setCreditForm({ ...creditForm, notes: e.target.value })}
                   rows={2}
                   placeholder="Optionnel (ex : Paiement anticipé de plusieurs mois)"
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
                 />
               </div>
 
@@ -1505,14 +1505,14 @@ export default function FinancesPage() {
                 <button
                   type="button"
                   onClick={() => setShowCreditModal(false)}
-                  className="rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700"
+                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={creditSubmitting || creditForm.amount <= 0 || !creditForm.studentId}
-                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                 >
                   {creditSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
                   Enregistrer
@@ -1525,29 +1525,29 @@ export default function FinancesPage() {
 
       {showDetail && detailTx && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl">
+          <div className="w-full max-w-md rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6shadow-xl">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
                 Détails de la transaction
               </h2>
               <button
                 onClick={() => setShowDetail(false)}
-                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
+                className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-500 dark:text-gray-400">Type</span>
+                <span className="text-neutral-500 dark:text-neutral-400">Type</span>
                 <span className="font-medium">{TYPE_LABEL[detailTx.type] || detailTx.type}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500 dark:text-gray-400">Date</span>
+                <span className="text-neutral-500 dark:text-neutral-400">Date</span>
                 <span className="font-medium">{formatDate(detailTx.date)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500 dark:text-gray-400">Montant</span>
+                <span className="text-neutral-500 dark:text-neutral-400">Montant</span>
                 <span
                   className={`font-semibold ${
                     detailTx.signedAmount >= 0
@@ -1560,18 +1560,18 @@ export default function FinancesPage() {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500 dark:text-gray-400">Description</span>
+                <span className="text-neutral-500 dark:text-neutral-400">Description</span>
                 <span className="max-w-[60%] text-right font-medium">{detailTx.description || "—"}</span>
               </div>
               {detailTx.attendance && (
                 <div className="flex justify-between">
-                  <span className="text-gray-500 dark:text-gray-400">Cours lié</span>
+                  <span className="text-neutral-500 dark:text-neutral-400">Cours lié</span>
                   <span className="max-w-[60%] text-right font-medium">
                     {detailTx.attendance.seance.groupe.nom}
                     {detailTx.attendance.seance.groupe.matiere?.nom
                       ? ` — ${detailTx.attendance.seance.groupe.matiere.nom}`
                       : ""}
-                    <span className="block text-xs text-gray-500 dark:text-gray-400">
+                    <span className="block text-xs text-neutral-500 dark:text-neutral-400">
                       {formatDate(detailTx.attendance.seance.date)}
                     </span>
                   </span>
@@ -1579,7 +1579,7 @@ export default function FinancesPage() {
               )}
               {detailTx.paymentMethod && (
                 <div className="flex justify-between">
-                  <span className="text-gray-500 dark:text-gray-400">Méthode</span>
+                  <span className="text-neutral-500 dark:text-neutral-400">Méthode</span>
                   <span className="font-medium">
                     {METHODE_LABEL[detailTx.paymentMethod] || detailTx.paymentMethod}
                   </span>
@@ -1587,19 +1587,19 @@ export default function FinancesPage() {
               )}
               {detailTx.receiptNumber && (
                 <div className="flex justify-between">
-                  <span className="text-gray-500 dark:text-gray-400">Reçu</span>
+                  <span className="text-neutral-500 dark:text-neutral-400">Reçu</span>
                   <span className="font-mono font-medium">{detailTx.receiptNumber}</span>
                 </div>
               )}
               {detailTx.reference && (
                 <div className="flex justify-between">
-                  <span className="text-gray-500 dark:text-gray-400">Référence</span>
+                  <span className="text-neutral-500 dark:text-neutral-400">Référence</span>
                   <span className="max-w-[60%] truncate font-mono font-medium">{detailTx.reference}</span>
                 </div>
               )}
               {detailTx.reversalOf && (
                 <div className="flex justify-between">
-                  <span className="text-gray-500 dark:text-gray-400">Annule</span>
+                  <span className="text-neutral-500 dark:text-neutral-400">Annule</span>
                   <span className="font-medium">
                     {detailTx.reversalOf.receiptNumber
                       ? detailTx.reversalOf.receiptNumber
@@ -1609,19 +1609,19 @@ export default function FinancesPage() {
               )}
               {detailTx.notes && (
                 <div className="flex justify-between">
-                  <span className="text-gray-500 dark:text-gray-400">Notes</span>
+                  <span className="text-neutral-500 dark:text-neutral-400">Notes</span>
                   <span className="max-w-[60%] text-right font-medium">{detailTx.notes}</span>
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="text-gray-500 dark:text-gray-400">Créée le</span>
+                <span className="text-neutral-500 dark:text-neutral-400">Créée le</span>
                 <span className="font-medium">{new Date(detailTx.createdAt).toLocaleString("fr-FR")}</span>
               </div>
             </div>
             <div className="mt-5 flex justify-end">
               <button
                 onClick={() => openReceipt(detailTx)}
-                className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700"
               >
                 <FileText className="h-4 w-4" />
                 Reçu
@@ -1633,27 +1633,27 @@ export default function FinancesPage() {
 
       {showReverseModal && reverseTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl">
+          <div className="w-full max-w-md rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6shadow-xl">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
                 Annuler la transaction
               </h2>
               <button
                 onClick={() => setShowReverseModal(false)}
-                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
+                className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="mb-4 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 p-3 text-sm">
-              <p className="font-medium text-gray-900 dark:text-gray-100">
+            <div className="mb-4 rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3 text-sm">
+              <p className="font-medium text-neutral-900 dark:text-neutral-100">
                 {TYPE_LABEL[reverseTarget.type] || reverseTarget.type} —{" "}
                 {formatCurrency(Math.abs(reverseTarget.signedAmount))}
               </p>
-              <p className="mt-1 text-gray-600 dark:text-gray-400">{reverseTarget.description || "—"}</p>
+              <p className="mt-1 text-neutral-600 dark:text-neutral-400">{reverseTarget.description || "—"}</p>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                 Raison de l&apos;annulation
               </label>
               <textarea
@@ -1662,13 +1662,13 @@ export default function FinancesPage() {
                 rows={3}
                 required
                 placeholder="Ex : Erreur de saisie, annulation du paiement..."
-                className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
               />
             </div>
             <div className="mt-5 flex justify-end gap-3">
               <button
                 onClick={() => setShowReverseModal(false)}
-                className="rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700"
+                className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
               >
                 Retour
               </button>

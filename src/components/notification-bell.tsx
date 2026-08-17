@@ -27,7 +27,7 @@ export default function NotificationBell() {
   return (
     <Link
       href="/admin/notifications"
-      className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-800"
+      className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-[#181b22]"
     >
       <div className="relative">
         <Bell className="h-5 w-5" />

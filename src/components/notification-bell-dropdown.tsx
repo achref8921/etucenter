@@ -138,7 +138,7 @@ export default function NotificationBellDropdown({ role }: { role: string }) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="relative rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+        className="relative rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-[#2a2d35] dark:hover:text-slate-300"
       >
         <Bell className="h-5 w-5" />
         {nonLues > 0 && (
@@ -149,8 +149,8 @@ export default function NotificationBellDropdown({ role }: { role: string }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900">
-          <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-slate-700">
+        <div className="absolute right-0 top-full mt-2 w-80 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-[#2a2d35] dark:bg-[#181b22]">
+          <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-[#2a2d35]">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               Notifications
               {nonLues > 0 && (
@@ -187,8 +187,8 @@ export default function NotificationBellDropdown({ role }: { role: string }) {
                 <div
                   key={n.id}
                   onClick={(e) => markAsRead(n.id, e)}
-                  className={`group flex items-start gap-3 border-b border-gray-50 px-4 py-3 transition-colors last:border-0 dark:border-slate-700 ${
-                    n.lu ? "bg-white dark:bg-slate-900" : "cursor-pointer bg-blue-50/60 hover:bg-blue-50 dark:bg-blue-900/20 dark:hover:bg-blue-900/30"
+                  className={`group flex items-start gap-3 border-b border-gray-50 px-4 py-3 transition-colors last:border-0 dark:border-[#2a2d35] ${
+                    n.lu ? "bg-white dark:bg-[#181b22]" : "cursor-pointer bg-blue-50/60 hover:bg-blue-50 dark:bg-blue-900/20 dark:hover:bg-blue-900/30"
                   }`}
                 >
                   <div className="mt-0.5 flex-shrink-0">{typeIcon(n.type)}</div>
@@ -219,7 +219,7 @@ export default function NotificationBellDropdown({ role }: { role: string }) {
           <Link
             href={allLink}
             onClick={() => setOpen(false)}
-            className="block border-t border-gray-100 bg-gray-50 px-4 py-2.5 text-center text-xs font-medium text-blue-600 hover:bg-gray-100 dark:border-slate-700 dark:bg-slate-800 dark:text-blue-400 dark:hover:bg-slate-700"
+            className="block border-t border-gray-100 bg-gray-50 px-4 py-2.5 text-center text-xs font-medium text-blue-600 hover:bg-gray-100 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-blue-400 dark:hover:bg-[#2a2d35]"
           >
             Voir toutes les notifications →
           </Link>

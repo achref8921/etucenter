@@ -55,7 +55,7 @@ const statusColors: Record<string, string> = {
   planifiee: "bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300",
   en_cours: "bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300",
   terminee: "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300",
-  annulee: "bg-gray-100 dark:bg-slate-800 text-gray-800 dark:text-gray-300",
+  annulee: "bg-neutral-100 dark:bg-[#1e2128] text-neutral-800 dark:text-neutral-300",
 };
 
 export default function AdminGroupeDetailPage() {
@@ -235,10 +235,10 @@ export default function AdminGroupeDetailPage() {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-4">
-          <Link href="/admin/groupes" className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+          <Link href="/admin/groupes" className="flex items-center gap-1 text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white">
             <ArrowLeft className="h-4 w-4" /> Retour
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Détail Groupe</h1>
+          <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Détail Groupe</h1>
         </div>
         {error && <div className="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">{error}</div>}
       </div>
@@ -332,10 +332,10 @@ export default function AdminGroupeDetailPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Link href="/admin/groupes" className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+        <Link href="/admin/groupes" className="flex items-center gap-1 text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white">
           <ArrowLeft className="h-4 w-4" /> Retour
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{g.nom}</h1>
+        <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">{g.nom}</h1>
       </div>
 
       {success && (
@@ -351,110 +351,110 @@ export default function AdminGroupeDetailPage() {
       )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
-          <h2 className="mb-4 text-sm font-semibold uppercase text-gray-400 dark:text-slate-500">Informations</h2>
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Nom</span><span className="font-medium text-gray-900 dark:text-gray-100">{g.nom}</span></div>
-            {g.description && <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Description</span><span className="text-gray-900 dark:text-gray-100">{g.description}</span></div>}
-            <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Prof</span><span className="font-medium text-gray-900 dark:text-gray-100">{g.prof ? `${g.prof.prenom} ${g.prof.nom}` : "—"}</span></div>
-            <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Matière</span><span className="font-medium text-gray-900 dark:text-gray-100">{g.matiere?.nom ?? "—"}</span></div>
+        <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
+          <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Informations</h2>
+          <div className="space-y-3 text-[13px]">
+            <div className="flex justify-between"><span className="text-neutral-500 dark:text-neutral-400">Nom</span><span className="font-medium text-neutral-900 dark:text-neutral-100">{g.nom}</span></div>
+            {g.description && <div className="flex justify-between"><span className="text-neutral-500 dark:text-neutral-400">Description</span><span className="text-neutral-900 dark:text-neutral-100">{g.description}</span></div>}
+            <div className="flex justify-between"><span className="text-neutral-500 dark:text-neutral-400">Prof</span><span className="font-medium text-neutral-900 dark:text-neutral-100">{g.prof ? `${g.prof.prenom} ${g.prof.nom}` : "—"}</span></div>
+            <div className="flex justify-between"><span className="text-neutral-500 dark:text-neutral-400">Matière</span><span className="font-medium text-neutral-900 dark:text-neutral-100">{g.matiere?.nom ?? "—"}</span></div>
             <div className="flex items-center justify-between">
-              <span className="text-gray-500 dark:text-gray-400">Tarif</span>
+              <span className="text-neutral-500 dark:text-neutral-400">Tarif</span>
               <div className="flex items-center gap-2">
                 {g.forfaitMontant && g.forfaitSeances ? (
                   <span className="text-right">
-                    <span className="block font-medium text-gray-900 dark:text-gray-100">
+                    <span className="block font-medium text-neutral-900 dark:text-neutral-100">
                       {formatCurrency(g.forfaitMontant)} / {g.forfaitSeances} séances
                     </span>
-                    <span className="block text-xs text-gray-500 dark:text-gray-400">
+                    <span className="block text-[12px] text-neutral-400 dark:text-neutral-500">
                       {formatCurrency(g.prixParSeance)} / séance
                     </span>
                   </span>
                 ) : (
-                  <span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(g.prixParSeance)} / séance</span>
+                  <span className="font-medium text-neutral-900 dark:text-neutral-100">{formatCurrency(g.prixParSeance)} / séance</span>
                 )}
-                <button onClick={openTarifModal} className="rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2.5 py-1 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
+                <button onClick={openTarifModal} className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-2.5 py-1 text-[12px] font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]">
                   Modifier
                 </button>
               </div>
             </div>
-            <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Capacité max</span><span className="font-medium text-gray-900 dark:text-gray-100">{g.capaciteMax}</span></div>
+            <div className="flex justify-between"><span className="text-neutral-500 dark:text-neutral-400">Capacité max</span><span className="font-medium text-neutral-900 dark:text-neutral-100">{g.capaciteMax}</span></div>
           </div>
         </div>
 
-        <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
-          <h2 className="mb-4 text-sm font-semibold uppercase text-gray-400 dark:text-slate-500">Résumé Financier</h2>
+        <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
+          <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Résumé Financier</h2>
           <div className="space-y-3">
-            <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 p-4">
+            <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-4">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Dû</p>
-                <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(groupe.financialSummary.totalDue)}</p>
+                <p className="text-[13px] text-neutral-600 dark:text-neutral-400">Total Dû</p>
+                <p className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">{formatCurrency(groupe.financialSummary.totalDue)}</p>
               </div>
             </div>
-            <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 p-4">
+            <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-4">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Payé</p>
+                <p className="text-[13px] text-neutral-600 dark:text-neutral-400">Total Payé</p>
                 <p className="text-lg font-semibold text-green-600 dark:text-green-400">{formatCurrency(groupe.financialSummary.totalPaid)}</p>
               </div>
             </div>
-            <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 p-4">
+            <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-4">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-600 dark:text-gray-400">Impayé</p>
-                <p className={`text-lg font-semibold ${groupe.financialSummary.unpaid > 0 ? "text-red-600 dark:text-red-400" : "text-gray-900 dark:text-gray-100"}`}>{formatCurrency(groupe.financialSummary.unpaid)}</p>
+                <p className="text-[13px] text-neutral-600 dark:text-neutral-400">Impayé</p>
+                <p className={`text-lg font-semibold ${groupe.financialSummary.unpaid > 0 ? "text-red-600 dark:text-red-400" : "text-neutral-900 dark:text-neutral-100"}`}>{formatCurrency(groupe.financialSummary.unpaid)}</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-        <div className="flex items-center justify-between border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Élèves Inscrits ({groupe.inscriptions.length})</h2>
+      <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+        <div className="flex items-center justify-between border-b border-neutral-200 dark:border-[#2a2d35] px-6 py-3">
+          <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">Élèves Inscrits ({groupe.inscriptions.length})</h2>
           <div className="flex items-center gap-2">
-            <button onClick={handleDownloadExcel} disabled={groupe.inscriptions.length === 0} className="flex items-center gap-1 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50">
+            <button onClick={handleDownloadExcel} disabled={groupe.inscriptions.length === 0} className="flex items-center gap-1 rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-1.5 text-[12px] font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128] disabled:opacity-50">
               <Download className="h-3.5 w-3.5" /> Excel
             </button>
-            <button onClick={() => setShowAddModal(true)} className="flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700">
+            <button onClick={() => setShowAddModal(true)} className="flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-blue-700">
               <Users className="h-3.5 w-3.5" /> Ajouter un élève
             </button>
           </div>
         </div>
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-gray-200 dark:border-slate-700">
+          <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
             <tr>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Nom</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Prénom</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Email</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Présences</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Absences</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Dû</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Payé</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Impayé</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Actions</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Nom</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Prénom</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Email</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Présences</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Absences</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Dû</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Payé</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Impayé</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+          <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
             {groupe.inscriptions.length === 0 ? (
-              <tr><td colSpan={9} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Aucun élève inscrit</td></tr>
+              <tr><td colSpan={9} className="px-4 py-2.5 text-center text-neutral-500 dark:text-neutral-400">Aucun élève inscrit</td></tr>
             ) : (
               groupe.inscriptions.map((ins) => (
-                <tr key={ins.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
-                  <td className="px-6 py-4 font-medium">
+                <tr key={ins.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
+                  <td className="px-4 py-2.5 font-medium">
                     <Link href={`/admin/eleves/${ins.eleve.id}`} className="text-blue-600 dark:text-blue-400 hover:underline">{ins.eleve.nom}</Link>
                   </td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{ins.eleve.prenom}</td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{ins.eleve.email}</td>
-                  <td className="px-6 py-4 text-green-600 dark:text-green-400">{ins.stats.presencesCount}</td>
-                  <td className="px-6 py-4 text-red-600 dark:text-red-400">{ins.stats.absencesCount}</td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{formatCurrency(ins.stats.totalDue)}</td>
-                  <td className="px-6 py-4 text-green-600 dark:text-green-400">{formatCurrency(ins.stats.totalPaid)}</td>
-                  <td className="px-6 py-4">
-                    <span className={`font-medium ${ins.stats.unpaid > 0 ? "text-red-600 dark:text-red-400" : "text-gray-900 dark:text-gray-100"}`}>{formatCurrency(ins.stats.unpaid)}</span>
+                  <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">{ins.eleve.prenom}</td>
+                  <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">{ins.eleve.email}</td>
+                  <td className="px-4 py-2.5 text-green-600 dark:text-green-400">{ins.stats.presencesCount}</td>
+                  <td className="px-4 py-2.5 text-red-600 dark:text-red-400">{ins.stats.absencesCount}</td>
+                  <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">{formatCurrency(ins.stats.totalDue)}</td>
+                  <td className="px-4 py-2.5 text-green-600 dark:text-green-400">{formatCurrency(ins.stats.totalPaid)}</td>
+                  <td className="px-4 py-2.5">
+                    <span className={`font-medium ${ins.stats.unpaid > 0 ? "text-red-600 dark:text-red-400" : "text-neutral-900 dark:text-neutral-100"}`}>{formatCurrency(ins.stats.unpaid)}</span>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 py-2.5">
                     <button
                       onClick={() => openRattrapageModal(ins.eleve)}
-                      className="flex items-center gap-1 rounded-lg border border-gray-300 dark:border-slate-600 px-2 py-1 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700"
+                      className="flex items-center gap-1 rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-2 py-1 text-[12px] font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
                       title="Ajouter une séance passée"
                     >
                       <CalendarPlus className="h-3.5 w-3.5" /> Séance passée
@@ -467,43 +467,43 @@ export default function AdminGroupeDetailPage() {
         </table>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-        <div className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Séances</h2>
+      <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+        <div className="border-b border-neutral-200 dark:border-[#2a2d35] px-6 py-3">
+          <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">Séances</h2>
         </div>
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-gray-200 dark:border-slate-700">
+          <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
             <tr>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Date</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Horaire</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Statut</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Présences</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Actions</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Date</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Horaire</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Statut</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Présences</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+          <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
             {groupe.seances.length === 0 ? (
-              <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Aucune séance</td></tr>
+              <tr><td colSpan={5} className="px-4 py-2.5 text-center text-neutral-500 dark:text-neutral-400">Aucune séance</td></tr>
             ) : (
               groupe.seances.map((s) => (
-                <tr key={s.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{formatDate(s.date)}</td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                <tr key={s.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
+                  <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">{formatDate(s.date)}</td>
+                  <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">
                     {s.heureDebut && s.heureFin
                       ? `${formatTime(s.heureDebut)} - ${formatTime(s.heureFin)}`
                       : "—"}
                   </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[s.statut] || "bg-gray-100 dark:bg-slate-800 text-gray-800 dark:text-gray-300"}`}>
+                  <td className="px-4 py-2.5">
+                    <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-medium ${statusColors[s.statut] || "bg-neutral-100 dark:bg-[#1e2128] text-neutral-800 dark:text-neutral-300"}`}>
                       {statusLabels[s.statut] || s.statut}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{s.stats.presentsCount}/{s.stats.totalEleves}</td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">{s.stats.presentsCount}/{s.stats.totalEleves}</td>
+                  <td className="px-4 py-2.5">
                     <button
                       onClick={() => setConfirmDeleteSeance(s.id)}
                       disabled={deletingSeanceId === s.id || s.stats.totalEleves > 0}
-                      className="rounded p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-red-600 dark:hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-30"
+                      className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100 dark:hover:bg-[#1e2128] hover:text-red-600 dark:hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-30"
                       title={s.stats.totalEleves > 0 ? "Des présences sont enregistrées — suppression impossible" : "Supprimer"}
                     >
                       {deletingSeanceId === s.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
@@ -518,10 +518,10 @@ export default function AdminGroupeDetailPage() {
 
       {showTarifModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl">
+          <div className="w-full max-w-md rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Modifier le tarif</h2>
-              <button onClick={() => setShowTarifModal(false)} className="text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300">
+              <button onClick={() => setShowTarifModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -529,20 +529,20 @@ export default function AdminGroupeDetailPage() {
               <div className="flex gap-4">
                 <button
                   onClick={() => setTarifMode("forfait")}
-                  className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium ${
+                  className={`flex-1 rounded-lg border px-3 py-2 text-[13px] font-medium ${
                     tarifMode === "forfait"
                       ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300"
-                      : "border-gray-300 dark:border-slate-600 text-gray-600 dark:text-gray-400"
+                      : "border-neutral-200 dark:border-[#2a2d35] text-neutral-600 dark:text-neutral-400"
                   }`}
                 >
                   Forfait (110 DT / N séances)
                 </button>
                 <button
                   onClick={() => setTarifMode("fixe")}
-                  className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium ${
+                  className={`flex-1 rounded-lg border px-3 py-2 text-[13px] font-medium ${
                     tarifMode === "fixe"
                       ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300"
-                      : "border-gray-300 dark:border-slate-600 text-gray-600 dark:text-gray-400"
+                      : "border-neutral-200 dark:border-[#2a2d35] text-neutral-600 dark:text-neutral-400"
                   }`}
                 >
                   Prix fixe / séance
@@ -553,43 +553,43 @@ export default function AdminGroupeDetailPage() {
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Montant (DT)</label>
+                      <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Montant (DT)</label>
                       <input
                         type="number"
                         value={tarifMontant || ""}
                         onChange={(e) => setTarifMontant(Number(e.target.value))}
                         min={0}
                         placeholder="110"
-                        className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                       />
                     </div>
                     <div>
-                      <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre de séances</label>
+                      <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Nombre de séances</label>
                       <input
                         type="number"
                         value={tarifSeances || ""}
                         onChange={(e) => setTarifSeances(Number(e.target.value))}
                         min={0}
                         placeholder="5"
-                        className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                       />
                     </div>
                   </div>
                   {computedTarifPrixSeance > 0 && (
-                    <p className="text-sm text-blue-600 dark:text-blue-400">
+                    <p className="text-[13px] text-blue-600 dark:text-blue-400">
                       = {computedTarifPrixSeance.toFixed(2)} DT / séance
                     </p>
                   )}
                 </>
               ) : (
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Prix / séance (DT)</label>
+                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Prix / séance (DT)</label>
                   <input
                     type="number"
                     value={tarifPrixSeance}
                     onChange={(e) => setTarifPrixSeance(Number(e.target.value))}
                     min={0}
-                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
               )}
@@ -598,14 +598,14 @@ export default function AdminGroupeDetailPage() {
                 <button
                   type="button"
                   onClick={() => setShowTarifModal(false)}
-                  className="rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800"
+                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
                 >
                   Annuler
                 </button>
                 <button
                   onClick={handleSaveTarif}
                   disabled={savingTarif || (tarifMode === "forfait" && computedTarifPrixSeance <= 0) || (tarifMode === "fixe" && tarifPrixSeance <= 0)}
-                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                 >
                   {savingTarif && <Loader2 className="h-4 w-4 animate-spin" />}
                   Enregistrer
@@ -618,57 +618,57 @@ export default function AdminGroupeDetailPage() {
 
       {showRattrapageModal && rattrapageEleve && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl">
+          <div className="w-full max-w-md rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Ajouter une séance passée</h2>
-              <button onClick={() => setShowRattrapageModal(false)} className="text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300">
+              <button onClick={() => setShowRattrapageModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300">
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="mb-4 rounded-lg border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-900/20 p-3 text-sm text-blue-700 dark:text-blue-400">
+            <div className="mb-4 rounded-lg border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-900/20 p-3 text-[13px] text-blue-700 dark:text-blue-400">
               Élève : <strong>{rattrapageEleve.prenom} {rattrapageEleve.nom}</strong> — groupe « {g.nom} »
             </div>
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
+                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Date</label>
                   <input
                     type="date"
                     value={rattrapageDate}
                     onChange={(e) => setRattrapageDate(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Heure début</label>
+                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Heure début</label>
                   <input
                     type="time"
                     value={rattrapageHeureDebut}
                     onChange={(e) => setRattrapageHeureDebut(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Heure fin</label>
+                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Heure fin</label>
                   <input
                     type="time"
                     value={rattrapageHeureFin}
                     onChange={(e) => setRattrapageHeureFin(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Notes</label>
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Notes</label>
                 <textarea
                   value={rattrapageNotes}
                   onChange={(e) => setRattrapageNotes(e.target.value)}
                   rows={2}
                   placeholder="Ex. séance de rattrapage non saisie"
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
-              <p className="rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 p-3 text-sm text-gray-600 dark:text-gray-400">
+              <p className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3 text-[13px] text-neutral-600 dark:text-neutral-400">
                 Le montant de <strong>{formatCurrency(g.prixParSeance)}</strong> sera déduit du compte de l'élève et une notification lui sera envoyée.
               </p>
               {rattrapageError && (
@@ -680,14 +680,14 @@ export default function AdminGroupeDetailPage() {
                 <button
                   type="button"
                   onClick={() => setShowRattrapageModal(false)}
-                  className="rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800"
+                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
                 >
                   Annuler
                 </button>
                 <button
                   onClick={handleSaveRattrapage}
                   disabled={savingRattrapage}
-                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                 >
                   {savingRattrapage && <Loader2 className="h-4 w-4 animate-spin" />}
                   Ajouter et déduire
@@ -700,39 +700,39 @@ export default function AdminGroupeDetailPage() {
 
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl">
+          <div className="w-full max-w-md rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Ajouter un élève</h2>
-              <button onClick={() => { setShowAddModal(false); setSearchQuery(""); setSearchResults([]); }} className="text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300">
+              <button onClick={() => { setShowAddModal(false); setSearchQuery(""); setSearchResults([]); }} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="relative mb-4">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
                 placeholder="Rechercher un élève..."
-                className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 py-2 pl-10 pr-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 py-2 pl-10 pr-3 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
             <div className="max-h-64 overflow-y-auto">
               {searching ? (
                 <div className="flex justify-center py-4"><Loader2 className="h-5 w-5 animate-spin text-blue-600" /></div>
               ) : searchResults.length === 0 ? (
-                <p className="py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                <p className="py-4 text-center text-[13px] text-neutral-500 dark:text-neutral-400">
                   {searchQuery.length < 2 ? "Tapez au moins 2 caractères" : "Aucun résultat"}
                 </p>
               ) : (
                 <div className="space-y-2">
                   {searchResults.map((e) => (
-                    <div key={e.id} className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-slate-700 p-3">
+                    <div key={e.id} className="flex items-center justify-between rounded-lg border border-neutral-200 dark:border-[#2a2d35] p-3">
                       <div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{e.prenom} {e.nom}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{e.email}</p>
+                        <p className="text-[13px] font-medium text-neutral-900 dark:text-neutral-100">{e.prenom} {e.nom}</p>
+                        <p className="text-[12px] text-neutral-400 dark:text-neutral-500">{e.email}</p>
                       </div>
-                      <button onClick={() => handleAddEleve(e.id)} disabled={addingId === e.id} className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-50">
+                      <button onClick={() => handleAddEleve(e.id)} disabled={addingId === e.id} className="rounded-lg bg-blue-600 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-blue-700 disabled:opacity-50">
                         {addingId === e.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Ajouter"}
                       </button>
                     </div>

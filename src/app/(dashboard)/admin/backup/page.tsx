@@ -121,22 +121,22 @@ export default function AdminBackupPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Backup & Restauration</h1>
-        <p className="text-sm text-slate-500 mt-1 dark:text-slate-400">
+        <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Backup & Restauration</h1>
+        <p className="text-sm text-neutral-500 mt-1 dark:text-neutral-400">
           Sauvegardez et restaurez les données de votre centre
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* EXPORT */}
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <div className="rounded-xl border border-neutral-200 bg-white p-6 dark:border-[#2a2d35] dark:bg-[#181b22]">
           <div className="flex items-center gap-3 mb-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
               <Download className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Exporter les données</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Télécharger un fichier JSON avec toutes les données</p>
+              <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Exporter les données</h2>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">Télécharger un fichier JSON avec toutes les données</p>
             </div>
           </div>
 
@@ -149,7 +149,7 @@ export default function AdminBackupPage() {
           <button
             onClick={handleExport}
             disabled={exporting}
-            className="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            className="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white  hover:bg-blue-700 disabled:opacity-50 transition-colors"
           >
             {exporting ? (
               <RefreshCw className="h-4 w-4 animate-spin" />
@@ -161,14 +161,14 @@ export default function AdminBackupPage() {
         </div>
 
         {/* IMPORT */}
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <div className="rounded-xl border border-neutral-200 bg-white p-6 dark:border-[#2a2d35] dark:bg-[#181b22]">
           <div className="flex items-center gap-3 mb-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/30">
               <Upload className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Importer les données</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Restaurer à partir d'un fichier de backup</p>
+              <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Importer les données</h2>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">Restaurer à partir d'un fichier de backup</p>
             </div>
           </div>
 
@@ -182,26 +182,26 @@ export default function AdminBackupPage() {
             />
             <button
               onClick={() => fileRef.current?.click()}
-              className="w-full flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm font-medium text-slate-600 hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-700 transition-colors dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-emerald-500"
+              className="w-full flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-neutral-300 bg-neutral-50 px-4 py-6 text-sm font-medium text-neutral-600 hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-700 transition-colors dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-400 dark:hover:border-emerald-500"
             >
               <FileJson className="h-5 w-5" />
               {file ? file.name : "Choisir un fichier de backup (.json)"}
             </button>
 
             {preview && (
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 dark:text-slate-400">Aperçu du backup</p>
+              <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4 dark:border-[#2a2d35] dark:bg-[#1e2128]">
+                <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2 dark:text-neutral-400">Aperçu du backup</p>
                 <div className="space-y-1 text-sm">
-                  <p className="text-slate-700 dark:text-slate-300">
+                  <p className="text-neutral-700 dark:text-neutral-300">
                     <strong>Centre :</strong> {preview.centre}
                   </p>
-                  <p className="text-slate-700 dark:text-slate-300">
+                  <p className="text-neutral-700 dark:text-neutral-300">
                     <strong>Exporté le :</strong>{" "}
                     {preview.exportedAt ? new Date(preview.exportedAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}
                   </p>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {Object.entries(preview.stats).map(([key, val]) => (
-                      <span key={key} className="inline-flex items-center gap-1 rounded-md bg-white border border-slate-200 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-900 dark:border-slate-600 dark:text-slate-400">
+                      <span key={key} className="inline-flex items-center gap-1 rounded-md bg-white border border-neutral-200 px-2 py-0.5 text-xs font-medium text-neutral-600 dark:bg-[#181b22] dark:border-[#2a2d35] dark:text-neutral-400">
                         {statLabels[key] || key}: <strong>{val as number}</strong>
                       </span>
                     ))}
@@ -211,17 +211,17 @@ export default function AdminBackupPage() {
             )}
 
             <div className="space-y-2">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide dark:text-slate-400">Mode d&apos;import</p>
+              <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide dark:text-neutral-400">Mode d&apos;import</p>
               <div className="flex gap-3">
-                <label className={`flex-1 cursor-pointer rounded-lg border-2 p-3 text-center transition-colors ${mode === "merge" ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/10 dark:border-emerald-600" : "border-slate-200 hover:border-slate-300 dark:border-slate-700"}`}>
+                <label className={`flex-1 cursor-pointer rounded-lg border-2 p-3 text-center transition-colors ${mode === "merge" ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/10 dark:border-emerald-600" : "border-neutral-200 hover:border-neutral-300 dark:border-[#2a2d35]"}`}>
                   <input type="radio" name="mode" value="merge" checked={mode === "merge"} onChange={() => setMode("merge")} className="sr-only" />
-                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Fusionner</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Ajouter sans écraser</p>
+                  <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Fusionner</p>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400">Ajouter sans écraser</p>
                 </label>
-                <label className={`flex-1 cursor-pointer rounded-lg border-2 p-3 text-center transition-colors ${mode === "full" ? "border-red-500 bg-red-50 dark:bg-red-900/10 dark:border-red-600" : "border-slate-200 hover:border-slate-300 dark:border-slate-700"}`}>
+                <label className={`flex-1 cursor-pointer rounded-lg border-2 p-3 text-center transition-colors ${mode === "full" ? "border-red-500 bg-red-50 dark:bg-red-900/10 dark:border-red-600" : "border-neutral-200 hover:border-neutral-300 dark:border-[#2a2d35]"}`}>
                   <input type="radio" name="mode" value="full" checked={mode === "full"} onChange={() => { setMode("full"); setConfirmFull(false); }} className="sr-only" />
-                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Remplacement complet</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Supprimer puis importer</p>
+                  <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Remplacement complet</p>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400">Supprimer puis importer</p>
                 </label>
               </div>
 
@@ -243,7 +243,7 @@ export default function AdminBackupPage() {
             <button
               onClick={handleImport}
               disabled={!file || importing}
-              className={`w-full flex items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold text-white shadow-sm disabled:opacity-50 transition-colors ${
+              className={`w-full flex items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold text-white  disabled:opacity-50 transition-colors ${
                 mode === "full" ? "bg-red-600 hover:bg-red-700" : "bg-emerald-600 hover:bg-emerald-700"
               }`}
             >
@@ -262,7 +262,7 @@ export default function AdminBackupPage() {
 
       {/* RESULT */}
       {result && (
-        <div className={`rounded-xl border p-6 shadow-sm ${result.success ? "border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-900/10" : "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/10"}`}>
+        <div className={`rounded-xl border p-6  ${result.success ? "border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-900/10" : "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/10"}`}>
           <div className="flex items-center gap-3 mb-3">
             {result.success ? (
               <CheckCircle className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
@@ -274,12 +274,12 @@ export default function AdminBackupPage() {
             </p>
           </div>
           {result.logs.length > 0 && (
-            <div className="rounded-lg bg-white/50 dark:bg-slate-900/50 p-4">
-              <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Détails</p>
+            <div className="rounded-lg bg-white/50 dark:bg-[#181b22]/50 p-4">
+              <p className="text-xs font-semibold text-neutral-500 mb-2 uppercase tracking-wide">Détails</p>
               <ul className="space-y-1">
                 {result.logs.map((log, i) => (
-                  <li key={i} className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-slate-400 flex-shrink-0" />
+                  <li key={i} className="text-sm text-neutral-600 dark:text-neutral-400 flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-neutral-400 flex-shrink-0" />
                     {log}
                   </li>
                 ))}

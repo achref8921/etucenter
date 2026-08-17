@@ -108,7 +108,6 @@ export default async function AdminDashboardPage() {
       format: "currency" as const,
       icon: "wallet",
       color: "bg-teal-500",
-      shadow: "shadow-teal-200",
       href: "/admin/finances",
       sub: `${studentFinance.positiveCount} élève${studentFinance.positiveCount > 1 ? "s" : ""} en crédit`,
       subTone: "good" as const,
@@ -119,7 +118,6 @@ export default async function AdminDashboardPage() {
       format: "currency" as const,
       icon: "alert",
       color: "bg-red-500",
-      shadow: "shadow-red-200",
       href: "/admin/finances",
       sub: `${studentFinance.negativeCount} élève${studentFinance.negativeCount > 1 ? "s" : ""} concerné${studentFinance.negativeCount > 1 ? "s" : ""}`,
       subTone: "bad" as const,
@@ -130,7 +128,6 @@ export default async function AdminDashboardPage() {
       format: "number" as const,
       icon: "users",
       color: "bg-blue-500",
-      shadow: "shadow-blue-200",
       href: "/admin/utilisateurs",
     },
     {
@@ -139,7 +136,6 @@ export default async function AdminDashboardPage() {
       format: "number" as const,
       icon: "prof",
       color: "bg-green-500",
-      shadow: "shadow-green-200",
       href: "/admin/utilisateurs",
     },
     {
@@ -148,7 +144,6 @@ export default async function AdminDashboardPage() {
       format: "number" as const,
       icon: "groups",
       color: "bg-indigo-500",
-      shadow: "shadow-indigo-200",
       href: "/admin/groupes",
     },
     {
@@ -157,7 +152,6 @@ export default async function AdminDashboardPage() {
       format: "number" as const,
       icon: "book",
       color: "bg-orange-500",
-      shadow: "shadow-orange-200",
       href: "/admin/matieres",
     },
     {
@@ -166,7 +160,6 @@ export default async function AdminDashboardPage() {
       format: "number" as const,
       icon: "check",
       color: "bg-teal-500",
-      shadow: "shadow-teal-200",
       href: "/admin/groupes",
     },
     {
@@ -175,7 +168,6 @@ export default async function AdminDashboardPage() {
       format: "number" as const,
       icon: "calendar",
       color: "bg-purple-500",
-      shadow: "shadow-purple-200",
       href: "/admin/groupes",
       sub: `${seancesAujourdhui} aujourd'hui`,
       subTone: "neutral" as const,
@@ -186,7 +178,6 @@ export default async function AdminDashboardPage() {
       format: "currency" as const,
       icon: "dollar",
       color: "bg-emerald-500",
-      shadow: "shadow-emerald-200",
       href: "/admin/finances",
       sub: `${formatCurrency(monthRevenue)} ce mois${
         revenueTrend !== null ? ` · ${revenueTrend >= 0 ? "+" : ""}${revenueTrend}% vs mois dern.` : ""
@@ -199,7 +190,6 @@ export default async function AdminDashboardPage() {
       format: "currency" as const,
       icon: "alert",
       color: "bg-red-500",
-      shadow: "shadow-red-200",
       href: "/admin/finances",
     },
   ];
@@ -207,17 +197,17 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Tableau de bord</h1>
+        <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Tableau de bord</h1>
         <div className="flex gap-2">
           <Link
             href="/admin/benefices"
-            className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700"
+            className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-green-700"
           >
             <TrendingUp className="h-4 w-4" /> Benefices
           </Link>
           <Link
             href="/admin/finances"
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
+            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700"
           >
             <CreditCard className="h-4 w-4" /> Finances
           </Link>
@@ -227,29 +217,29 @@ export default async function AdminDashboardPage() {
       <StatCards cards={statCards} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm">
-          <div className="flex items-center justify-between border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-5 py-3">
-            <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Derniers Paiements</h2>
-            <Link href="/admin/finances" className="flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800">
+        <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+          <div className="flex items-center justify-between border-b border-neutral-200 dark:border-[#2a2d35] px-5 py-3">
+            <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">Derniers Paiements</h2>
+            <Link href="/admin/finances" className="flex items-center gap-1 text-[12px] font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800">
               Tout voir <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
-          <div className="divide-y divide-gray-100 dark:divide-slate-700">
+          <div className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
             {recentPaiements.length === 0 ? (
-              <p className="px-5 py-6 text-center text-sm text-gray-500 dark:text-gray-400">Aucun paiement</p>
+              <p className="px-5 py-6 text-center text-[13px] text-neutral-500 dark:text-neutral-400">Aucun paiement</p>
             ) : (
               recentPaiements.map((p) => (
-                <div key={p.id} className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 dark:hover:bg-slate-800">
+                <div key={p.id} className="flex items-center justify-between px-5 py-3 hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20 text-xs font-semibold text-green-700 dark:text-green-400">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20 text-[12px] font-semibold text-green-700 dark:text-green-400">
                       {p.eleve.prenom[0]}{p.eleve.nom[0]}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{p.eleve.prenom} {p.eleve.nom}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{p.groupe.nom} · {formatDateTime(p.datePaiement)}</p>
+                      <p className="text-[13px] font-medium text-neutral-900 dark:text-neutral-100">{p.eleve.prenom} {p.eleve.nom}</p>
+                      <p className="text-[12px] text-neutral-400 dark:text-neutral-500">{p.groupe.nom} · {formatDateTime(p.datePaiement)}</p>
                     </div>
                   </div>
-                  <span className="text-sm font-semibold text-green-600 dark:text-green-400">{formatCurrency(Number(p.montant))}</span>
+                  <span className="text-[13px] font-semibold text-green-600 dark:text-green-400">{formatCurrency(Number(p.montant))}</span>
                 </div>
               ))
             )}

@@ -30,7 +30,7 @@ export default function ConfirmDelete({ open, title, message, onConfirm, onCance
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-sm rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl">
+      <div className="w-full max-w-sm rounded-lg bg-white dark:bg-[#181b22] p-6 shadow-xl">
         <div className="mb-4 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
             <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
@@ -42,7 +42,7 @@ export default function ConfirmDelete({ open, title, message, onConfirm, onCance
           <button
             onClick={onCancel}
             disabled={loading}
-            className="rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 disabled:opacity-50"
+            className="rounded-lg border border-gray-300 dark:border-[#2a2d35] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#181b22] disabled:opacity-50"
           >
             Annuler
           </button>

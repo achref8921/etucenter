@@ -113,8 +113,8 @@ export default function NotificationComposer({
   };
 
   return (
-    <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-      <div className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
+    <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+      <div className="border-b border-gray-200 dark:border-[#2a2d35] bg-gray-50 dark:bg-[#181b22] px-6 py-3">
         <h2 className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
           <Send className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           Envoyer une notification aux élèves
@@ -150,7 +150,7 @@ export default function NotificationComposer({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Rechercher un élève par nom ou code..."
-              className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 pl-9 pr-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-lg border border-gray-300 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] pl-9 pr-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:outline-none"
             />
           </div>
 
@@ -175,16 +175,16 @@ export default function NotificationComposer({
           )}
 
           {loadingEleves ? (
-            <div className="flex items-center justify-center rounded-lg border border-gray-200 dark:border-slate-700 py-8">
+            <div className="flex items-center justify-center rounded-lg border border-gray-200 dark:border-[#2a2d35] py-8">
               <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
             </div>
           ) : filteredEleves.length === 0 ? (
-            <div className="rounded-lg border border-gray-200 dark:border-slate-700 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+            <div className="rounded-lg border border-gray-200 dark:border-[#2a2d35] py-8 text-center text-sm text-gray-500 dark:text-gray-400">
               Aucun élève trouvé
             </div>
           ) : (
-            <div className="max-h-56 overflow-y-auto rounded-lg border border-gray-200 dark:border-slate-700">
-              <div className="sticky top-0 flex items-center justify-between border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-3 py-2">
+            <div className="max-h-56 overflow-y-auto rounded-lg border border-gray-200 dark:border-[#2a2d35]">
+              <div className="sticky top-0 flex items-center justify-between border-b border-gray-200 dark:border-[#2a2d35] bg-gray-50 dark:bg-[#181b22] px-3 py-2">
                 <button
                   onClick={selectAllFiltered}
                   className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
@@ -206,7 +206,7 @@ export default function NotificationComposer({
                   <button
                     key={e.id}
                     onClick={() => toggleSelect(e.id)}
-                    className={`flex w-full items-center justify-between gap-2 border-b border-gray-50 dark:border-slate-700/50 px-3 py-2.5 text-left last:border-0 ${
+                    className={`flex w-full items-center justify-between gap-2 border-b border-gray-50 dark:border-[#2a2d35]/50 px-3 py-2.5 text-left last:border-0 ${
                       isSelected
                         ? "bg-blue-50 dark:bg-blue-900/20"
                         : "hover:bg-gray-50 dark:hover:bg-slate-800"
@@ -225,7 +225,7 @@ export default function NotificationComposer({
                       className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border ${
                         isSelected
                           ? "border-blue-600 bg-blue-600 text-white"
-                          : "border-gray-300 dark:border-slate-600 text-transparent"
+                          : "border-gray-300 dark:border-[#2a2d35] text-transparent"
                       }`}
                     >
                       <Check className="h-3.5 w-3.5" />
@@ -247,7 +247,7 @@ export default function NotificationComposer({
             onChange={(e) => setTitre(e.target.value)}
             maxLength={255}
             placeholder="Ex : Rappel de paiement, Séance annulée..."
-            className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:outline-none"
+            className="w-full rounded-lg border border-gray-300 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:outline-none"
           />
         </div>
 
@@ -261,7 +261,7 @@ export default function NotificationComposer({
             rows={4}
             maxLength={2000}
             placeholder="Écrivez le contenu de la notification..."
-            className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:outline-none"
+            className="w-full rounded-lg border border-gray-300 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:outline-none"
           />
           <p className="mt-1 text-right text-xs text-gray-400 dark:text-gray-500">
             {message.length}/2000
@@ -269,12 +269,12 @@ export default function NotificationComposer({
         </div>
 
         {titre.trim() || message.trim() ? (
-          <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 p-4">
+          <div className="rounded-lg border border-gray-200 dark:border-[#2a2d35] bg-gray-50 dark:bg-[#181b22] p-4">
             <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">
               <Eye className="h-3.5 w-3.5" />
               Aperçu
             </p>
-            <div className="flex items-start gap-3 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
+            <div className="flex items-start gap-3 rounded-lg border border-gray-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-4">
               <div className="mt-0.5 flex-shrink-0">
                 <Bell className="h-4 w-4 text-gray-400 dark:text-gray-500" />
               </div>
@@ -301,7 +301,7 @@ export default function NotificationComposer({
           <button
             type="button"
             onClick={() => setShowPreview((prev) => !prev)}
-            className="flex items-center gap-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700"
+            className="flex items-center gap-2 rounded-lg border border-gray-300 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2d35]"
           >
             <Eye className="h-4 w-4" />
             {showPreview ? "Masquer l'aperçu" : "Voir l'aperçu"}

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -350,7 +350,7 @@ export default function ProfSeancesPage() {
     if (s === "planifiee") return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
     if (s === "en_cours") return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300";
     if (s === "terminee") return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
-    return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
+    return "bg-gray-100 text-neutral-800 dark:bg-gray-800 dark:text-neutral-300";
   };
 
   const isSessionPast = (s: Seance): boolean => {
@@ -373,18 +373,18 @@ export default function ProfSeancesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Mes Séances</h1>
+          <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Mes Séances</h1>
         </div>
         <button
           onClick={() => { setShowCreateModal(true); setCreateGroupeId(""); setCreateDate(""); setCreateHeureDebut(""); setCreateHeureFin(""); setCreateNotes(""); setCreateErrors({}); }}
-          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
         >
           <Plus className="h-4 w-4" />
           Nouvelle Séance
         </button>
         <button
           onClick={openRattrapageModal}
-          className="flex items-center gap-2 rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800"
+          className="flex items-center gap-2 rounded-xl border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
           title="Ajouter une séance passée pour un élève"
         >
           <CalendarPlus className="h-4 w-4" />
@@ -393,24 +393,24 @@ export default function ProfSeancesPage() {
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">{error}</div>
+        <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">{error}</div>
       )}
 
       {success && (
-        <div className="rounded-lg border border-green-200 dark:border-green-900/50 bg-green-50 dark:bg-green-900/20 p-4 text-sm text-green-700 dark:text-green-400">{success}</div>
+        <div className="rounded-xl border border-green-200 dark:border-green-900/50 bg-green-50 dark:bg-green-900/20 p-4 text-sm text-green-700 dark:text-green-400">{success}</div>
       )}
 
       <form onSubmit={handleFilter} className="flex flex-wrap items-end gap-4">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Date début</label>
-          <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+          <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Date début</label>
+          <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Date fin</label>
-          <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+          <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Date fin</label>
+          <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
         </div>
-        <button type="submit" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Filtrer</button>
-        <button type="button" onClick={() => { setDateFrom(""); setDateTo(""); fetchSeances(); }} className="rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800">Réinitialiser</button>
+        <button type="submit" className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">Filtrer</button>
+        <button type="button" onClick={() => { setDateFrom(""); setDateTo(""); fetchSeances(); }} className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]">Réinitialiser</button>
       </form>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -424,10 +424,10 @@ export default function ProfSeancesPage() {
           <button
             key={f.key}
             onClick={() => setStatusFilter(f.key)}
-            className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all ${
+            className={`rounded-full px-3.5 py-1.5 text-[12px] font-semibold transition-all ${
               statusFilter === f.key
-                ? "bg-blue-600 text-white shadow-sm"
-                : "border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 dark:border-slate-600 dark:bg-slate-900 dark:text-gray-300 dark:hover:bg-slate-800"
+                ? "bg-indigo-600 text-white"
+                : "border border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-300 dark:hover:bg-[#1e2128]"
             }`}
           >
             {f.label}
@@ -441,44 +441,44 @@ export default function ProfSeancesPage() {
       {loading ? (
         <SkeletonPage />
       ) : (
-        <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+        <div className="overflow-hidden rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
+            <table className="w-full text-left text-[13px]">
+              <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
                 <tr>
-                  <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Date</th>
-                  <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Groupe</th>
-                  <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Horaire</th>
-                  <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Statut</th>
-                  <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Présences</th>
-                  <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Actions</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Date</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Horaire</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Statut</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Présences</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+              <tbody className="divide-y divide-neutral-100 dark:divide-slate-700">
                 {filteredSeances.length === 0 ? (
-                  <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Aucune séance trouvée</td></tr>
+                  <tr><td colSpan={6} className="px-4 py-8 text-center text-neutral-500 dark:text-neutral-400">Aucune séance trouvée</td></tr>
                 ) : (
                   filteredSeances.map((seance) => (
-                    <tr key={seance.id} className="cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800" onClick={() => router.push(`/prof/presences/${seance.id}`)}>
-                      <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{formatDate(seance.date)}</td>
-                      <td className="px-6 py-4 font-medium">{seance.groupe.nom}</td>
-                      <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                    <tr key={seance.id} className="cursor-pointer hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]" onClick={() => router.push(`/prof/presences/${seance.id}`)}>
+                      <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{formatDate(seance.date)}</td>
+                      <td className="px-4 py-2.5 font-medium">{seance.groupe.nom}</td>
+                      <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
                         {seance.heureDebut && seance.heureFin
                           ? `${formatTime(seance.heureDebut)} - ${formatTime(seance.heureFin)}`
                           : "—"}
                       </td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColor(seance.statut)}`}>
+                      <td className="px-4 py-2.5">
+                        <span className={`inline-block rounded-full px-2.5 py-0.5 text-[12px] font-medium ${statusColor(seance.statut)}`}>
                           {statusLabel(seance.statut)}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{seance._count.presences}</td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{seance._count.presences}</td>
+                      <td className="px-4 py-2.5">
                         <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                           <button
                             onClick={(e) => openEditModal(seance, e)}
                             disabled={isSessionPast(seance)}
-                            className="rounded p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-400"
+                            className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-gray-100 dark:hover:bg-[#1e2128] hover:text-blue-600 dark:hover:text-blue-400 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
                             title={isSessionPast(seance) ? "Séance passée — modification impossible" : "Modifier"}
                           >
                             <Pencil className="h-4 w-4" />
@@ -486,7 +486,7 @@ export default function ProfSeancesPage() {
                           <button
                             onClick={(e) => { e.stopPropagation(); setConfirmDelete(seance.id); }}
                             disabled={deletingId === seance.id}
-                            className="rounded p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-red-600 dark:hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-400"
+                            className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-gray-100 dark:hover:bg-[#1e2128] hover:text-red-600 dark:hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
                             title="Supprimer"
                           >
                             {deletingId === seance.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
@@ -504,32 +504,32 @@ export default function ProfSeancesPage() {
 
       {showRattrapageModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl">
+          <div className="w-full max-w-md rounded-xl bg-white dark:bg-[#181b22] p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold dark:text-gray-100">Séance passée</h2>
-              <button onClick={() => setShowRattrapageModal(false)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"><X className="h-5 w-5" /></button>
+              <h2 className="text-lg font-semibold dark:text-neutral-100">Séance passée</h2>
+              <button onClick={() => setShowRattrapageModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"><X className="h-5 w-5" /></button>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Groupe</label>
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Groupe</label>
                 <select
                   value={rattrapageGroupeId}
                   onChange={(e) => { setRattrapageGroupeId(e.target.value); loadGroupEleves(e.target.value); }}
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 >
                   <option value="">Sélectionner un groupe</option>
                   {groupes.map((g) => <option key={g.id} value={g.id}>{g.nom}</option>)}
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                   Élèves
                 </label>
-                <div className="overflow-hidden rounded-lg border border-gray-300 dark:border-slate-600">
+                <div className="overflow-hidden rounded-xl border border-neutral-200 dark:border-[#2a2d35]">
                   {rattrapageEleves.length === 0 ? (
-                    <p className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">Choisissez d'abord un groupe</p>
+                    <p className="px-3 py-2 text-sm text-neutral-500 dark:text-neutral-400">Choisissez d'abord un groupe</p>
                   ) : (
-                    <div className="max-h-44 divide-y divide-gray-100 overflow-y-auto dark:divide-slate-700/50">
+                    <div className="max-h-44 divide-y divide-neutral-100 overflow-y-auto dark:divide-slate-700/50">
                       {rattrapageEleves.map((el) => {
                         const checked = rattrapageEleveIds.includes(el.id);
                         return (
@@ -538,16 +538,16 @@ export default function ProfSeancesPage() {
                             className={`flex cursor-pointer items-center gap-2.5 px-3 py-2 text-sm transition-colors ${
                               checked
                                 ? "bg-blue-50 dark:bg-blue-900/30"
-                                : "hover:bg-gray-50 dark:hover:bg-slate-800"
+                                : "hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
                             }`}
                           >
                             <input
                               type="checkbox"
                               checked={checked}
                               onChange={() => toggleRattrapageEleve(el.id)}
-                              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                              className="h-4 w-4 rounded border-neutral-200 text-blue-600 focus:ring-blue-500"
                             />
-                            <span className={`font-medium ${checked ? "text-blue-700 dark:text-blue-300" : "text-gray-700 dark:text-gray-300"}`}>
+                            <span className={`font-medium ${checked ? "text-blue-700 dark:text-blue-300" : "text-neutral-700 dark:text-neutral-300"}`}>
                               {el.prenom} {el.nom}
                             </span>
                           </label>
@@ -561,70 +561,70 @@ export default function ProfSeancesPage() {
                     <button
                       type="button"
                       onClick={toggleSelectAllRattrapage}
-                      className="text-xs font-medium text-blue-600 hover:underline dark:text-blue-400"
+                      className="text-[12px] font-medium text-blue-600 hover:underline dark:text-blue-400"
                     >
                       {rattrapageEleveIds.length === rattrapageEleves.length ? "Tout désélectionner" : "Tout sélectionner"}
                     </button>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                    <span className="text-[12px] text-neutral-500 dark:text-neutral-400">
                       {rattrapageEleveIds.length} sélectionné{rattrapageEleveIds.length > 1 ? "s" : ""}
                     </span>
                   </div>
                 )}
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Date</label>
                 <input
                   type="date"
                   value={rattrapageDate}
                   onChange={(e) => setRattrapageDate(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Heure début</label>
+                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Heure début</label>
                   <input
                     type="time"
                     value={rattrapageHeureDebut}
                     onChange={(e) => setRattrapageHeureDebut(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Heure fin</label>
+                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Heure fin</label>
                   <input
                     type="time"
                     value={rattrapageHeureFin}
                     onChange={(e) => setRattrapageHeureFin(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Notes</label>
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Notes</label>
                 <textarea
                   value={rattrapageNotes}
                   onChange={(e) => setRattrapageNotes(e.target.value)}
                   rows={2}
                   placeholder="Ex. séance de rattrapage non saisie"
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
               {rattrapageError && (
-                <div className="rounded-lg border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">{rattrapageError}</div>
+                <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">{rattrapageError}</div>
               )}
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowRattrapageModal(false)}
-                  className="rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800"
+                  className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
                 >
                   Annuler
                 </button>
                 <button
                   onClick={handleSaveRattrapage}
                   disabled={savingRattrapage}
-                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
                 >
                   {savingRattrapage && <Loader2 className="h-4 w-4 animate-spin" />}
                   Ajouter et déduire
@@ -637,42 +637,42 @@ export default function ProfSeancesPage() {
 
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl">
+          <div className="w-full max-w-md rounded-xl bg-white dark:bg-[#181b22] p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold dark:text-gray-100">Nouvelle Séance</h2>
-              <button onClick={() => setShowCreateModal(false)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"><X className="h-5 w-5" /></button>
+              <h2 className="text-lg font-semibold dark:text-neutral-100">Nouvelle Séance</h2>
+              <button onClick={() => setShowCreateModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"><X className="h-5 w-5" /></button>
             </div>
             <form onSubmit={handleCreateSubmit} className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Groupe</label>
-                <select value={createGroupeId} onChange={(e) => setCreateGroupeId(e.target.value)} className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Groupe</label>
+                <select value={createGroupeId} onChange={(e) => setCreateGroupeId(e.target.value)} className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
                   <option value="">Sélectionner un groupe</option>
                   {groupes.map((g) => <option key={g.id} value={g.id}>{g.nom}</option>)}
                 </select>
-                {createErrors.groupeId && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{createErrors.groupeId}</p>}
+                {createErrors.groupeId && <p className="mt-1 text-[12px] text-red-600 dark:text-red-400">{createErrors.groupeId}</p>}
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
-                <input type="date" value={createDate} onChange={(e) => setCreateDate(e.target.value)} className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-                {createErrors.date && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{createErrors.date}</p>}
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Date</label>
+                <input type="date" value={createDate} onChange={(e) => setCreateDate(e.target.value)} className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                {createErrors.date && <p className="mt-1 text-[12px] text-red-600 dark:text-red-400">{createErrors.date}</p>}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Heure début</label>
-                  <input type="time" value={createHeureDebut} onChange={(e) => setCreateHeureDebut(e.target.value)} className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Heure début</label>
+                  <input type="time" value={createHeureDebut} onChange={(e) => setCreateHeureDebut(e.target.value)} className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Heure fin</label>
-                  <input type="time" value={createHeureFin} onChange={(e) => setCreateHeureFin(e.target.value)} className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Heure fin</label>
+                  <input type="time" value={createHeureFin} onChange={(e) => setCreateHeureFin(e.target.value)} className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Notes</label>
-                <textarea value={createNotes} onChange={(e) => setCreateNotes(e.target.value)} rows={3} className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Notes</label>
+                <textarea value={createNotes} onChange={(e) => setCreateNotes(e.target.value)} rows={3} className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
               </div>
               <div className="flex justify-end gap-3 pt-2">
-                <button type="button" onClick={() => setShowCreateModal(false)} className="rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800">Annuler</button>
-                <button type="submit" disabled={submitting} className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+                <button type="button" onClick={() => setShowCreateModal(false)} className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]">Annuler</button>
+                <button type="submit" disabled={submitting} className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
                   {submitting && <Loader2 className="h-4 w-4 animate-spin" />} Créer
                 </button>
               </div>
@@ -683,32 +683,32 @@ export default function ProfSeancesPage() {
 
       {showEditModal && editSeance && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl">
+          <div className="w-full max-w-md rounded-xl bg-white dark:bg-[#181b22] p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold dark:text-gray-100">Modifier la Séance</h2>
-              <button onClick={() => setShowEditModal(false)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"><X className="h-5 w-5" /></button>
+              <h2 className="text-lg font-semibold dark:text-neutral-100">Modifier la Séance</h2>
+              <button onClick={() => setShowEditModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"><X className="h-5 w-5" /></button>
             </div>
-            <div className="mb-3 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 p-3 text-sm text-gray-600 dark:text-gray-400">
+            <div className="mb-3 rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3 text-sm text-neutral-600 dark:text-neutral-400">
               {editSeance.groupe.nom} — {formatDate(editSeance.date)}
             </div>
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
-                <input type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Date</label>
+                <input type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Heure début</label>
-                  <input type="time" value={editHeureDebut} onChange={(e) => setEditHeureDebut(e.target.value)} className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Heure début</label>
+                  <input type="time" value={editHeureDebut} onChange={(e) => setEditHeureDebut(e.target.value)} className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Heure fin</label>
-                  <input type="time" value={editHeureFin} onChange={(e) => setEditHeureFin(e.target.value)} className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Heure fin</label>
+                  <input type="time" value={editHeureFin} onChange={(e) => setEditHeureFin(e.target.value)} className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Statut</label>
-                <select value={editStatut} onChange={(e) => setEditStatut(e.target.value)} className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Statut</label>
+                <select value={editStatut} onChange={(e) => setEditStatut(e.target.value)} className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
                   <option value="planifiee">Planifiée</option>
                   <option value="en_cours">En cours</option>
                   <option value="terminee">Terminée</option>
@@ -716,12 +716,12 @@ export default function ProfSeancesPage() {
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Notes</label>
-                <textarea value={editNotes} onChange={(e) => setEditNotes(e.target.value)} rows={3} className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Notes</label>
+                <textarea value={editNotes} onChange={(e) => setEditNotes(e.target.value)} rows={3} className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
               </div>
               <div className="flex justify-end gap-3 pt-2">
-                <button type="button" onClick={() => setShowEditModal(false)} className="rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800">Annuler</button>
-                <button type="submit" disabled={submitting} className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+                <button type="button" onClick={() => setShowEditModal(false)} className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]">Annuler</button>
+                <button type="submit" disabled={submitting} className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
                   {submitting && <Loader2 className="h-4 w-4 animate-spin" />} Enregistrer
                 </button>
               </div>

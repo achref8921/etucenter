@@ -67,13 +67,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             <div
               key={t.id}
               role="status"
-              className={`animate-toast-in pointer-events-auto flex items-start gap-3 rounded-lg border bg-white p-3.5 shadow-lg dark:bg-slate-900 ${style.bar}`}
+              className={`animate-toast-in pointer-events-auto flex items-start gap-3 rounded-lg border bg-white p-3.5 shadow-lg dark:bg-[#181b22] ${style.bar}`}
             >
               {style.icon}
               <p className="flex-1 text-sm text-gray-800 dark:text-gray-200">{t.message}</p>
               <button
                 onClick={() => dismiss(t.id)}
-                className="rounded p-0.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+                className="rounded p-0.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-500 dark:hover:bg-[#181b22] dark:hover:text-slate-300"
                 aria-label="Fermer"
               >
                 <X className="h-4 w-4" />

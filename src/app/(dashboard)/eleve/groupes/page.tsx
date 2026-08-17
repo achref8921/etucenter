@@ -82,18 +82,18 @@ export default function EleveGroupesPage() {
         <GraduationCap className="h-6 w-6 text-blue-600" />
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Mes Groupes</h1>
       </div>
-      <p className="-mt-3 text-sm text-gray-500 dark:text-gray-400">
+      <p className="-mt-3 text-[13px] text-neutral-500 dark:text-neutral-400">
         Cliquez sur un groupe pour plus de détails.
       </p>
 
       {error && (
-        <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">
+        <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4 text-[13px] text-red-700 dark:text-red-400">
           {error}
         </div>
       )}
 
       {groupes.length === 0 ? (
-        <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-8 text-center text-gray-500 dark:text-gray-400">
+        <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-8 text-center text-[13px] text-neutral-500 dark:text-neutral-400">
           Vous n&apos;êtes inscrit à aucun groupe
         </div>
       ) : (
@@ -103,48 +103,48 @@ export default function EleveGroupesPage() {
             return (
               <div
                 key={g.groupe.id}
-                className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm transition-all hover:shadow-md"
+                className="overflow-hidden rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] transition-all"
               >
                 <button
                   onClick={() => setExpandedId(isExpanded ? null : g.groupe.id)}
-                  className="w-full p-6 text-left transition-colors hover:bg-blue-50/60 dark:hover:bg-blue-950/30"
+                  className="w-full p-6 text-left transition-colors hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-400">{g.groupe.nom}</h3>
                       {g.groupe.matiere && (
-                        <p className="mt-0.5 flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+                        <p className="mt-0.5 flex items-center gap-1.5 text-[13px] text-neutral-500 dark:text-neutral-400">
                           <BookOpen className="h-3.5 w-3.5" /> {g.groupe.matiere.nom}
                         </p>
                       )}
                     </div>
                     {isExpanded ? (
-                      <ChevronUp className="h-5 w-5 flex-shrink-0 text-gray-400 dark:text-gray-500" />
+                      <ChevronUp className="h-5 w-5 flex-shrink-0 text-neutral-400 dark:text-neutral-500" />
                     ) : (
-                      <ChevronDown className="h-5 w-5 flex-shrink-0 text-gray-400 dark:text-gray-500" />
+                      <ChevronDown className="h-5 w-5 flex-shrink-0 text-neutral-400 dark:text-neutral-500" />
                     )}
                   </div>
 
-                  <div className="mt-4 space-y-2 text-sm">
+                  <div className="mt-4 space-y-2 text-[13px]">
                     <div className="flex justify-between">
-                      <span className="text-gray-500 dark:text-gray-400">Prof</span>
+                      <span className="text-neutral-500 dark:text-neutral-400">Prof</span>
                       <span className="font-medium text-gray-900 dark:text-gray-100">
                         {g.groupe.prof ? `${g.groupe.prof.prenom} ${g.groupe.prof.nom}` : "—"}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-500 dark:text-gray-400">Prix/Séance</span>
-                      <span className="font-medium text-gray-900 dark:text-gray-100">
+                      <span className="text-neutral-500 dark:text-neutral-400">Prix/Séance</span>
+                      <span className="font-medium tabular-nums text-gray-900 dark:text-gray-100">
                         {formatCurrency(g.groupe.prixParSeance)}
                       </span>
                     </div>
                   </div>
 
-                  <div className="mt-4 border-t border-gray-100 dark:border-slate-700 pt-4">
-                    <div className="mt-2 flex items-center justify-between text-sm">
-                      <span className="text-gray-500 dark:text-gray-400">Solde</span>
+                  <div className="mt-4 border-t border-neutral-100 dark:border-[#2a2d35] pt-4">
+                    <div className="mt-2 flex items-center justify-between text-[13px]">
+                      <span className="text-neutral-500 dark:text-neutral-400">Solde</span>
                       <span
-                        className={`font-semibold ${
+                        className={`font-semibold tabular-nums ${
                           g.stats.remainingCredit > 0
                             ? "text-emerald-600 dark:text-emerald-400"
                             : g.stats.remainingCredit < 0
@@ -159,21 +159,21 @@ export default function EleveGroupesPage() {
                 </button>
 
                 {isExpanded && (
-                  <div className="border-t border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 p-6">
+                  <div className="border-t border-neutral-100 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#181b22] p-6">
                     {g.groupe.description && (
-                      <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">{g.groupe.description}</p>
+                      <p className="mb-4 text-[13px] text-neutral-600 dark:text-neutral-400">{g.groupe.description}</p>
                     )}
 
-                    <div className="mb-4 space-y-2 text-sm">
-                      <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                        <Calendar className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                    <div className="mb-4 space-y-2 text-[13px]">
+                      <div className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400">
+                        <Calendar className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
                         Inscrit le :{" "}
                         <span className="font-medium text-gray-900 dark:text-gray-100">
                           {formatDate(g.inscription.dateInscription)}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                        <Clock className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                      <div className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400">
+                        <Clock className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
                         Séances :{" "}
                         <span className="font-medium text-gray-900 dark:text-gray-100">
                           {g.seances.total} au total
@@ -182,8 +182,8 @@ export default function EleveGroupesPage() {
                           )}
                         </span>
                       </div>
-                      <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
-                        <User className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                      <div className="flex items-center gap-3 text-neutral-600 dark:text-neutral-400">
+                        <User className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
                         Présences :
                         <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
                           <CheckCircle2 className="h-3.5 w-3.5" /> {g.presences.present}
@@ -195,15 +195,15 @@ export default function EleveGroupesPage() {
                     </div>
 
                     {g.groupe.prof && (
-                      <div className="mb-4 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3">
-                        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                      <div className="mb-4 rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-3">
+                        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
                           Contacter le prof
                         </p>
                         <div className="flex flex-wrap gap-2">
                           {g.groupe.prof.telephone && (
                             <a
                               href={`tel:${g.groupe.prof.telephone}`}
-                              className="flex items-center gap-1.5 rounded-md bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
+                              className="flex items-center gap-1.5 rounded-md bg-emerald-50 px-3 py-1.5 text-[12px] font-medium text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
                             >
                               <Phone className="h-3.5 w-3.5" /> Appeler
                             </a>
@@ -211,7 +211,7 @@ export default function EleveGroupesPage() {
                           {g.groupe.prof.email && (
                             <a
                               href={`mailto:${g.groupe.prof.email}`}
-                              className="flex items-center gap-1.5 rounded-md bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400"
+                              className="flex items-center gap-1.5 rounded-md bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400"
                             >
                               <Mail className="h-3.5 w-3.5" /> Email
                             </a>
@@ -223,19 +223,19 @@ export default function EleveGroupesPage() {
                     <div className="flex flex-wrap gap-2">
                       <Link
                         href="/eleve/seances"
-                        className="flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700"
+                        className="flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-2 text-[12px] font-semibold text-white hover:bg-blue-700"
                       >
                         <Calendar className="h-3.5 w-3.5" /> Mes séances
                       </Link>
                       <Link
                         href="/eleve/presences"
-                        className="flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-100 dark:border-slate-600 dark:text-gray-300 dark:hover:bg-slate-800"
+                        className="flex items-center gap-1 rounded-lg border border-neutral-200 px-3 py-2 text-[12px] font-semibold text-neutral-700 hover:bg-neutral-100 dark:border-[#2a2d35] dark:text-neutral-300 dark:hover:bg-[#1e2128]"
                       >
                         Présences <ChevronRight className="h-3.5 w-3.5" />
                       </Link>
                       <Link
                         href="/eleve/paiements"
-                        className="flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-100 dark:border-slate-600 dark:text-gray-300 dark:hover:bg-slate-800"
+                        className="flex items-center gap-1 rounded-lg border border-neutral-200 px-3 py-2 text-[12px] font-semibold text-neutral-700 hover:bg-neutral-100 dark:border-[#2a2d35] dark:text-neutral-300 dark:hover:bg-[#1e2128]"
                       >
                         Paiements <ChevronRight className="h-3.5 w-3.5" />
                       </Link>

@@ -225,10 +225,10 @@ export default function GroupesPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestion des Groupes</h1>
+        <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Gestion des Groupes</h1>
         <button
           onClick={openCreate}
-          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700"
         >
           <Plus className="h-4 w-4" />
           Ajouter
@@ -246,40 +246,40 @@ export default function GroupesPage() {
           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+        <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
           <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
+            <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
               <tr>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Nom</th>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Prof</th>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Matière</th>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Prix</th>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Actions</th>
+                <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Nom</th>
+                <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Prof</th>
+                <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Matière</th>
+                <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Prix</th>
+                <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+            <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
               {groupes.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan={5} className="px-4 py-2.5 text-center text-neutral-500 dark:text-neutral-400">
                     Aucun groupe trouvé
                   </td>
                 </tr>
               ) : (
                 groupes.map((groupe) => (
-                  <tr key={groupe.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
-                    <td className="px-6 py-4 font-medium">
+                  <tr key={groupe.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
+                    <td className="px-4 py-2.5 font-medium">
                       <Link href={`/admin/groupes/${groupe.id}`} className="text-blue-600 dark:text-blue-400 hover:underline">
                         {groupe.nom}
                       </Link>
                     </td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                    <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">
                       {editingProfId === groupe.id ? (
                         <div className="flex items-center gap-1">
                           <select
                             value={selectedProfId}
                             onChange={(e) => setSelectedProfId(e.target.value)}
-                            className="rounded border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none"
+                            className="rounded border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-2 py-1 focus:border-blue-500 focus:outline-none"
                           >
                             <option value="">Aucun prof</option>
                             {profs.map((p) => (
@@ -289,7 +289,7 @@ export default function GroupesPage() {
                           <button onClick={() => handleUpdateProf(groupe.id)} disabled={savingProfId === groupe.id} className="text-green-600 dark:text-green-400 hover:text-green-800 disabled:opacity-50">
                             {savingProfId === groupe.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
                           </button>
-                          <button onClick={() => { setEditingProfId(null); setSelectedProfId(""); }} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                          <button onClick={() => { setEditingProfId(null); setSelectedProfId(""); }} className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300">
                             <X className="h-3.5 w-3.5" />
                           </button>
                         </div>
@@ -298,7 +298,7 @@ export default function GroupesPage() {
                           <span>{groupe.prof ? `${groupe.prof.prenom} ${groupe.prof.nom}` : "—"}</span>
                           <button
                             onClick={() => { setEditingProfId(groupe.id); setSelectedProfId(groupe.prof?.id || ""); }}
-                            className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+                            className="text-neutral-400 hover:text-blue-600 dark:hover:text-blue-400"
                             title="Changer le prof"
                           >
                             <Pencil className="h-3.5 w-3.5" />
@@ -306,16 +306,16 @@ export default function GroupesPage() {
                         </div>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                    <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">
                       {groupe.matiere?.nom || "—"}
                     </td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                    <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">
                       {groupe.forfaitMontant && groupe.forfaitSeances ? (
                         <span className="flex flex-col">
-                          <span className="font-medium text-gray-900 dark:text-gray-100">
+                          <span className="font-medium text-neutral-900 dark:text-neutral-100">
                             {formatCurrency(groupe.forfaitMontant)} / {groupe.forfaitSeances} séances
                           </span>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                          <span className="text-[12px] text-neutral-400 dark:text-neutral-500">
                             {formatCurrency(groupe.prixParSeance)} / séance
                           </span>
                         </span>
@@ -323,7 +323,7 @@ export default function GroupesPage() {
                         <span>{formatCurrency(groupe.prixParSeance)} / séance</span>
                       )}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-2.5">
                       <div className="flex items-center gap-3">
                         <button
                           onClick={() => openEdit(groupe)}
@@ -356,45 +356,45 @@ export default function GroupesPage() {
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl">
+          <div className="w-full max-w-md rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">{editingGroupe ? "Modifier le groupe" : "Ajouter un groupe"}</h2>
               <button
                 onClick={() => { setShowModal(false); setEditingGroupe(null); }}
-                className="text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300"
+                className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Nom</label>
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Nom</label>
                 <input
                   name="nom"
                   value={formData.nom}
                   onChange={handleChange}
                   required
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Description</label>
                 <textarea
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
                   rows={2}
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Prof</label>
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Prof</label>
                 <select
                   name="profId"
                   value={formData.profId}
                   onChange={handleChange}
                   required={!editingGroupe}
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 >
                   <option value="">Sélectionner un prof</option>
                   {profs.map((e) => (
@@ -405,13 +405,13 @@ export default function GroupesPage() {
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Matière</label>
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Matière</label>
                 <select
                   name="matiereId"
                   value={formData.matiereId}
                   onChange={handleChange}
                   required={!editingGroupe}
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 >
                   <option value="">Sélectionner une matière</option>
                   {matieres.map((m) => (
@@ -421,13 +421,13 @@ export default function GroupesPage() {
                   ))}
                 </select>
               </div>
-              <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 p-3">
-                <p className="mb-2 text-xs font-semibold text-gray-600 dark:text-gray-300">
+              <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3">
+                <p className="mb-2 text-[12px] font-semibold text-neutral-600 dark:text-neutral-300">
                   Tarif par forfait (ex. 110 DT pour 5 séances)
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">
                       Montant du forfait (DT)
                     </label>
                     <input
@@ -437,11 +437,11 @@ export default function GroupesPage() {
                       onChange={handleChange}
                       min={0}
                       placeholder="110"
-                      className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">
                       Nombre de séances
                     </label>
                     <input
@@ -451,21 +451,21 @@ export default function GroupesPage() {
                       onChange={handleChange}
                       min={0}
                       placeholder="5"
-                      className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
                 </div>
                 {formData.forfaitMontant > 0 && formData.forfaitSeances > 0 && (
-                  <p className="mt-2 text-xs text-blue-600 dark:text-blue-400">
+                  <p className="mt-2 text-[13px] text-blue-600 dark:text-blue-400">
                     = {formData.prixParSeance.toFixed(2)} DT / séance
                   </p>
                 )}
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                <p className="mt-1 text-[12px] text-neutral-400 dark:text-neutral-500">
                   Prix par séance calculé automatiquement = montant ÷ nombre de séances
                 </p>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">
                   Prix / séance (DT)
                 </label>
                 <input
@@ -476,11 +476,11 @@ export default function GroupesPage() {
                   required
                   min={0}
                   disabled={formData.forfaitMontant > 0 && formData.forfaitSeances > 0}
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">
                   Capacité max
                 </label>
                 <input
@@ -490,21 +490,21 @@ export default function GroupesPage() {
                   onChange={handleChange}
                   required
                   min={1}
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => { setShowModal(false); setEditingGroupe(null); }}
-                  className="rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800"
+                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                 >
                   {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
                   {editingGroupe ? "Enregistrer" : "Créer"}

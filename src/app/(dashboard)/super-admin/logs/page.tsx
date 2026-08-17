@@ -25,14 +25,14 @@ const actionIcons: Record<string, typeof AlertTriangle> = {
 };
 
 const actionColors: Record<string, string> = {
-  center_created: "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400",
-  center_suspended: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
-  center_activated: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
-  center_deleted: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
-  center_updated: "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400",
-  admin_created: "bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400",
-  admin_reset: "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400",
-  admin_deleted: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
+  center_created: "text-emerald-500 dark:text-emerald-400",
+  center_suspended: "text-red-500 dark:text-red-400",
+  center_activated: "text-blue-500 dark:text-blue-400",
+  center_deleted: "text-red-500 dark:text-red-400",
+  center_updated: "text-amber-500 dark:text-amber-400",
+  admin_created: "text-violet-500 dark:text-violet-400",
+  admin_reset: "text-amber-500 dark:text-amber-400",
+  admin_deleted: "text-red-500 dark:text-red-400",
 };
 
 export default function SuperAdminLogsPage() {
@@ -76,70 +76,68 @@ export default function SuperAdminLogsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">System Logs</h1>
-          <p className="text-sm text-slate-500 mt-1 dark:text-slate-400">Audit trail of critical platform actions</p>
+          <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Journaux système</h1>
+          <p className="mt-1 text-[13px] text-neutral-500 dark:text-neutral-400">Historique des actions critiques de la plateforme</p>
         </div>
         <div className="flex items-center gap-2">
           {logs.length > 0 && (
             <>
               <button
                 onClick={() => setShowConfirmAll(true)}
-                className="flex items-center gap-2 rounded-lg border border-red-200 bg-white px-3.5 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors dark:border-red-800 dark:bg-slate-900 dark:text-red-400 dark:hover:bg-red-900/20"
+                className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-[13px] font-medium text-neutral-600 hover:bg-red-50 hover:text-red-600 transition-colors dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-400 dark:hover:bg-red-900/20 dark:hover:text-red-400"
               >
                 <Trash2 className="h-4 w-4" />
                 Tout supprimer
               </button>
             </>
           )}
-          <button onClick={loadLogs} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800">
+          <button onClick={loadLogs} className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-[13px] font-medium text-neutral-600 hover:bg-neutral-50 transition-colors dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-400 dark:hover:bg-[#1e2128]">
             <RefreshCw className="h-4 w-4" />
-            Refresh
+            Actualiser
           </button>
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden dark:border-slate-700 dark:bg-slate-900">
+      <div className="rounded-xl border border-neutral-200 bg-white overflow-hidden dark:border-[#2a2d35] dark:bg-[#181b22]">
         {loading ? (
-          <div className="px-5 py-12 text-center text-sm text-slate-400 dark:text-slate-500">Loading logs...</div>
+          <div className="px-4 py-12 text-center text-[13px] text-neutral-400 dark:text-neutral-500">Chargement…</div>
         ) : logs.length === 0 ? (
-          <div className="px-5 py-12 text-center text-sm text-slate-400 dark:text-slate-500">No system logs recorded yet.</div>
+          <div className="px-4 py-12 text-center text-[13px] text-neutral-400 dark:text-neutral-500">Aucun journal enregistré.</div>
         ) : (
-          <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-            <thead className="bg-slate-50 dark:bg-slate-800">
+          <table className="min-w-full divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+            <thead>
               <tr>
-                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Action</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Entity</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Details</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Date</th>
-                <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Action</th>
+                <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Action</th>
+                <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Entité</th>
+                <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Détails</th>
+                <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Date</th>
+                <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+            <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
               {logs.map((log) => {
                 const Icon = actionIcons[log.action] || Shield;
-                const color = actionColors[log.action] || "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400";
+                const color = actionColors[log.action] || "text-neutral-400 dark:text-neutral-500";
                 return (
-                  <tr key={log.id} className="hover:bg-slate-50 transition-colors dark:hover:bg-slate-800">
-                    <td className="px-5 py-3">
+                  <tr key={log.id} className="hover:bg-neutral-100/50 transition-colors dark:hover:bg-[#1e2128]">
+                    <td className="px-4 py-2.5">
                       <div className="flex items-center gap-2.5">
-                        <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${color}`}>
-                          <Icon className="h-4 w-4" />
-                        </div>
-                        <span className="text-sm font-medium text-slate-900 dark:text-slate-100">{log.action.replace(/_/g, " ")}</span>
+                        <Icon className={`h-4 w-4 flex-shrink-0 ${color}`} />
+                        <span className="text-[13px] font-medium text-neutral-900 dark:text-neutral-100">{log.action.replace(/_/g, " ")}</span>
                       </div>
                     </td>
-                    <td className="px-5 py-3 text-sm text-slate-600 dark:text-slate-400">{log.entity || "—"}</td>
-                    <td className="px-5 py-3 text-sm text-slate-500 max-w-xs truncate dark:text-slate-400">
+                    <td className="px-4 py-2.5 text-[13px] text-neutral-500 dark:text-neutral-400">{log.entity || "—"}</td>
+                    <td className="px-4 py-2.5 text-[13px] text-neutral-500 max-w-xs truncate dark:text-neutral-400">
                       {log.details ? JSON.stringify(log.details) : "—"}
                     </td>
-                    <td className="px-5 py-3 text-sm text-slate-500 dark:text-slate-400">
+                    <td className="px-4 py-2.5 text-[13px] text-neutral-500 dark:text-neutral-400">
                       {new Date(log.createdAt).toLocaleString("fr-FR")}
                     </td>
-                    <td className="px-5 py-3 text-right">
+                    <td className="px-4 py-2.5 text-right">
                       <button
                         onClick={() => deleteLog(log.id)}
                         disabled={deletingId === log.id}
-                        className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-50 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                        className="rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-50 dark:hover:bg-red-900/20 dark:hover:text-red-400"
                         title="Supprimer"
                       >
                         {deletingId === log.id ? (

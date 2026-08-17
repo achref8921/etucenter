@@ -49,83 +49,79 @@ export default async function SuperAdminDashboardPage() {
   const inactiveCenters = totalCenters - activeCenters;
 
   const statCards = [
-    { label: "Total Centers", value: totalCenters, icon: Building2, color: "bg-violet-500", shadow: "shadow-violet-200 dark:shadow-violet-900/30", sub: `${activeCenters} active, ${inactiveCenters} inactive` },
-    { label: "Total Users", value: totalUsers, icon: Users, color: "bg-blue-500", shadow: "shadow-blue-200 dark:shadow-blue-900/30", sub: `${totalAdmins} admins, ${totalTeachers} teachers, ${totalStudents} students` },
-    { label: "Groups", value: totalGroups, icon: GraduationCap, color: "bg-emerald-500", shadow: "shadow-emerald-200 dark:shadow-emerald-900/30", sub: "Across all centers" },
-    { label: "Subjects", value: totalMatieres, icon: BookOpen, color: "bg-amber-500", shadow: "shadow-amber-200 dark:shadow-amber-900/30", sub: "Across all centers" },
+    { label: "Total Centers", value: totalCenters, icon: Building2, iconColor: "text-violet-500 dark:text-violet-400", sub: `${activeCenters} actifs, ${inactiveCenters} inactifs` },
+    { label: "Total Utilisateurs", value: totalUsers, icon: Users, iconColor: "text-blue-500 dark:text-blue-400", sub: `${totalAdmins} admins, ${totalTeachers} profs, ${totalStudents} élèves` },
+    { label: "Groupes", value: totalGroups, icon: GraduationCap, iconColor: "text-emerald-500 dark:text-emerald-400", sub: "Tous centres confondus" },
+    { label: "Matières", value: totalMatieres, icon: BookOpen, iconColor: "text-amber-500 dark:text-amber-400", sub: "Tous centres confondus" },
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Platform Overview</h1>
-        <p className="text-sm text-slate-500 mt-1 dark:text-slate-400">EduCenter SaaS — Global metrics and insights</p>
+        <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Aperçu de la plateforme</h1>
+        <p className="mt-1 text-[13px] text-neutral-500 dark:text-neutral-400">EduCenter SaaS — Métriques globales et insights</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((card) => (
-          <div key={card.label} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow dark:border-slate-700 dark:bg-slate-900 dark:hover:shadow-lg">
+          <div key={card.label} className="rounded-xl border border-neutral-200 bg-white p-4 transition-colors hover:bg-neutral-50 dark:border-[#2a2d35] dark:bg-[#181b22] dark:hover:bg-[#1e2128]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{card.label}</p>
-                <p className="mt-1 text-3xl font-bold text-slate-900 dark:text-slate-100">{card.value}</p>
-                <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">{card.sub}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">{card.label}</p>
+                <p className="mt-1 text-2xl font-bold tabular-nums text-neutral-900 dark:text-neutral-100">{card.value}</p>
+                <p className="mt-0.5 text-[12px] text-neutral-400 dark:text-neutral-500">{card.sub}</p>
               </div>
-              <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${card.color} shadow-md ${card.shadow}`}>
-                <card.icon className="h-6 w-6 text-white" />
-              </div>
+              <card.icon className={`h-5 w-5 ${card.iconColor}`} />
             </div>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-slate-700">
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Recent Centers</h2>
-            <Link href="/super-admin/centers" className="text-xs font-medium text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">
-              View all
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <div className="rounded-xl border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
+          <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-3 dark:border-[#2a2d35]">
+            <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">Centers récents</h2>
+            <Link href="/super-admin/centers" className="text-[12px] font-medium text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">
+              Voir tout
             </Link>
           </div>
-          <div className="divide-y divide-slate-50 dark:divide-slate-700">
+          <div className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
             {recentCenters.map((c) => (
-              <div key={c.id} className="flex items-center justify-between px-5 py-3">
+              <div key={c.id} className="flex items-center justify-between px-4 py-2.5 hover:bg-neutral-50/50 dark:hover:bg-[#1e2128]/50">
                 <div>
-                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{c.name}</p>
-                  <p className="text-xs text-slate-400 dark:text-slate-500">{c.slug} · {c._count.utilisateurs} users · {c._count.groupes} groups</p>
+                  <p className="text-[13px] font-medium text-neutral-900 dark:text-neutral-100">{c.name}</p>
+                  <p className="text-[12px] text-neutral-400 dark:text-neutral-500">{c.slug} · {c._count.utilisateurs} users · {c._count.groupes} groupes</p>
                 </div>
-                <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${c.active ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400" : "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400"}`}>
-                  {c.active ? "Active" : "Inactive"}
+                <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${c.active ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400" : "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400"}`}>
+                  {c.active ? "Actif" : "Inactif"}
                 </span>
               </div>
             ))}
             {recentCenters.length === 0 && (
-              <p className="px-5 py-4 text-sm text-slate-400 dark:text-slate-500">No centers yet.</p>
+              <p className="px-4 py-3 text-center text-[13px] text-neutral-400 dark:text-neutral-500">Aucun centre pour le moment.</p>
             )}
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-slate-700">
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Recent Activity</h2>
-            <Link href="/super-admin/logs" className="text-xs font-medium text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">
-              View all
+        <div className="rounded-xl border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
+          <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-3 dark:border-[#2a2d35]">
+            <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">Activité récente</h2>
+            <Link href="/super-admin/logs" className="text-[12px] font-medium text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">
+              Voir tout
             </Link>
           </div>
-          <div className="divide-y divide-slate-50 dark:divide-slate-700">
+          <div className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
             {recentLogs.map((log) => (
-              <div key={log.id} className="flex items-center gap-3 px-5 py-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800">
-                  <AlertTriangle className="h-4 w-4 text-slate-500 dark:text-slate-400" />
-                </div>
+              <div key={log.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-neutral-50/50 dark:hover:bg-[#1e2128]/50">
+                <AlertTriangle className="h-4 w-4 flex-shrink-0 text-neutral-400 dark:text-neutral-500" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-slate-900 truncate dark:text-slate-100">{log.action}</p>
-                  <p className="text-xs text-slate-400 dark:text-slate-500">{formatDateTime(log.createdAt)}</p>
+                  <p className="text-[13px] font-medium text-neutral-900 truncate dark:text-neutral-100">{log.action}</p>
+                  <p className="text-[12px] text-neutral-400 dark:text-neutral-500">{formatDateTime(log.createdAt)}</p>
                 </div>
               </div>
             ))}
             {recentLogs.length === 0 && (
-              <p className="px-5 py-4 text-sm text-slate-400 dark:text-slate-500">No activity logs yet.</p>
+              <p className="px-4 py-3 text-center text-[13px] text-neutral-400 dark:text-neutral-500">Aucun journal d&apos;activité.</p>
             )}
           </div>
         </div>

@@ -143,12 +143,12 @@ export default function AdminEleveDetailPage() {
         <div className="flex items-center gap-4">
           <Link
             href="/admin/utilisateurs"
-            className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+            className="flex items-center gap-1 text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
           >
             <ArrowLeft className="h-4 w-4" />
             Retour
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Détail Élève</h1>
+          <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Détail Élève</h1>
         </div>
         {error && (
           <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">
@@ -170,24 +170,24 @@ export default function AdminEleveDetailPage() {
       <div className="flex items-center gap-4">
         <Link
           href="/admin/utilisateurs"
-          className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+          className="flex items-center gap-1 text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
         >
           <ArrowLeft className="h-4 w-4" />
           Retour
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+        <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
           {e.prenom} {e.nom}
         </h1>
       </div>
 
-      <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
+      <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6 ">
         <div className="flex items-center gap-4">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
             <User className="h-7 w-7 text-blue-600 dark:text-blue-400" />
           </div>
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-3">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
                 {e.prenom} {e.nom}
               </h2>
               {e.codeEleve && (
@@ -205,7 +205,7 @@ export default function AdminEleveDetailPage() {
                 {e.actif ? "Actif" : "Suspendu"}
               </span>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-neutral-500 dark:text-neutral-400">
               {e.email}
               {e.emailVerified ? (
                 <span className="ml-2 inline-flex items-center gap-0.5 text-xs font-medium text-green-600 dark:text-green-400">
@@ -217,60 +217,60 @@ export default function AdminEleveDetailPage() {
                 </span>
               )}
             </p>
-            <p className="text-xs text-gray-400 dark:text-gray-500">Membre depuis le {formatDate(e.createdAt)}</p>
+            <p className="text-xs text-neutral-400 dark:text-neutral-500">Membre depuis le {formatDate(e.createdAt)}</p>
           </div>
         </div>
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div>
-            <p className="text-xs font-medium uppercase text-gray-400 dark:text-gray-500">Téléphone</p>
-            <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{e.telephone || "—"}</p>
+            <p className="text-xs font-medium uppercase text-neutral-400 dark:text-neutral-500">Téléphone</p>
+            <p className="mt-1 text-sm text-neutral-900 dark:text-neutral-100">{e.telephone || "—"}</p>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase text-gray-400 dark:text-gray-500">Date de naissance</p>
-            <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">
+            <p className="text-xs font-medium uppercase text-neutral-400 dark:text-neutral-500">Date de naissance</p>
+            <p className="mt-1 text-sm text-neutral-900 dark:text-neutral-100">
               {e.dateNaissance ? formatDate(e.dateNaissance) : "—"}
             </p>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase text-gray-400 dark:text-gray-500">Email</p>
-            <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{e.email}</p>
+            <p className="text-xs font-medium uppercase text-neutral-400 dark:text-neutral-500">Email</p>
+            <p className="mt-1 text-sm text-neutral-900 dark:text-neutral-100">{e.email}</p>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase text-gray-400 dark:text-gray-500">Niveau</p>
-            <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">
+            <p className="text-xs font-medium uppercase text-neutral-400 dark:text-neutral-500">Niveau</p>
+            <p className="mt-1 text-sm text-neutral-900 dark:text-neutral-100">
               {e.niveau === "primaire" ? "Primaire" : e.niveau === "college" ? "Collège" : e.niveau === "lycee" ? "Lycée" : "—"}
             </p>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase text-gray-400 dark:text-gray-500">Classe</p>
-            <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{e.classe || "—"}</p>
+            <p className="text-xs font-medium uppercase text-neutral-400 dark:text-neutral-500">Classe</p>
+            <p className="mt-1 text-sm text-neutral-900 dark:text-neutral-100">{e.classe || "—"}</p>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase text-gray-400 dark:text-gray-500">Filière</p>
-            <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{e.filiere ? e.filiere.charAt(0).toUpperCase() + e.filiere.slice(1) : "—"}</p>
+            <p className="text-xs font-medium uppercase text-neutral-400 dark:text-neutral-500">Filière</p>
+            <p className="mt-1 text-sm text-neutral-900 dark:text-neutral-100">{e.filiere ? e.filiere.charAt(0).toUpperCase() + e.filiere.slice(1) : "—"}</p>
           </div>
         </div>
       </div>
 
-      <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
+      <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6 ">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div
               className={`flex h-12 w-12 items-center justify-center rounded-lg ${
                 financeBalance === null
-                  ? "bg-gray-400 dark:bg-slate-600"
+                  ? "bg-neutral-400 dark:bg-[#1e2128]"
                   : financeBalance > 0
                     ? "bg-green-500"
                     : financeBalance < 0
                       ? "bg-red-500"
-                      : "bg-gray-400 dark:bg-slate-600"
+                      : "bg-neutral-400 dark:bg-[#1e2128]"
               }`}
             >
               <Wallet className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Compte financier</h2>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Solde prépayé</p>
+              <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Compte financier</h2>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">Solde prépayé</p>
             </div>
           </div>
           <Link
@@ -285,12 +285,12 @@ export default function AdminEleveDetailPage() {
             <p
               className={`text-3xl font-bold ${
                 financeBalance === null
-                  ? "text-gray-400 dark:text-gray-500"
+                  ? "text-neutral-400 dark:text-neutral-500"
                   : financeBalance > 0
                     ? "text-green-600 dark:text-green-400"
                     : financeBalance < 0
                       ? "text-red-600 dark:text-red-400"
-                      : "text-gray-900 dark:text-gray-100"
+                      : "text-neutral-900 dark:text-neutral-100"
               }`}
             >
               {financeLoading
@@ -300,7 +300,7 @@ export default function AdminEleveDetailPage() {
                   : `${financeBalance > 0 ? "+" : ""}${formatCurrency(financeBalance)}`}
             </p>
             {!financeLoading && financeBalance !== null && (
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
                 {financeBalance > 0
                   ? "Solde prépayé disponible"
                   : financeBalance < 0
@@ -312,24 +312,24 @@ export default function AdminEleveDetailPage() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
+      <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6 ">
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-500 shadow-md shadow-purple-200 dark:shadow-purple-900/30">
             <ClipboardCheck className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Assiduité</h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Assiduité</h2>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
               {presents} présences · {absents} absences · {eleve.presences.length} séance{eleve.presences.length > 1 ? "s" : ""} enregistrée{eleve.presences.length > 1 ? "s" : ""}
             </p>
           </div>
         </div>
         <div className="mt-4">
           <div className="flex items-end justify-between">
-            <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{attendanceRate}%</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Taux de présence</p>
+            <p className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">{attendanceRate}%</p>
+            <p className="text-sm text-neutral-500 dark:text-neutral-400">Taux de présence</p>
           </div>
-          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-slate-700">
+          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-[#2a2d35]">
             <div
               className={`h-full rounded-full transition-all duration-500 ${
                 attendanceRate >= 70
@@ -344,50 +344,50 @@ export default function AdminEleveDetailPage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-        <div className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Groupes Inscrits</h2>
+      <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+        <div className="border-b border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
+          <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Groupes Inscrits</h2>
         </div>
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-gray-200 dark:border-slate-700">
+          <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
             <tr>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Groupe</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Matière</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Prof</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Présences</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Absences</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Total Dû</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Total Payé</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Impayé</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Matière</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Prof</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Présences</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Absences</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Total Dû</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Total Payé</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Impayé</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+          <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
             {eleve.inscriptions.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                <td colSpan={8} className="px-6 py-8 text-center text-neutral-500 dark:text-neutral-400">
                   Aucun groupe inscrit
                 </td>
               </tr>
             ) : (
               eleve.inscriptions.map((ins) => (
-                <tr key={ins.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
-                  <td className="px-6 py-4 font-medium">
+                <tr key={ins.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
+                  <td className="px-4 py-2.5 font-medium">
                     <Link href={`/admin/groupes/${ins.groupe.id}`} className="text-blue-600 dark:text-blue-400 hover:underline">
                       {ins.groupe.nom}
                     </Link>
                   </td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{ins.groupe.matiere?.nom ?? "—"}</td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                  <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{ins.groupe.matiere?.nom ?? "—"}</td>
+                  <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
                     {ins.groupe.prof
                       ? `${ins.groupe.prof.prenom} ${ins.groupe.prof.nom}`
                       : "—"}
                   </td>
-                  <td className="px-6 py-4 text-green-600 dark:text-green-400">{ins.stats.presencesCount}</td>
-                  <td className="px-6 py-4 text-red-600 dark:text-red-400">{ins.stats.absencesCount}</td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{formatCurrency(ins.stats.totalDue)}</td>
-                  <td className="px-6 py-4 text-green-600 dark:text-green-400">{formatCurrency(ins.stats.totalPaid)}</td>
-                  <td className="px-6 py-4">
-                    <span className={`font-medium ${ins.stats.unpaid > 0 ? "text-red-600 dark:text-red-400" : "text-gray-900 dark:text-gray-100"}`}>
+                  <td className="px-4 py-2.5 text-green-600 dark:text-green-400">{ins.stats.presencesCount}</td>
+                  <td className="px-4 py-2.5 text-red-600 dark:text-red-400">{ins.stats.absencesCount}</td>
+                  <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{formatCurrency(ins.stats.totalDue)}</td>
+                  <td className="px-4 py-2.5 text-green-600 dark:text-green-400">{formatCurrency(ins.stats.totalPaid)}</td>
+                  <td className="px-4 py-2.5">
+                    <span className={`font-medium ${ins.stats.unpaid > 0 ? "text-red-600 dark:text-red-400" : "text-neutral-900 dark:text-neutral-100"}`}>
                       {formatCurrency(ins.stats.unpaid)}
                     </span>
                   </td>
@@ -398,15 +398,15 @@ export default function AdminEleveDetailPage() {
         </table>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Historique des Présences</h2>
+      <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
+          <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Historique des Présences</h2>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500 dark:text-gray-400">
+            <span className="text-xs text-neutral-500 dark:text-neutral-400">
               {eleve.presences.filter((p) => p.statut === "present").length} présents ·{" "}
               {eleve.presences.filter((p) => p.statut === "absent").length} absents
             </span>
-            <div className="flex rounded-lg border border-gray-200 dark:border-slate-700 p-0.5">
+            <div className="flex rounded-lg border border-neutral-200 dark:border-[#2a2d35] p-0.5">
               {(["toutes", "present", "absent"] as const).map((f) => (
                 <button
                   key={f}
@@ -415,7 +415,7 @@ export default function AdminEleveDetailPage() {
                   className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
                     presenceFilter === f
                       ? "bg-blue-600 text-white"
-                      : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-700"
+                      : "text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-[#1e2128]"
                   }`}
                 >
                   {f === "toutes" ? "Toutes" : f === "present" ? "Présents" : "Absents"}
@@ -426,19 +426,19 @@ export default function AdminEleveDetailPage() {
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-gray-200 dark:border-slate-700">
+            <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
               <tr>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Date</th>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Groupe</th>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Matière</th>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Prof</th>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Statut</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Date</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Matière</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Prof</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Statut</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+            <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
               {eleve.presences.filter((p) => presenceFilter === "toutes" || p.statut === presenceFilter).length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan={5} className="px-6 py-8 text-center text-neutral-500 dark:text-neutral-400">
                     {eleve.presences.length === 0
                       ? "Aucune présence enregistrée"
                       : "Aucune présence dans cette catégorie"}
@@ -448,18 +448,18 @@ export default function AdminEleveDetailPage() {
                 eleve.presences
                   .filter((p) => presenceFilter === "toutes" || p.statut === presenceFilter)
                   .map((p) => (
-                    <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
-                      <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{formatDate(p.seance.date)}</td>
-                      <td className="px-6 py-4 font-medium">
+                    <tr key={p.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
+                      <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{formatDate(p.seance.date)}</td>
+                      <td className="px-4 py-2.5 font-medium">
                         <Link href={`/admin/groupes/${p.seance.groupe.id}`} className="text-blue-600 dark:text-blue-400 hover:underline">
                           {p.seance.groupe.nom}
                         </Link>
                       </td>
-                      <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{p.seance.groupe.matiere?.nom ?? "—"}</td>
-                      <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                      <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{p.seance.groupe.matiere?.nom ?? "—"}</td>
+                      <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
                         {p.seance.groupe.prof ? `${p.seance.groupe.prof.prenom} ${p.seance.groupe.prof.nom}` : "—"}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-2.5">
                         <span
                           className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                             p.statut === "present"
@@ -478,9 +478,9 @@ export default function AdminEleveDetailPage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-        <div className="flex items-center justify-between border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Grand Livre</h2>
+      <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+        <div className="flex items-center justify-between border-b border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
+          <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Grand Livre</h2>
           <Link
             href={`/admin/finances?studentId=${e.id}`}
             className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
@@ -490,27 +490,27 @@ export default function AdminEleveDetailPage() {
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-gray-200 dark:border-slate-700">
+            <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
               <tr>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Date</th>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Description</th>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Groupe</th>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Type</th>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Montant</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Date</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Description</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Type</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Montant</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+            <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
               {transactions.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan={5} className="px-6 py-8 text-center text-neutral-500 dark:text-neutral-400">
                     Aucune transaction enregistrée
                   </td>
                 </tr>
               ) : (
                 transactions.slice(0, 10).map((t) => (
-                  <tr key={t.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{formatDateTime(t.date)}</td>
-                    <td className="px-6 py-4 font-medium">
+                  <tr key={t.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
+                    <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{formatDateTime(t.date)}</td>
+                    <td className="px-4 py-2.5 font-medium">
                       {t.description}
                       {t.receiptNumber && (
                         <span className="ml-2 inline-block rounded bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 font-mono text-xs font-semibold text-blue-700 dark:text-blue-400">
@@ -518,10 +518,10 @@ export default function AdminEleveDetailPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                    <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
                       {t.attendance?.seance.groupe.nom ?? "—"}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-2.5">
                       <span
                         className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${
                           t.type === "PREPAYMENT"
@@ -537,7 +537,7 @@ export default function AdminEleveDetailPage() {
                       </span>
                     </td>
                     <td
-                      className={`px-6 py-4 font-semibold ${
+                      className={`px-4 py-2.5 font-semibold ${
                         t.signedAmount >= 0
                           ? "text-green-600 dark:text-green-400"
                           : "text-red-600 dark:text-red-400"
@@ -553,39 +553,39 @@ export default function AdminEleveDetailPage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-        <div className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Historique des Paiements</h2>
+      <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+        <div className="border-b border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
+          <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Historique des Paiements</h2>
         </div>
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-gray-200 dark:border-slate-700">
+          <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
             <tr>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Date</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Groupe</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Montant</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Méthode</th>
-              <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">Notes</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Date</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Montant</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Méthode</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Notes</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+          <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
             {eleve.paiements.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                <td colSpan={5} className="px-6 py-8 text-center text-neutral-500 dark:text-neutral-400">
                   Aucun paiement enregistré
                 </td>
               </tr>
             ) : (
               eleve.paiements.map((p) => (
-                <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{formatDateTime(p.datePaiement)}</td>
-                  <td className="px-6 py-4 font-medium">{p.groupe.nom}</td>
-                  <td className="px-6 py-4 font-medium">{formatCurrency(p.montant)}</td>
-                  <td className="px-6 py-4">
-                    <span className="inline-block rounded-full bg-gray-100 dark:bg-slate-700 px-2.5 py-0.5 text-xs font-medium text-gray-800 dark:text-gray-200">
+                <tr key={p.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
+                  <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{formatDateTime(p.datePaiement)}</td>
+                  <td className="px-4 py-2.5 font-medium">{p.groupe.nom}</td>
+                  <td className="px-4 py-2.5 font-medium">{formatCurrency(p.montant)}</td>
+                  <td className="px-4 py-2.5">
+                    <span className="inline-block rounded-full bg-neutral-100 dark:bg-[#2a2d35] px-2.5 py-0.5 text-xs font-medium text-neutral-800 dark:text-neutral-200">
                       {p.methodePaiement}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{p.notes || "—"}</td>
+                  <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{p.notes || "—"}</td>
                 </tr>
               ))
             )}

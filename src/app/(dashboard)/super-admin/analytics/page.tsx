@@ -97,7 +97,7 @@ export default function SuperAdminAnalyticsPage() {
 
   if (!data) {
     return (
-      <div className="py-20 text-center text-sm text-slate-500 dark:text-slate-400">
+      <div className="py-20 text-center text-[13px] text-neutral-500 dark:text-neutral-400">
         Impossible de charger les analytiques.
       </div>
     );
@@ -116,14 +116,14 @@ export default function SuperAdminAnalyticsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Analytiques</h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Analytiques</h1>
+          <p className="mt-1 text-[13px] text-neutral-500 dark:text-neutral-400">
             Vue globale de la plateforme EduCenter
           </p>
         </div>
         <button
           onClick={openAdd}
-          className="flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-violet-700"
+          className="flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-[13px] font-semibold text-white hover:bg-violet-700"
         >
           <Plus className="h-4 w-4" />
           Ajouter un abonnement
@@ -132,66 +132,66 @@ export default function SuperAdminAnalyticsPage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <div className="rounded-xl border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Mcenters actifs</p>
-              <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">{data.activeCenters}</p>
-              <p className="text-xs text-slate-400 dark:text-slate-500">
+              <p className="text-xs text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Mcenters actifs</p>
+              <p className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-100">{data.activeCenters}</p>
+              <p className="text-xs text-neutral-400 dark:text-neutral-500">
                 total: {data.totalCenters} | suspendus: {data.suspendedCenters}
               </p>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500">
-              <Building2 className="h-5 w-5 text-white" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 dark:bg-[#1e2128]">
+              <Building2 className="h-5 w-5 text-neutral-500" />
             </div>
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <div className="rounded-xl border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Revenus ce mois</p>
-              <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">
+              <p className="text-xs text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Revenus ce mois</p>
+              <p className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-100">
                 {data.thisMonthAmount.toLocaleString("fr-TN")} DT
               </p>
-              <p className="text-xs text-slate-400 dark:text-slate-500">
+              <p className="text-xs text-neutral-400 dark:text-neutral-500">
                 {data.subscriptionsThisMonth} abonnements actifs
               </p>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500">
-              <DollarSign className="h-5 w-5 text-white" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 dark:bg-[#1e2128]">
+              <DollarSign className="h-5 w-5 text-neutral-500" />
             </div>
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <div className="rounded-xl border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Utilisateurs totaux</p>
-              <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">{data.totalUsers}</p>
-              <p className="text-xs text-slate-400 dark:text-slate-500">
+              <p className="text-xs text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Utilisateurs totaux</p>
+              <p className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-100">{data.totalUsers}</p>
+              <p className="text-xs text-neutral-400 dark:text-neutral-500">
                 {data.totalStudents} élèves | {data.totalTeachers} profs
               </p>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500">
-              <Users className="h-5 w-5 text-white" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 dark:bg-[#1e2128]">
+              <Users className="h-5 w-5 text-neutral-500" />
             </div>
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <div className="rounded-xl border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Revenu total</p>
-              <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">
+              <p className="text-xs text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Revenu total</p>
+              <p className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-100">
                 {data.totalSubAmount.toLocaleString("fr-TN")} DT
               </p>
-              <p className="text-xs text-slate-400 dark:text-slate-500">
+              <p className="text-xs text-neutral-400 dark:text-neutral-500">
                 {data.totalGroups} groupes
               </p>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500">
-              <TrendingUp className="h-5 w-5 text-white" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 dark:bg-[#1e2128]">
+              <TrendingUp className="h-5 w-5 text-neutral-500" />
             </div>
           </div>
         </div>
@@ -199,8 +199,8 @@ export default function SuperAdminAnalyticsPage() {
 
       {/* Charts */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-          <h3 className="mb-4 text-sm font-semibold text-slate-900 dark:text-slate-100">
+        <div className="rounded-xl border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
+          <h3 className="mb-4 text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
             Revenus mensuels des abonnements
           </h3>
           {revenueChartData.length > 0 ? (
@@ -217,12 +217,12 @@ export default function SuperAdminAnalyticsPage() {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <p className="py-12 text-center text-sm text-slate-400">Aucune donnée</p>
+            <p className="py-12 text-center text-[13px] text-neutral-400">Aucune donnée</p>
           )}
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-          <h3 className="mb-4 text-sm font-semibold text-slate-900 dark:text-slate-100">
+        <div className="rounded-xl border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
+          <h3 className="mb-4 text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
             Répartition des revenus par centre
           </h3>
           {centerPieData.length > 0 ? (
@@ -249,7 +249,7 @@ export default function SuperAdminAnalyticsPage() {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <p className="py-12 text-center text-sm text-slate-400">Aucune donnée</p>
+            <p className="py-12 text-center text-[13px] text-neutral-400">Aucune donnée</p>
           )}
         </div>
       </div>
@@ -257,22 +257,22 @@ export default function SuperAdminAnalyticsPage() {
       {/* Expiring Soon + Cancelled */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Expiring Soon */}
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-          <div className="border-b border-slate-200 px-5 py-3 dark:border-slate-700">
-            <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
+        <div className="rounded-xl border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
+          <div className="border-b border-neutral-200 px-4 py-2.5 dark:border-[#2a2d35]">
+            <h3 className="flex items-center gap-2 text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
               <Clock className="h-4 w-4 text-amber-500" />
               Abonnements expirent bientôt (7 jours)
             </h3>
           </div>
-          <div className="divide-y divide-slate-100 dark:divide-slate-700">
+          <div className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
             {(data.expiringSoon || []).length === 0 ? (
-              <p className="px-5 py-6 text-center text-sm text-slate-400">Aucun abonnement à échoir</p>
+              <p className="px-5 py-6 text-center text-[13px] text-neutral-400">Aucun abonnement à échoir</p>
             ) : (
               (data.expiringSoon || []).map((s) => (
-                <div key={s.id} className="flex items-center justify-between px-5 py-3">
+                <div key={s.id} className="flex items-center justify-between px-4 py-2.5">
                   <div>
-                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{s.centerName}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-[13px] font-medium text-neutral-900 dark:text-neutral-100">{s.centerName}</p>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
                       Expire le {new Date(s.dateFin).toLocaleDateString("fr-FR")}
                     </p>
                   </div>
@@ -286,22 +286,22 @@ export default function SuperAdminAnalyticsPage() {
         </div>
 
         {/* Cancelled */}
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-          <div className="border-b border-slate-200 px-5 py-3 dark:border-slate-700">
-            <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
+        <div className="rounded-xl border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
+          <div className="border-b border-neutral-200 px-4 py-2.5 dark:border-[#2a2d35]">
+            <h3 className="flex items-center gap-2 text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
               <Ban className="h-4 w-4 text-red-500" />
               Abonnements annulés ({data.cancelledSubscriptions.length})
             </h3>
           </div>
-          <div className="divide-y divide-slate-100 dark:divide-slate-700">
+          <div className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
             {(data.cancelledSubscriptions || []).length === 0 ? (
-              <p className="px-5 py-6 text-center text-sm text-slate-400">Aucun abonnement annulé</p>
+              <p className="px-5 py-6 text-center text-[13px] text-neutral-400">Aucun abonnement annulé</p>
             ) : (
               (data.cancelledSubscriptions || []).map((s) => (
-                <div key={s.id} className="flex items-center justify-between px-5 py-3">
+                <div key={s.id} className="flex items-center justify-between px-4 py-2.5">
                   <div>
-                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{s.centerName}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-[13px] font-medium text-neutral-900 dark:text-neutral-100">{s.centerName}</p>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
                       Annulé le {new Date(s.dateFin).toLocaleDateString("fr-FR")}
                     </p>
                   </div>
@@ -316,26 +316,26 @@ export default function SuperAdminAnalyticsPage() {
       </div>
 
       {/* Center Revenue Table */}
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-        <div className="border-b border-slate-200 px-5 py-3 dark:border-slate-700">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+      <div className="rounded-xl border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
+        <div className="border-b border-neutral-200 px-4 py-2.5 dark:border-[#2a2d35]">
+          <h3 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
             Revenus par centre
           </h3>
         </div>
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-slate-200 dark:border-slate-700">
+        <table className="w-full text-left text-[13px]">
+          <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
             <tr>
-              <th className="px-5 py-3 font-medium text-slate-500 dark:text-slate-400">Centre</th>
-              <th className="px-5 py-3 font-medium text-slate-500 dark:text-slate-400">Abonnements</th>
-              <th className="px-5 py-3 text-right font-medium text-slate-500 dark:text-slate-400">Total payé</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Centre</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Abonnements</th>
+              <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Total payé</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+          <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
             {(data.centerRevenue || []).map((c) => (
-              <tr key={c.id} className="hover:bg-slate-50 dark:hover:bg-slate-800">
-                <td className="px-5 py-3 font-medium text-slate-900 dark:text-slate-100">{c.name}</td>
-                <td className="px-5 py-3 text-slate-600 dark:text-slate-400">{c.subscriptionCount}</td>
-                <td className="px-5 py-3 text-right font-semibold text-slate-900 dark:text-slate-100">
+              <tr key={c.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
+                <td className="px-4 py-2.5 font-medium text-neutral-900 dark:text-neutral-100">{c.name}</td>
+                <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{c.subscriptionCount}</td>
+                <td className="px-4 py-2.5 text-right font-semibold text-neutral-900 dark:text-neutral-100">
                   {c.totalPaid.toLocaleString("fr-TN")} DT
                 </td>
               </tr>
@@ -345,26 +345,26 @@ export default function SuperAdminAnalyticsPage() {
       </div>
 
       {/* Recent Subscriptions */}
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-        <div className="border-b border-slate-200 px-5 py-3 dark:border-slate-700">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+      <div className="rounded-xl border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
+        <div className="border-b border-neutral-200 px-4 py-2.5 dark:border-[#2a2d35]">
+          <h3 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
             Derniers abonnements
           </h3>
         </div>
-        <div className="divide-y divide-slate-100 dark:divide-slate-700">
+        <div className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
           {(data.recentSubscriptions || []).length === 0 ? (
-            <p className="px-5 py-6 text-center text-sm text-slate-400">Aucun abonnement</p>
+            <p className="px-5 py-6 text-center text-[13px] text-neutral-400">Aucun abonnement</p>
           ) : (
             (data.recentSubscriptions || []).map((s) => (
-              <div key={s.id} className="flex items-center justify-between px-5 py-3">
+              <div key={s.id} className="flex items-center justify-between px-4 py-2.5">
                 <div>
-                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{s.centerName}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                  <p className="text-[13px] font-medium text-neutral-900 dark:text-neutral-100">{s.centerName}</p>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
                     {new Date(s.dateDebut).toLocaleDateString("fr-FR")} → {new Date(s.dateFin).toLocaleDateString("fr-FR")}
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                  <span className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
                     {s.montant.toLocaleString("fr-TN")} DT
                   </span>
                   <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
@@ -384,23 +384,23 @@ export default function SuperAdminAnalyticsPage() {
       {/* Add Subscription Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-slate-900">
+          <div className="w-full max-w-md rounded-xl border border-neutral-200 bg-white p-6 shadow-xl dark:border-[#2a2d35] dark:bg-[#181b22]">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+              <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
                 Ajouter un abonnement
               </h2>
-              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+              <button onClick={() => setShowAddModal(false)} className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300">
                 <XIcon className="h-5 w-5" />
               </button>
             </div>
             <form onSubmit={handleAdd} className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Centre</label>
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Centre</label>
                 <select
                   value={addForm.centerId}
                   onChange={(e) => setAddForm({ ...addForm, centerId: e.target.value })}
                   required
-                  className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  className="w-full rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22] px-3 py-2 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
                 >
                   <option value="">Sélectionner un centre</option>
                   {centers.map((c) => (
@@ -409,23 +409,23 @@ export default function SuperAdminAnalyticsPage() {
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Montant (DT)</label>
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Montant (DT)</label>
                 <input
                   type="number"
                   value={addForm.montant}
                   onChange={(e) => setAddForm({ ...addForm, montant: e.target.value })}
                   min={0}
                   required
-                  className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  className="w-full rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22] px-3 py-2 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
                   placeholder="Ex: 200"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Durée</label>
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Durée</label>
                 <select
                   value={addForm.duree}
                   onChange={(e) => setAddForm({ ...addForm, duree: e.target.value })}
-                  className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  className="w-full rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22] px-3 py-2 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
                 >
                   <option value="month">1 mois</option>
                   <option value="quarter">3 mois</option>
@@ -433,12 +433,12 @@ export default function SuperAdminAnalyticsPage() {
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Notes (optionnel)</label>
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Notes (optionnel)</label>
                 <textarea
                   value={addForm.notes}
                   onChange={(e) => setAddForm({ ...addForm, notes: e.target.value })}
                   rows={2}
-                  className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  className="w-full rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22] px-3 py-2 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
                   placeholder="Notes optionnelles..."
                 />
               </div>
@@ -446,14 +446,14 @@ export default function SuperAdminAnalyticsPage() {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="rounded-lg border border-slate-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={addLoading || !addForm.centerId || !addForm.montant}
-                  className="flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-violet-700 disabled:opacity-50"
                 >
                   {addLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                   Enregistrer

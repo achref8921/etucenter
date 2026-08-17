@@ -105,7 +105,7 @@ export default function NotificationsList() {
         {nonLues > 0 && (
           <button
             onClick={markAllAsRead}
-            className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:border-slate-700 dark:text-gray-400 dark:hover:bg-slate-800"
+            className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:border-[#2a2d35] dark:text-gray-400 dark:hover:bg-[#181b22]"
           >
             <CheckCheck className="h-4 w-4" />
             Tout marquer comme lu
@@ -118,7 +118,7 @@ export default function NotificationsList() {
           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
         </div>
       ) : notifications.length === 0 ? (
-        <div className="rounded-lg border border-gray-200 bg-white p-12 text-center dark:border-slate-700 dark:bg-slate-900">
+        <div className="rounded-lg border border-gray-200 bg-white p-12 text-center dark:border-[#2a2d35] dark:bg-[#181b22]">
           <Bell className="mx-auto h-12 w-12 text-gray-300 dark:text-slate-600" />
           <p className="mt-4 text-gray-500 dark:text-gray-400">Aucune notification</p>
         </div>
@@ -130,7 +130,7 @@ export default function NotificationsList() {
               onClick={() => !n.lu && markAsRead(n.id)}
               className={`flex items-start gap-4 rounded-lg border p-4 transition-colors ${
                 n.lu
-                  ? "border-gray-100 bg-white dark:border-slate-700 dark:bg-slate-900"
+                  ? "border-gray-100 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]"
                   : "cursor-pointer border-blue-100 bg-blue-50 hover:bg-blue-100 dark:border-blue-900/50 dark:bg-blue-900/20 dark:hover:bg-blue-900/30"
               }`}
             >

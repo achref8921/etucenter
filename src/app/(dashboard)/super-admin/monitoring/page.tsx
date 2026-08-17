@@ -76,9 +76,9 @@ const statusMeta: Record<MonitorLevel, { label: string; pill: string; dot: strin
 };
 
 const typeMeta: Record<MonitorType, { label: string; icon: any; cls: string }> = {
-  server: { label: "Serveur", icon: Server, cls: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" },
-  database: { label: "Base de données", icon: Database, cls: "bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400" },
-  resources: { label: "Ressources", icon: Cpu, cls: "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" },
+  server: { label: "Serveur", icon: Server, cls: "bg-neutral-100 text-neutral-500 dark:bg-[#1e2128] dark:text-neutral-400" },
+  database: { label: "Base de données", icon: Database, cls: "bg-neutral-100 text-neutral-500 dark:bg-[#1e2128] dark:text-neutral-400" },
+  resources: { label: "Ressources", icon: Cpu, cls: "bg-neutral-100 text-neutral-500 dark:bg-[#1e2128] dark:text-neutral-400" },
 };
 
 function formatDate(iso: string): string {
@@ -192,7 +192,7 @@ export default function MonitoringPage() {
   }
 
   if (loading) {
-    return <div className="p-8 text-center text-slate-400 dark:text-slate-500">Chargement du monitoring...</div>;
+    return <div className="p-8 text-center text-neutral-400 dark:text-neutral-500">Chargement du monitoring...</div>;
   }
 
   const latest = (summary?.latest ?? {}) as Record<MonitorType, CheckRow | null>;
@@ -212,28 +212,28 @@ export default function MonitoringPage() {
       label: "Uptime 24h",
       value: summary?.uptime24h !== null ? `${summary?.uptime24h}%` : "—",
       icon: Gauge,
-      cls: "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400",
+      cls: "bg-neutral-100 text-neutral-500 dark:bg-[#1e2128] dark:text-neutral-400",
       sub: "Taux de disponibilité (24h)",
     },
     {
       label: "Contrôles aujourd'hui",
       value: String(summary?.checksToday ?? 0),
       icon: Activity,
-      cls: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
+      cls: "bg-neutral-100 text-neutral-500 dark:bg-[#1e2128] dark:text-neutral-400",
       sub: "Cycles de contrôle effectués",
     },
     {
       label: "Erreurs aujourd'hui",
       value: String(summary?.errorsToday ?? 0),
       icon: AlertTriangle,
-      cls: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
+      cls: "bg-neutral-100 text-neutral-500 dark:bg-[#1e2128] dark:text-neutral-400",
       sub: "Erreurs enregistrées",
     },
     {
       label: "Alertes 24h",
       value: String(summary?.alerts24h ?? 0),
       icon: BellRing,
-      cls: "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400",
+      cls: "bg-neutral-100 text-neutral-500 dark:bg-[#1e2128] dark:text-neutral-400",
       sub: "Notifications envoyées",
     },
   ];
@@ -242,15 +242,15 @@ export default function MonitoringPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Monitoring</h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Monitoring</h1>
+          <p className="mt-1 text-[13px] text-neutral-500 dark:text-neutral-400">
             Santé du serveur, de la base de données et des ressources — alertes automatiques en cas d&apos;incident
           </p>
         </div>
         <button
           onClick={runCheckNow}
           disabled={running}
-          className="flex items-center justify-center gap-2 rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center justify-center gap-2 rounded-lg bg-violet-600 px-4 py-2.5 text-[13px] font-medium text-white hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
           {running ? "Vérification..." : "Vérifier maintenant"}
@@ -258,26 +258,26 @@ export default function MonitoringPage() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">{error}</div>
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">{error}</div>
       )}
       {success && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400">{success}</div>
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-[13px] text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400">{success}</div>
       )}
 
       {/* Stat cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {statCards.map((card) => (
-          <div key={card.label} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+          <div key={card.label} className="rounded-xl border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
             <div className="flex items-center gap-3">
               <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${card.cls}`}>
                 <card.icon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{card.label}</p>
-                <p className="text-lg font-bold text-slate-900 dark:text-slate-100">{card.value}</p>
+                <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{card.label}</p>
+                <p className="text-lg font-bold text-neutral-900 dark:text-neutral-100">{card.value}</p>
               </div>
             </div>
-            <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">{card.sub}</p>
+            <p className="mt-2 text-xs text-neutral-400 dark:text-neutral-500">{card.sub}</p>
           </div>
         ))}
       </div>
@@ -291,15 +291,15 @@ export default function MonitoringPage() {
           const sm = statusMeta[status];
           const Icon = meta.icon;
           return (
-            <div key={type} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <div key={type} className="rounded-xl border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${meta.cls}`}>
                     <Icon className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{meta.label}</p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500">
+                    <p className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">{meta.label}</p>
+                    <p className="text-xs text-neutral-400 dark:text-neutral-500">
                       {check ? formatDate(check.checkedAt) : "jamais contrôlé"}
                     </p>
                   </div>
@@ -310,7 +310,7 @@ export default function MonitoringPage() {
                 </span>
               </div>
 
-              <div className="mt-4 space-y-1.5 text-sm">
+              <div className="mt-4 space-y-1.5 text-[13px]">
                 {type === "server" && (
                   <>
                     <Row k="Temps d'activité" v={check ? formatUptime(check.details?.uptimeSec ?? 0) : "—"} />
@@ -343,8 +343,8 @@ export default function MonitoringPage() {
 
       {/* Charts */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-          <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        <div className="rounded-xl border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
+          <h2 className="mb-4 flex items-center gap-2 text-[13px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
             <HardDrive className="h-4 w-4" /> Mémoire (derniers contrôles)
           </h2>
           {memData.length > 1 ? (
@@ -359,12 +359,12 @@ export default function MonitoringPage() {
               </AreaChart>
             </ResponsiveContainer>
           ) : (
-            <p className="py-10 text-center text-sm text-slate-400 dark:text-slate-500">Pas encore assez de données</p>
+            <p className="py-10 text-center text-[13px] text-neutral-400 dark:text-neutral-500">Pas encore assez de données</p>
           )}
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-          <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        <div className="rounded-xl border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
+          <h2 className="mb-4 flex items-center gap-2 text-[13px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
             <Zap className="h-4 w-4" /> Temps de réponse base de données
           </h2>
           {latencyData.length > 1 ? (
@@ -378,25 +378,25 @@ export default function MonitoringPage() {
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            <p className="py-10 text-center text-sm text-slate-400 dark:text-slate-500">Pas encore assez de données</p>
+            <p className="py-10 text-center text-[13px] text-neutral-400 dark:text-neutral-500">Pas encore assez de données</p>
           )}
         </div>
       </div>
 
       {/* Recent checks table */}
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-        <div className="border-b border-slate-100 px-5 py-4 dark:border-slate-800">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Contrôles récents</h2>
+      <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
+        <div className="border-b border-neutral-100 px-5 py-4 dark:border-[#2a2d35]">
+          <h2 className="text-[13px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Contrôles récents</h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 dark:bg-slate-800">
+          <table className="w-full text-left text-[13px]">
+            <thead className="bg-neutral-50 dark:bg-[#1e2128]">
               <tr>
-                <th className="px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Heure</th>
-                <th className="px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Composant</th>
-                <th className="px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Statut</th>
-                <th className="px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Réponse</th>
-                <th className="px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Détail</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Heure</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Composant</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Statut</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Réponse</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Détail</th>
               </tr>
             </thead>
             <tbody>
@@ -404,19 +404,19 @@ export default function MonitoringPage() {
                 const sm = statusMeta[c.status];
                 const meta = typeMeta[c.type];
                 return (
-                  <tr key={c.id} className="border-t border-slate-100 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50">
-                    <td className="whitespace-nowrap px-5 py-2.5 text-slate-500 dark:text-slate-400">{formatDate(c.checkedAt)}</td>
-                    <td className="whitespace-nowrap px-5 py-2.5 font-medium text-slate-900 dark:text-slate-100">{meta.label}</td>
-                    <td className="px-5 py-2.5">
+                  <tr key={c.id} className="border-t border-neutral-100 hover:bg-neutral-100/50 dark:border-[#2a2d35] dark:hover:bg-[#1e2128]/50">
+                    <td className="whitespace-nowrap px-4 py-2.5 text-neutral-500 dark:text-neutral-400">{formatDate(c.checkedAt)}</td>
+                    <td className="whitespace-nowrap px-4 py-2.5 font-medium text-neutral-900 dark:text-neutral-100">{meta.label}</td>
+                    <td className="px-4 py-2.5">
                       <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${sm.pill}`}>
                         <span className={`h-1.5 w-1.5 rounded-full ${sm.dot}`} />
                         {sm.label}
                       </span>
                     </td>
-                    <td className="px-5 py-2.5 text-slate-500 dark:text-slate-400">
+                    <td className="px-4 py-2.5 text-neutral-500 dark:text-neutral-400">
                       {c.responseTimeMs != null ? `${c.responseTimeMs} ms` : "—"}
                     </td>
-                    <td className="max-w-[280px] truncate px-5 py-2.5 text-slate-500 dark:text-slate-400">
+                    <td className="max-w-[280px] truncate px-4 py-2.5 text-neutral-500 dark:text-neutral-400">
                       {c.status === "error"
                         ? String(c.details?.error ?? "ressource indisponible")
                         : c.type === "database"
@@ -430,7 +430,7 @@ export default function MonitoringPage() {
               })}
               {history.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-5 py-10 text-center text-sm text-slate-400 dark:text-slate-500">
+                  <td colSpan={5} className="px-5 py-10 text-center text-[13px] text-neutral-400 dark:text-neutral-500">
                     Aucun contrôle effectué. Cliquez sur « Vérifier maintenant ».
                   </td>
                 </tr>
@@ -441,66 +441,66 @@ export default function MonitoringPage() {
       </div>
 
       {/* Alert config */}
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-        <h2 className="mb-1 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+      <div className="rounded-xl border border-neutral-200 bg-white p-6 dark:border-[#2a2d35] dark:bg-[#181b22]">
+        <h2 className="mb-1 flex items-center gap-2 text-[13px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
           <ShieldAlert className="h-4 w-4" /> Alertes automatiques
         </h2>
-        <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
+        <p className="mb-4 text-[13px] text-neutral-500 dark:text-neutral-400">
           Notifications envoyées par email et dans l&apos;application en cas d&apos;incident. Une alerte de rétablissement est envoyée une fois le service de retour à la normale.
         </p>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <div>
-            <label className="mb-1.5 flex items-center justify-between text-sm font-semibold text-slate-700 dark:text-slate-300">
+            <label className="mb-1.5 flex items-center justify-between text-[13px] font-semibold text-neutral-700 dark:text-neutral-300">
               Monitoring automatique
               <button
                 onClick={() => setSettings({ ...settings, monitorEnabled: settings.monitorEnabled === "true" ? "false" : "true" })}
-                className={`relative h-6 w-11 rounded-full transition-colors ${settings.monitorEnabled === "true" ? "bg-violet-600" : "bg-slate-300 dark:bg-slate-600"}`}
+                className={`relative h-6 w-11 rounded-full transition-colors ${settings.monitorEnabled === "true" ? "bg-violet-600" : "bg-neutral-300 dark:bg-neutral-600"}`}
               >
                 <span
                   className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${settings.monitorEnabled === "true" ? "translate-x-5" : "translate-x-0.5"}`}
                 />
               </button>
             </label>
-            <p className="text-xs text-slate-400 dark:text-slate-500">Contrôles périodiques via la tâche planifiée.</p>
+            <p className="text-xs text-neutral-400 dark:text-neutral-500">Contrôles périodiques via la tâche planifiée.</p>
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Intervalle (minutes)</label>
+            <label className="mb-1.5 block text-[13px] font-semibold text-neutral-700 dark:text-neutral-300">Intervalle (minutes)</label>
             <input
               type="number"
               min={1}
               max={60}
               value={settings.monitorIntervalMinutes ?? "5"}
               onChange={(e) => setSettings({ ...settings, monitorIntervalMinutes: e.target.value })}
-              className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 focus:border-violet-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              className="w-full rounded-lg border border-neutral-200 bg-white px-3.5 py-2.5 text-[13px] text-neutral-900 focus:border-violet-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-100"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Emails d&apos;alerte</label>
+            <label className="mb-1.5 block text-[13px] font-semibold text-neutral-700 dark:text-neutral-300">Emails d&apos;alerte</label>
             <input
               type="text"
               value={settings.alertEmails ?? ""}
               onChange={(e) => setSettings({ ...settings, alertEmails: e.target.value })}
               placeholder="admin@exemple.com, autre@exemple.com"
-              className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 focus:border-violet-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              className="w-full rounded-lg border border-neutral-200 bg-white px-3.5 py-2.5 text-[13px] text-neutral-900 focus:border-violet-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-100"
             />
-            <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Vide = emails des super administrateurs.</p>
+            <p className="mt-1 text-xs text-neutral-400 dark:text-neutral-500">Vide = emails des super administrateurs.</p>
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Webhook (Slack/Discord…) — optionnel</label>
+            <label className="mb-1.5 block text-[13px] font-semibold text-neutral-700 dark:text-neutral-300">Webhook (Slack/Discord…) — optionnel</label>
             <input
               type="url"
               value={settings.alertWebhookUrl ?? ""}
               onChange={(e) => setSettings({ ...settings, alertWebhookUrl: e.target.value })}
               placeholder="https://hooks.slack.com/services/..."
-              className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 focus:border-violet-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              className="w-full rounded-lg border border-neutral-200 bg-white px-3.5 py-2.5 text-[13px] text-neutral-900 focus:border-violet-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-100"
             />
           </div>
         </div>
-        <div className="mt-5 flex justify-end border-t border-slate-100 pt-4 dark:border-slate-800">
+        <div className="mt-5 flex justify-end border-t border-neutral-100 pt-4 dark:border-[#2a2d35]">
           <button
             onClick={saveConfig}
             disabled={saving}
-            className="flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-violet-700 disabled:opacity-50"
+            className="flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2.5 text-[13px] font-medium text-white hover:bg-violet-700 disabled:opacity-50"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             Enregistrer les alertes
@@ -514,8 +514,8 @@ export default function MonitoringPage() {
 function Row({ k, v, danger }: { k: string; v: string; danger?: boolean }) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <span className="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">{k}</span>
-      <span className={`truncate font-semibold ${danger ? "text-red-600 dark:text-red-400" : "text-slate-700 dark:text-slate-300"}`}>
+      <span className="text-xs font-medium uppercase tracking-wide text-neutral-400 dark:text-neutral-500">{k}</span>
+      <span className={`truncate font-semibold ${danger ? "text-red-600 dark:text-red-400" : "text-neutral-700 dark:text-neutral-300"}`}>
         {danger ? <span className="inline-flex items-center gap-1"><AlertTriangle className="h-3.5 w-3.5" />{v}</span> : v}
       </span>
     </div>

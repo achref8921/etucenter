@@ -242,19 +242,19 @@ export default function FinancesProfesseursPage() {
         <div className="flex items-center gap-4">
           <Link
             href="/admin"
-            className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+            className="flex items-center gap-1 text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
           >
             <ArrowLeft className="h-4 w-4" />
             Retour
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
             Comptes Professeurs
           </h1>
         </div>
         {selectedId && (
           <button
             onClick={openModal}
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700"
           >
             <Plus className="h-4 w-4" />
             Nouvelle transaction
@@ -268,35 +268,35 @@ export default function FinancesProfesseursPage() {
         </div>
       )}
 
-      <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-        <div className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
-          <h2 className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
-            <Users className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+      <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+        <div className="border-b border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+            <Users className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
             Professeurs ({teachers.length})
           </h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-gray-200 dark:border-slate-700">
+            <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
               <tr>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
                   Professeur
                 </th>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
                   Contact
                 </th>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
                   Solde
                 </th>
-                <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400"></th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+            <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
               {teachers.length === 0 ? (
                 <tr>
                   <td
                     colSpan={4}
-                    className="px-6 py-8 text-center text-gray-500 dark:text-gray-400"
+                    className="px-6 py-8 text-center text-neutral-500 dark:text-neutral-400"
                   >
                     Aucun professeur
                   </td>
@@ -311,11 +311,11 @@ export default function FinancesProfesseursPage() {
                     className={`cursor-pointer transition-colors ${
                       selectedId === t.id
                         ? "bg-blue-50 dark:bg-blue-900/20"
-                        : "hover:bg-gray-50 dark:hover:bg-slate-800"
+                        : "hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]"
                     }`}
                   >
-                    <td className="px-6 py-4">
-                      <p className="font-medium text-gray-900 dark:text-gray-100">
+                    <td className="px-4 py-2.5">
+                      <p className="font-medium text-neutral-900 dark:text-neutral-100">
                         {t.prenom} {t.nom}
                       </p>
                       {!t.actif && (
@@ -324,24 +324,24 @@ export default function FinancesProfesseursPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                    <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
                       {t.email}
                       {t.telephone ? ` — ${t.telephone}` : ""}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-2.5">
                       <span
                         className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-sm font-semibold ${
                           t.balance > 0
                             ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
                             : t.balance < 0
                               ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-                              : "bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-gray-200"
+                              : "bg-neutral-100 text-neutral-700 dark:bg-[#2a2d35] dark:text-neutral-200"
                         }`}
                       >
                         {t.balance !== 0 && (t.balance > 0 ? "+" : "−")}
                         {formatCurrency(Math.abs(t.balance))}
                       </span>
-                      <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
+                      <span className="ml-2 text-xs text-neutral-500 dark:text-neutral-400">
                         {t.balance > 0
                           ? "à payer"
                           : t.balance < 0
@@ -349,7 +349,7 @@ export default function FinancesProfesseursPage() {
                             : "solde nul"}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-2.5">
                       <Link
                         href={`/admin/professeurs/${t.id}`}
                         className="text-blue-600 dark:text-blue-400 hover:underline"
@@ -367,10 +367,10 @@ export default function FinancesProfesseursPage() {
       </div>
 
       {selectedId && (
-        <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-          <div className="flex flex-col gap-3 border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
-              <Wallet className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+        <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+          <div className="flex flex-col gap-3 border-b border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+              <Wallet className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
               Grand livre — {selectedTeacher?.prenom} {selectedTeacher?.nom}
             </h2>
             {selectedTeacher && (
@@ -380,7 +380,7 @@ export default function FinancesProfesseursPage() {
                     ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
                     : balance < 0
                       ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-                      : "bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-gray-200"
+                      : "bg-neutral-100 text-neutral-700 dark:bg-[#2a2d35] dark:text-neutral-200"
                 }`}
               >
                 Solde : {balance !== 0 && (balance > 0 ? "+" : "−")}
@@ -390,30 +390,30 @@ export default function FinancesProfesseursPage() {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-gray-200 dark:border-slate-700">
+              <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
                 <tr>
-                  <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
                     Date
                   </th>
-                  <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
                     Type
                   </th>
-                  <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
                     Description
                   </th>
-                  <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
                     Méthode
                   </th>
-                  <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
                     Montant
                   </th>
-                  <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
                     Reçu
                   </th>
-                  <th className="px-6 py-3 font-medium text-gray-600 dark:text-gray-400"></th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+              <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
                 {loadingLedger ? (
                   <tr>
                     <td colSpan={7} className="px-6 py-8 text-center">
@@ -424,7 +424,7 @@ export default function FinancesProfesseursPage() {
                   <tr>
                     <td
                       colSpan={7}
-                      className="px-6 py-8 text-center text-gray-500 dark:text-gray-400"
+                      className="px-6 py-8 text-center text-neutral-500 dark:text-neutral-400"
                     >
                       Aucune transaction
                     </td>
@@ -433,14 +433,14 @@ export default function FinancesProfesseursPage() {
                   transactions.map((tx) => (
                     <tr
                       key={tx.id}
-                      className={`hover:bg-gray-50 dark:hover:bg-slate-800 ${
+                      className={`hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] ${
                         tx.status === "reversed" ? "opacity-50" : ""
                       }`}
                     >
-                      <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                      <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
                         {formatDate(tx.date)}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-2.5">
                         <span
                           className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${
                             tx.type === "REVERSAL"
@@ -455,28 +455,28 @@ export default function FinancesProfesseursPage() {
                           {TYPE_LABEL[tx.type]}
                         </span>
                         {tx.status === "reversed" && (
-                          <span className="ml-1 inline-block rounded-full bg-gray-100 dark:bg-slate-700 px-2 py-0.5 text-xs text-gray-600 dark:text-gray-300">
+                          <span className="ml-1 inline-block rounded-full bg-neutral-100 dark:bg-[#2a2d35] px-2 py-0.5 text-xs text-neutral-600 dark:text-neutral-300">
                             Annulé
                           </span>
                         )}
                       </td>
-                      <td className="max-w-xs px-6 py-4">
-                        <p className="truncate text-gray-600 dark:text-gray-400">
+                      <td className="max-w-xs px-4 py-2.5">
+                        <p className="truncate text-neutral-600 dark:text-neutral-400">
                           {tx.description}
                         </p>
                         {tx.receiptNumber && (
-                          <p className="text-xs text-gray-400 dark:text-gray-500">
+                          <p className="text-xs text-neutral-400 dark:text-neutral-500">
                             {tx.receiptNumber}
                           </p>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                      <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
                         {tx.paymentMethod
                           ? METHODE_LABEL[tx.paymentMethod] || tx.paymentMethod
                           : "—"}
                       </td>
                       <td
-                        className={`px-6 py-4 font-semibold ${
+                        className={`px-4 py-2.5 font-semibold ${
                           Number(tx.signedAmount) >= 0
                             ? "text-green-600 dark:text-green-400"
                             : "text-red-600 dark:text-red-400"
@@ -485,20 +485,20 @@ export default function FinancesProfesseursPage() {
                         {Number(tx.signedAmount) >= 0 ? "+" : "−"}
                         {formatCurrency(Math.abs(Number(tx.amount)))}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-2.5">
                         <button
                           onClick={() => openReceipt(tx)}
-                          className="rounded p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-emerald-600 dark:hover:text-emerald-400"
+                          className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] hover:text-emerald-600 dark:hover:text-emerald-400"
                           title="Imprimer le reçu"
                         >
                           <FileText className="h-4 w-4" />
                         </button>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-2.5">
                         {tx.type !== "REVERSAL" && tx.status === "active" && (
                           <button
                             onClick={() => openReverse(tx)}
-                            className="rounded p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-red-600 dark:hover:text-red-400"
+                            className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] hover:text-red-600 dark:hover:text-red-400"
                             title="Annuler la transaction"
                           >
                             <Undo2 className="h-4 w-4" />
@@ -512,22 +512,22 @@ export default function FinancesProfesseursPage() {
             </table>
           </div>
           {totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-gray-200 dark:border-slate-700 px-6 py-3">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex items-center justify-between border-t border-neutral-200 dark:border-[#2a2d35] px-4 py-2.5">
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">
                 {total} transaction(s) — Page {page}/{totalPages}
               </p>
               <div className="flex gap-2">
                 <button
                   onClick={() => fetchLedger(selectedId, page - 1)}
                   disabled={page <= 1}
-                  className="rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50"
+                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-3 py-1.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128] disabled:opacity-50"
                 >
                   Précédent
                 </button>
                 <button
                   onClick={() => fetchLedger(selectedId, page + 1)}
                   disabled={page >= totalPages}
-                  className="rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50"
+                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-3 py-1.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128] disabled:opacity-50"
                 >
                   Suivant
                 </button>
@@ -539,27 +539,27 @@ export default function FinancesProfesseursPage() {
 
       {showModal && selectedTeacher && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-lg rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl">
+          <div className="w-full max-w-lg rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">
                 Nouvelle transaction — {selectedTeacher.prenom} {selectedTeacher.nom}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
+                className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                   Type
                 </label>
                 <select
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value })}
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 >
                   <option value="PAYMENT">Paiement (argent versé au professeur)</option>
                   <option value="EARNING">Gain (gain enregistré au crédit)</option>
@@ -568,7 +568,7 @@ export default function FinancesProfesseursPage() {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                   Montant (DT)
                 </label>
                 <input
@@ -578,19 +578,19 @@ export default function FinancesProfesseursPage() {
                   min={0}
                   step="0.01"
                   required
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
               </div>
 
               {form.type === "ADJUSTMENT" && (
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Sens
                   </label>
                   <select
                     value={form.credit ? "credit" : "debit"}
                     onChange={(e) => setForm({ ...form, credit: e.target.value === "credit" })}
-                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                   >
                     <option value="credit">Crédit (+ augmente le solde)</option>
                     <option value="debit">Débit (− diminue le solde)</option>
@@ -600,13 +600,13 @@ export default function FinancesProfesseursPage() {
 
               {form.type === "PAYMENT" && (
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Méthode de paiement
                   </label>
                   <select
                     value={form.paymentMethod}
                     onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })}
-                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                   >
                     <option value="especes">Espèces</option>
                     <option value="virement">Virement</option>
@@ -617,7 +617,7 @@ export default function FinancesProfesseursPage() {
               )}
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                   Date
                 </label>
                 <input
@@ -625,12 +625,12 @@ export default function FinancesProfesseursPage() {
                   value={form.date}
                   onChange={(e) => setForm({ ...form, date: e.target.value })}
                   required
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                   Référence
                 </label>
                 <input
@@ -638,12 +638,12 @@ export default function FinancesProfesseursPage() {
                   value={form.reference}
                   onChange={(e) => setForm({ ...form, reference: e.target.value })}
                   placeholder="Optionnel"
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                   Notes
                 </label>
                 <textarea
@@ -651,7 +651,7 @@ export default function FinancesProfesseursPage() {
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
                   rows={2}
                   placeholder="Optionnel"
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
               </div>
 
@@ -659,14 +659,14 @@ export default function FinancesProfesseursPage() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700"
+                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={submitting || form.amount <= 0}
-                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                 >
                   {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
                   Enregistrer
@@ -679,31 +679,31 @@ export default function FinancesProfesseursPage() {
 
       {showReverseModal && reverseTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl">
+          <div className="w-full max-w-md rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Annuler la transaction</h2>
               <button
                 onClick={() => setShowReverseModal(false)}
-                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
+                className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="mb-4 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 p-3 text-sm">
-              <p className="text-gray-600 dark:text-gray-400">
+            <div className="mb-4 rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3 text-sm">
+              <p className="text-neutral-600 dark:text-neutral-400">
                 <span className="font-medium">{TYPE_LABEL[reverseTarget.type]}</span> —{" "}
                 {reverseTarget.description}
               </p>
-              <p className="mt-1 text-gray-500 dark:text-gray-400">
+              <p className="mt-1 text-neutral-500 dark:text-neutral-400">
                 Montant :{" "}
-                <span className="font-semibold text-gray-900 dark:text-gray-100">
+                <span className="font-semibold text-neutral-900 dark:text-neutral-100">
                   {formatCurrency(Math.abs(Number(reverseTarget.amount)))}
                 </span>
               </p>
             </div>
             <form onSubmit={handleReverse} className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                   Raison de l'annulation <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -712,21 +712,21 @@ export default function FinancesProfesseursPage() {
                   rows={3}
                   required
                   placeholder="Expliquez la raison..."
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
               </div>
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowReverseModal(false)}
-                  className="rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700"
+                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={reversing || !reverseReason.trim()}
-                  className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-red-700 disabled:opacity-50"
                 >
                   {reversing && <Loader2 className="h-4 w-4 animate-spin" />}
                   Confirmer l'annulation

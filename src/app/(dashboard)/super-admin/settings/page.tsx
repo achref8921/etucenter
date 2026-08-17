@@ -78,14 +78,12 @@ export default function SuperAdminSettingsPage() {
 
   function Card({ icon: Icon, iconClass, title, description, children }: { icon: any; iconClass: string; title: string; description: string; children: React.ReactNode }) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+      <div className="rounded-xl border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
         <div className="mb-4 flex items-center gap-3">
-          <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${iconClass}`}>
-            <Icon className="h-5 w-5 text-white" />
-          </div>
+          <Icon className={`h-5 w-5 ${iconClass}`} />
           <div>
-            <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">{title}</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">{description}</p>
+            <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">{title}</h2>
+            <p className="text-[12px] text-neutral-400 dark:text-neutral-500">{description}</p>
           </div>
         </div>
         {children}
@@ -96,53 +94,53 @@ export default function SuperAdminSettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Paramètres de la plateforme</h1>
-        <p className="text-sm text-slate-500 mt-1 dark:text-slate-400">Configuration globale appliquée à toute la plateforme</p>
+        <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Paramètres de la plateforme</h1>
+        <p className="mt-1 text-[13px] text-neutral-500 dark:text-neutral-400">Configuration globale appliquée à toute la plateforme</p>
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">{error}</div>
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-[13px] text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">{error}</div>
       )}
       {success && (
-        <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-300">
+        <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-300">
           <CheckCircle2 className="h-4 w-4" /> {success}
         </div>
       )}
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-violet-600 dark:text-violet-400" />
+          <Loader2 className="h-6 w-6 animate-spin text-violet-600 dark:text-violet-400" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <Card
             icon={Database}
-            iconClass="bg-violet-600"
+            iconClass="text-violet-500 dark:text-violet-400"
             title="Rétention des sauvegardes"
-            description="Nombre de jours pendant lesquels les sauvegardes sont conservées avant suppression automatique"
+            description="Nombre de jours de conservation des sauvegardes"
           >
-            <label className="mb-1 block text-sm font-semibold text-slate-700 dark:text-slate-300">Jours de rétention</label>
+            <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Jours de rétention</label>
             <input
               type="number"
               min={1}
               max={365}
               value={retention}
               onChange={(e) => setRetention(e.target.value)}
-              className="w-full max-w-xs rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-violet-400"
+              className="w-full max-w-xs rounded-lg border border-neutral-200 bg-white px-3 py-2 text-[13px] text-neutral-900 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-100 dark:focus:border-violet-400"
             />
-            <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">Entre 1 et 365 jours. Valeur actuelle du serveur : <span className="font-mono font-semibold">{retention}</span></p>
+            <p className="mt-1.5 text-[12px] text-neutral-400 dark:text-neutral-500">Entre 1 et 365 jours. Valeur actuelle : <span className="font-mono font-medium">{retention}</span></p>
           </Card>
 
           <Card
             icon={UserPlus}
-            iconClass="bg-emerald-600"
+            iconClass="text-emerald-500 dark:text-emerald-400"
             title="Inscriptions ouvertes"
-            description="Autorise ou bloque la création de nouveaux comptes via la page d'inscription"
+            description="Autorise ou bloque la création de nouveaux comptes"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{openRegistration ? "Ouvertes" : "Fermées"}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-[13px] font-medium text-neutral-800 dark:text-neutral-200">{openRegistration ? "Ouvertes" : "Fermées"}</p>
+                <p className="text-[12px] text-neutral-400 dark:text-neutral-500">
                   {openRegistration ? "Les nouveaux utilisateurs peuvent s'inscrire." : "Les nouvelles inscriptions sont bloquées."}
                 </p>
               </div>
@@ -152,14 +150,14 @@ export default function SuperAdminSettingsPage() {
 
           <Card
             icon={Wrench}
-            iconClass="bg-amber-600"
+            iconClass="text-amber-500 dark:text-amber-400"
             title="Mode maintenance"
-            description="Bloque temporairement l'accès à tous les comptes (hors super admin) pendant la maintenance"
+            description="Bloque temporairement l'accès pendant la maintenance"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{maintenance ? "Actif" : "Inactif"}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-[13px] font-medium text-neutral-800 dark:text-neutral-200">{maintenance ? "Actif" : "Inactif"}</p>
+                <p className="text-[12px] text-neutral-400 dark:text-neutral-500">
                   {maintenance ? "Les utilisateurs sont redirigés vers la page de maintenance." : "Accès normal pour tous les utilisateurs."}
                 </p>
               </div>
@@ -169,13 +167,13 @@ export default function SuperAdminSettingsPage() {
 
           <Card
             icon={Settings2}
-            iconClass="bg-blue-600"
+            iconClass="text-blue-500 dark:text-blue-400"
             title="Notes"
             description="Les modifications sont journalisées dans les System Logs"
           >
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <p className="text-[13px] text-neutral-500 dark:text-neutral-400">
               Chaque modification de ces réglages est enregistrée avec le compte du super admin et l&apos;horodatage,
-              consultables dans <span className="font-semibold text-slate-700 dark:text-slate-300">System Logs</span>.
+              consultables dans <span className="font-medium text-neutral-700 dark:text-neutral-300">System Logs</span>.
             </p>
           </Card>
         </div>
@@ -185,10 +183,10 @@ export default function SuperAdminSettingsPage() {
         <button
           onClick={handleSave}
           disabled={saving || loading}
-          className="flex items-center gap-2 rounded-lg bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-violet-700 disabled:opacity-50 dark:hover:bg-violet-500"
+          className="flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-[13px] font-semibold text-white hover:bg-violet-700 disabled:opacity-50 dark:hover:bg-violet-500"
         >
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-          {saving ? "Enregistrement..." : "Enregistrer les réglages"}
+          {saving ? "Enregistrement…" : "Enregistrer les réglages"}
         </button>
       </div>
     </div>

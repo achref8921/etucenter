@@ -122,7 +122,7 @@ export default function EleveProfilPage() {
         {!editing && (
           <button
             onClick={() => setEditing(true)}
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700"
           >
             <Edit3 className="h-4 w-4" />
             Modifier
@@ -131,64 +131,64 @@ export default function EleveProfilPage() {
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">
+        <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4 text-[13px] text-red-700 dark:text-red-400">
           {error}
         </div>
       )}
 
       {success && (
-        <div className="rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-4 text-sm text-green-700 dark:text-green-400">
+        <div className="rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-4 text-[13px] text-green-700 dark:text-green-400">
           {success}
         </div>
       )}
 
       {profil && (
-        <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
           {editing ? (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Nom</label>
+                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Nom</label>
                   <input
                     {...register("nom", { required: "Le nom est requis", minLength: { value: 2, message: "Minimum 2 caractères" } })}
-                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                   {errors.nom && (
-                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">{errors.nom.message}</p>
+                    <p className="mt-1 text-[12px] text-red-600 dark:text-red-400">{errors.nom.message}</p>
                   )}
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Prénom</label>
+                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Prénom</label>
                   <input
                     {...register("prenom", { required: "Le prénom est requis", minLength: { value: 2, message: "Minimum 2 caractères" } })}
-                    className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                   {errors.prenom && (
-                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">{errors.prenom.message}</p>
+                    <p className="mt-1 text-[12px] text-red-600 dark:text-red-400">{errors.prenom.message}</p>
                   )}
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">
                   Téléphone
                 </label>
                 <input
                   {...register("telephone")}
-                  className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
                   onClick={handleCancel}
-                  className="rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800"
+                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                 >
                   {saving ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -203,25 +203,25 @@ export default function EleveProfilPage() {
             <dl className="space-y-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Nom</dt>
-                  <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">{profil.nom}</dd>
+                  <dt className="text-[13px] font-medium text-neutral-500 dark:text-neutral-400">Nom</dt>
+                  <dd className="mt-1 text-[13px] text-gray-900 dark:text-gray-100">{profil.nom}</dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Prénom</dt>
-                  <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">{profil.prenom}</dd>
+                  <dt className="text-[13px] font-medium text-neutral-500 dark:text-neutral-400">Prénom</dt>
+                  <dd className="mt-1 text-[13px] text-gray-900 dark:text-gray-100">{profil.prenom}</dd>
                 </div>
               </div>
               <div>
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Email</dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">{profil.email}</dd>
+                <dt className="text-[13px] font-medium text-neutral-500 dark:text-neutral-400">Email</dt>
+                <dd className="mt-1 text-[13px] text-gray-900 dark:text-gray-100">{profil.email}</dd>
               </div>
               <div>
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Téléphone</dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">{profil.telephone ?? "—"}</dd>
+                <dt className="text-[13px] font-medium text-neutral-500 dark:text-neutral-400">Téléphone</dt>
+                <dd className="mt-1 text-[13px] text-gray-900 dark:text-gray-100">{profil.telephone ?? "—"}</dd>
               </div>
               <div>
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Date de naissance</dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">
+                <dt className="text-[13px] font-medium text-neutral-500 dark:text-neutral-400">Date de naissance</dt>
+                <dd className="mt-1 text-[13px] text-gray-900 dark:text-gray-100">
                   {profil.dateNaissance ? formatDate(profil.dateNaissance) : "—"}
                 </dd>
               </div>
