@@ -195,7 +195,7 @@ export default function ProfDashboardPage() {
               value={formatCurrency(stats.impayeNet)}
               icon={<AlertTriangle className="h-6 w-6 text-white" />}
               iconBg="bg-amber-500"
-              href="/prof/eleves"
+              href="/prof/eleves?filter=unpaid"
               hint="Part nette des impayés élèves"
             />
             <StatCard

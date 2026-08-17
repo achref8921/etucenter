@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import {
   Users,
@@ -73,11 +74,13 @@ interface HistoryState {
 
 export default function ProfElevesPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialFilter = searchParams.get("filter") === "unpaid" ? "unpaid" : "all";
   const [students, setStudents] = useState<StudentData[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [filter, setFilter] = useState<"all" | "paid" | "unpaid">("all");
+  const [filter, setFilter] = useState<"all" | "paid" | "unpaid">(initialFilter);
   const [historyMap, setHistoryMap] = useState<Record<string, HistoryState>>({});
 
   useEffect(() => {
