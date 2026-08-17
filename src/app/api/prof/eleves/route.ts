@@ -151,25 +151,24 @@ export async function GET(request: Request) {
     const result = [];
     for (const [stId, student] of studentMap) {
       let totalDue = 0;
-      let totalPaid = 0;
+      let totalGrossPaid = 0;
       const groupeDetails = [];
 
       for (const grp of student.groupes) {
         const finishedCount = finishedSeanceMap.get(grp.id) || 0;
         const pres = presenceMap.get(`${stId}-${grp.id}`) || { total: 0, present: 0, absent: 0, due: 0 };
         const due = pres.due;
-        const paid = paymentMap.get(`${stId}-${grp.id}`) || 0;
+        const grossPaid = paymentMap.get(`${stId}-${grp.id}`) || 0;
 
         totalDue += due;
-        totalPaid += paid;
+        totalGrossPaid += grossPaid;
 
         groupeDetails.push({
           ...grp,
           seancesTotalies: finishedCount,
           due,
-          paye: paid,
-          impaye: Math.max(0, due - paid),
-          avance: Math.max(0, paid - due),
+          paye: Math.max(0, grossPaid - due),
+          impaye: Math.max(0, due - grossPaid),
           presences: pres.present,
           absences: pres.absent,
           tauxPresence: pres.total > 0 ? Math.round((pres.present / pres.total) * 100) : 0,
@@ -180,8 +179,8 @@ export async function GET(request: Request) {
         ...student,
         groupes: groupeDetails,
         totalDue,
-        totalPaid,
-        impayeTotal: Math.max(0, totalDue - totalPaid),
+        totalPaid: Math.max(0, totalGrossPaid - totalDue),
+        impayeTotal: Math.max(0, totalDue - totalGrossPaid),
       });
     }
 

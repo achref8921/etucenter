@@ -30,7 +30,6 @@ interface GroupeDetail {
   due: number;
   paye: number;
   impaye: number;
-  avance: number;
   presences: number;
   absences: number;
   tauxPresence: number;
@@ -499,11 +498,6 @@ export default function ProfElevesPage() {
                                 <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                                   {formatCurrency(g.paye)}
                                 </span>
-                                {g.avance > 0 && (
-                                  <span className="ml-1 text-[10px] text-emerald-500 dark:text-emerald-400">
-                                    (avance {formatCurrency(g.avance)})
-                                  </span>
-                                )}
                               </td>
                               <td className="px-4 py-3 text-right">
                                 <span
