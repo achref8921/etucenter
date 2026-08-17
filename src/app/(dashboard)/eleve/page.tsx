@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import {
   GraduationCap,
   DollarSign,
-  AlertTriangle,
   Loader2,
   ChevronDown,
   ChevronUp,
@@ -70,7 +69,7 @@ export default function EleveDashboardPage() {
   }, []);
 
   const totalRemaining = groupes.reduce((sum, g) => sum + g.stats.remainingCredit, 0);
-  const totalUnpaid = groupes.reduce((sum, g) => sum + g.stats.unpaid, 0);
+
 
   if (loading) {
     return (
@@ -97,7 +96,7 @@ export default function EleveDashboardPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Link
           href="/eleve/groupes"
           className="group rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md"
@@ -148,23 +147,7 @@ export default function EleveDashboardPage() {
             </div>
           </div>
         </Link>
-        <Link
-          href="/eleve/paiements"
-          className="group rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-red-300 dark:hover:border-red-700 hover:shadow-md"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Impayé</p>
-              <p className="mt-1 text-2xl font-semibold text-red-600 dark:text-red-400">{formatCurrency(totalUnpaid)}</p>
-              <p className="mt-1 flex items-center gap-1 text-xs font-medium text-blue-600 opacity-0 transition-opacity group-hover:opacity-100 dark:text-blue-400">
-                Régler mon compte <ChevronRight className="h-3 w-3" />
-              </p>
-            </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-red-500">
-              <AlertTriangle className="h-6 w-6 text-white" />
-            </div>
-          </div>
-        </Link>
+
       </div>
 
       <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
