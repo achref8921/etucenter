@@ -61,8 +61,8 @@ export async function POST(
       return NextResponse.json({ error: "Centre non trouvé" }, { status: 404 });
     }
 
-    const existingEmail = await prisma.utilisateur.findUnique({
-      where: { email },
+    const existingEmail = await prisma.utilisateur.findFirst({
+      where: { email, deletedAt: null },
     });
     if (existingEmail) {
       return NextResponse.json({ error: "Cet email est déjà utilisé" }, { status: 409 });

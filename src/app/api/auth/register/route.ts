@@ -40,8 +40,8 @@ export async function POST(request: Request) {
 
     const { nom, prenom, email, motDePasse, telephone, role, niveau, classe, filiere, codeCentre } = parsed.data;
 
-    const existingUser = await prisma.utilisateur.findUnique({
-      where: { email },
+    const existingUser = await prisma.utilisateur.findFirst({
+      where: { email, deletedAt: null },
     });
 
     if (existingUser) {

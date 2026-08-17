@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
 
     const { nom, prenom, email, motDePasse, telephone, role, dateNaissance, niveau, classe, filiere } = parsed.data;
 
-    const existingUser = await prisma.utilisateur.findUnique({ where: { email } });
+    const existingUser = await prisma.utilisateur.findFirst({ where: { email, deletedAt: null } });
     if (existingUser) {
       return NextResponse.json({ error: "Un utilisateur avec cet email existe déjà" }, { status: 409 });
     }

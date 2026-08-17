@@ -49,8 +49,8 @@ export async function PUT(request: NextRequest) {
     if (dateNaissance !== undefined) data.dateNaissance = dateNaissance ? new Date(dateNaissance) : null;
 
     if (email !== undefined && email !== (session.user as any).email) {
-      const existing = await prisma.utilisateur.findUnique({
-        where: { email },
+      const existing = await prisma.utilisateur.findFirst({
+        where: { email, deletedAt: null },
       });
       if (existing && existing.id !== userId) {
         return NextResponse.json({ error: "Cet email est déjà utilisé" }, { status: 400 });
