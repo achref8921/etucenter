@@ -153,7 +153,7 @@ export default function ProfDashboardPage() {
         <>
           {/* Hero card + secondary stats */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            {/* Hero card - Impaye Total */}
+            {/* Hero card - Impaye net */}
             <Link
               href="/prof/eleves?filter=unpaid"
               className="group relative overflow-hidden rounded-xl border border-neutral-200 bg-gradient-to-br from-indigo-50 via-white to-indigo-50/50 p-6 transition-all duration-200 hover:-translate-y-0.5 dark:border-[#2a2d35] dark:from-indigo-500/5 dark:via-[#181b22] dark:to-indigo-500/5"
@@ -161,7 +161,7 @@ export default function ProfDashboardPage() {
               <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-indigo-100/50 dark:bg-indigo-500/5" />
               <div className="relative">
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                  Impaye Total (net {stats.tauxPourcentage}%)
+                  Impaye net
                 </p>
                 <p className="mt-2 text-3xl font-bold tabular-nums tracking-tight text-neutral-900 dark:text-neutral-50">
                   {formatCurrency(stats.impayeNet)}
@@ -180,7 +180,7 @@ export default function ProfDashboardPage() {
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                    A Encaisser (net {stats.tauxPourcentage}%)
+                    A encaisser net
                   </p>
                   <p className="mt-2 text-2xl font-bold tabular-nums tracking-tight text-emerald-600 dark:text-emerald-400">
                     {formatCurrency(stats.claimable)}
