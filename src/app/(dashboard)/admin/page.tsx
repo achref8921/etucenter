@@ -1,269 +1,214 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import {
-  ArrowRight,
-  CreditCard,
   TrendingUp,
+  DollarSign,
+  AlertTriangle,
+  ArrowRight,
+  Users,
+  GraduationCap,
 } from "lucide-react";
-import { getAdminStats } from "@/lib/calculations";
-import { getStudentFinanceOverview } from "@/lib/student-finance";
-import { prisma } from "@/lib/prisma";
-import { formatCurrency, formatDateTime } from "@/lib/utils";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { StatCards, SeancesUpcoming, TopImpayes } from "./admin-widgets";
+import { formatCurrency } from "@/lib/utils";
+import { getAdminDashboardMonthData } from "@/lib/admin-dashboard-data";
+import { MonthSelector } from "@/components/month-selector";
 
-export default async function AdminDashboardPage() {
+function getCurrentMonth(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
+
+async function DashboardContent({ month }: { month: string }) {
   const session = await getServerSession(authOptions);
-  const centreId = (session?.user as any)?.centerId;
-  const serverNow = new Date();
-  const startOfToday = new Date(serverNow.getFullYear(), serverNow.getMonth(), serverNow.getDate());
-  const startOfTomorrow = new Date(serverNow.getFullYear(), serverNow.getMonth(), serverNow.getDate() + 1);
-  const startOfMonth = new Date(serverNow.getFullYear(), serverNow.getMonth(), 1);
-  const startOfLastMonth = new Date(serverNow.getFullYear(), serverNow.getMonth() - 1, 1);
+  const centerId = (session?.user as any)?.centerId;
+  const data = await getAdminDashboardMonthData(centerId, month);
 
-  const [stats, totalGroups, totalMatieres, activeInscriptions, recentPaiements, seancesAVenir, topImpayes, studentFinance, seancesAujourdhui, monthRevenueAgg, lastMonthRevenueAgg] =
-    await Promise.all([
-      getAdminStats(centreId),
-      prisma.groupe.count({ where: { centerId: centreId } }),
-      prisma.matiere.count({ where: { centerId: centreId } }),
-      prisma.inscription.count({ where: { statut: "actif", groupe: { centerId: centreId } } }),
-      prisma.paiement.findMany({
-        where: { groupe: { centerId: centreId } },
-        orderBy: { datePaiement: "desc" },
-        take: 5,
-        include: {
-          eleve: { select: { id: true, nom: true, prenom: true } },
-          groupe: { select: { id: true, nom: true } },
-        },
-      }),
-      prisma.seance.findMany({
-        where: { statut: { in: ["planifiee", "en_cours"] }, groupe: { centerId: centreId } },
-        orderBy: { date: "asc" },
-        take: 5,
-        include: {
-          groupe: {
-            select: {
-              id: true,
-              nom: true,
-              prof: { select: { id: true, nom: true, prenom: true } },
-            },
-          },
-        },
-      }),
-      prisma.$queryRawUnsafe(
-        `SELECT g.id as groupe_id, g.nom as groupe_nom, 
-                u.id as eleve_id, u.nom as eleve_nom, u.prenom as eleve_prenom,
-                COALESCE(due.due_total, 0) as due_total,
-                COALESCE(paid.paid_total, 0) as paid_total,
-                CASE WHEN COALESCE(due.due_total, 0) - COALESCE(paid.paid_total, 0) > 0
-                     THEN COALESCE(due.due_total, 0) - COALESCE(paid.paid_total, 0) ELSE 0 END as unpaid
-         FROM (
-            SELECT pr.eleve_id, s.groupe_id, g.prix_par_seance as due_total
-            FROM presences pr
-            JOIN seances s ON pr.seance_id = s.id
-            JOIN groupes g ON s.groupe_id = g.id
-            WHERE pr.statut = 'present' AND s.statut = 'terminee' AND g.center_id = $1::uuid
-            GROUP BY pr.eleve_id, s.groupe_id, g.prix_par_seance
-         ) due
-         JOIN utilisateurs u ON due.eleve_id = u.id
-         JOIN groupes g ON due.groupe_id = g.id
-         LEFT JOIN (
-           SELECT pai.eleve_id, pai.groupe_id, SUM(pai.montant) as paid_total
-           FROM paiements pai
-           JOIN groupes g2 ON pai.groupe_id = g2.id
-           WHERE g2.center_id = $1::uuid
-           GROUP BY pai.eleve_id, pai.groupe_id
-         ) paid ON due.eleve_id = paid.eleve_id AND due.groupe_id = paid.groupe_id
-         WHERE COALESCE(due.due_total, 0) - COALESCE(paid.paid_total, 0) > 0
-         ORDER BY unpaid DESC
-         LIMIT 5`,
-         centreId
-      ),
-      getStudentFinanceOverview(centreId),
-      prisma.seance.count({
-        where: {
-          groupe: { centerId: centreId },
-          date: { gte: startOfToday, lt: startOfTomorrow },
-        },
-      }),
-      prisma.paiement.aggregate({
-        _sum: { montant: true },
-        where: { groupe: { centerId: centreId }, datePaiement: { gte: startOfMonth } },
-      }),
-      prisma.paiement.aggregate({
-        _sum: { montant: true },
-        where: { groupe: { centerId: centreId }, datePaiement: { gte: startOfLastMonth, lt: startOfMonth } },
-      }),
-    ]);
+  return (
+    <>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <Link
+          href={`/admin/benefices?month=${month}`}
+          className="group rounded-lg border border-neutral-200 bg-white p-6 transition-all hover:border-indigo-300 hover:shadow-md dark:border-[#2a2d35] dark:bg-[#181b22] dark:hover:border-indigo-500/30"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                Bénéfice Centre
+              </p>
+              <p className="mt-2 text-2xl font-bold tabular-nums text-neutral-900 group-hover:text-indigo-600 dark:text-neutral-100 dark:group-hover:text-indigo-400">
+                {formatCurrency(data.totalBenefice)}
+              </p>
+              <div className="mt-2 flex items-center gap-1 text-[12px] text-neutral-400 dark:text-neutral-500">
+                <DollarSign className="h-3 w-3" />
+                {formatCurrency(data.totalRecu)} reçus
+              </div>
+            </div>
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-500/10">
+              <TrendingUp className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-center gap-1 text-[12px] font-medium text-indigo-600 opacity-0 transition-opacity group-hover:opacity-100 dark:text-indigo-400">
+            Voir détail <ArrowRight className="h-3 w-3" />
+          </div>
+        </Link>
 
-  const monthRevenue = Number(monthRevenueAgg._sum.montant ?? 0);
-  const lastMonth = Number(lastMonthRevenueAgg._sum.montant ?? 0);
-  const revenueTrend =
-    lastMonth > 0 ? Math.round(((monthRevenue - lastMonth) / lastMonth) * 100) : null;
+        <div className="rounded-lg border border-neutral-200 bg-white p-6 dark:border-[#2a2d35] dark:bg-[#181b22]">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                Impayés
+              </p>
+              <p className="mt-2 text-2xl font-bold tabular-nums text-red-600 dark:text-red-400">
+                {formatCurrency(data.totalUnpaid)}
+              </p>
+            </div>
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-50 dark:bg-red-500/10">
+              <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+            </div>
+          </div>
+          <Link
+            href="/admin/finances"
+            className="mt-3 flex items-center gap-1 text-[12px] font-medium text-red-600 opacity-0 transition-opacity group-hover:opacity-100 dark:text-red-400"
+          >
+            Gérer <ArrowRight className="h-3 w-3" />
+          </Link>
+        </div>
 
-  const statCards = [
-    {
-      title: "Crédit Disponible",
-      value: studentFinance.availableCredits,
-      format: "currency" as const,
-      icon: "wallet",
-      color: "bg-teal-500",
-      href: "/admin/finances",
-      sub: `${studentFinance.positiveCount} élève${studentFinance.positiveCount > 1 ? "s" : ""} en crédit`,
-      subTone: "good" as const,
-    },
-    {
-      title: "Dettes Élèves",
-      value: studentFinance.studentDebt,
-      format: "currency" as const,
-      icon: "alert",
-      color: "bg-red-500",
-      href: "/admin/finances",
-      sub: `${studentFinance.negativeCount} élève${studentFinance.negativeCount > 1 ? "s" : ""} concerné${studentFinance.negativeCount > 1 ? "s" : ""}`,
-      subTone: "bad" as const,
-    },
-    {
-      title: "Élèves",
-      value: stats.totalStudents,
-      format: "number" as const,
-      icon: "users",
-      color: "bg-blue-500",
-      href: "/admin/utilisateurs",
-    },
-    {
-      title: "Prof",
-      value: stats.totalTeachers,
-      format: "number" as const,
-      icon: "prof",
-      color: "bg-green-500",
-      href: "/admin/utilisateurs",
-    },
-    {
-      title: "Groupes",
-      value: totalGroups,
-      format: "number" as const,
-      icon: "groups",
-      color: "bg-indigo-500",
-      href: "/admin/groupes",
-    },
-    {
-      title: "Matières",
-      value: totalMatieres,
-      format: "number" as const,
-      icon: "book",
-      color: "bg-orange-500",
-      href: "/admin/matieres",
-    },
-    {
-      title: "Inscriptions Actives",
-      value: activeInscriptions,
-      format: "number" as const,
-      icon: "check",
-      color: "bg-teal-500",
-      href: "/admin/groupes",
-    },
-    {
-      title: "Séances Terminées",
-      value: stats.totalSeances,
-      format: "number" as const,
-      icon: "calendar",
-      color: "bg-purple-500",
-      href: "/admin/groupes",
-      sub: `${seancesAujourdhui} aujourd'hui`,
-      subTone: "neutral" as const,
-    },
-    {
-      title: "Revenus Totaux",
-      value: stats.totalRevenue,
-      format: "currency" as const,
-      icon: "dollar",
-      color: "bg-emerald-500",
-      href: "/admin/finances",
-      sub: `${formatCurrency(monthRevenue)} ce mois${
-        revenueTrend !== null ? ` · ${revenueTrend >= 0 ? "+" : ""}${revenueTrend}% vs mois dern.` : ""
-      }`,
-      subTone: "good" as const,
-    },
-    {
-      title: "Impayés",
-      value: stats.totalUnpaid,
-      format: "currency" as const,
-      icon: "alert",
-      color: "bg-red-500",
-      href: "/admin/finances",
-    },
-  ];
+        <div className="rounded-lg border border-neutral-200 bg-white p-6 dark:border-[#2a2d35] dark:bg-[#181b22]">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
+                <p className="text-[13px] text-neutral-600 dark:text-neutral-400">
+                  <span className="font-semibold text-neutral-900 dark:text-neutral-100">{data.totalStudents}</span> élèves
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <GraduationCap className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
+                <p className="text-[13px] text-neutral-600 dark:text-neutral-400">
+                  <span className="font-semibold text-neutral-900 dark:text-neutral-100">{data.totalTeachers}</span> profs
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {data.profs.length > 0 && (
+        <div className="rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
+          <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-3 dark:border-[#2a2d35]">
+            <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+              Bénéfices par professeur
+            </h2>
+            <Link
+              href="/admin/finances-professeurs"
+              className="flex items-center gap-1 text-[12px] font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400"
+            >
+              Comptes profs <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-[13px]">
+              <thead>
+                <tr className="border-b border-neutral-100 dark:border-[#2a2d35]">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                    Prof
+                  </th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                    Taux
+                  </th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                    Reçu
+                  </th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                    Centre
+                  </th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                    Salaire
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+                {data.profs.map((p) => (
+                  <tr
+                    key={p.prof.id}
+                    className="transition-colors hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]"
+                  >
+                    <td className="px-4 py-2.5 font-medium text-neutral-900 dark:text-neutral-100">
+                      {p.prof.prenom} {p.prof.nom}
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <span className="inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-[11px] font-medium text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400">
+                        {p.taux}%
+                      </span>
+                    </td>
+                    <td className="px-4 py-2.5 tabular-nums text-neutral-900 dark:text-neutral-100">
+                      {formatCurrency(p.totalRecu)}
+                    </td>
+                    <td className="px-4 py-2.5 tabular-nums font-medium text-indigo-600 dark:text-indigo-400">
+                      {formatCurrency(p.beneficeCentre)}
+                    </td>
+                    <td className="px-4 py-2.5 tabular-nums font-medium text-purple-600 dark:text-purple-400">
+                      {formatCurrency(p.salaireProf)}
+                    </td>
+                  </tr>
+                ))}
+                <tr className="bg-neutral-50 font-semibold dark:bg-[#1e2128]">
+                  <td className="px-4 py-2.5 text-neutral-900 dark:text-neutral-100">Total</td>
+                  <td className="px-4 py-2.5"></td>
+                  <td className="px-4 py-2.5 tabular-nums text-neutral-900 dark:text-neutral-100">
+                    {formatCurrency(data.totalRecu)}
+                  </td>
+                  <td className="px-4 py-2.5 tabular-nums text-indigo-600 dark:text-indigo-400">
+                    {formatCurrency(data.totalBenefice)}
+                  </td>
+                  <td className="px-4 py-2.5 tabular-nums text-purple-600 dark:text-purple-400">
+                    {formatCurrency(data.totalSalaire)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+export default async function AdminDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ month?: string }>;
+}) {
+  const params = await searchParams;
+  const month = params.month || getCurrentMonth();
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Tableau de bord</h1>
-        <div className="flex gap-2">
-          <Link
-            href="/admin/benefices"
-            className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-green-700"
-          >
-            <TrendingUp className="h-4 w-4" /> Benefices
-          </Link>
-          <Link
-            href="/admin/finances"
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700"
-          >
-            <CreditCard className="h-4 w-4" /> Finances
-          </Link>
-        </div>
+        <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
+          Tableau de bord
+        </h1>
+        <Suspense fallback={null}>
+          <MonthSelector month={month} />
+        </Suspense>
       </div>
 
-      <StatCards cards={statCards} />
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
-          <div className="flex items-center justify-between border-b border-neutral-200 dark:border-[#2a2d35] px-5 py-3">
-            <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">Derniers Paiements</h2>
-            <Link href="/admin/finances" className="flex items-center gap-1 text-[12px] font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800">
-              Tout voir <ArrowRight className="h-3 w-3" />
-            </Link>
+      <Suspense
+        fallback={
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-32 animate-pulse rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]"
+              />
+            ))}
           </div>
-          <div className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
-            {recentPaiements.length === 0 ? (
-              <p className="px-5 py-6 text-center text-[13px] text-neutral-500 dark:text-neutral-400">Aucun paiement</p>
-            ) : (
-              recentPaiements.map((p) => (
-                <div key={p.id} className="flex items-center justify-between px-5 py-3 hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20 text-[12px] font-semibold text-green-700 dark:text-green-400">
-                      {p.eleve.prenom[0]}{p.eleve.nom[0]}
-                    </div>
-                    <div>
-                      <p className="text-[13px] font-medium text-neutral-900 dark:text-neutral-100">{p.eleve.prenom} {p.eleve.nom}</p>
-                      <p className="text-[12px] text-neutral-400 dark:text-neutral-500">{p.groupe.nom} · {formatDateTime(p.datePaiement)}</p>
-                    </div>
-                  </div>
-                  <span className="text-[13px] font-semibold text-green-600 dark:text-green-400">{formatCurrency(Number(p.montant))}</span>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        <SeancesUpcoming
-          seances={seancesAVenir.map((s) => ({
-            id: s.id,
-            date: s.date.toISOString(),
-            heureFin: s.heureFin ? s.heureFin.toISOString() : null,
-            statut: s.statut,
-            groupe: {
-              id: s.groupe.id,
-              nom: s.groupe.nom,
-              prof: s.groupe.prof
-                ? { id: s.groupe.prof.id, nom: s.groupe.prof.nom, prenom: s.groupe.prof.prenom }
-                : null,
-            },
-          }))}
-        />
-      </div>
-
-      <TopImpayes rows={topImpayes as any[]} />
+        }
+      >
+        <DashboardContent month={month} />
+      </Suspense>
     </div>
   );
 }

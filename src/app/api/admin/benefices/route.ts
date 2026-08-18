@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
 
     const profIds = profs.map((p) => p.id);
 
-    const [monthPayments, eleveCounts, historyRows] = await Promise.all([
+    const [monthPayments, eleveCounts, historyRows, monthPaiements] = await Promise.all([
       profIds.length
         ? prisma.$queryRawUnsafe<{ prof_id: string | null; total: number }[]>(
             `
@@ -69,6 +69,18 @@ export async function GET(request: NextRequest) {
         centreId,
         new Date(now.getFullYear(), now.getMonth() - 11, 1)
       ),
+      prisma.paiement.findMany({
+        where: {
+          groupe: { centerId: centreId },
+          datePaiement: { gte: startDate, lte: endDate },
+        },
+        orderBy: { datePaiement: "desc" },
+        take: 20,
+        include: {
+          eleve: { select: { id: true, nom: true, prenom: true } },
+          groupe: { select: { id: true, nom: true } },
+        },
+      }),
     ]);
 
     const monthMap = new Map<string, number>();
@@ -131,6 +143,7 @@ export async function GET(request: NextRequest) {
       totalBenefice,
       totalSalaire,
       monthlyHistory,
+      monthPaiements,
     });
   } catch (error) {
     return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });

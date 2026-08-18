@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { TrendingUp, Save, Loader2, DollarSign, Users, Percent } from "lucide-react";
+import { TrendingUp, Save, Loader2, DollarSign, Users, Percent, CreditCard, ArrowRight } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import {
   BarChart,
@@ -42,6 +42,14 @@ interface MonthlyPoint {
   totalSalaire: number;
 }
 
+interface PaiementRow {
+  id: string;
+  montant: number;
+  datePaiement: string;
+  eleve: { id: string; nom: string; prenom: string };
+  groupe: { id: string; nom: string };
+}
+
 interface BeneficesData {
   selectedMonth: string;
   profs: ProfBenefice[];
@@ -49,6 +57,7 @@ interface BeneficesData {
   totalBenefice: number;
   totalSalaire: number;
   monthlyHistory: MonthlyPoint[];
+  monthPaiements: PaiementRow[];
 }
 
 const monthLabels: Record<string, string> = {
@@ -223,6 +232,56 @@ export default function AdminBeneficesPage() {
                 <Users className="h-6 w-6 text-white" />
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {beneficesData && beneficesData.monthPaiements && beneficesData.monthPaiements.length > 0 && (
+        <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+          <div className="flex items-center justify-between border-b border-neutral-200 dark:border-[#2a2d35] px-5 py-3">
+            <h2 className="flex items-center gap-2 text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+              <CreditCard className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
+              Paiements du mois — {formatMonthLabel(beneficesData.selectedMonth)}
+              <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-neutral-500 dark:bg-[#2a2d35] dark:text-neutral-400">
+                {beneficesData.monthPaiements.length}
+              </span>
+            </h2>
+            <a
+              href={`/admin/finances?month=${beneficesData.selectedMonth}`}
+              className="flex items-center gap-1 text-[12px] font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800"
+            >
+              Tout voir <ArrowRight className="h-3 w-3" />
+            </a>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-[13px]">
+              <thead>
+                <tr className="border-b border-neutral-100 dark:border-[#2a2d35]">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Élève</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Date</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Montant</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+                {beneficesData.monthPaiements.map((p) => (
+                  <tr key={p.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
+                    <td className="px-4 py-2.5">
+                      <a href={`/admin/eleves/${p.eleve.id}`} className="font-medium text-blue-600 dark:text-blue-400 hover:underline">
+                        {p.eleve.prenom} {p.eleve.nom}
+                      </a>
+                    </td>
+                    <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{p.groupe.nom}</td>
+                    <td className="px-4 py-2.5 text-neutral-500 dark:text-neutral-400">
+                      {new Date(p.datePaiement).toLocaleDateString("fr-FR")}
+                    </td>
+                    <td className="px-4 py-2.5 font-semibold tabular-nums text-green-600 dark:text-green-400">
+                      {formatCurrency(Number(p.montant))}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
