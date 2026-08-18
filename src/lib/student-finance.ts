@@ -619,7 +619,7 @@ export async function listStudentsWithBalance(centerId: string) {
 
   const rows = await prisma.studentTransaction.groupBy({
     by: ["eleveId"],
-    where: studentCreditBalanceWhere(centerId),
+    where: { centerId, status: "active" },
     _sum: { signedAmount: true },
   });
 

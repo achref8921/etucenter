@@ -37,7 +37,7 @@ async function DashboardContent({ month }: { month: string }) {
               {formatCurrency(data.netCenterEarnings)}
             </p>
             <p className="mt-1 text-[12px] text-neutral-400 dark:text-neutral-500">
-              20% de {formatCurrency(data.netPaidSessionsRevenue)} — Houts dra + 7adher w m5alasa
+              20% de {formatCurrency(data.netPaidSessionsRevenue)} — Houts msdara w m5alasa
             </p>
           </div>
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-500/10">
@@ -58,9 +58,9 @@ async function DashboardContent({ month }: { month: string }) {
             </p>
           </div>
           <div>
-            <p className="text-[12px] text-neutral-400 dark:text-neutral-500">Dfou3at chhar</p>
-            <p className="text-[13px] font-semibold tabular-nums text-green-600 dark:text-green-400">
-              {formatCurrency(data.totalRecu)}
+            <p className="text-[12px] text-neutral-400 dark:text-neutral-500">Benefice Centre</p>
+            <p className="text-[13px] font-semibold tabular-nums text-indigo-600 dark:text-indigo-400">
+              {formatCurrency(data.netCenterEarnings)}
             </p>
           </div>
         </div>
@@ -161,7 +161,7 @@ async function DashboardContent({ month }: { month: string }) {
                       </span>
                     </td>
                     <td className="px-4 py-2.5 tabular-nums text-neutral-900 dark:text-neutral-100">
-                      {formatCurrency(p.totalRecu)}
+                      {formatCurrency(p.netRevenue)}
                     </td>
                     <td className="px-4 py-2.5 tabular-nums font-medium text-indigo-600 dark:text-indigo-400">
                       {formatCurrency(p.beneficeCentre)}
@@ -175,13 +175,13 @@ async function DashboardContent({ month }: { month: string }) {
                   <td className="px-4 py-2.5 text-neutral-900 dark:text-neutral-100">Total</td>
                   <td className="px-4 py-2.5"></td>
                   <td className="px-4 py-2.5 tabular-nums text-neutral-900 dark:text-neutral-100">
-                    {formatCurrency(data.totalRecu)}
+                    {formatCurrency(data.netPaidSessionsRevenue)}
                   </td>
                   <td className="px-4 py-2.5 tabular-nums text-indigo-600 dark:text-indigo-400">
-                    {formatCurrency(data.totalBenefice)}
+                    {formatCurrency(data.netCenterEarnings)}
                   </td>
                   <td className="px-4 py-2.5 tabular-nums text-purple-600 dark:text-purple-400">
-                    {formatCurrency(data.totalSalaire)}
+                    {formatCurrency(data.netPaidSessionsRevenue - data.netCenterEarnings)}
                   </td>
                 </tr>
               </tbody>

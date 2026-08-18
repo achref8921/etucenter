@@ -3,18 +3,15 @@ import { DEFAULT_CENTER_SHARE } from "./teacher-finance";
 
 export interface DashboardMonthData {
   selectedMonth: string;
-  totalRecu: number;
-  totalBenefice: number;
-  totalSalaire: number;
-  totalUnpaid: number;
   netCenterEarnings: number;
   netPaidSessionsRevenue: number;
+  totalUnpaid: number;
   totalStudents: number;
   totalTeachers: number;
   profs: {
     prof: { id: string; nom: string; prenom: string };
     taux: number;
-    totalRecu: number;
+    netRevenue: number;
     beneficeCentre: number;
     salaireProf: number;
     nombreEleves: number;
@@ -41,22 +38,76 @@ export async function getAdminDashboardMonthData(
     },
   });
 
+  const tauxMap = new Map<string, number>(
+    profs.map((p) => [
+      p.id,
+      p.tauxBenefice ? Number(p.tauxBenefice.tauxPourcentage) : DEFAULT_CENTER_SHARE,
+    ])
+  );
+
   const profIds = profs.map((p) => p.id);
 
-  const [monthPayments, eleveCounts] = await Promise.all([
+  const [netRevenueByProf, eleveCounts] = await Promise.all([
     profIds.length
-      ? prisma.$queryRawUnsafe<{ prof_id: string | null; total: number }[]>(
+      ? prisma.$queryRawUnsafe<{ prof_id: string; net_revenue: number }[]>(
           `
-          SELECT g.prof_id, COALESCE(SUM(pa.montant), 0)::float AS total
-          FROM paiements pa JOIN groupes g ON pa.groupe_id = g.id
-          WHERE g.center_id = $1::uuid
-            AND pa.date_paiement >= $2::timestamptz
-            AND pa.date_paiement <= $3::timestamptz
+          WITH all_sessions AS (
+            SELECT
+              pr.eleve_id,
+              s.groupe_id,
+              COALESCE(s.prix_par_seance, g.prix_par_seance) as price,
+              s.date as seance_date
+            FROM presences pr
+            JOIN seances s ON pr.seance_id = s.id
+            JOIN groupes g ON s.groupe_id = g.id
+            WHERE pr.statut = 'present'
+              AND s.statut = 'terminee'
+              AND g.center_id = $1::uuid
+              AND s.date <= $2::timestamptz
+          ),
+          student_dues AS (
+            SELECT
+              eleve_id, groupe_id,
+              SUM(price) as total_due,
+              SUM(CASE WHEN seance_date >= $3::timestamptz THEN price ELSE 0 END) as due_this_month
+            FROM all_sessions
+            GROUP BY eleve_id, groupe_id
+          ),
+          student_payments AS (
+            SELECT
+              pai.eleve_id,
+              pai.groupe_id,
+              SUM(pai.montant) as total_paid
+            FROM paiements pai
+            JOIN groupes g ON pai.groupe_id = g.id
+            WHERE g.center_id = $1::uuid
+              AND pai.date_paiement <= $2::timestamptz
+            GROUP BY pai.eleve_id, pai.groupe_id
+          ),
+          paid_this_month AS (
+            SELECT
+              sd.eleve_id,
+              sd.groupe_id,
+              GREATEST(0,
+                LEAST(sd.due_this_month,
+                  GREATEST(0, COALESCE(sp.total_paid, 0) - (sd.total_due - sd.due_this_month))
+                )
+              ) as paid_amount
+            FROM student_dues sd
+            LEFT JOIN student_payments sp
+              ON sd.eleve_id = sp.eleve_id AND sd.groupe_id = sp.groupe_id
+            WHERE sd.due_this_month > 0
+          )
+          SELECT
+            g.prof_id,
+            COALESCE(SUM(pm.paid_amount), 0)::float as net_revenue
+          FROM paid_this_month pm
+          JOIN groupes g ON pm.groupe_id = g.id
           GROUP BY g.prof_id
           `,
           centerId,
-          startDate,
-          endDate
+          endDate,
+          startDate
         )
       : [],
     profIds.length
@@ -72,32 +123,25 @@ export async function getAdminDashboardMonthData(
       : [],
   ]);
 
-  const monthMap = new Map<string, number>();
-  for (const r of monthPayments) monthMap.set(r.prof_id ?? "", Number(r.total || 0));
+  const revenueMap = new Map<string, number>();
+  for (const r of netRevenueByProf) revenueMap.set(r.prof_id, Number(r.net_revenue || 0));
   const countMap = new Map<string, number>();
   for (const r of eleveCounts) countMap.set(r.prof_id ?? "", Number(r.nb || 0));
 
-  const tauxMap = new Map<string, number>(
-    profs.map((p) => [
-      p.id,
-      p.tauxBenefice ? Number(p.tauxBenefice.tauxPourcentage) : DEFAULT_CENTER_SHARE,
-    ])
-  );
-
-  let totalRecu = 0;
-  let totalBenefice = 0;
+  let totalNetRevenue = 0;
+  let totalCenterEarnings = 0;
 
   const profsData = profs.map((e) => {
     const taux = tauxMap.get(e.id) ?? DEFAULT_CENTER_SHARE;
-    const totalRecuP = monthMap.get(e.id) || 0;
-    const beneficeCentre = (totalRecuP * taux) / 100;
-    const salaireProf = totalRecuP - beneficeCentre;
-    totalRecu += totalRecuP;
-    totalBenefice += beneficeCentre;
+    const netRevenue = revenueMap.get(e.id) || 0;
+    const beneficeCentre = (netRevenue * taux) / 100;
+    const salaireProf = netRevenue - beneficeCentre;
+    totalNetRevenue += netRevenue;
+    totalCenterEarnings += beneficeCentre;
     return {
       prof: { id: e.id, nom: e.nom, prenom: e.prenom },
       taux,
-      totalRecu: totalRecuP,
+      netRevenue,
       beneficeCentre,
       salaireProf,
       nombreEleves: countMap.get(e.id) || 0,
@@ -140,69 +184,11 @@ export async function getAdminDashboardMonthData(
     prisma.utilisateur.count({ where: { role: "prof", centerId, deletedAt: null } }),
   ]);
 
-  // Net center earnings: only count sessions that are completed, student present, AND student has paid (FIFO)
-  const netResult = await prisma.$queryRawUnsafe<{ net_revenue: number }[]>(
-    `
-    WITH session_due AS (
-      SELECT
-        pr.eleve_id,
-        s.groupe_id,
-        COALESCE(s.prix_par_seance, g.prix_par_seance) as session_price,
-        s.date as seance_date
-      FROM presences pr
-      JOIN seances s ON pr.seance_id = s.id
-      JOIN groupes g ON s.groupe_id = g.id
-      WHERE pr.statut = 'present'
-        AND s.statut = 'terminee'
-        AND g.center_id = $1::uuid
-        AND s.date <= $2::timestamptz
-    ),
-    monthly_totals AS (
-      SELECT
-        eleve_id,
-        groupe_id,
-        SUM(CASE WHEN seance_date >= $3::timestamptz THEN session_price ELSE 0 END) as due_this_month,
-        SUM(session_price) as due_alltime
-      FROM session_due
-      GROUP BY eleve_id, groupe_id
-    ),
-    paid_alltime AS (
-      SELECT
-        pai.eleve_id,
-        pai.groupe_id,
-        SUM(pai.montant) as total_paid
-      FROM paiements pai
-      JOIN groupes g ON pai.groupe_id = g.id
-      WHERE g.center_id = $1::uuid
-        AND pai.date_paiement <= $2::timestamptz
-      GROUP BY pai.eleve_id, pai.groupe_id
-    )
-    SELECT COALESCE(SUM(
-      GREATEST(0,
-        LEAST(mt.due_this_month,
-          GREATEST(0, COALESCE(pa.total_paid, 0) - (mt.due_alltime - mt.due_this_month))
-        )
-      )
-    ), 0)::float as net_revenue
-    FROM monthly_totals mt
-    LEFT JOIN paid_alltime pa ON mt.eleve_id = pa.eleve_id AND mt.groupe_id = pa.groupe_id
-    `,
-    centerId,
-    endDate,
-    startDate
-  );
-
-  const netPaidSessionsRevenue = Number(netResult[0]?.net_revenue || 0);
-  const netCenterEarnings = (netPaidSessionsRevenue * DEFAULT_CENTER_SHARE) / 100;
-
   return {
     selectedMonth: month,
-    totalRecu,
-    totalBenefice,
-    totalSalaire: totalRecu - totalBenefice,
+    netCenterEarnings: totalCenterEarnings,
+    netPaidSessionsRevenue: totalNetRevenue,
     totalUnpaid: Number(unpaidResult[0]?.total || 0),
-    netCenterEarnings,
-    netPaidSessionsRevenue,
     totalStudents,
     totalTeachers,
     profs: profsData,
