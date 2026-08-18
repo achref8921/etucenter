@@ -7,6 +7,7 @@ import {
   ArrowRight,
   Users,
   GraduationCap,
+  Banknote,
 } from "lucide-react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -26,70 +27,86 @@ async function DashboardContent({ month }: { month: string }) {
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="rounded-lg border border-neutral-200 bg-white p-6 dark:border-[#2a2d35] dark:bg-[#181b22]">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+              Aribat El Centre Net
+            </p>
+            <p className="mt-2 text-3xl font-bold tabular-nums text-indigo-600 dark:text-indigo-400">
+              {formatCurrency(data.netCenterEarnings)}
+            </p>
+            <p className="mt-1 text-[12px] text-neutral-400 dark:text-neutral-500">
+              20% de {formatCurrency(data.netPaidSessionsRevenue)} — Houts dra + 7adher w m5alasa
+            </p>
+          </div>
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-500/10">
+            <Banknote className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+          </div>
+        </div>
+        <div className="mt-4 grid grid-cols-3 gap-4 border-t border-neutral-100 pt-4 dark:border-[#2a2d35]">
+          <div>
+            <p className="text-[12px] text-neutral-400 dark:text-neutral-500">Houts m5alasa</p>
+            <p className="text-[13px] font-semibold tabular-nums text-neutral-900 dark:text-neutral-100">
+              {formatCurrency(data.netPaidSessionsRevenue)}
+            </p>
+          </div>
+          <div>
+            <p className="text-[12px] text-neutral-400 dark:text-neutral-500">Impayes</p>
+            <p className="text-[13px] font-semibold tabular-nums text-red-600 dark:text-red-400">
+              {formatCurrency(data.totalUnpaid)}
+            </p>
+          </div>
+          <div>
+            <p className="text-[12px] text-neutral-400 dark:text-neutral-500">Dfou3at chhar</p>
+            <p className="text-[13px] font-semibold tabular-nums text-green-600 dark:text-green-400">
+              {formatCurrency(data.totalRecu)}
+            </p>
+          </div>
+        </div>
         <Link
           href={`/admin/benefices?month=${month}`}
-          className="group rounded-lg border border-neutral-200 bg-white p-6 transition-all hover:border-indigo-300 hover:shadow-md dark:border-[#2a2d35] dark:bg-[#181b22] dark:hover:border-indigo-500/30"
+          className="mt-4 flex items-center gap-1 text-[12px] font-medium text-indigo-600 hover:text-indigo-800 dark:text-indigo-400"
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                Bénéfice Centre
-              </p>
-              <p className="mt-2 text-2xl font-bold tabular-nums text-neutral-900 group-hover:text-indigo-600 dark:text-neutral-100 dark:group-hover:text-indigo-400">
-                {formatCurrency(data.totalBenefice)}
-              </p>
-              <div className="mt-2 flex items-center gap-1 text-[12px] text-neutral-400 dark:text-neutral-500">
-                <DollarSign className="h-3 w-3" />
-                {formatCurrency(data.totalRecu)} reçus
-              </div>
-            </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-500/10">
-              <TrendingUp className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-            </div>
-          </div>
-          <div className="mt-3 flex items-center gap-1 text-[12px] font-medium text-indigo-600 opacity-0 transition-opacity group-hover:opacity-100 dark:text-indigo-400">
-            Voir détail <ArrowRight className="h-3 w-3" />
-          </div>
+          Voir benefices detailles <ArrowRight className="h-3 w-3" />
         </Link>
+      </div>
 
-        <div className="rounded-lg border border-neutral-200 bg-white p-6 dark:border-[#2a2d35] dark:bg-[#181b22]">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="rounded-lg border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                Impayés
-              </p>
-              <p className="mt-2 text-2xl font-bold tabular-nums text-red-600 dark:text-red-400">
-                {formatCurrency(data.totalUnpaid)}
-              </p>
-            </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-50 dark:bg-red-500/10">
-              <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
-            </div>
+            <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+              Impayes Total
+            </p>
+            <AlertTriangle className="h-4 w-4 text-red-400" />
           </div>
+          <p className="mt-2 text-xl font-bold tabular-nums text-red-600 dark:text-red-400">
+            {formatCurrency(data.totalUnpaid)}
+          </p>
           <Link
             href="/admin/finances"
-            className="mt-3 flex items-center gap-1 text-[12px] font-medium text-red-600 opacity-0 transition-opacity group-hover:opacity-100 dark:text-red-400"
+            className="mt-2 flex items-center gap-1 text-[12px] font-medium text-red-600 opacity-0 transition-opacity hover:opacity-100 dark:text-red-400"
           >
-            Gérer <ArrowRight className="h-3 w-3" />
+            Gerer <ArrowRight className="h-3 w-3" />
           </Link>
         </div>
 
-        <div className="rounded-lg border border-neutral-200 bg-white p-6 dark:border-[#2a2d35] dark:bg-[#181b22]">
+        <div className="rounded-lg border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
           <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
-                <p className="text-[13px] text-neutral-600 dark:text-neutral-400">
-                  <span className="font-semibold text-neutral-900 dark:text-neutral-100">{data.totalStudents}</span> élèves
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <GraduationCap className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
-                <p className="text-[13px] text-neutral-600 dark:text-neutral-400">
-                  <span className="font-semibold text-neutral-900 dark:text-neutral-100">{data.totalTeachers}</span> profs
-                </p>
-              </div>
+            <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+              Effectifs
+            </p>
+            <Users className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
+          </div>
+          <div className="mt-2 flex items-center gap-4">
+            <div>
+              <span className="text-xl font-bold text-neutral-900 dark:text-neutral-100">{data.totalStudents}</span>
+              <span className="ml-1 text-[12px] text-neutral-400 dark:text-neutral-500">eleves</span>
+            </div>
+            <div className="h-4 w-px bg-neutral-200 dark:bg-[#2a2d35]"></div>
+            <div>
+              <span className="text-xl font-bold text-neutral-900 dark:text-neutral-100">{data.totalTeachers}</span>
+              <span className="ml-1 text-[12px] text-neutral-400 dark:text-neutral-500">profs</span>
             </div>
           </div>
         </div>

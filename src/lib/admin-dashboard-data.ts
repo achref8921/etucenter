@@ -7,6 +7,8 @@ export interface DashboardMonthData {
   totalBenefice: number;
   totalSalaire: number;
   totalUnpaid: number;
+  netCenterEarnings: number;
+  netPaidSessionsRevenue: number;
   totalStudents: number;
   totalTeachers: number;
   profs: {
@@ -138,12 +140,69 @@ export async function getAdminDashboardMonthData(
     prisma.utilisateur.count({ where: { role: "prof", centerId, deletedAt: null } }),
   ]);
 
+  // Net center earnings: only count sessions that are completed, student present, AND student has paid (FIFO)
+  const netResult = await prisma.$queryRawUnsafe<{ net_revenue: number }[]>(
+    `
+    WITH session_due AS (
+      SELECT
+        pr.eleve_id,
+        s.groupe_id,
+        COALESCE(s.prix_par_seance, g.prix_par_seance) as session_price,
+        s.date as seance_date
+      FROM presences pr
+      JOIN seances s ON pr.seance_id = s.id
+      JOIN groupes g ON s.groupe_id = g.id
+      WHERE pr.statut = 'present'
+        AND s.statut = 'terminee'
+        AND g.center_id = $1::uuid
+        AND s.date <= $2::timestamptz
+    ),
+    monthly_totals AS (
+      SELECT
+        eleve_id,
+        groupe_id,
+        SUM(CASE WHEN seance_date >= $3::timestamptz THEN session_price ELSE 0 END) as due_this_month,
+        SUM(session_price) as due_alltime
+      FROM session_due
+      GROUP BY eleve_id, groupe_id
+    ),
+    paid_alltime AS (
+      SELECT
+        pai.eleve_id,
+        pai.groupe_id,
+        SUM(pai.montant) as total_paid
+      FROM paiements pai
+      JOIN groupes g ON pai.groupe_id = g.id
+      WHERE g.center_id = $1::uuid
+        AND pai.date_paiement <= $2::timestamptz
+      GROUP BY pai.eleve_id, pai.groupe_id
+    )
+    SELECT COALESCE(SUM(
+      GREATEST(0,
+        LEAST(mt.due_this_month,
+          GREATEST(0, COALESCE(pa.total_paid, 0) - (mt.due_alltime - mt.due_this_month))
+        )
+      )
+    ), 0)::float as net_revenue
+    FROM monthly_totals mt
+    LEFT JOIN paid_alltime pa ON mt.eleve_id = pa.eleve_id AND mt.groupe_id = pa.groupe_id
+    `,
+    centerId,
+    endDate,
+    startDate
+  );
+
+  const netPaidSessionsRevenue = Number(netResult[0]?.net_revenue || 0);
+  const netCenterEarnings = (netPaidSessionsRevenue * DEFAULT_CENTER_SHARE) / 100;
+
   return {
     selectedMonth: month,
     totalRecu,
     totalBenefice,
     totalSalaire: totalRecu - totalBenefice,
     totalUnpaid: Number(unpaidResult[0]?.total || 0),
+    netCenterEarnings,
+    netPaidSessionsRevenue,
     totalStudents,
     totalTeachers,
     profs: profsData,
