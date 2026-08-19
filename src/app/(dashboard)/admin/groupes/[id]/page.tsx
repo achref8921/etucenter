@@ -112,6 +112,15 @@ export default function AdminGroupeDetailPage() {
     fetchGroupe();
   }, [fetchGroupe]);
 
+  useEffect(() => {
+    if (showAddModal) {
+      loadAllStudents();
+      setSearchQuery("");
+      setFilterNiveau("");
+      setFilterFiliere("");
+    }
+  }, [showAddModal]);
+
   const loadAllStudents = async () => {
     try {
       setLoadingStudents(true);
