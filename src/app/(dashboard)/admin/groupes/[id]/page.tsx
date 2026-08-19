@@ -92,6 +92,8 @@ export default function AdminGroupeDetailPage() {
   const [filterFiliere, setFilterFiliere] = useState("");
   const [loadingStudents, setLoadingStudents] = useState(false);
   const [addingId, setAddingId] = useState<string | null>(null);
+  const [removingId, setRemovingId] = useState<string | null>(null);
+  const [confirmRemoveEleve, setConfirmRemoveEleve] = useState<{ id: string; inscriptionId: string; name: string } | null>(null);
 
   const fetchGroupe = useCallback(async () => {
     try {
@@ -170,6 +172,25 @@ export default function AdminGroupeDetailPage() {
       setError(err instanceof Error ? err.message : "Erreur inconnue");
     } finally {
       setAddingId(null);
+    }
+  };
+
+  const handleRemoveEleve = async (inscriptionId: string) => {
+    try {
+      setRemovingId(inscriptionId);
+      setError(null);
+      const res = await fetch(`/api/admin/inscriptions?id=${inscriptionId}`, { method: "DELETE" });
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || "Erreur lors de la suppression");
+      }
+      setConfirmRemoveEleve(null);
+      fetchGroupe();
+      loadAllStudents();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setRemovingId(null);
     }
   };
 
@@ -472,13 +493,23 @@ export default function AdminGroupeDetailPage() {
                     <span className={`font-medium ${ins.stats.unpaid > 0 ? "text-red-600 dark:text-red-400" : "text-neutral-900 dark:text-neutral-100"}`}>{formatCurrency(ins.stats.unpaid)}</span>
                   </td>
                   <td className="px-4 py-2.5">
-                    <button
-                      onClick={() => openRattrapageModal(ins.eleve)}
-                      className="flex items-center gap-1 rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-2 py-1 text-[12px] font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
-                      title="Ajouter une séance passée"
-                    >
-                      <CalendarPlus className="h-3.5 w-3.5" /> Séance passée
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => openRattrapageModal(ins.eleve)}
+                        className="flex items-center gap-1 rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-2 py-1 text-[12px] font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+                        title="Ajouter une séance passée"
+                      >
+                        <CalendarPlus className="h-3.5 w-3.5" /> Séance passée
+                      </button>
+                      <button
+                        onClick={() => setConfirmRemoveEleve({ id: ins.eleve.id, inscriptionId: ins.id, name: `${ins.eleve.prenom} ${ins.eleve.nom}` })}
+                        disabled={removingId === ins.id}
+                        className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400 disabled:opacity-30"
+                        title="Retirer du groupe"
+                      >
+                        {removingId === ins.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -791,6 +822,14 @@ export default function AdminGroupeDetailPage() {
           </div>
         </div>
       )}
+      <ConfirmDelete
+        open={!!confirmRemoveEleve}
+        title="Retirer l'élève du groupe"
+        message={`Êtes-vous sûr de vouloir retirer ${confirmRemoveEleve?.name || ""} de ce groupe ? Son inscription sera désactivée.`}
+        onConfirm={() => { if (confirmRemoveEleve) handleRemoveEleve(confirmRemoveEleve.inscriptionId); }}
+        onCancel={() => setConfirmRemoveEleve(null)}
+        loading={removingId === confirmRemoveEleve?.inscriptionId}
+      />
       <ConfirmDelete
         open={!!confirmDeleteSeance}
         title="Supprimer la séance"
