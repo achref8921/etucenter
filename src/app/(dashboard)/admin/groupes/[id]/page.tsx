@@ -42,6 +42,9 @@ interface EleveSearch {
   nom: string;
   prenom: string;
   email: string;
+  niveau: string | null;
+  classe: string | null;
+  filiere: string | null;
 }
 
 const statusLabels: Record<string, string> = {
@@ -84,8 +87,10 @@ export default function AdminGroupeDetailPage() {
   const [tarifSeances, setTarifSeances] = useState(0);
   const [tarifPrixSeance, setTarifPrixSeance] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<EleveSearch[]>([]);
-  const [searching, setSearching] = useState(false);
+  const [allStudents, setAllStudents] = useState<EleveSearch[]>([]);
+  const [filterNiveau, setFilterNiveau] = useState("");
+  const [filterFiliere, setFilterFiliere] = useState("");
+  const [loadingStudents, setLoadingStudents] = useState(false);
   const [addingId, setAddingId] = useState<string | null>(null);
 
   const fetchGroupe = useCallback(async () => {
@@ -107,29 +112,33 @@ export default function AdminGroupeDetailPage() {
     fetchGroupe();
   }, [fetchGroupe]);
 
-  const handleSearch = async (query: string) => {
-    setSearchQuery(query);
-    if (query.length < 2) {
-      setSearchResults([]);
-      return;
-    }
+  const loadAllStudents = async () => {
     try {
-      setSearching(true);
+      setLoadingStudents(true);
       const res = await fetch(`/api/admin/utilisateurs`);
       if (res.ok) {
         const data = await res.json();
         const enrolledIds = groupe?.inscriptions.map((i) => i.eleve.id) || [];
-        setSearchResults(
+        setAllStudents(
           data
             .filter((u: any) => u.role === "eleve")
             .filter((u: any) => !enrolledIds.includes(u.id))
-            .filter((u: any) => `${u.prenom} ${u.nom}`.toLowerCase().includes(query.toLowerCase()) || u.email.toLowerCase().includes(query.toLowerCase()))
         );
       }
     } finally {
-      setSearching(false);
+      setLoadingStudents(false);
     }
   };
+
+  const filteredStudents = allStudents.filter((e) => {
+    const matchSearch =
+      searchQuery === "" ||
+      `${e.prenom} ${e.nom}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      e.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchNiveau = filterNiveau === "" || e.niveau === filterNiveau;
+    const matchFiliere = filterFiliere === "" || e.filiere === filterFiliere;
+    return matchSearch && matchNiveau && matchFiliere;
+  });
 
   const handleAddEleve = async (eleveId: string) => {
     try {
@@ -144,7 +153,9 @@ export default function AdminGroupeDetailPage() {
         throw new Error(body.error || "Erreur lors de l'inscription");
       }
       setSearchQuery("");
-      setSearchResults([]);
+      setFilterNiveau("");
+      setFilterFiliere("");
+      loadAllStudents();
       fetchGroupe();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur inconnue");
@@ -700,39 +711,67 @@ export default function AdminGroupeDetailPage() {
 
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
+          <div className="w-full max-w-lg rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Ajouter un élève</h2>
-              <button onClick={() => { setShowAddModal(false); setSearchQuery(""); setSearchResults([]); }} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300">
+              <button onClick={() => { setShowAddModal(false); setSearchQuery(""); setFilterNiveau(""); setFilterFiliere(""); }} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300">
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="relative mb-4">
+            <div className="relative mb-3">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500" />
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => handleSearch(e.target.value)}
-                placeholder="Rechercher un élève..."
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Rechercher par nom ou email..."
                 className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 py-2 pl-10 pr-3 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
+            <div className="mb-3 flex gap-2">
+              <select
+                value={filterNiveau}
+                onChange={(e) => setFilterNiveau(e.target.value)}
+                className="flex-1 rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="">Tous les niveaux</option>
+                <option value="primaire">Primaire</option>
+                <option value="college">Collège</option>
+                <option value="lycee">Lycée</option>
+              </select>
+              <select
+                value={filterFiliere}
+                onChange={(e) => setFilterFiliere(e.target.value)}
+                className="flex-1 rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="">Toutes les filières</option>
+                <option value="lettres">Lettres</option>
+                <option value="economique">Économique</option>
+                <option value="informatique">Informatique</option>
+                <option value="technique">Technique</option>
+                <option value="sciences">Sciences</option>
+                <option value="math">Math</option>
+              </select>
+            </div>
             <div className="max-h-64 overflow-y-auto">
-              {searching ? (
+              {loadingStudents ? (
                 <div className="flex justify-center py-4"><Loader2 className="h-5 w-5 animate-spin text-blue-600" /></div>
-              ) : searchResults.length === 0 ? (
-                <p className="py-4 text-center text-[13px] text-neutral-500 dark:text-neutral-400">
-                  {searchQuery.length < 2 ? "Tapez au moins 2 caractères" : "Aucun résultat"}
-                </p>
+              ) : filteredStudents.length === 0 ? (
+                <p className="py-4 text-center text-[13px] text-neutral-500 dark:text-neutral-400">Aucun élève disponible</p>
               ) : (
                 <div className="space-y-2">
-                  {searchResults.map((e) => (
+                  {filteredStudents.map((e) => (
                     <div key={e.id} className="flex items-center justify-between rounded-lg border border-neutral-200 dark:border-[#2a2d35] p-3">
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <p className="text-[13px] font-medium text-neutral-900 dark:text-neutral-100">{e.prenom} {e.nom}</p>
-                        <p className="text-[12px] text-neutral-400 dark:text-neutral-500">{e.email}</p>
+                        <p className="text-[12px] text-neutral-400 dark:text-neutral-500">
+                          {e.email}
+                          {e.niveau && ` — ${e.niveau}`}
+                          {e.classe && ` ${e.classe}`}
+                          {e.filiere && ` (${e.filiere})`}
+                        </p>
                       </div>
-                      <button onClick={() => handleAddEleve(e.id)} disabled={addingId === e.id} className="rounded-lg bg-blue-600 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-blue-700 disabled:opacity-50">
+                      <button onClick={() => handleAddEleve(e.id)} disabled={addingId === e.id} className="ml-3 shrink-0 rounded-lg bg-blue-600 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-blue-700 disabled:opacity-50">
                         {addingId === e.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Ajouter"}
                       </button>
                     </div>

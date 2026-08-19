@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Trash2, X, Loader2, Pencil, Check } from "lucide-react";
+import { Plus, Trash2, X, Loader2, Pencil, Check, Search } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import ConfirmDelete from "@/components/confirm-delete";
 
@@ -54,6 +54,9 @@ export default function GroupesPage() {
   const [selectedProfId, setSelectedProfId] = useState<string>("");
   const [savingProfId, setSavingProfId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<{ id: string } | null>(null);
+  const [search, setSearch] = useState("");
+  const [filterProfId, setFilterProfId] = useState("");
+  const [filterMatiereId, setFilterMatiereId] = useState("");
   const [formData, setFormData] = useState<GroupeFormData>({
     nom: "",
     description: "",
@@ -222,6 +225,16 @@ export default function GroupesPage() {
     setShowModal(true);
   };
 
+  const filteredGroupes = groupes.filter((g) => {
+    const matchSearch =
+      search === "" ||
+      g.nom.toLowerCase().includes(search.toLowerCase()) ||
+      (g.description && g.description.toLowerCase().includes(search.toLowerCase()));
+    const matchProf = filterProfId === "" || g.prof?.id === filterProfId;
+    const matchMatiere = filterMatiereId === "" || g.matiere?.id === filterMatiereId;
+    return matchSearch && matchProf && matchMatiere;
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -238,6 +251,41 @@ export default function GroupesPage() {
       {error && (
         <div className="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">
           {error}
+        </div>
+      )}
+
+      {!loading && groupes.length > 0 && (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Rechercher un groupe..."
+              className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] py-2.5 pl-10 pr-4 text-[13px] text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/20"
+            />
+          </div>
+          <select
+            value={filterProfId}
+            onChange={(e) => setFilterProfId(e.target.value)}
+            className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/20"
+          >
+            <option value="">Tous les profs</option>
+            {profs.map((p) => (
+              <option key={p.id} value={p.id}>{p.prenom} {p.nom}</option>
+            ))}
+          </select>
+          <select
+            value={filterMatiereId}
+            onChange={(e) => setFilterMatiereId(e.target.value)}
+            className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/20"
+          >
+            <option value="">Toutes les matières</option>
+            {matieres.map((m) => (
+              <option key={m.id} value={m.id}>{m.nom}</option>
+            ))}
+          </select>
         </div>
       )}
 
@@ -259,14 +307,14 @@ export default function GroupesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
-              {groupes.length === 0 ? (
+              {filteredGroupes.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-4 py-2.5 text-center text-neutral-500 dark:text-neutral-400">
-                    Aucun groupe trouvé
+                    {groupes.length === 0 ? "Aucun groupe trouvé" : "Aucun résultat pour cette recherche"}
                   </td>
                 </tr>
               ) : (
-                groupes.map((groupe) => (
+                filteredGroupes.map((groupe) => (
                   <tr key={groupe.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
                     <td className="px-4 py-2.5 font-medium">
                       <Link href={`/admin/groupes/${groupe.id}`} className="text-blue-600 dark:text-blue-400 hover:underline">

@@ -1,8 +1,21 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { TrendingUp, Save, Loader2, DollarSign, Users, Percent, CreditCard, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import {
+  TrendingUp,
+  Save,
+  Loader2,
+  DollarSign,
+  Users,
+  Percent,
+  CreditCard,
+  ArrowRight,
+  AlertTriangle,
+  Banknote,
+} from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { MonthSelector } from "@/components/month-selector";
 import {
   BarChart,
   Bar,
@@ -56,6 +69,7 @@ interface BeneficesData {
   totalRecu: number;
   totalBenefice: number;
   totalSalaire: number;
+  totalUnpaid: number;
   monthlyHistory: MonthlyPoint[];
   monthPaiements: PaiementRow[];
 }
@@ -69,16 +83,6 @@ const monthLabels: Record<string, string> = {
 function formatMonthLabel(m: string): string {
   const [y, mo] = m.split("-");
   return `${monthLabels[mo] || mo} ${y}`;
-}
-
-function getLast12Months(): string[] {
-  const months: string[] = [];
-  const now = new Date();
-  for (let i = 11; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
-  }
-  return months;
 }
 
 export default function AdminBeneficesPage() {
@@ -158,87 +162,97 @@ export default function AdminBeneficesPage() {
 
   const chartData = beneficesData?.monthlyHistory.map((h) => ({
     name: formatMonthLabel(h.month),
-    "Revenus": h.totalRecu,
-    "Bénéfices": h.totalBenefice,
-    "Salaires": h.totalSalaire,
+    Revenus: h.totalRecu,
+    Bénéfices: h.totalBenefice,
+    Salaires: h.totalSalaire,
   })) || [];
-
-  const allMonths = getLast12Months();
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-600 dark:text-indigo-400" />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Bénéfices du Centre</h1>
-          <p className="text-[13px] text-neutral-500 dark:text-neutral-400">Tafsil taux de profit par prof + analyse mensuelle</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <label className="text-[13px] font-medium text-neutral-600 dark:text-neutral-400">Mois:</label>
-          <select
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
-          >
-            {allMonths.map((m) => (
-              <option key={m} value={m}>{formatMonthLabel(m)}</option>
-            ))}
-          </select>
-        </div>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
+          Bénéfices du Centre
+        </h1>
+        <MonthSelector month={selectedMonth} />
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">{error}</div>
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-[13px] text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
+          {error}
+        </div>
       )}
 
       {beneficesData && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
+          <div className="rounded-lg border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[13px] font-medium text-neutral-600 dark:text-neutral-400">Total Revenus</p>
-                <p className="mt-1 text-2xl font-semibold text-neutral-900 dark:text-neutral-100">{formatCurrency(beneficesData.totalRecu)}</p>
+                <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                  Revenu net
+                </p>
+                <p className="mt-2 text-xl font-bold tabular-nums text-neutral-900 dark:text-neutral-100">
+                  {formatCurrency(beneficesData.totalRecu)}
+                </p>
               </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500">
-                <DollarSign className="h-6 w-6 text-white" />
-              </div>
+              <Banknote className="h-5 w-5 text-neutral-400 dark:text-neutral-500" />
             </div>
           </div>
-          <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
+          <div className="rounded-lg border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[13px] font-medium text-neutral-600 dark:text-neutral-400">Bénéfices</p>
-                <p className="mt-1 text-2xl font-semibold text-green-600 dark:text-green-400">{formatCurrency(beneficesData.totalBenefice)}</p>
+                <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                  Bénéfice Centre
+                </p>
+                <p className="mt-2 text-xl font-bold tabular-nums text-indigo-600 dark:text-indigo-400">
+                  {formatCurrency(beneficesData.totalBenefice)}
+                </p>
               </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-500">
-                <TrendingUp className="h-6 w-6 text-white" />
-              </div>
+              <TrendingUp className="h-5 w-5 text-neutral-400 dark:text-neutral-500" />
             </div>
           </div>
-          <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
+          <div className="rounded-lg border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[13px] font-medium text-neutral-600 dark:text-neutral-400">Salaires Prof</p>
-                <p className="mt-1 text-2xl font-semibold text-purple-600 dark:text-purple-400">{formatCurrency(beneficesData.totalSalaire)}</p>
+                <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                  Salaires Prof
+                </p>
+                <p className="mt-2 text-xl font-bold tabular-nums text-purple-600 dark:text-purple-400">
+                  {formatCurrency(beneficesData.totalSalaire)}
+                </p>
               </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-500">
-                <Users className="h-6 w-6 text-white" />
-              </div>
+              <Users className="h-5 w-5 text-neutral-400 dark:text-neutral-500" />
             </div>
+          </div>
+        </div>
+      )}
+
+      {beneficesData && beneficesData.totalUnpaid > 0 && (
+        <div className="rounded-lg border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                Impayés total
+              </p>
+              <p className="mt-2 text-xl font-bold tabular-nums text-red-600 dark:text-red-400">
+                {formatCurrency(beneficesData.totalUnpaid)}
+              </p>
+            </div>
+            <AlertTriangle className="h-5 w-5 text-red-400 dark:text-red-500" />
           </div>
         </div>
       )}
 
       {beneficesData && beneficesData.monthPaiements && beneficesData.monthPaiements.length > 0 && (
-        <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
-          <div className="flex items-center justify-between border-b border-neutral-200 dark:border-[#2a2d35] px-5 py-3">
+        <div className="rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
+          <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-3 dark:border-[#2a2d35]">
             <h2 className="flex items-center gap-2 text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
               <CreditCard className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
               Paiements du mois — {formatMonthLabel(beneficesData.selectedMonth)}
@@ -246,32 +260,45 @@ export default function AdminBeneficesPage() {
                 {beneficesData.monthPaiements.length}
               </span>
             </h2>
-            <a
+            <Link
               href={`/admin/finances?month=${beneficesData.selectedMonth}`}
-              className="flex items-center gap-1 text-[12px] font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800"
+              className="flex items-center gap-1 text-[12px] font-medium text-indigo-600 hover:text-indigo-800 dark:text-indigo-400"
             >
               Tout voir <ArrowRight className="h-3 w-3" />
-            </a>
+            </Link>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-[13px]">
               <thead>
                 <tr className="border-b border-neutral-100 dark:border-[#2a2d35]">
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Élève</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Date</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Montant</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                    Élève
+                  </th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                    Groupe
+                  </th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                    Date
+                  </th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                    Montant
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
                 {beneficesData.monthPaiements.map((p) => (
                   <tr key={p.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
                     <td className="px-4 py-2.5">
-                      <a href={`/admin/eleves/${p.eleve.id}`} className="font-medium text-blue-600 dark:text-blue-400 hover:underline">
+                      <Link
+                        href={`/admin/eleves/${p.eleve.id}`}
+                        className="font-medium text-blue-600 hover:underline dark:text-blue-400"
+                      >
                         {p.eleve.prenom} {p.eleve.nom}
-                      </a>
+                      </Link>
                     </td>
-                    <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{p.groupe.nom}</td>
+                    <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                      {p.groupe.nom}
+                    </td>
                     <td className="px-4 py-2.5 text-neutral-500 dark:text-neutral-400">
                       {new Date(p.datePaiement).toLocaleDateString("fr-FR")}
                     </td>
@@ -286,35 +313,45 @@ export default function AdminBeneficesPage() {
         </div>
       )}
 
-      <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
-        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Taux de Profit par Prof</h2>
+      <div className="rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
+        <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-3 dark:border-[#2a2d35]">
+          <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+            Taux de profit par prof
+          </h2>
+        </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
-              <tr>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Prof</th>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Groupes</th>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Eleves</th>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Taux (%)</th>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Action</th>
+          <table className="w-full text-left text-[13px]">
+            <thead>
+              <tr className="border-b border-neutral-100 dark:border-[#2a2d35]">
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                  Prof
+                </th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                  Groupes
+                </th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                  Élèves
+                </th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                  Taux
+                </th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                  Action
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
               {profs.map((e) => (
                 <tr key={e.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
-                  <td className="px-4 py-2.5">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 text-sm font-semibold text-blue-700 dark:text-blue-400">
-                        {e.prenom[0]}{e.nom[0]}
-                      </div>
-                      <div>
-                        <p className="font-medium text-neutral-900 dark:text-neutral-100">{e.prenom} {e.nom}</p>
-                        <p className="text-[12px] text-neutral-400 dark:text-neutral-500">{e.email}</p>
-                      </div>
-                    </div>
+                  <td className="px-4 py-2.5 font-medium text-neutral-900 dark:text-neutral-100">
+                    {e.prenom} {e.nom}
                   </td>
-                  <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">{e.nombreGroupes}</td>
-                  <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">{e.nombreEleves}</td>
+                  <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                    {e.nombreGroupes}
+                  </td>
+                  <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                    {e.nombreEleves}
+                  </td>
                   <td className="px-4 py-2.5">
                     <div className="flex items-center gap-1">
                       <input
@@ -325,7 +362,7 @@ export default function AdminBeneficesPage() {
                         value={tauxInputs[e.id] || ""}
                         onChange={(ev) => setTauxInputs((prev) => ({ ...prev, [e.id]: ev.target.value }))}
                         placeholder="0"
-                        className="w-20 rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-2 py-1.5 text-[13px] text-center focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                        className="w-20 rounded-lg border border-neutral-200 bg-white px-2 py-1.5 text-center text-[13px] text-neutral-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/20 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-100 dark:focus:border-indigo-400"
                       />
                       <Percent className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
                     </div>
@@ -334,7 +371,7 @@ export default function AdminBeneficesPage() {
                     <button
                       onClick={() => handleSaveTaux(e.id)}
                       disabled={savingId === e.id}
-                      className="flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                      className="flex items-center gap-1 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-[12px] font-medium text-neutral-700 hover:bg-neutral-50 disabled:opacity-50 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-300 dark:hover:bg-[#1e2128]"
                     >
                       {savingId === e.id ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -358,8 +395,10 @@ export default function AdminBeneficesPage() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
-        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Évolution des bénéfices (12 mois)</h2>
+      <div className="rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22] p-6">
+        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+          Évolution des bénéfices (12 mois)
+        </h2>
         {chartData.length > 0 ? (
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 60 }}>
@@ -377,55 +416,87 @@ export default function AdminBeneficesPage() {
                 contentStyle={{ borderRadius: "8px", border: "1px solid #e5e7eb" }}
               />
               <Legend />
-              <Bar dataKey="Revenus" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Revenus" fill="#6366f1" radius={[4, 4, 0, 0]} />
               <Bar dataKey="Bénéfices" fill="#22c55e" radius={[4, 4, 0, 0]} />
               <Bar dataKey="Salaires" fill="#a855f7" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <p className="py-8 text-center text-[13px] text-neutral-500 dark:text-neutral-400">Aucune donnée pour le graphique</p>
+          <p className="py-8 text-center text-[13px] text-neutral-500 dark:text-neutral-400">
+            Aucune donnée pour le graphique
+          </p>
         )}
       </div>
 
       {beneficesData && beneficesData.profs.length > 0 && (
-        <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
-          <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-            Détail des bénéfices — {formatMonthLabel(beneficesData.selectedMonth)}
-          </h2>
+        <div className="rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
+          <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-3 dark:border-[#2a2d35]">
+            <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+              Détail des bénéfices — {formatMonthLabel(beneficesData.selectedMonth)}
+            </h2>
+          </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
-                <tr>
-                  <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Prof</th>
-                  <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Taux</th>
-                  <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Nb Eleves</th>
-                  <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Total Reçu</th>
-                  <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Bénéfices</th>
-                  <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Salaire Prof</th>
+            <table className="w-full text-left text-[13px]">
+              <thead>
+                <tr className="border-b border-neutral-100 dark:border-[#2a2d35]">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                    Prof
+                  </th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                    Taux
+                  </th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                    Nb Élèves
+                  </th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                    Revenu net
+                  </th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                    Centre
+                  </th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                    Salaire
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
                 {beneficesData.profs.map((e) => (
                   <tr key={e.prof.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
-                    <td className="px-4 py-2.5 font-medium text-neutral-900 dark:text-neutral-100">{e.prof.prenom} {e.prof.nom}</td>
+                    <td className="px-4 py-2.5 font-medium text-neutral-900 dark:text-neutral-100">
+                      {e.prof.prenom} {e.prof.nom}
+                    </td>
                     <td className="px-4 py-2.5">
-                      <span className="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 text-[11px] font-medium text-blue-800 dark:text-blue-400">
+                      <span className="inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-[11px] font-medium text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400">
                         {e.tauxPourcentage}%
                       </span>
                     </td>
-                    <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">{e.nombreEleves}</td>
-                    <td className="px-4 py-2.5 font-medium text-neutral-900 dark:text-neutral-100">{formatCurrency(e.totalRecu)}</td>
-                    <td className="px-4 py-2.5 font-medium text-green-600 dark:text-green-400">{formatCurrency(e.beneficeCentre)}</td>
-                    <td className="px-4 py-2.5 font-medium text-purple-600 dark:text-purple-400">{formatCurrency(e.salaireProf)}</td>
+                    <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                      {e.nombreEleves}
+                    </td>
+                    <td className="px-4 py-2.5 tabular-nums text-neutral-900 dark:text-neutral-100">
+                      {formatCurrency(e.totalRecu)}
+                    </td>
+                    <td className="px-4 py-2.5 tabular-nums font-medium text-indigo-600 dark:text-indigo-400">
+                      {formatCurrency(e.beneficeCentre)}
+                    </td>
+                    <td className="px-4 py-2.5 tabular-nums font-medium text-purple-600 dark:text-purple-400">
+                      {formatCurrency(e.salaireProf)}
+                    </td>
                   </tr>
                 ))}
-                <tr className="bg-neutral-50 dark:bg-[#1e2128] font-semibold">
+                <tr className="bg-neutral-50 font-semibold dark:bg-[#1e2128]">
                   <td className="px-4 py-2.5 text-neutral-900 dark:text-neutral-100">Total</td>
                   <td className="px-4 py-2.5"></td>
                   <td className="px-4 py-2.5"></td>
-                  <td className="px-4 py-2.5 text-neutral-900 dark:text-neutral-100">{formatCurrency(beneficesData.totalRecu)}</td>
-                  <td className="px-4 py-2.5 text-green-600 dark:text-green-400">{formatCurrency(beneficesData.totalBenefice)}</td>
-                  <td className="px-4 py-2.5 text-purple-600 dark:text-purple-400">{formatCurrency(beneficesData.totalSalaire)}</td>
+                  <td className="px-4 py-2.5 tabular-nums text-neutral-900 dark:text-neutral-100">
+                    {formatCurrency(beneficesData.totalRecu)}
+                  </td>
+                  <td className="px-4 py-2.5 tabular-nums text-indigo-600 dark:text-indigo-400">
+                    {formatCurrency(beneficesData.totalBenefice)}
+                  </td>
+                  <td className="px-4 py-2.5 tabular-nums text-purple-600 dark:text-purple-400">
+                    {formatCurrency(beneficesData.totalSalaire)}
+                  </td>
                 </tr>
               </tbody>
             </table>
