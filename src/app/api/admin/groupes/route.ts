@@ -21,7 +21,7 @@ export async function GET() {
           select: { id: true, nom: true },
         },
         _count: {
-          select: { inscriptions: true },
+          select: { inscriptions: { where: { statut: "actif" } } },
         },
       },
       orderBy: { createdAt: "desc" },
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
           select: { id: true, nom: true },
         },
         _count: {
-          select: { inscriptions: true },
+          select: { inscriptions: { where: { statut: "actif" } } },
         },
       },
     });

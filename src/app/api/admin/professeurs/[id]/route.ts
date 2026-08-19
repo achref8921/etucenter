@@ -52,7 +52,7 @@ export async function GET(
       where: { profId: id, centerId: centreId },
       include: {
         matiere: { select: { id: true, nom: true } },
-        _count: { select: { inscriptions: true, seances: true } },
+        _count: { select: { inscriptions: { where: { statut: "actif" } }, seances: true } },
       },
       orderBy: { createdAt: "desc" },
     });
