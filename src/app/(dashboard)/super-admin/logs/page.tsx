@@ -104,6 +104,7 @@ export default function SuperAdminLogsPage() {
         ) : logs.length === 0 ? (
           <div className="px-4 py-12 text-center text-[13px] text-neutral-400 dark:text-neutral-500">Aucun journal enregistré.</div>
         ) : (
+          <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-neutral-100 dark:divide-[#2a2d35]">
             <thead>
               <tr>
@@ -152,6 +153,7 @@ export default function SuperAdminLogsPage() {
               })}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 

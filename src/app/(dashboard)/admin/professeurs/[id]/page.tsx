@@ -371,6 +371,7 @@ export default function AdminProfesseurDetailPage() {
             Ses Séances
           </h2>
         </div>
+        <div className="overflow-x-auto">
         <table className="w-full text-left text-[13px]">
           <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
             <tr>
@@ -445,6 +446,7 @@ export default function AdminProfesseurDetailPage() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

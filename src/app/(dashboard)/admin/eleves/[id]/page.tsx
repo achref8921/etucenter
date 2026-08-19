@@ -348,6 +348,7 @@ export default function AdminEleveDetailPage() {
         <div className="border-b border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
           <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Groupes Inscrits</h2>
         </div>
+        <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
             <tr>
@@ -396,6 +397,7 @@ export default function AdminEleveDetailPage() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
@@ -557,6 +559,7 @@ export default function AdminEleveDetailPage() {
         <div className="border-b border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
           <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Historique des Paiements</h2>
         </div>
+        <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
             <tr>
@@ -591,6 +594,7 @@ export default function AdminEleveDetailPage() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

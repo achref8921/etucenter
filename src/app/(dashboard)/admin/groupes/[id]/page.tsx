@@ -460,6 +460,7 @@ export default function AdminGroupeDetailPage() {
             </button>
           </div>
         </div>
+        <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
             <tr>
@@ -516,12 +517,14 @@ export default function AdminGroupeDetailPage() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
         <div className="border-b border-neutral-200 dark:border-[#2a2d35] px-6 py-3">
           <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">Séances</h2>
         </div>
+        <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
             <tr>
@@ -565,6 +568,7 @@ export default function AdminGroupeDetailPage() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {showTarifModal && (
