@@ -17,6 +17,7 @@ export async function GET() {
         prenom: true,
         email: true,
         telephone: true,
+        autresTelephones: true,
         role: true,
         image: true,
         dateNaissance: true,
@@ -44,12 +45,17 @@ export async function PUT(request: NextRequest) {
     if (error) return error;
 
     const body = await request.json();
-    const { nom, prenom, telephone, image } = body;
+    const { nom, prenom, telephone, autresTelephones, image } = body;
 
-    const data: Record<string, string | null> = {};
+    const data: Record<string, any> = {};
     if (nom !== undefined) data.nom = nom;
     if (prenom !== undefined) data.prenom = prenom;
     if (telephone !== undefined) data.telephone = telephone;
+    if (autresTelephones !== undefined) {
+      data.autresTelephones = Array.isArray(autresTelephones) && autresTelephones.length > 0
+        ? JSON.stringify(autresTelephones)
+        : null;
+    }
     if (image !== undefined) data.image = sanitizeImageValue(image);
 
     if (Object.keys(data).length === 0) {
@@ -65,6 +71,7 @@ export async function PUT(request: NextRequest) {
         prenom: true,
         email: true,
         telephone: true,
+        autresTelephones: true,
         role: true,
         image: true,
         dateNaissance: true,

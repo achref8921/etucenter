@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { User, Loader2, Save, Edit3, Trash2 } from "lucide-react";
+import { User, Loader2, Save, Edit3, Trash2, Phone, Plus, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { formatDate } from "@/lib/utils";
 import ConfirmPermanentDelete from "@/components/confirm-permanent-delete";
@@ -13,6 +13,7 @@ interface Profil {
   prenom: string;
   email: string;
   telephone: string | null;
+  autresTelephones: string | null;
   role: string;
   image: string | null;
   dateNaissance: string | null;
@@ -34,6 +35,7 @@ export default function EleveProfilPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [autresTelephones, setAutresTelephones] = useState<string[]>([]);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -60,6 +62,7 @@ export default function EleveProfilPage() {
           prenom: data.prenom,
           telephone: data.telephone ?? "",
         });
+        setAutresTelephones(data.autresTelephones ? JSON.parse(data.autresTelephones) : []);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Erreur inconnue");
       } finally {
@@ -82,6 +85,7 @@ export default function EleveProfilPage() {
           nom: data.nom,
           prenom: data.prenom,
           telephone: data.telephone || null,
+          autresTelephones: autresTelephones.filter(t => t.trim()),
         }),
       });
       if (!res.ok) {
@@ -106,6 +110,7 @@ export default function EleveProfilPage() {
         prenom: profil.prenom,
         telephone: profil.telephone ?? "",
       });
+      setAutresTelephones(profil.autresTelephones ? JSON.parse(profil.autresTelephones) : []);
     }
     setEditing(false);
     setError(null);
@@ -130,6 +135,11 @@ export default function EleveProfilPage() {
     } finally {
       setDeleteLoading(false);
     }
+  };
+
+  const parsePhones = (raw: string | null): string[] => {
+    if (!raw) return [];
+    try { return JSON.parse(raw); } catch { return []; }
   };
 
   if (loading) {
@@ -196,15 +206,48 @@ export default function EleveProfilPage() {
                   )}
                 </div>
               </div>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">
-                    Téléphone
-                  </label>
-                  <input
-                    {...register("telephone")}
-                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
+              <div>
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">
+                  <Phone className="mr-1 inline h-3.5 w-3.5" /> Téléphone principal
+                </label>
+                <input
+                  {...register("telephone")}
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">
+                  <Phone className="mr-1 inline h-3.5 w-3.5" /> Autres numéros
+                </label>
+                <div className="space-y-2">
+                  {autresTelephones.map((tel, idx) => (
+                    <div key={idx} className="flex gap-2">
+                      <input
+                        value={tel}
+                        onChange={(e) => {
+                          const next = [...autresTelephones];
+                          next[idx] = e.target.value;
+                          setAutresTelephones(next);
+                        }}
+                        placeholder={`Numéro ${idx + 2}`}
+                        className="flex-1 rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setAutresTelephones(autresTelephones.filter((_, i) => i !== idx))}
+                        className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setAutresTelephones([...autresTelephones, ""])}
+                    className="flex items-center gap-1 text-[12px] font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Ajouter un numéro
+                  </button>
                 </div>
               </div>
               <div className="flex justify-end gap-3 pt-2">
@@ -248,6 +291,16 @@ export default function EleveProfilPage() {
               <div>
                 <dt className="text-[13px] font-medium text-neutral-500 dark:text-neutral-400">Téléphone</dt>
                 <dd className="mt-1 text-[13px] text-gray-900 dark:text-gray-100">{profil.telephone ?? "—"}</dd>
+                {parsePhones(profil.autresTelephones).length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {parsePhones(profil.autresTelephones).map((p, i) => (
+                      <div key={i}>
+                        <dt className="text-[12px] font-medium text-neutral-400 dark:text-neutral-500">Téléphone {i + 2}</dt>
+                        <dd className="mt-0.5 text-[13px] text-gray-900 dark:text-gray-100">{p}</dd>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               <div>
                 <dt className="text-[13px] font-medium text-neutral-500 dark:text-neutral-400">Date de naissance</dt>
