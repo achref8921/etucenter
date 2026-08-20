@@ -489,6 +489,14 @@ export async function listTeachersWithBalance(centerId: string) {
     balanceMap.set(row.teacherId, round2(Number(row._sum.signedAmount ?? 0)));
   }
 
+  const claimableResults = await Promise.all(
+    teachers.map((t) => getTeacherDashboardFinance(centerId, t.id))
+  );
+  const claimableMap = new Map<string, number>();
+  teachers.forEach((t, i) => {
+    claimableMap.set(t.id, claimableResults[i].claimable);
+  });
+
   return teachers.map((t) => ({
     id: t.id,
     nom: t.nom,
@@ -497,5 +505,6 @@ export async function listTeachersWithBalance(centerId: string) {
     telephone: t.telephone,
     actif: t.actif,
     balance: balanceMap.get(t.id) ?? 0,
+    claimable: claimableMap.get(t.id) ?? 0,
   }));
 }

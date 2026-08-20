@@ -23,6 +23,7 @@ interface TeacherRow {
   telephone: string | null;
   actif: boolean;
   balance: number;
+  claimable: number;
 }
 
 interface TransactionRow {
@@ -288,6 +289,9 @@ export default function FinancesProfesseursPage() {
                 <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
                   Solde
                 </th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                  À encaisser
+                </th>
                 <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500"></th>
               </tr>
             </thead>
@@ -295,7 +299,7 @@ export default function FinancesProfesseursPage() {
               {teachers.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={5}
                     className="px-6 py-8 text-center text-neutral-500 dark:text-neutral-400"
                   >
                     Aucun professeur
@@ -348,6 +352,16 @@ export default function FinancesProfesseursPage() {
                             ? "à recevoir"
                             : "solde nul"}
                       </span>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <span className="inline-flex items-center rounded-lg bg-emerald-100 px-2.5 py-1 text-sm font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                        {formatCurrency(t.claimable)}
+                      </span>
+                      {t.claimable > 0 && (
+                        <span className="ml-2 text-xs text-neutral-500 dark:text-neutral-400">
+                          à recevoir
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-2.5">
                       <Link

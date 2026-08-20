@@ -1,5 +1,5 @@
 import { prisma } from "./prisma";
-import { DEFAULT_CENTER_SHARE } from "./teacher-finance";
+import { DEFAULT_CENTER_SHARE, getTeacherDashboardFinance } from "./teacher-finance";
 
 export interface DashboardMonthData {
   selectedMonth: string;
@@ -14,6 +14,7 @@ export interface DashboardMonthData {
     netRevenue: number;
     beneficeCentre: number;
     salaireProf: number;
+    claimable: number;
     nombreEleves: number;
   }[];
 }
@@ -144,8 +145,17 @@ export async function getAdminDashboardMonthData(
       netRevenue,
       beneficeCentre,
       salaireProf,
+      claimable: 0,
       nombreEleves: countMap.get(e.id) || 0,
     };
+  });
+
+  const claimableResults = await Promise.all(
+    profs.map((p) => getTeacherDashboardFinance(centerId, p.id))
+  );
+  profs.forEach((p, i) => {
+    const entry = profsData.find((pd) => pd.prof.id === p.id);
+    if (entry) entry.claimable = claimableResults[i].claimable;
   });
 
   const unpaidResult = await prisma.$queryRawUnsafe<{ total: number }[]>(

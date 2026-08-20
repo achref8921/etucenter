@@ -144,6 +144,9 @@ async function DashboardContent({ month }: { month: string }) {
                   <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
                     Salaire
                   </th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                    À encaisser
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
@@ -169,6 +172,9 @@ async function DashboardContent({ month }: { month: string }) {
                     <td className="px-4 py-2.5 tabular-nums font-medium text-purple-600 dark:text-purple-400">
                       {formatCurrency(p.salaireProf)}
                     </td>
+                    <td className="px-4 py-2.5 tabular-nums font-medium text-emerald-600 dark:text-emerald-400">
+                      {formatCurrency(p.claimable)}
+                    </td>
                   </tr>
                 ))}
                 <tr className="bg-neutral-50 font-semibold dark:bg-[#1e2128]">
@@ -182,6 +188,9 @@ async function DashboardContent({ month }: { month: string }) {
                   </td>
                   <td className="px-4 py-2.5 tabular-nums text-purple-600 dark:text-purple-400">
                     {formatCurrency(data.netPaidSessionsRevenue - data.netCenterEarnings)}
+                  </td>
+                  <td className="px-4 py-2.5 tabular-nums text-emerald-600 dark:text-emerald-400">
+                    {formatCurrency(data.profs.reduce((sum, p) => sum + p.claimable, 0))}
                   </td>
                 </tr>
               </tbody>
