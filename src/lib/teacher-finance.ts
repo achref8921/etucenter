@@ -81,7 +81,7 @@ export async function getTeacherDashboardFinance(
   });
   const profShare = 1 - centerSharePercent(taux) / 100;
 
-  const [financeRows, centerPayments] = await Promise.all([
+  const [financeRows, centerPayments, manualGains] = await Promise.all([
     prisma.$queryRaw<{ impaye_net: number; claimable: number }[]>`
       WITH teacher_due AS (
         SELECT pr.eleve_id, s.groupe_id,
@@ -111,14 +111,25 @@ export async function getTeacherDashboardFinance(
       _sum: { amount: true },
       where: { centerId, teacherId, type: "PAYMENT", status: "active" },
     }),
+    prisma.teacherTransaction.aggregate({
+      _sum: { signedAmount: true },
+      where: {
+        centerId,
+        teacherId,
+        type: "EARNING",
+        status: "active",
+        NOT: { reference: { startsWith: "paiement:" } },
+      },
+    }),
   ]);
 
   const grossClaimable = Number(financeRows[0]?.claimable ?? 0);
   const paidByCenter = Number(centerPayments._sum.amount ?? 0);
+  const manualGainAmount = Number(manualGains._sum.signedAmount ?? 0);
 
   return {
     impayeNet: round2(Number(financeRows[0]?.impaye_net ?? 0)),
-    claimable: round2(Math.max(0, grossClaimable - paidByCenter)),
+    claimable: round2(Math.max(0, grossClaimable - paidByCenter - manualGainAmount)),
   };
 }
 
