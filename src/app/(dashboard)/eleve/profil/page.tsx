@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { User, Loader2, Save, Edit3 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { User, Loader2, Save, Edit3, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { formatDate } from "@/lib/utils";
+import ConfirmPermanentDelete from "@/components/confirm-permanent-delete";
 
 interface Profil {
   id: string;
@@ -25,12 +27,17 @@ interface FormInputs {
 }
 
 export default function EleveProfilPage() {
+  const router = useRouter();
   const [profil, setProfil] = useState<Profil | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const {
     register,
@@ -102,6 +109,27 @@ export default function EleveProfilPage() {
     }
     setEditing(false);
     setError(null);
+  };
+
+  const handleDeleteAccount = async (password: string) => {
+    try {
+      setDeleteLoading(true);
+      setDeleteError(null);
+      const res = await fetch("/api/profil/account", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ motDePasse: password }),
+      });
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || "Erreur lors de la suppression");
+      }
+      router.push("/");
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   if (loading) {
@@ -231,6 +259,30 @@ export default function EleveProfilPage() {
           )}
         </div>
       )}
+
+      <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-white dark:bg-[#181b22] p-6">
+        <h2 className="mb-2 text-sm font-semibold text-red-700 dark:text-red-400">
+          <Trash2 className="mr-1 inline h-4 w-4" /> Zone Dangereuse
+        </h2>
+        <p className="mb-4 text-[13px] text-neutral-600 dark:text-neutral-400">
+          La suppression de votre compte est <span className="font-semibold text-red-600 dark:text-red-400">irréversible</span>. Toutes vos données (inscriptions, paiements, présences, notifications) seront définitivement perdues.
+        </p>
+        <button
+          onClick={() => { setShowDeleteModal(true); setDeleteError(null); }}
+          className="rounded-lg border border-red-300 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 px-4 py-2 text-[13px] font-medium text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30"
+        >
+          <Trash2 className="mr-1 inline h-3.5 w-3.5" /> Supprimer mon compte
+        </button>
+      </div>
+
+      <ConfirmPermanentDelete
+        open={showDeleteModal}
+        userName={profil ? `${profil.prenom} ${profil.nom}` : ""}
+        onConfirm={handleDeleteAccount}
+        onCancel={() => { setShowDeleteModal(false); setDeleteError(null); }}
+        loading={deleteLoading}
+        error={deleteError}
+      />
     </div>
   );
 }
