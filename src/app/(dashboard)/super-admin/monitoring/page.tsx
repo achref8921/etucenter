@@ -17,17 +17,7 @@ import {
   HardDrive,
   Zap,
 } from "lucide-react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-  AreaChart,
-  Area,
-} from "recharts";
+import { MemChart, LatencyChart } from "@/components/charts/monitoring-charts";
 
 type MonitorLevel = "ok" | "warning" | "error";
 type MonitorType = "server" | "database" | "resources";
@@ -347,39 +337,14 @@ export default function MonitoringPage() {
           <h2 className="mb-4 flex items-center gap-2 text-[13px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
             <HardDrive className="h-4 w-4" /> Mémoire (derniers contrôles)
           </h2>
-          {memData.length > 1 ? (
-            <ResponsiveContainer width="100%" height={220}>
-              <AreaChart data={memData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="t" tick={{ fontSize: 10, fill: "#94a3b8" }} />
-                <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} />
-                <Tooltip />
-                <Area type="monotone" dataKey="RSS" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.15} />
-                <Area type="monotone" dataKey="Heap" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.15} />
-              </AreaChart>
-            </ResponsiveContainer>
-          ) : (
-            <p className="py-10 text-center text-[13px] text-neutral-400 dark:text-neutral-500">Pas encore assez de données</p>
-          )}
+          <MemChart data={memData} />
         </div>
 
         <div className="rounded-xl border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
           <h2 className="mb-4 flex items-center gap-2 text-[13px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
             <Zap className="h-4 w-4" /> Temps de réponse base de données
           </h2>
-          {latencyData.length > 1 ? (
-            <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={latencyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="t" tick={{ fontSize: 10, fill: "#94a3b8" }} />
-                <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} />
-                <Tooltip />
-                <Line type="monotone" dataKey="ms" stroke="#2563eb" strokeWidth={2} dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
-          ) : (
-            <p className="py-10 text-center text-[13px] text-neutral-400 dark:text-neutral-500">Pas encore assez de données</p>
-          )}
+          <LatencyChart data={latencyData} />
         </div>
       </div>
 

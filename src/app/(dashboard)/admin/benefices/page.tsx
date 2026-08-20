@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import {
   TrendingUp,
   Save,
@@ -16,16 +17,8 @@ import {
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { MonthSelector } from "@/components/month-selector";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
+
+const BeneficesBarChart = dynamic(() => import("@/components/charts/benefices-bar-chart"), { ssr: false });
 
 interface ProfTaux {
   id: string;
@@ -464,33 +457,7 @@ export default function AdminBeneficesPage() {
         <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
           Évolution des bénéfices (12 mois)
         </h2>
-        {chartData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 60 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis
-                dataKey="name"
-                tick={{ fontSize: 11 }}
-                angle={-45}
-                textAnchor="end"
-                height={80}
-              />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip
-                formatter={(value: any, name: any) => [formatCurrency(Number(value)), name]}
-                contentStyle={{ borderRadius: "8px", border: "1px solid #e5e7eb" }}
-              />
-              <Legend />
-              <Bar dataKey="Revenus" fill="#6366f1" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="Bénéfices" fill="#22c55e" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="Salaires" fill="#a855f7" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        ) : (
-          <p className="py-8 text-center text-[13px] text-neutral-500 dark:text-neutral-400">
-            Aucune donnée pour le graphique
-          </p>
-        )}
+        <BeneficesBarChart data={chartData} formatCurrency={formatCurrency} />
       </div>
 
     </div>

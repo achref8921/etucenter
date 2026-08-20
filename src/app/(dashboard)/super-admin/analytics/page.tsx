@@ -1,10 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell,
-} from "recharts";
+import { RevenueBarChart, CenterPieChart } from "@/components/charts/analytics-charts";
 import {
   Building2, Users, DollarSign, AlertTriangle, TrendingUp, Loader2,
   Plus, X as XIcon, Clock, Ban, CheckCircle,
@@ -27,8 +24,6 @@ interface AnalyticsData {
   centerRevenue: { id: string; name: string; totalPaid: number; subscriptionCount: number }[];
   recentSubscriptions: { id: string; centerName: string; centerId: string; montant: number; dateDebut: string; dateFin: string; statut: string }[];
 }
-
-const COLORS = ["#7c3aed", "#2563eb", "#10b981", "#f59e0b", "#ef4444", "#ec4899"];
 
 function formatMonth(m: string) {
   const [year, month] = m.split("-");
@@ -203,54 +198,14 @@ export default function SuperAdminAnalyticsPage() {
           <h3 className="mb-4 text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
             Revenus mensuels des abonnements
           </h3>
-          {revenueChartData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={revenueChartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="#94a3b8" />
-                <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" />
-                <Tooltip
-                  contentStyle={{ borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 12 }}
-                  formatter={(v) => [`${Number(v).toLocaleString("fr-TN")} DT`, "Revenu"]}
-                />
-                <Bar dataKey="revenue" fill="#7c3aed" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <p className="py-12 text-center text-[13px] text-neutral-400">Aucune donnée</p>
-          )}
+          <RevenueBarChart data={revenueChartData} />
         </div>
 
         <div className="rounded-xl border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
           <h3 className="mb-4 text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
             Répartition des revenus par centre
           </h3>
-          {centerPieData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={280}>
-              <PieChart>
-                <Pie
-                  data={centerPieData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  dataKey="value"
-                  label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
-                  labelLine={false}
-                  style={{ fontSize: 11 }}
-                >
-                  {centerPieData.map((_, i) => (
-                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  formatter={(v) => [`${Number(v).toLocaleString("fr-TN")} DT`, "Revenu"]}
-                  contentStyle={{ borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 12 }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : (
-            <p className="py-12 text-center text-[13px] text-neutral-400">Aucune donnée</p>
-          )}
+          <CenterPieChart data={centerPieData} />
         </div>
       </div>
 

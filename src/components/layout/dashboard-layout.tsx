@@ -9,7 +9,7 @@ import { NavModeProvider } from "@/components/nav-mode-provider";
 import SessionGuard from "@/components/session-guard";
 import { ToastProvider } from "@/components/ui/toast";
 import BackButton from "@/components/ui/back-button";
-import { Role } from "@prisma/client";
+import { Role } from "@/types/role";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;

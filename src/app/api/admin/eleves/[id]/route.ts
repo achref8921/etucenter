@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
-import { calculateTotalDue, calculateTotalPaid, calculateUnpaid } from "@/lib/calculations";
+import { calculateStudentStats } from "@/lib/calculations";
 
 export async function GET(
   _request: NextRequest,
@@ -46,7 +46,11 @@ export async function GET(
       where: { eleveId: id },
       include: {
         groupe: {
-          include: {
+          select: {
+            id: true,
+            nom: true,
+            profId: true,
+            prixParSeance: true,
             prof: {
               select: { id: true, nom: true, prenom: true },
             },
@@ -59,77 +63,62 @@ export async function GET(
       orderBy: { dateInscription: "desc" },
     });
 
-    const inscriptionsWithStats = await Promise.all(
-      inscriptions.map(async (inscription: any) => {
-        const [presencesCount, absencesCount, totalDue, totalPaid, unpaid] = await Promise.all([
-          prisma.presence.count({
-            where: {
-              eleveId: id,
-              statut: "present",
-              seance: { groupeId: inscription.groupeId },
-            },
-          }),
-          prisma.presence.count({
-            where: {
-              eleveId: id,
-              statut: "absent",
-              seance: { groupeId: inscription.groupeId },
-            },
-          }),
-          calculateTotalDue(id, inscription.groupeId),
-          calculateTotalPaid(id, inscription.groupeId),
-          calculateUnpaid(id, inscription.groupeId),
-        ]);
+    const studentStats = await calculateStudentStats(id);
+    const statsMap = new Map(studentStats.map((s) => [s.groupeId, s]));
 
-        return {
-          id: inscription.id,
-          dateInscription: inscription.dateInscription,
-          statut: inscription.statut,
-          groupe: inscription.groupe,
-          stats: {
-            presencesCount,
-            absencesCount,
-            totalDue,
-            totalPaid,
-            unpaid,
-          },
-        };
-      })
-    );
-
-    const paiements = await prisma.paiement.findMany({
-      where: { eleveId: id },
-      include: {
-        groupe: {
-          select: { id: true, nom: true },
-        },
-      },
-      orderBy: { datePaiement: "desc" },
+    const inscriptionsWithStats = inscriptions.map((inscription) => {
+      const stats = statsMap.get(inscription.groupeId);
+      return {
+        id: inscription.id,
+        dateInscription: inscription.dateInscription,
+        statut: inscription.statut,
+        groupe: inscription.groupe,
+        stats: stats
+          ? {
+              presencesCount: stats.presencesCount,
+              absencesCount: stats.absencesCount,
+              totalDue: stats.totalDue,
+              totalPaid: stats.totalPaid,
+              unpaid: stats.unpaid,
+            }
+          : { presencesCount: 0, absencesCount: 0, totalDue: 0, totalPaid: 0, unpaid: 0 },
+      };
     });
 
-    const presences = await prisma.presence.findMany({
-      where: { eleveId: id },
-      select: {
-        id: true,
-        statut: true,
-        seance: {
-          select: {
-            id: true,
-            date: true,
-            statut: true,
-            groupe: {
-              select: {
-                id: true,
-                nom: true,
-                matiere: { select: { nom: true } },
-                prof: { select: { id: true, nom: true, prenom: true } },
+    const [paiements, presences] = await Promise.all([
+      prisma.paiement.findMany({
+        where: { eleveId: id },
+        include: {
+          groupe: {
+            select: { id: true, nom: true },
+          },
+        },
+        orderBy: { datePaiement: "desc" },
+      }),
+      prisma.presence.findMany({
+        where: { eleveId: id },
+        select: {
+          id: true,
+          statut: true,
+          seance: {
+            select: {
+              id: true,
+              date: true,
+              statut: true,
+              groupe: {
+                select: {
+                  id: true,
+                  nom: true,
+                  matiere: { select: { nom: true } },
+                  prof: { select: { id: true, nom: true, prenom: true } },
+                },
               },
             },
           },
         },
-      },
-      orderBy: { seance: { date: "desc" } },
-    });
+        orderBy: { seance: { date: "desc" } },
+      }),
+    ]);
 
     logger.info("Détails élève récupérés", {
       adminId: (session.user as any).id,

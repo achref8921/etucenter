@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
-import { calculateTotalDue, calculateTotalPaid, calculateUnpaid } from "@/lib/calculations";
 
 export async function GET(
   _request: NextRequest,
@@ -48,76 +47,95 @@ export async function GET(
       orderBy: { dateInscription: "desc" },
     });
 
-    const inscriptionsWithStats = await Promise.all(
-      inscriptions.map(async (inscription: any) => {
-        const [presencesCount, absencesCount, totalDue, totalPaid, unpaid] = await Promise.all([
-          prisma.presence.count({
-            where: {
-              eleveId: inscription.eleveId,
-              statut: "present",
-              seance: { groupeId: id },
-            },
-          }),
-          prisma.presence.count({
-            where: {
-              eleveId: inscription.eleveId,
-              statut: "absent",
-              seance: { groupeId: id },
-            },
-          }),
-          calculateTotalDue(inscription.eleveId, id),
-          calculateTotalPaid(inscription.eleveId, id),
-          calculateUnpaid(inscription.eleveId, id),
-        ]);
+    const eleveIds = inscriptions.map((i) => i.eleveId);
 
-        return {
-          id: inscription.id,
-          dateInscription: inscription.dateInscription,
-          statut: inscription.statut,
-          eleve: inscription.eleve,
-          stats: {
-            presencesCount,
-            absencesCount,
-            totalDue,
-            totalPaid,
-            unpaid,
-          },
-        };
-      })
-    );
+    const [dueResults, paidResults, presenceCounts, absenceCounts] = await Promise.all([
+      prisma.$queryRawUnsafe<{ eleve_id: string; total: string }[]>(
+        `SELECT pr.eleve_id, COALESCE(SUM(COALESCE(s.prix_par_seance, g.prix_par_seance)), 0) as total
+         FROM presences pr
+         JOIN seances s ON pr.seance_id = s.id
+         JOIN groupes g ON s.groupe_id = g.id
+         WHERE pr.statut = 'present' AND s.statut = 'terminee' AND s.groupe_id = $1::uuid
+           AND pr.eleve_id = ANY($2::uuid[])
+         GROUP BY pr.eleve_id`,
+        id,
+        eleveIds.length > 0 ? eleveIds : ["00000000-0000-0000-0000-000000000000"],
+      ),
+      prisma.paiement.groupBy({
+        by: ["eleveId"],
+        where: { groupeId: id, eleveId: { in: eleveIds } },
+        _sum: { montant: true },
+      }),
+      prisma.presence.groupBy({
+        by: ["eleveId"],
+        where: { statut: "present", seance: { groupeId: id }, eleveId: { in: eleveIds } },
+        _count: true,
+      }),
+      prisma.presence.groupBy({
+        by: ["eleveId"],
+        where: { statut: "absent", seance: { groupeId: id }, eleveId: { in: eleveIds } },
+        _count: true,
+      }),
+    ]);
 
-    const seances = await prisma.seance.findMany({
-      where: { groupeId: id },
-      include: {
-        _count: {
-          select: {
-            presences: { where: { statut: "present" } },
-          },
+    const dueMap = new Map(dueResults.map((r) => [r.eleve_id, Number(r.total)]));
+    const paidMap = new Map(paidResults.map((r) => [r.eleveId, Number(r._sum.montant ?? 0)]));
+    const presencesCountMap = new Map(presenceCounts.map((r) => [r.eleveId, r._count ?? 0]));
+    const absencesCountMap = new Map(absenceCounts.map((r) => [r.eleveId, r._count ?? 0]));
+
+    const inscriptionsWithStats = inscriptions.map((inscription) => {
+      const totalDue = dueMap.get(inscription.eleveId) ?? 0;
+      const totalPaid = paidMap.get(inscription.eleveId) ?? 0;
+      return {
+        id: inscription.id,
+        dateInscription: inscription.dateInscription,
+        statut: inscription.statut,
+        eleve: inscription.eleve,
+        stats: {
+          presencesCount: presencesCountMap.get(inscription.eleveId) ?? 0,
+          absencesCount: absencesCountMap.get(inscription.eleveId) ?? 0,
+          totalDue,
+          totalPaid,
+          unpaid: totalDue - totalPaid,
         },
-      },
-      orderBy: { date: "desc" },
+      };
     });
 
-    const seancesWithStats = await Promise.all(
-      seances.map(async (seance: any) => {
-        const totalPresences = await prisma.presence.count({
-          where: { seanceId: seance.id },
-        });
+    const [seances, totalPresencesPerSeance, presentsPerSeance] = await Promise.all([
+      prisma.seance.findMany({
+        where: { groupeId: id },
+        orderBy: { date: "desc" },
+      }),
+      prisma.presence.groupBy({
+        by: ["seanceId"],
+        where: { seance: { groupeId: id } },
+        _count: true,
+      }),
+      prisma.presence.groupBy({
+        by: ["seanceId"],
+        where: { seance: { groupeId: id }, statut: "present" },
+        _count: true,
+      }),
+    ]);
 
-        return {
-          id: seance.id,
-          date: seance.date,
-          heureDebut: seance.heureDebut,
-          heureFin: seance.heureFin,
-          statut: seance.statut,
-          notes: seance.notes,
-          stats: {
-            presentsCount: seance._count.presences,
-            totalEleves: totalPresences,
-          },
-        };
-      })
-    );
+    const seancePresencesMap = new Map(totalPresencesPerSeance.map((r) => [r.seanceId, r._count ?? 0]));
+    const seancePresentsMap = new Map(presentsPerSeance.map((r) => [r.seanceId, r._count ?? 0]));
+
+    const seancesWithStats = seances.map((seance) => {
+      const totalEleves = seancePresencesMap.get(seance.id) ?? 0;
+      return {
+        id: seance.id,
+        date: seance.date,
+        heureDebut: seance.heureDebut,
+        heureFin: seance.heureFin,
+        statut: seance.statut,
+        notes: seance.notes,
+        stats: {
+          presentsCount: seancePresentsMap.get(seance.id) ?? 0,
+          totalEleves,
+        },
+      };
+    });
 
     const financialSummary = inscriptionsWithStats.reduce(
       (acc, insc) => ({

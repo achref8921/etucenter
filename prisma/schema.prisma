@@ -201,6 +201,7 @@ model Groupe {
   paiements    Paiement[]
 
   @@index([centerId, profId])
+  @@index([centerId])
   @@index([matiereId])
   @@map("groupes")
 }
@@ -284,6 +285,7 @@ model Paiement {
   groupe Groupe      @relation(fields: [groupeId], references: [id], onDelete: Cascade)
 
   @@index([eleveId, groupeId])
+  @@index([eleveId])
   @@index([groupeId, datePaiement])
   @@index([datePaiement])
   @@map("paiements")
