@@ -13,6 +13,18 @@ export function isAdminRole(role: string): boolean {
 async function findAndValidateUser(email: string) {
   const user = await prisma.utilisateur.findUnique({
     where: { email },
+    select: {
+      id: true,
+      centerId: true,
+      nom: true,
+      prenom: true,
+      email: true,
+      motDePasse: true,
+      role: true,
+      image: true,
+      actif: true,
+      deletedAt: true,
+    },
   });
 
   if (!user || !user.motDePasse || user.deletedAt) {

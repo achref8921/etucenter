@@ -114,7 +114,6 @@ model Utilisateur {
   email          String    @unique @db.VarChar(255)
   motDePasse     String?   @map("mot_de_passe") @db.VarChar(255)
   telephone      String?   @db.VarChar(20)
-  autresTelephones String? @map("autres_telephones") @db.VarChar(1000)
   role           Role
   image          String?   @db.VarChar(500)
   dateNaissance  DateTime? @map("date_naissance") @db.Date

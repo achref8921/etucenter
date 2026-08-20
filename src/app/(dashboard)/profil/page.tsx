@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { User, Loader2, Save, Edit3, Lock, Mail, Phone, Calendar, Eye, EyeOff, Trash2, Plus, X } from "lucide-react";
+import { User, Loader2, Save, Edit3, Lock, Mail, Phone, Calendar, Eye, EyeOff, Trash2 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import ConfirmPermanentDelete from "@/components/confirm-permanent-delete";
 
@@ -12,7 +12,6 @@ interface Profil {
   prenom: string;
   email: string;
   telephone: string | null;
-  autresTelephones: string | null;
   role: string;
   dateNaissance: string | null;
   createdAt: string;
@@ -31,7 +30,6 @@ export default function ProfilPage() {
   const [prenom, setPrenom] = useState("");
   const [email, setEmail] = useState("");
   const [telephone, setTelephone] = useState("");
-  const [autresTelephones, setAutresTelephones] = useState<string[]>([]);
   const [dateNaissance, setDateNaissance] = useState("");
 
   const [showPasswordSection, setShowPasswordSection] = useState(false);
@@ -58,7 +56,6 @@ export default function ProfilPage() {
         setPrenom(data.prenom);
         setEmail(data.email);
         setTelephone(data.telephone ?? "");
-        setAutresTelephones(data.autresTelephones ? JSON.parse(data.autresTelephones) : []);
         setDateNaissance(data.dateNaissance ? data.dateNaissance.split("T")[0] : "");
       } catch (err) {
         setError(err instanceof Error ? err.message : "Erreur inconnue");
@@ -83,7 +80,6 @@ export default function ProfilPage() {
           prenom,
           email,
           telephone: telephone || null,
-          autresTelephones: autresTelephones.filter(t => t.trim()),
           dateNaissance: dateNaissance || null,
         }),
       });
@@ -210,7 +206,6 @@ export default function ProfilPage() {
                       setPrenom(profil.prenom);
                       setEmail(profil.email);
                       setTelephone(profil.telephone ?? "");
-                      setAutresTelephones(profil.autresTelephones ? JSON.parse(profil.autresTelephones) : []);
                       setDateNaissance(profil.dateNaissance ? profil.dateNaissance.split("T")[0] : "");
                       setError(null);
                     }}
@@ -282,41 +277,6 @@ export default function ProfilPage() {
                       className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
-                  <div className="sm:col-span-2">
-                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      <Phone className="mr-1 inline h-3.5 w-3.5" /> Autres numéros
-                    </label>
-                    <div className="space-y-2">
-                      {autresTelephones.map((tel, idx) => (
-                        <div key={idx} className="flex gap-2">
-                          <input
-                            value={tel}
-                            onChange={(e) => {
-                              const next = [...autresTelephones];
-                              next[idx] = e.target.value;
-                              setAutresTelephones(next);
-                            }}
-                            placeholder={`Numéro ${idx + 2}`}
-                            className="flex-1 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setAutresTelephones(autresTelephones.filter((_, i) => i !== idx))}
-                            className="rounded-lg border border-gray-300 dark:border-slate-600 px-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </div>
-                      ))}
-                      <button
-                        type="button"
-                        onClick={() => setAutresTelephones([...autresTelephones, ""])}
-                        className="flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
-                      >
-                        <Plus className="h-3.5 w-3.5" /> Ajouter un numéro
-                      </button>
-                    </div>
-                  </div>
                 </div>
               ) : (
                 <dl className="space-y-4">
@@ -337,19 +297,6 @@ export default function ProfilPage() {
                   <div>
                     <dt className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Téléphone</dt>
                     <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">{profil.telephone ?? "—"}</dd>
-                    {profil.autresTelephones && (() => {
-                      const phones: string[] = JSON.parse(profil.autresTelephones);
-                      return phones.length > 0 ? (
-                        <div className="mt-2 space-y-1">
-                          {phones.map((p, i) => (
-                            <div key={i}>
-                              <dt className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Téléphone {i + 2}</dt>
-                              <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">{p}</dd>
-                            </div>
-                          ))}
-                        </div>
-                      ) : null;
-                    })()}
                   </div>
                   <div>
                     <dt className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Date de naissance</dt>
