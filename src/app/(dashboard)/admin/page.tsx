@@ -31,13 +31,13 @@ async function DashboardContent({ month }: { month: string }) {
         <div className="flex items-start justify-between">
           <div>
             <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-              Aribat El Centre Net
+              Bénéfice Net du Centre
             </p>
             <p className="mt-2 text-3xl font-bold tabular-nums text-indigo-600 dark:text-indigo-400">
               {formatCurrency(data.netCenterEarnings)}
             </p>
             <p className="mt-1 text-[12px] text-neutral-400 dark:text-neutral-500">
-              20% de {formatCurrency(data.netPaidSessionsRevenue)} — Houts msdara w m5alasa
+              20% de {formatCurrency(data.netPaidSessionsRevenue)} — Revenu brut
             </p>
           </div>
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-500/10">
@@ -46,19 +46,19 @@ async function DashboardContent({ month }: { month: string }) {
         </div>
         <div className="mt-4 grid grid-cols-3 gap-4 border-t border-neutral-100 pt-4 dark:border-[#2a2d35]">
           <div>
-            <p className="text-[12px] text-neutral-400 dark:text-neutral-500">Houts m5alasa</p>
+            <p className="text-[12px] text-neutral-400 dark:text-neutral-500">Revenu Brut</p>
             <p className="text-[13px] font-semibold tabular-nums text-neutral-900 dark:text-neutral-100">
               {formatCurrency(data.netPaidSessionsRevenue)}
             </p>
           </div>
           <div>
-            <p className="text-[12px] text-neutral-400 dark:text-neutral-500">Impayes</p>
+            <p className="text-[12px] text-neutral-400 dark:text-neutral-500">Impayés</p>
             <p className="text-[13px] font-semibold tabular-nums text-red-600 dark:text-red-400">
               {formatCurrency(data.totalUnpaid)}
             </p>
           </div>
           <div>
-            <p className="text-[12px] text-neutral-400 dark:text-neutral-500">Benefice Centre</p>
+            <p className="text-[12px] text-neutral-400 dark:text-neutral-500">Bénéfice Centre</p>
             <p className="text-[13px] font-semibold tabular-nums text-indigo-600 dark:text-indigo-400">
               {formatCurrency(data.netCenterEarnings)}
             </p>
@@ -68,7 +68,7 @@ async function DashboardContent({ month }: { month: string }) {
           href={`/admin/benefices?month=${month}`}
           className="mt-4 flex items-center gap-1 text-[12px] font-medium text-indigo-600 hover:text-indigo-800 dark:text-indigo-400"
         >
-          Voir benefices detailles <ArrowRight className="h-3 w-3" />
+          Voir les bénéfices détaillés <ArrowRight className="h-3 w-3" />
         </Link>
       </div>
 
@@ -76,7 +76,7 @@ async function DashboardContent({ month }: { month: string }) {
         <div className="rounded-lg border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
           <div className="flex items-center justify-between">
             <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-              Impayes Total
+              Impayés Total
             </p>
             <AlertTriangle className="h-4 w-4 text-red-400" />
           </div>

@@ -114,7 +114,7 @@ export default function AdminBackupPage() {
     presences: "Presences",
     paiements: "Paiements",
     inscriptions: "Inscriptions",
-    tauxBenefices: "Taux Benefices",
+    tauxBenefices: "Taux Bénéfices",
     notifications: "Notifications",
   };
 
