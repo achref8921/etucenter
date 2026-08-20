@@ -11,7 +11,6 @@ interface Profil {
   prenom: string;
   email: string;
   telephone: string | null;
-  telephone2: string | null;
   role: string;
   image: string | null;
   dateNaissance: string | null;
@@ -23,7 +22,6 @@ interface FormInputs {
   nom: string;
   prenom: string;
   telephone: string;
-  telephone2: string;
 }
 
 export default function EleveProfilPage() {
@@ -54,7 +52,6 @@ export default function EleveProfilPage() {
           nom: data.nom,
           prenom: data.prenom,
           telephone: data.telephone ?? "",
-          telephone2: data.telephone2 ?? "",
         });
       } catch (err) {
         setError(err instanceof Error ? err.message : "Erreur inconnue");
@@ -78,7 +75,6 @@ export default function EleveProfilPage() {
           nom: data.nom,
           prenom: data.prenom,
           telephone: data.telephone || null,
-          telephone2: data.telephone2 || null,
         }),
       });
       if (!res.ok) {
@@ -102,7 +98,6 @@ export default function EleveProfilPage() {
         nom: profil.nom,
         prenom: profil.prenom,
         telephone: profil.telephone ?? "",
-        telephone2: profil.telephone2 ?? "",
       });
     }
     setEditing(false);
@@ -180,16 +175,6 @@ export default function EleveProfilPage() {
                   </label>
                   <input
                     {...register("telephone")}
-                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">
-                    Téléphone 2
-                  </label>
-                  <input
-                    {...register("telephone2")}
-                    placeholder="Numéro secondaire"
                     className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>

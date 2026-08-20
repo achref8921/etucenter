@@ -10,7 +10,6 @@ interface Profil {
   prenom: string;
   email: string;
   telephone: string | null;
-  telephone2: string | null;
   role: string;
   dateNaissance: string | null;
   createdAt: string;
@@ -28,7 +27,6 @@ export default function ProfilPage() {
   const [prenom, setPrenom] = useState("");
   const [email, setEmail] = useState("");
   const [telephone, setTelephone] = useState("");
-  const [telephone2, setTelephone2] = useState("");
   const [dateNaissance, setDateNaissance] = useState("");
 
   const [showPasswordSection, setShowPasswordSection] = useState(false);
@@ -51,7 +49,6 @@ export default function ProfilPage() {
         setPrenom(data.prenom);
         setEmail(data.email);
         setTelephone(data.telephone ?? "");
-        setTelephone2(data.telephone2 ?? "");
         setDateNaissance(data.dateNaissance ? data.dateNaissance.split("T")[0] : "");
       } catch (err) {
         setError(err instanceof Error ? err.message : "Erreur inconnue");
@@ -76,7 +73,6 @@ export default function ProfilPage() {
           prenom,
           email,
           telephone: telephone || null,
-          telephone2: telephone2 || null,
           dateNaissance: dateNaissance || null,
         }),
       });
@@ -182,7 +178,6 @@ export default function ProfilPage() {
                       setPrenom(profil.prenom);
                       setEmail(profil.email);
                       setTelephone(profil.telephone ?? "");
-                      setTelephone2(profil.telephone2 ?? "");
                       setDateNaissance(profil.dateNaissance ? profil.dateNaissance.split("T")[0] : "");
                       setError(null);
                     }}
@@ -233,7 +228,7 @@ export default function ProfilPage() {
                       className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                       <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                         <Phone className="mr-1 inline h-3.5 w-3.5" /> Téléphone
@@ -241,17 +236,6 @@ export default function ProfilPage() {
                       <input
                         value={telephone}
                         onChange={(e) => setTelephone(e.target.value)}
-                        className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        <Phone className="mr-1 inline h-3.5 w-3.5" /> Téléphone 2
-                      </label>
-                      <input
-                        value={telephone2}
-                        onChange={(e) => setTelephone2(e.target.value)}
-                        placeholder="Numéro secondaire"
                         className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                       />
                     </div>
@@ -287,10 +271,6 @@ export default function ProfilPage() {
                   <div>
                     <dt className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Téléphone</dt>
                     <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">{profil.telephone ?? "—"}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Téléphone 2</dt>
-                    <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">{profil.telephone2 ?? "—"}</dd>
                   </div>
                   <div>
                     <dt className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Date de naissance</dt>

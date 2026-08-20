@@ -16,7 +16,6 @@ export async function GET() {
         prenom: true,
         email: true,
         telephone: true,
-        telephone2: true,
         role: true,
         dateNaissance: true,
         createdAt: true,
@@ -39,7 +38,7 @@ export async function PUT(request: NextRequest) {
     if (error) return error;
 
     const body = await request.json();
-    const { nom, prenom, telephone, telephone2, email, dateNaissance, motDePasse, ancienMotDePasse } = body;
+    const { nom, prenom, telephone, email, dateNaissance, motDePasse, ancienMotDePasse } = body;
 
     const userId = (session.user as any).id;
     const data: Record<string, any> = {};
@@ -47,7 +46,6 @@ export async function PUT(request: NextRequest) {
     if (nom !== undefined) data.nom = nom;
     if (prenom !== undefined) data.prenom = prenom;
     if (telephone !== undefined) data.telephone = telephone || null;
-    if (telephone2 !== undefined) data.telephone2 = telephone2 || null;
     if (dateNaissance !== undefined) data.dateNaissance = dateNaissance ? new Date(dateNaissance) : null;
 
     if (email !== undefined && email !== (session.user as any).email) {
@@ -99,7 +97,6 @@ export async function PUT(request: NextRequest) {
         prenom: true,
         email: true,
         telephone: true,
-        telephone2: true,
         role: true,
         dateNaissance: true,
         createdAt: true,
