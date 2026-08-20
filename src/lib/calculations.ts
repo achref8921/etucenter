@@ -1,20 +1,19 @@
 import { prisma } from "./prisma";
+import { Prisma } from "@prisma/client";
 
 export async function calculateTotalDue(eleveId: string, groupeId: string): Promise<number> {
-  const result = await prisma.$queryRawUnsafe<{ total: string | null }[]>(
-    `SELECT COALESCE(
+  const result = await prisma.$queryRaw<{ total: string | null }[]>(
+    Prisma.sql`SELECT COALESCE(
        SUM(COALESCE(s.prix_par_seance, g.prix_par_seance)),
        0
      ) as total
      FROM presences pr
      JOIN seances s ON pr.seance_id = s.id
      JOIN groupes g ON s.groupe_id = g.id
-     WHERE pr.eleve_id = $1::uuid
+     WHERE pr.eleve_id = ${eleveId}::uuid
        AND pr.statut = 'present'
-       AND s.groupe_id = $2::uuid
+       AND s.groupe_id = ${groupeId}::uuid
        AND s.statut = 'terminee'`,
-    eleveId,
-    groupeId,
   );
 
   return Number(result[0]?.total ?? 0);
@@ -49,21 +48,19 @@ export async function calculateStudentStats(eleveId: string) {
   const groupeIds = inscriptions.map((i) => i.groupeId);
 
   const [dueResults, paidResults, presencesCounts, absencesCounts] = await Promise.all([
-    prisma.$queryRawUnsafe<{ groupe_id: string; total: string }[]>(
-      `SELECT s.groupe_id, COALESCE(
+    prisma.$queryRaw<{ groupe_id: string; total: string }[]>(
+      Prisma.sql`SELECT s.groupe_id, COALESCE(
          SUM(COALESCE(s.prix_par_seance, g.prix_par_seance)),
          0
        ) as total
        FROM presences pr
        JOIN seances s ON pr.seance_id = s.id
        JOIN groupes g ON s.groupe_id = g.id
-       WHERE pr.eleve_id = $1::uuid
+       WHERE pr.eleve_id = ${eleveId}::uuid
          AND pr.statut = 'present'
          AND s.statut = 'terminee'
-         AND s.groupe_id = ANY($2::uuid[])
+         AND s.groupe_id = ANY(${groupeIds}::uuid[])
        GROUP BY s.groupe_id`,
-      eleveId,
-      groupeIds,
     ),
     prisma.paiement.groupBy({
       by: ["groupeId"],
@@ -132,8 +129,8 @@ export async function getAdminStats(centerId: string) {
       prisma.utilisateur.count({ where: { role: "prof", centerId, deletedAt: null } }),
       prisma.seance.count({ where: { statut: "terminee", groupe: { centerId } } }),
       prisma.paiement.aggregate({ _sum: { montant: true }, where: { groupe: { centerId } } }),
-      prisma.$queryRawUnsafe(
-        `SELECT COALESCE(SUM(remaining), 0) as total FROM (
+      prisma.$queryRaw(
+        Prisma.sql`SELECT COALESCE(SUM(remaining), 0) as total FROM (
           SELECT 
             due.eleve_id,
             due.groupe_id,
@@ -147,19 +144,18 @@ export async function getAdminStats(centerId: string) {
             FROM presences pr
             JOIN seances s ON pr.seance_id = s.id
             JOIN groupes g ON s.groupe_id = g.id
-            WHERE pr.statut = 'present' AND s.statut = 'terminee' AND g.center_id = $1::uuid
+            WHERE pr.statut = 'present' AND s.statut = 'terminee' AND g.center_id = ${centerId}::uuid
             GROUP BY pr.eleve_id, s.groupe_id, s.prix_par_seance, g.prix_par_seance
           ) due
           LEFT JOIN (
             SELECT pai.eleve_id, pai.groupe_id, SUM(pai.montant) as paid_total
             FROM paiements pai
             JOIN groupes g2 ON pai.groupe_id = g2.id
-            WHERE g2.center_id = $1::uuid
+            WHERE g2.center_id = ${centerId}::uuid
             GROUP BY pai.eleve_id, pai.groupe_id
           ) paid ON due.eleve_id = paid.eleve_id AND due.groupe_id = paid.groupe_id
           WHERE COALESCE(paid.paid_total, 0) < due.due_total
         ) sub`,
-        centerId
       ),
     ]);
 

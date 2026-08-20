@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
+import { Prisma } from "@prisma/client";
 
 export async function GET(
   _request: NextRequest,
@@ -49,17 +50,17 @@ export async function GET(
 
     const eleveIds = inscriptions.map((i) => i.eleveId);
 
+    const safeEleveIds = eleveIds.length > 0 ? eleveIds : ["00000000-0000-0000-0000-000000000000"];
+
     const [dueResults, paidResults, presenceCounts, absenceCounts] = await Promise.all([
-      prisma.$queryRawUnsafe<{ eleve_id: string; total: string }[]>(
-        `SELECT pr.eleve_id, COALESCE(SUM(COALESCE(s.prix_par_seance, g.prix_par_seance)), 0) as total
+      prisma.$queryRaw<{ eleve_id: string; total: string }[]>(
+        Prisma.sql`SELECT pr.eleve_id, COALESCE(SUM(COALESCE(s.prix_par_seance, g.prix_par_seance)), 0) as total
          FROM presences pr
          JOIN seances s ON pr.seance_id = s.id
          JOIN groupes g ON s.groupe_id = g.id
-         WHERE pr.statut = 'present' AND s.statut = 'terminee' AND s.groupe_id = $1::uuid
-           AND pr.eleve_id = ANY($2::uuid[])
+         WHERE pr.statut = 'present' AND s.statut = 'terminee' AND s.groupe_id = ${id}::uuid
+           AND pr.eleve_id = ANY(${safeEleveIds}::uuid[])
          GROUP BY pr.eleve_id`,
-        id,
-        eleveIds.length > 0 ? eleveIds : ["00000000-0000-0000-0000-000000000000"],
       ),
       prisma.paiement.groupBy({
         by: ["eleveId"],
