@@ -118,7 +118,7 @@ export async function getTeacherDashboardFinance(
 
   return {
     impayeNet: round2(Number(financeRows[0]?.impaye_net ?? 0)),
-    claimable: round2(Math.max(0, grossClaimable - paidByCenter)),
+    claimable: round2(grossClaimable - paidByCenter),
   };
 }
 
