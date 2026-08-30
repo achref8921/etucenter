@@ -66,7 +66,7 @@ export default function FinancesProfesseursPage() {
 
   const selectedId = searchParams.get("teacherId") || "";
   const [transactions, setTransactions] = useState<TransactionRow[]>([]);
-  const [balance, setBalance] = useState(0);
+  const [claimable, setClaimable] = useState(0);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -76,12 +76,8 @@ export default function FinancesProfesseursPage() {
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
-    type: "PAYMENT",
     amount: 0,
-    credit: true,
     date: "",
-    paymentMethod: "especes",
-    reference: "",
     notes: "",
   });
 
@@ -118,7 +114,7 @@ export default function FinancesProfesseursPage() {
         if (!res.ok) throw new Error("Erreur lors du chargement");
         const data = await res.json();
         setTransactions(data.transactions);
-        setBalance(data.balance);
+        setClaimable(data.claimable ?? 0);
         setTotal(data.total);
         setPage(data.page);
         setTotalPages(data.totalPages);
@@ -145,12 +141,8 @@ export default function FinancesProfesseursPage() {
 
   const openModal = () => {
     setForm({
-      type: "PAYMENT",
       amount: 0,
-      credit: true,
       date: new Date().toISOString().slice(0, 10),
-      paymentMethod: "especes",
-      reference: "",
       notes: "",
     });
     setShowModal(true);
@@ -167,12 +159,9 @@ export default function FinancesProfesseursPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           teacherId: selectedId,
-          type: form.type,
+          type: "EARNING",
           amount: form.amount,
-          credit: form.credit,
           date: form.date,
-          paymentMethod: form.paymentMethod,
-          reference: form.reference || null,
           notes: form.notes || null,
         }),
       });
@@ -287,9 +276,6 @@ export default function FinancesProfesseursPage() {
                   Contact
                 </th>
                 <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                  Solde
-                </th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
                   À encaisser
                 </th>
                 <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500"></th>
@@ -299,7 +285,7 @@ export default function FinancesProfesseursPage() {
               {teachers.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={4}
                     className="px-6 py-8 text-center text-neutral-500 dark:text-neutral-400"
                   >
                     Aucun professeur
@@ -331,27 +317,6 @@ export default function FinancesProfesseursPage() {
                     <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
                       {t.email}
                       {t.telephone ? ` — ${t.telephone}` : ""}
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <span
-                        className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-sm font-semibold ${
-                          t.balance > 0
-                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                            : t.balance < 0
-                              ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-                              : "bg-neutral-100 text-neutral-700 dark:bg-[#2a2d35] dark:text-neutral-200"
-                        }`}
-                      >
-                        {t.balance !== 0 && (t.balance > 0 ? "+" : "−")}
-                        {formatCurrency(Math.abs(t.balance))}
-                      </span>
-                      <span className="ml-2 text-xs text-neutral-500 dark:text-neutral-400">
-                        {t.balance > 0
-                          ? "à payer"
-                          : t.balance < 0
-                            ? "à recevoir"
-                            : "solde nul"}
-                      </span>
                     </td>
                     <td className="px-4 py-2.5">
                       <span className="inline-flex items-center rounded-lg bg-emerald-100 px-2.5 py-1 text-sm font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
@@ -390,15 +355,15 @@ export default function FinancesProfesseursPage() {
             {selectedTeacher && (
               <span
                 className={`inline-flex items-center gap-1 rounded-lg px-3 py-1 text-sm font-semibold ${
-                  balance > 0
-                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                    : balance < 0
+                  claimable > 0
+                    ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400"
+                    : claimable < 0
                       ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
                       : "bg-neutral-100 text-neutral-700 dark:bg-[#2a2d35] dark:text-neutral-200"
                 }`}
               >
-                Solde : {balance !== 0 && (balance > 0 ? "+" : "−")}
-                {formatCurrency(Math.abs(balance))}
+                À encaisser : {claimable !== 0 && (claimable > 0 ? "+" : "−")}
+                {formatCurrency(Math.abs(claimable))}
               </span>
             )}
           </div>
@@ -566,19 +531,8 @@ export default function FinancesProfesseursPage() {
               </button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                  Type
-                </label>
-                <select
-                  value={form.type}
-                  onChange={(e) => setForm({ ...form, type: e.target.value })}
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
-                >
-                  <option value="PAYMENT">Paiement (argent versé au professeur)</option>
-                  <option value="EARNING">Gain (gain enregistré au crédit)</option>
-                  <option value="ADJUSTMENT">Ajustement (correction manuelle)</option>
-                </select>
+              <div className="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 px-3 py-2 text-[13px] text-blue-700 dark:text-blue-400">
+                Gain — ce montant est déduit de l'à encaisser du professeur.
               </div>
 
               <div>
@@ -596,40 +550,6 @@ export default function FinancesProfesseursPage() {
                 />
               </div>
 
-              {form.type === "ADJUSTMENT" && (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                    Sens
-                  </label>
-                  <select
-                    value={form.credit ? "credit" : "debit"}
-                    onChange={(e) => setForm({ ...form, credit: e.target.value === "credit" })}
-                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
-                  >
-                    <option value="credit">Crédit (+ augmente le solde)</option>
-                    <option value="debit">Débit (− diminue le solde)</option>
-                  </select>
-                </div>
-              )}
-
-              {form.type === "PAYMENT" && (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                    Méthode de paiement
-                  </label>
-                  <select
-                    value={form.paymentMethod}
-                    onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })}
-                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
-                  >
-                    <option value="especes">Espèces</option>
-                    <option value="virement">Virement</option>
-                    <option value="cheque">Chèque</option>
-                    <option value="autre">Autre</option>
-                  </select>
-                </div>
-              )}
-
               <div>
                 <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                   Date
@@ -639,19 +559,6 @@ export default function FinancesProfesseursPage() {
                   value={form.date}
                   onChange={(e) => setForm({ ...form, date: e.target.value })}
                   required
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                  Référence
-                </label>
-                <input
-                  type="text"
-                  value={form.reference}
-                  onChange={(e) => setForm({ ...form, reference: e.target.value })}
-                  placeholder="Optionnel"
                   className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
               </div>

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireActiveCenter, PROF_ROLES } from "@/lib/auth-helpers";
 import { logger } from "@/lib/logger";
-import { getTeacherBalance, listTeacherTransactions } from "@/lib/teacher-finance";
+import { getTeacherDashboardFinance, listTeacherTransactions } from "@/lib/teacher-finance";
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,9 +20,9 @@ export async function GET(request: NextRequest) {
     const from = fromRaw ? new Date(`${fromRaw}T00:00:00`) : undefined;
     const to = toRaw ? new Date(`${toRaw}T23:59:59`) : undefined;
 
-    const [ledger, balance] = await Promise.all([
+    const [ledger, finance] = await Promise.all([
       listTeacherTransactions({ centerId, teacherId: userId, from, to, type, page }),
-      getTeacherBalance(centerId, userId),
+      getTeacherDashboardFinance(centerId, userId),
     ]);
 
     return NextResponse.json({
@@ -31,7 +31,9 @@ export async function GET(request: NextRequest) {
       page: ledger.page,
       pageSize: ledger.pageSize,
       totalPages: ledger.totalPages,
-      balance,
+      balance: finance.claimable,
+      claimable: finance.claimable,
+      impayeNet: finance.impayeNet,
     });
   } catch (error) {
     logger.error("Erreur lors de la récupération du compte professeur", { error });

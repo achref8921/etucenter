@@ -109,7 +109,21 @@ export async function getTeacherDashboardFinance(
     `,
     prisma.teacherTransaction.aggregate({
       _sum: { amount: true },
-      where: { centerId, teacherId, type: "PAYMENT", status: "active" },
+      where: {
+        centerId,
+        teacherId,
+        status: "active",
+        OR: [
+          { type: "PAYMENT" },
+          {
+            type: "EARNING",
+            OR: [
+              { reference: null },
+              { NOT: { reference: { startsWith: "paiement:" } } },
+            ],
+          },
+        ],
+      },
     }),
   ]);
 

@@ -37,13 +37,13 @@ const METHODE_LABEL: Record<string, string> = {
 
 export default function ProfComptePage() {
   const [transactions, setTransactions] = useState<TransactionRow[]>([]);
-  const [balance, setBalance] = useState(0);
+  const [claimable, setClaimable] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [displayBalance, setDisplayBalance] = useState(0);
 
   useEffect(() => {
-    if (balance === 0) {
+    if (claimable === 0) {
       setDisplayBalance(0);
       return;
     }
@@ -53,12 +53,12 @@ export default function ProfComptePage() {
     const tick = (t: number) => {
       const p = Math.min((t - start) / duration, 1);
       const eased = 1 - Math.pow(1 - p, 3);
-      setDisplayBalance(balance * eased);
+      setDisplayBalance(claimable * eased);
       if (p < 1) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [balance]);
+  }, [claimable]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,7 +69,7 @@ export default function ProfComptePage() {
         if (!res.ok) throw new Error("Erreur lors du chargement");
         const data = await res.json();
         setTransactions(data.transactions);
-        setBalance(data.balance);
+        setClaimable(data.claimable ?? data.balance ?? 0);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Erreur inconnue");
       } finally {
@@ -108,8 +108,8 @@ export default function ProfComptePage() {
 
       <div
         className={`animate-fade-in-up rounded-xl border p-6 ${
-          balance >= 0
-            ? "border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20"
+          claimable >= 0
+            ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20"
             : "border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20"
         }`}
       >
@@ -117,33 +117,33 @@ export default function ProfComptePage() {
           <div>
             <p
               className={`text-[13px] font-medium ${
-                balance >= 0
-                  ? "text-green-700 dark:text-green-400"
+                claimable >= 0
+                  ? "text-emerald-700 dark:text-emerald-400"
                   : "text-red-700 dark:text-red-400"
               }`}
             >
-              {balance >= 0 ? "Solde à percevoir" : "Solde dû au centre"}
+              {claimable >= 0 ? "À encaisser" : "À encaisser (négatif)"}
             </p>
             <p
               className={`mt-1 text-3xl font-bold ${
-                balance >= 0
-                  ? "text-green-900 dark:text-green-100"
+                claimable >= 0
+                  ? "text-emerald-900 dark:text-emerald-100"
                   : "text-red-900 dark:text-red-100"
               }`}
             >
-              {balance !== 0 && (balance > 0 ? "+" : "−")}
+              {claimable !== 0 && (claimable > 0 ? "+" : "−")}
               {formatCurrency(Math.abs(displayBalance))}
             </p>
             <p className="mt-1 text-[12px] text-neutral-500 dark:text-neutral-400">
-              {balance > 0
+              {claimable > 0
                 ? "Le centre vous doit ce montant."
-                : balance < 0
+                : claimable < 0
                   ? "Ce montant est à régler au centre."
-                  : "Votre solde est nul."}
+                  : "Votre à encaisser est nul."}
             </p>
           </div>
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white dark:bg-[#181b22]">
-            <Wallet className="h-7 w-7 text-green-600 dark:text-green-400" />
+            <Wallet className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
           </div>
         </div>
       </div>

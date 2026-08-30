@@ -5,7 +5,7 @@ import { logger } from "@/lib/logger";
 import { teacherTransactionSchema } from "@/lib/validations";
 import {
   createTeacherTransaction,
-  getTeacherBalance,
+  getTeacherDashboardFinance,
   listTeacherTransactions,
 } from "@/lib/teacher-finance";
 
@@ -36,9 +36,11 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const [ledger, balance] = await Promise.all([
+    const [ledger, finance] = await Promise.all([
       listTeacherTransactions({ centerId, teacherId, from, to, type, page }),
-      teacherId ? getTeacherBalance(centerId, teacherId) : Promise.resolve(0),
+      teacherId
+        ? getTeacherDashboardFinance(centerId, teacherId)
+        : Promise.resolve({ claimable: 0, impayeNet: 0 }),
     ]);
 
     return NextResponse.json({
@@ -47,7 +49,8 @@ export async function GET(request: NextRequest) {
       page: ledger.page,
       pageSize: ledger.pageSize,
       totalPages: ledger.totalPages,
-      balance,
+      claimable: finance.claimable,
+      impayeNet: finance.impayeNet,
       filters: { teacherId, type, from: fromRaw ?? null, to: toRaw ?? null },
     });
   } catch (error) {
