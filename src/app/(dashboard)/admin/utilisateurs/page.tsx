@@ -135,9 +135,14 @@ export default function UtilisateursPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+      const body = await res.json();
       if (!res.ok) {
-        const body = await res.json();
-        throw new Error(body.error || "Erreur lors de la création");
+        if (res.status === 409) {
+          setFormErrors({ ...formErrors, email: body.error || "Un utilisateur avec cet email existe déjà" });
+        } else {
+          setFormErrors({ ...formErrors, form: body.error || "Erreur lors de la création" });
+        }
+        return;
       }
       setShowModal(false);
       resetForm();
@@ -480,6 +485,7 @@ export default function UtilisateursPage() {
               <button onClick={() => { setShowModal(false); resetForm(); }} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300"><X className="h-5 w-5" /></button>
             </div>
             <form onSubmit={onSubmit} className="space-y-3">
+              {formErrors.form && <div className="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 p-3 text-xs text-red-700 dark:text-red-400">{formErrors.form}</div>}
               <div>
                 <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Nom</label>
                 <input value={formData.nom} onChange={(e) => setFormData({ ...formData, nom: e.target.value })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
@@ -492,7 +498,7 @@ export default function UtilisateursPage() {
               </div>
               <div>
                 <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Email</label>
-                <input value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} type="email" className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                <input value={formData.email} onChange={(e) => { setFormData({ ...formData, email: e.target.value }); if (formErrors.email) { const next = { ...formErrors }; delete next.email; setFormErrors(next); } }} type="email" className={`w-full rounded-lg border ${formErrors.email ? "border-red-500" : "border-neutral-200 dark:border-[#2a2d35]"} bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500`} />
                 {formErrors.email && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.email}</p>}
               </div>
               <div>
