@@ -81,6 +81,7 @@ export default function ProfGestionElevesPage() {
     filiere: "",
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [modalError, setModalError] = useState<string | null>(null);
 
   const fetchGroupes = useCallback(async () => {
     try {
@@ -107,6 +108,7 @@ export default function ProfGestionElevesPage() {
   const resetForm = () => {
     setFormData({ groupeId: "", nom: "", prenom: "", email: "", telephone: "", motDePasse: "", niveau: "", classe: "", filiere: "" });
     setFormErrors({});
+    setModalError(null);
   };
 
   const openModal = () => {
@@ -147,8 +149,9 @@ export default function ProfGestionElevesPage() {
       if (!res.ok) {
         if (res.status === 409) {
           setFormErrors({ ...formErrors, email: body.error || "Cet email est déjà utilisé par un autre compte" });
+          setModalError(body.error || "Cet email est déjà utilisé par un autre compte");
         } else {
-          setFormErrors({ ...formErrors, form: body.error || "Erreur lors de la création" });
+          setModalError(body.error || "Erreur lors de la création");
         }
         return;
       }
@@ -366,7 +369,14 @@ export default function ProfGestionElevesPage() {
               </button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-3">
-              {formErrors.form && <div className="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 p-3 text-xs text-red-700 dark:text-red-400">{formErrors.form}</div>}
+              {modalError && (
+                <div className="flex items-start justify-between gap-2 rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 p-3 text-xs text-red-700 dark:text-red-400">
+                  <span>{modalError}</span>
+                  <button type="button" onClick={() => setModalError(null)} className="text-red-500 hover:text-red-700 dark:hover:text-red-300" aria-label="Fermer">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
               <div>
                 <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Groupe</label>
                 <select

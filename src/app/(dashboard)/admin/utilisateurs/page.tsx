@@ -73,6 +73,7 @@ export default function UtilisateursPage() {
     filiere: "",
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [modalError, setModalError] = useState<string | null>(null);
 
   const fetchUsers = async () => {
     try {
@@ -96,6 +97,7 @@ export default function UtilisateursPage() {
   const resetForm = () => {
     setFormData({ nom: "", prenom: "", email: "", motDePasse: "", telephone: "", role: "prof", niveau: "", classe: "", filiere: "" });
     setFormErrors({});
+    setModalError(null);
   };
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -139,8 +141,9 @@ export default function UtilisateursPage() {
       if (!res.ok) {
         if (res.status === 409) {
           setFormErrors({ ...formErrors, email: body.error || "Un utilisateur avec cet email existe déjà" });
+          setModalError(body.error || "Un utilisateur avec cet email existe déjà");
         } else {
-          setFormErrors({ ...formErrors, form: body.error || "Erreur lors de la création" });
+          setModalError(body.error || "Erreur lors de la création");
         }
         return;
       }
@@ -485,7 +488,14 @@ export default function UtilisateursPage() {
               <button onClick={() => { setShowModal(false); resetForm(); }} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300"><X className="h-5 w-5" /></button>
             </div>
             <form onSubmit={onSubmit} className="space-y-3">
-              {formErrors.form && <div className="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 p-3 text-xs text-red-700 dark:text-red-400">{formErrors.form}</div>}
+              {modalError && (
+                <div className="flex items-start justify-between gap-2 rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 p-3 text-xs text-red-700 dark:text-red-400">
+                  <span>{modalError}</span>
+                  <button type="button" onClick={() => setModalError(null)} className="text-red-500 hover:text-red-700 dark:hover:text-red-300" aria-label="Fermer">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
               <div>
                 <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Nom</label>
                 <input value={formData.nom} onChange={(e) => setFormData({ ...formData, nom: e.target.value })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
