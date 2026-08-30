@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Plus, Trash2, X, Loader2, Filter, ToggleLeft, ToggleRight, Search, Download, KeyRound, UserCog, Eraser } from "lucide-react";
+import { Plus, Trash2, X, Loader2, Filter, ToggleLeft, ToggleRight, Search, Download, KeyRound, UserCog } from "lucide-react";
 import PasswordInput from "@/components/password-input";
 import ConfirmDelete from "@/components/confirm-delete";
 
@@ -60,9 +60,6 @@ export default function UtilisateursPage() {
   const [newPassword, setNewPassword] = useState("");
   const [resetSubmitting, setResetSubmitting] = useState(false);
   const [resetError, setResetError] = useState<string | null>(null);
-  const [confirmPermanent, setConfirmPermanent] = useState<{ id: string; name: string; email: string } | null>(null);
-  const [permanentDeletingId, setPermanentDeletingId] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     nom: "",
@@ -174,26 +171,6 @@ export default function UtilisateursPage() {
       setError(err instanceof Error ? err.message : "Erreur inconnue");
     } finally {
       setDeletingId(null);
-    }
-  };
-
-  const handlePermanentDelete = async (id: string) => {
-    try {
-      setPermanentDeletingId(id);
-      setError(null);
-      setSuccessMsg(null);
-      const res = await fetch(`/api/admin/utilisateurs/definitif?id=${id}`, { method: "DELETE" });
-      const body = await res.json();
-      if (!res.ok) {
-        throw new Error(body.error || "Erreur lors de la suppression définitive");
-      }
-      setSuccessMsg(body.message || "Compte supprimé définitivement");
-      fetchUsers();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur inconnue");
-    } finally {
-      setPermanentDeletingId(null);
-      setConfirmPermanent(null);
     }
   };
 
@@ -424,7 +401,6 @@ export default function UtilisateursPage() {
       </div>
 
       {error && <div className="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">{error}</div>}
-      {successMsg && <div className="rounded-lg border border-green-200 dark:border-green-900/50 bg-green-50 dark:bg-green-900/20 p-4 text-sm text-green-700 dark:text-green-400">{successMsg}</div>}
 
       {loading ? (
         <div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-blue-600" /></div>
@@ -493,11 +469,6 @@ export default function UtilisateursPage() {
                         <button onClick={(e) => { e.stopPropagation(); setConfirmDelete({ id: user.id }); }} disabled={deletingId === user.id} className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 disabled:opacity-50">
                           {deletingId === user.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                         </button>
-                        {isSuperAdmin && user.role !== "super_admin" && (
-                          <button onClick={(e) => { e.stopPropagation(); setConfirmPermanent({ id: user.id, name: `${user.prenom} ${user.nom}`, email: user.email }); setError(null); setSuccessMsg(null); }} disabled={permanentDeletingId === user.id} className="rounded p-1 text-white transition-colors bg-red-600 hover:bg-red-700 disabled:opacity-50" title="Supprimer définitivement (purgé de la base)">
-                            {permanentDeletingId === user.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eraser className="h-4 w-4" />}
-                          </button>
-                        )}
                       </div>
                     </td>
                   </tr>
@@ -604,19 +575,6 @@ export default function UtilisateursPage() {
         </div>
       )}
       <ConfirmDelete open={!!confirmDelete} title="Archiver l'utilisateur" message="L'utilisateur sera archivé : il ne pourra plus se connecter, mais toutes ses données (inscriptions, paiements, présences) seront conservées. Vous pourrez le réactiver à tout moment." onConfirm={() => { if (confirmDelete) handleDelete(confirmDelete.id); setConfirmDelete(null); }} onCancel={() => setConfirmDelete(null)} loading={deletingId === confirmDelete?.id} />
-
-      <ConfirmDelete
-        open={!!confirmPermanent}
-        title="Supprimer définitivement ?"
-        message={
-          confirmPermanent
-            ? `Le compte de ${confirmPermanent.name} (${confirmPermanent.email}) et TOUTES ses données (inscriptions, paiements, présences, notifications, transactions…) seront irréversiblement purgés de la base de données.${confirmPermanent && users.find((u) => u.id === confirmPermanent.id)?.role !== "eleve" ? " S'il s'agit d'un prof, ses groupes resteront mais sans professeur assigné." : ""} Cette action est définitive.`
-            : ""
-        }
-        onConfirm={() => { if (confirmPermanent) handlePermanentDelete(confirmPermanent.id); }}
-        onCancel={() => setConfirmPermanent(null)}
-        loading={permanentDeletingId === confirmPermanent?.id}
-      />
 
       {resetPwd && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">

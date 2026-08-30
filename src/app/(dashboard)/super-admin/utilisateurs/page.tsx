@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Power, PowerOff, RotateCcw, Search, Loader2, X, KeyRound, Database, History } from "lucide-react";
+import { Power, PowerOff, RotateCcw, Search, Loader2, X, KeyRound, Database, History, Eraser } from "lucide-react";
 import PasswordInput from "@/components/password-input";
+import ConfirmDelete from "@/components/confirm-delete";
 
 interface UtilisateurData {
   id: string;
@@ -53,6 +54,9 @@ export default function SuperAdminUtilisateursPage() {
   const [restoring, setRestoring] = useState(false);
   const [restoreError, setRestoreError] = useState("");
   const [restoreResult, setRestoreResult] = useState<RestoreResult | null>(null);
+  const [deleteUser, setDeleteUser] = useState<UtilisateurData | null>(null);
+  const [deletingPermanent, setDeletingPermanent] = useState(false);
+  const [success, setSuccess] = useState("");
 
   interface RestoreCandidate {
     id: string;
@@ -184,6 +188,26 @@ export default function SuperAdminUtilisateursPage() {
     setRestoring(false);
   }
 
+  async function handlePermanentDelete() {
+    if (!deleteUser) return;
+    setDeletingPermanent(true);
+    setError("");
+    setSuccess("");
+    try {
+      const res = await fetch(`/api/super-admin/utilisateurs/${deleteUser.id}/definitif`, { method: "DELETE" });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error || "Erreur lors de la suppression définitive");
+      setUsers((prev) => prev.filter((u) => u.id !== deleteUser.id));
+      setDeleteUser(null);
+      setSuccess(body.message || "Compte supprimé définitivement");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
+      setDeleteUser(null);
+    } finally {
+      setDeletingPermanent(false);
+    }
+  }
+
   function formatSize(bytes: number | null) {
     if (!bytes) return "—";
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} Ko`;
@@ -261,6 +285,9 @@ export default function SuperAdminUtilisateursPage() {
 
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">{error}</div>
+      )}
+      {success && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-[13px] text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-400">{success}</div>
       )}
 
       <div className="rounded-xl border border-neutral-200 bg-white overflow-x-auto dark:border-[#2a2d35] dark:bg-[#181b22]">
@@ -345,6 +372,13 @@ export default function SuperAdminUtilisateursPage() {
                       className="rounded-lg p-1.5 text-neutral-400 hover:bg-violet-50 hover:text-violet-600 transition-colors dark:text-neutral-500 dark:hover:bg-violet-900/20 dark:hover:text-violet-400"
                     >
                       <KeyRound className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => { setDeleteUser(u); setError(""); setSuccess(""); }}
+                      title="Supprimer définitivement (purge complète de la base)"
+                      className="rounded-lg p-1.5 text-neutral-400 hover:bg-red-50 hover:text-red-600 transition-colors dark:text-neutral-500 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                    >
+                      <Eraser className="h-4 w-4" />
                     </button>
                   </div>
                 </td>
@@ -491,6 +525,18 @@ export default function SuperAdminUtilisateursPage() {
           </div>
         </div>
       )}
+      <ConfirmDelete
+        open={!!deleteUser}
+        title="Suppression définitive"
+        message={
+          deleteUser
+            ? `Action irréversible : le compte de ${deleteUser.prenom} ${deleteUser.nom} (${deleteUser.email}) sera définitivement supprimé de la base avec toutes ses données associées (inscriptions, paiements, présences, notifications). Aucune restauration ne sera possible.`
+            : ""
+        }
+        onConfirm={handlePermanentDelete}
+        onCancel={() => setDeleteUser(null)}
+        loading={deletingPermanent}
+      />
     </div>
   );
 }
