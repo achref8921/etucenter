@@ -20,6 +20,7 @@ import {
   Settings,
   BarChart3,
   Database,
+  UserPlus,
 } from "lucide-react";
 
 interface NavItem {
@@ -79,13 +80,22 @@ interface SidebarProps {
   role: Role;
   centerName?: string;
   centerLogo?: string | null;
+  peutGererEleves?: boolean;
   open: boolean;
   onClose: () => void;
 }
 
-export default function Sidebar({ role, centerName, centerLogo, open, onClose }: SidebarProps) {
+export default function Sidebar({ role, centerName, centerLogo, peutGererEleves, open, onClose }: SidebarProps) {
   const pathname = usePathname();
-  const navItems = navItemsByRole[role];
+  const baseItems = navItemsByRole[role];
+  const navItems =
+    role === "prof" && peutGererEleves
+      ? [
+          ...baseItems.slice(0, 1),
+          { label: "Gestion Élèves", href: "/prof/gestion-eleves", icon: UserPlus },
+          ...baseItems.slice(1),
+        ]
+      : baseItems;
 
   return (
     <>

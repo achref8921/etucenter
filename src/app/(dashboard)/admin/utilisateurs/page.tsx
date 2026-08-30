@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Plus, Trash2, X, Loader2, Filter, ToggleLeft, ToggleRight, Search, Download, KeyRound } from "lucide-react";
+import { Plus, Trash2, X, Loader2, Filter, ToggleLeft, ToggleRight, Search, Download, KeyRound, UserCog } from "lucide-react";
 import PasswordInput from "@/components/password-input";
 import ConfirmDelete from "@/components/confirm-delete";
 
@@ -15,6 +15,7 @@ interface Utilisateur {
   telephone: string | null;
   role: string;
   actif: boolean;
+  peutGererEleves: boolean;
   codeEleve: string | null;
   codeProf: string | null;
   niveau: string | null;
@@ -210,6 +211,29 @@ export default function UtilisateursPage() {
     }
   };
 
+  const [gestionTogglingId, setGestionTogglingId] = useState<string | null>(null);
+
+  const handleToggleGestionEleves = async (id: string, current: boolean) => {
+    try {
+      setGestionTogglingId(id);
+      setError(null);
+      const res = await fetch("/api/admin/utilisateurs", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, peutGererEleves: !current }),
+      });
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || "Erreur");
+      }
+      fetchUsers();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setGestionTogglingId(null);
+    }
+  };
+
   const niveauLabels: Record<string, string> = { primaire: "Primaire", college: "Collège", lycee: "Lycée" };
   const filiereLabels: Record<string, string> = { lettres: "Lettres", economique: "Économique", informatique: "Informatique", technique: "Technique", sciences: "Sciences", math: "Mathématiques" };
 
@@ -384,12 +408,13 @@ export default function UtilisateursPage() {
                 <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Rôle</th>
                 <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Classe</th>
                 <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">État</th>
+                <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Gestion élèves</th>
                 <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
               {filteredUsers.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-2.5 text-center text-neutral-500 dark:text-neutral-400">Aucun utilisateur trouvé</td></tr>
+                <tr><td colSpan={8} className="px-4 py-2.5 text-center text-neutral-500 dark:text-neutral-400">Aucun utilisateur trouvé</td></tr>
               ) : (
                 filteredUsers.map((user) => (
                   <tr key={user.id} className="cursor-pointer hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]" onClick={() => router.push(roleNav(user))}>
@@ -415,6 +440,16 @@ export default function UtilisateursPage() {
                         {togglingId === user.id ? <Loader2 className="h-4 w-4 animate-spin text-neutral-400 dark:text-neutral-500" /> : user.actif ? <ToggleRight className="h-6 w-6 text-green-500 dark:text-green-400" /> : <ToggleLeft className="h-6 w-6 text-neutral-300 dark:text-[#2a2d35]" />}
                         <span className={`text-[11px] font-medium ${user.actif ? "text-green-600 dark:text-green-400" : "text-neutral-400 dark:text-neutral-500"}`}>{user.actif ? "Actif" : "Inactif"}</span>
                       </button>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      {user.role === "prof" || user.role === "PROF" ? (
+                        <button onClick={(e) => { e.stopPropagation(); handleToggleGestionEleves(user.id, user.peutGererEleves); }} disabled={gestionTogglingId === user.id} className="flex items-center gap-1 disabled:opacity-50" title={user.peutGererEleves ? "Retirer la permission de gérer des élèves" : "Autoriser la gestion des élèves"}>
+                          {gestionTogglingId === user.id ? <Loader2 className="h-4 w-4 animate-spin text-neutral-400 dark:text-neutral-500" /> : user.peutGererEleves ? <ToggleRight className="h-6 w-6 text-indigo-500 dark:text-indigo-400" /> : <ToggleLeft className="h-6 w-6 text-neutral-300 dark:text-[#2a2d35]" />}
+                          <span className={`text-[11px] font-medium ${user.peutGererEleves ? "text-indigo-600 dark:text-indigo-400" : "text-neutral-400 dark:text-neutral-500"}`}>{user.peutGererEleves ? "Oui" : "Non"}</span>
+                        </button>
+                      ) : (
+                        <span className="text-[11px] text-neutral-300 dark:text-neutral-600">—</span>
+                      )}
                     </td>
                     <td className="px-4 py-2.5">
                       <div className="flex items-center gap-1">

@@ -118,6 +118,7 @@ model Utilisateur {
   image          String?   @db.VarChar(500)
   dateNaissance  DateTime? @map("date_naissance") @db.Date
   actif          Boolean   @default(false)
+  peutGererEleves Boolean  @default(false) @map("peut_gerer_eleves")
   codeEleve      String?   @map("code_eleve") @db.VarChar(4)
   codeProf       String?   @map("code_prof") @db.VarChar(5)
   niveau         NiveauScolaire?

@@ -9,6 +9,7 @@ export interface SessionUser {
   centerId: string;
   image?: string | null;
   frozen?: boolean;
+  peutGererEleves?: boolean;
 }
 
 export interface DashboardStats {

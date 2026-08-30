@@ -18,6 +18,7 @@ import {
   Building2,
   Settings,
   BarChart3,
+  UserPlus,
 } from "lucide-react";
 
 interface NavItem {
@@ -57,9 +58,13 @@ const bottomNavItems: Record<Role, NavItem[]> = {
   ],
 };
 
-export default function BottomNav({ role, variant = "indigo" }: { role: Role; variant?: "indigo" | "violet" }) {
+export default function BottomNav({ role, variant = "indigo", peutGererEleves }: { role: Role; variant?: "indigo" | "violet"; peutGererEleves?: boolean }) {
   const pathname = usePathname();
-  const items = bottomNavItems[role] || [];
+  const baseItems = bottomNavItems[role] || [];
+  const items =
+    role === "prof" && peutGererEleves
+      ? [{ label: "Gestion Élèves", href: "/prof/gestion-eleves", icon: UserPlus }, ...baseItems]
+      : baseItems;
   const isActiveFn = (href: string) =>
     pathname === href ||
     (href !== `/${role}` && href !== "/super-admin" && pathname.startsWith(href));

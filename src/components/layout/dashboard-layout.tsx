@@ -21,6 +21,7 @@ interface DashboardLayoutProps {
     role: Role;
     centerId?: string;
     frozen?: boolean;
+    peutGererEleves?: boolean;
   };
   centerName?: string;
   centerLogo?: string | null;
@@ -73,6 +74,7 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
         role={user.role}
         centerName={centerName}
         centerLogo={centerLogo}
+        peutGererEleves={user.peutGererEleves}
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
@@ -98,7 +100,7 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
         </main>
       </div>
 
-      <BottomNav role={user.role} />
+      <BottomNav role={user.role} peutGererEleves={user.peutGererEleves} />
     </div>
   );
 }

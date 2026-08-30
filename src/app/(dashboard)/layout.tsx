@@ -51,6 +51,7 @@ export default async function DashboardRootLayout({
     email: session.user.email ?? "",
     centerId: session.user.centerId,
     frozen,
+    peutGererEleves: (session.user as any).peutGererEleves === true,
   };
 
   return (

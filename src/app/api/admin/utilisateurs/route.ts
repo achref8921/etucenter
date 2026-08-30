@@ -25,6 +25,7 @@ export async function GET() {
         telephone: true,
         role: true,
         actif: true,
+        peutGererEleves: true,
         codeEleve: true,
         codeProf: true,
         image: true,
@@ -142,14 +143,14 @@ export async function PATCH(request: NextRequest) {
     if (error) return error;
 
     const body = await request.json();
-    const { id, actif, motDePasse } = body;
+    const { id, actif, motDePasse, peutGererEleves } = body;
 
     if (!id) {
       return NextResponse.json({ error: "id est requis" }, { status: 400 });
     }
 
-    if (actif === undefined && motDePasse === undefined) {
-      return NextResponse.json({ error: "actif ou motDePasse requis" }, { status: 400 });
+    if (actif === undefined && motDePasse === undefined && peutGererEleves === undefined) {
+      return NextResponse.json({ error: "actif, motDePasse ou peutGererEleves requis" }, { status: 400 });
     }
 
     if (motDePasse !== undefined && (typeof motDePasse !== "string" || motDePasse.length < 8)) {
@@ -172,6 +173,18 @@ export async function PATCH(request: NextRequest) {
     const data: any = {};
     if (actif !== undefined) data.actif = actif;
     if (actif === true) data.deletedAt = null;
+    if (peutGererEleves !== undefined) {
+      if (user.role !== "prof") {
+        return NextResponse.json(
+          { error: "Seuls les professeurs peuvent gérer des élèves" },
+          { status: 400 }
+        );
+      }
+      if (typeof peutGererEleves !== "boolean") {
+        return NextResponse.json({ error: "peutGererEleves doit être un booléen" }, { status: 400 });
+      }
+      data.peutGererEleves = peutGererEleves;
+    }
     if (motDePasse) {
       data.motDePasse = await bcrypt.hash(motDePasse, 12);
       data.passwordResetToken = null;
@@ -181,8 +194,16 @@ export async function PATCH(request: NextRequest) {
     const updated = await prisma.utilisateur.update({
       where: { id },
       data,
-      select: { id: true, nom: true, prenom: true, email: true, role: true, actif: true },
+      select: { id: true, nom: true, prenom: true, email: true, role: true, actif: true, peutGererEleves: true },
     });
+
+    if (peutGererEleves !== undefined) {
+      logger.info("Permission de gestion des élèves mise à jour", {
+        adminId: (session.user as any).id,
+        userId: id,
+        peutGererEleves,
+      });
+    }
 
     if (motDePasse) {
       logger.info("Mot de passe réinitialisé par l'admin", {

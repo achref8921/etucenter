@@ -242,7 +242,7 @@ export const authOptions: NextAuthOptions = {
         if (role !== "super_admin" && userId) {
           const dbUser = await prisma.utilisateur.findUnique({
             where: { id: userId },
-            select: { actif: true, centerId: true },
+            select: { actif: true, centerId: true, peutGererEleves: true },
           });
 
           if (!dbUser || !dbUser.actif) {
@@ -258,6 +258,8 @@ export const authOptions: NextAuthOptions = {
               frozen = true;
             }
           }
+
+          (session.user as any).peutGererEleves = !!dbUser?.peutGererEleves;
         }
 
         (session.user as any).frozen = frozen;
