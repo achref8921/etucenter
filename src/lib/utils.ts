@@ -75,6 +75,16 @@ export function generateCenterCode(): string {
   return code;
 }
 
+export function generateInitialPassword(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+  const length = 8;
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return result;
+}
+
 export function sanitizeImageValue(value: string | null | undefined): string | null {
   if (!value) return null;
   const trimmed = value.trim();

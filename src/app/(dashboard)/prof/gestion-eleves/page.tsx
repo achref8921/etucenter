@@ -1,9 +1,16 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Plus, Loader2, Users, X, Trash2, GraduationCap, Search, UserPlus, UserX } from "lucide-react";
+import { Plus, Loader2, Users, X, Trash2, GraduationCap, Search, UserPlus, UserX, KeyRound, Copy, Check } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
 import { SkeletonPage } from "@/components/ui/skeleton";
+import PasswordInput from "@/components/password-input";
+
+interface Credentials {
+  email: string;
+  motDePasse: string;
+  codeEleve: string;
+}
 
 interface Eleve {
   id: string;
@@ -59,6 +66,8 @@ export default function ProfGestionElevesPage() {
   const [submitting, setSubmitting] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [createdCreds, setCreatedCreds] = useState<Credentials | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const [formData, setFormData] = useState({
     groupeId: "",
@@ -66,6 +75,7 @@ export default function ProfGestionElevesPage() {
     prenom: "",
     email: "",
     telephone: "",
+    motDePasse: "",
     niveau: "",
     classe: "",
     filiere: "",
@@ -95,7 +105,7 @@ export default function ProfGestionElevesPage() {
   }, [fetchGroupes]);
 
   const resetForm = () => {
-    setFormData({ groupeId: "", nom: "", prenom: "", email: "", telephone: "", niveau: "", classe: "", filiere: "" });
+    setFormData({ groupeId: "", nom: "", prenom: "", email: "", telephone: "", motDePasse: "", niveau: "", classe: "", filiere: "" });
     setFormErrors({});
   };
 
@@ -111,6 +121,7 @@ export default function ProfGestionElevesPage() {
     if (!formData.nom.trim()) newErrors.nom = "Requis";
     if (!formData.prenom.trim()) newErrors.prenom = "Requis";
     if (formData.niveau && !formData.classe) newErrors.classe = "Requis";
+    if (formData.motDePasse && formData.motDePasse.length < 6) newErrors.motDePasse = "Min 6 caractères";
     if (Object.keys(newErrors).length > 0) { setFormErrors(newErrors); return; }
 
     try {
@@ -122,6 +133,7 @@ export default function ProfGestionElevesPage() {
         prenom: formData.prenom,
         email: formData.email || undefined,
         telephone: formData.telephone || undefined,
+        motDePasse: formData.motDePasse || undefined,
         niveau: formData.niveau || undefined,
         classe: formData.classe || undefined,
         filiere: formData.filiere || undefined,
@@ -137,7 +149,12 @@ export default function ProfGestionElevesPage() {
       }
       setShowModal(false);
       resetForm();
-      toast("success", `Élève ${body.eleve?.prenom} ${body.eleve?.nom} ajouté au groupe`);
+      setCopied(false);
+      if (body.credentials) {
+        setCreatedCreds(body.credentials);
+      } else {
+        toast("success", `Élève ${body.eleve?.prenom} ${body.eleve?.nom} ajouté au groupe`);
+      }
       fetchGroupes();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur inconnue");
@@ -385,6 +402,16 @@ export default function ProfGestionElevesPage() {
                 <input value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} type="email" className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
               </div>
               <div>
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">
+                  Mot de passe initial <span className="text-neutral-400 dark:text-neutral-500">(optionnel — généré automatiquement si vide)</span>
+                </label>
+                <PasswordInput value={formData.motDePasse} onChange={(e) => setFormData({ ...formData, motDePasse: e.target.value })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                {formErrors.motDePasse && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.motDePasse}</p>}
+                <p className="mt-1 text-[11px] text-neutral-400 dark:text-neutral-500">
+                  Minimum 6 caractères. L'élève pourra se connecter avec son email et ce mot de passe.
+                </p>
+              </div>
+              <div>
                 <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Niveau</label>
                 <select value={formData.niveau} onChange={(e) => setFormData({ ...formData, niveau: e.target.value, classe: "", filiere: "" })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
                   <option value="">-- Sélectionner --</option>
@@ -419,6 +446,60 @@ export default function ProfGestionElevesPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Credentials modal */}
+      {createdCreds && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Élève créé avec succès</h2>
+              <button onClick={() => setCreatedCreds(null)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="mb-4 flex items-start gap-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 p-3 text-[13px] text-emerald-700 dark:text-emerald-400">
+              <KeyRound className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>
+                Communiquez ces informations à l'élève pour qu'il puisse se connecter à son compte.
+              </span>
+            </div>
+            <div className="space-y-3">
+              <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">Code élève</p>
+                <p className="mt-0.5 font-mono text-sm font-bold text-neutral-900 dark:text-neutral-100">#{createdCreds.codeEleve}</p>
+              </div>
+              <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">Email / Identifiant</p>
+                <p className="mt-0.5 break-all text-sm font-medium text-neutral-900 dark:text-neutral-100">{createdCreds.email}</p>
+              </div>
+              <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">Mot de passe initial</p>
+                <p className="mt-0.5 font-mono text-sm font-bold text-neutral-900 dark:text-neutral-100">{createdCreds.motDePasse}</p>
+              </div>
+            </div>
+            <div className="mt-5 flex justify-end gap-3">
+              <button
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(
+                      `Code: ${createdCreds.codeEleve}\nEmail: ${createdCreds.email}\nMot de passe: ${createdCreds.motDePasse}`
+                    );
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  } catch {}
+                }}
+                className="flex items-center gap-2 rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+              >
+                {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+                {copied ? "Copié !" : "Copier les identifiants"}
+              </button>
+              <button onClick={() => setCreatedCreds(null)} className="rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700">
+                Fermer
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireProfCanManageEleves } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
-import { generateRandomCode } from "@/lib/utils";
+import { generateRandomCode, generateInitialPassword } from "@/lib/utils";
+import bcrypt from "bcryptjs";
 
 export async function GET() {
   try {
@@ -119,8 +120,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(inscription, { status: 201 });
     }
 
-    // New student creation + enrollment : { nom, prenom, groupeId, email?, telephone?, niveau?, classe?, filiere? }
-    const { nom, prenom, groupeId, email, telephone, niveau, classe, filiere } = body;
+    // New student creation + enrollment : { nom, prenom, groupeId, email?, telephone?, niveau?, classe?, filiere?, motDePasse? }
+    const { nom, prenom, groupeId, email, telephone, niveau, classe, filiere, motDePasse } = body;
 
     if (!nom || !prenom || !groupeId) {
       return NextResponse.json(
@@ -142,6 +143,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    if (motDePasse !== undefined && (typeof motDePasse !== "string" || motDePasse.length < 6)) {
+      return NextResponse.json(
+        { error: "Le mot de passe doit contenir au moins 6 caractères" },
+        { status: 400 }
+      );
+    }
+
+    const initialPassword = motDePasse && motDePasse.trim() ? motDePasse : generateInitialPassword();
+
     let codeEleve: string;
     let exists = true;
     while (exists) {
@@ -160,12 +170,15 @@ export async function POST(request: NextRequest) {
     const capacityError = await checkCapacity(groupeId, groupe.capaciteMax);
     if (capacityError) return capacityError;
 
+    const loginEmail = finalEmail || `eleve-${eleveCode}-${centerId.slice(0, 8)}@etucenter.local`;
+
     const eleve = await prisma.utilisateur.create({
       data: {
         centerId,
         nom: (nom as string).trim(),
         prenom: (prenom as string).trim(),
-        email: finalEmail || `eleve-${eleveCode}-${centerId.slice(0, 8)}@etucenter.local`,
+        email: loginEmail,
+        motDePasse: await bcrypt.hash(initialPassword, 12),
         role: "eleve",
         actif: true,
         telephone: telephone?.trim() || null,
@@ -201,7 +214,18 @@ export async function POST(request: NextRequest) {
       groupeId,
     });
 
-    return NextResponse.json({ eleve, inscription }, { status: 201 });
+    return NextResponse.json(
+      {
+        eleve,
+        inscription,
+        credentials: {
+          email: loginEmail,
+          motDePasse: initialPassword,
+          codeEleve: eleveCode,
+        },
+      },
+      { status: 201 }
+    );
   } catch (error) {
     logger.error("Erreur lors de la création de l'élève par le prof", { error });
     return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });
