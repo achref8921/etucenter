@@ -3,6 +3,7 @@ import { requireProfCanManageEleves } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { generateRandomCode, generateInitialPassword } from "@/lib/utils";
+import { sendPushToUsers } from "@/lib/push";
 import bcrypt from "bcryptjs";
 
 export async function GET() {
@@ -102,6 +103,15 @@ export async function POST(request: NextRequest) {
           },
         });
         logger.info("Inscription réactivée par le prof", { userId, eleveId, groupeId });
+        await notifyAdminsOfStudentAdd({
+          centerId,
+          elevePrenom: inscription.eleve.prenom,
+          eleveNom: inscription.eleve.nom,
+          groupeNom: inscription.groupe.nom,
+          profPrenom: (session.user as any).prenom,
+          profNom: (session.user as any).nom,
+          action: "reactive",
+        });
         return NextResponse.json(inscription, { status: 201 });
       }
 
@@ -117,6 +127,15 @@ export async function POST(request: NextRequest) {
       });
 
       logger.info("Élève existant inscrit par le prof", { userId, eleveId, groupeId });
+      await notifyAdminsOfStudentAdd({
+        centerId,
+        elevePrenom: inscription.eleve.prenom,
+        eleveNom: inscription.eleve.nom,
+        groupeNom: inscription.groupe.nom,
+        profPrenom: (session.user as any).prenom,
+        profNom: (session.user as any).nom,
+        action: "ajoute",
+      });
       return NextResponse.json(inscription, { status: 201 });
     }
 
@@ -214,6 +233,16 @@ export async function POST(request: NextRequest) {
       groupeId,
     });
 
+    await notifyAdminsOfStudentAdd({
+      centerId,
+      elevePrenom: eleve.prenom,
+      eleveNom: eleve.nom,
+      groupeNom: inscription.groupe.nom,
+      profPrenom: (session.user as any).prenom,
+      profNom: (session.user as any).nom,
+      action: "ajoute",
+    });
+
     return NextResponse.json(
       {
         eleve,
@@ -300,4 +329,61 @@ async function checkCapacity(groupeId: string, capaciteMax: number | null) {
   }
 
   return null;
+}
+
+async function notifyAdminsOfStudentAdd(params: {
+  centerId: string;
+  elevePrenom: string;
+  eleveNom: string;
+  profPrenom: string;
+  profNom: string;
+  groupeNom: string;
+  action: "ajoute" | "reactive";
+}) {
+  const admins = await prisma.utilisateur.findMany({
+    where: { role: "admin", centerId: params.centerId, deletedAt: null },
+    select: { id: true },
+  });
+  if (admins.length === 0) return;
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString("fr-FR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+  const heureStr = now.toLocaleTimeString("fr-FR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const nomEleve = `${params.elevePrenom} ${params.eleveNom}`;
+  const nomProf = `${params.profPrenom} ${params.profNom}`;
+  const titre =
+    params.action === "reactive"
+      ? "Élève réinscrit par un prof"
+      : "Nouvel élève ajouté par un prof";
+  const message =
+    params.action === "reactive"
+      ? `${nomEleve} a été réinscrit au groupe « ${params.groupeNom} » par ${nomProf} le ${dateStr} à ${heureStr}.`
+      : `${nomEleve} a été ajouté au groupe « ${params.groupeNom} » par ${nomProf} le ${dateStr} à ${heureStr}.`;
+
+  await prisma.notification.createMany({
+    data: admins.map((admin) => ({
+      centerId: params.centerId,
+      destinataireId: admin.id,
+      titre,
+      message,
+      type: "ajout_eleve_prof",
+    })),
+  });
+
+  await sendPushToUsers(
+    admins.map((admin) => admin.id),
+    { title: titre, body: message, url: "/admin/notifications" }
+  ).catch(() => {});
+
+  logger.info("Notification d'ajout d'élève envoyée aux admins", {
+    centerId: params.centerId,
+    count: admins.length,
+  });
 }

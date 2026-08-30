@@ -114,6 +114,7 @@ export default function NotificationBellDropdown({ role }: { role: string }) {
   const typeIcon = (type: string) => {
     if (type === "inscription_eleve") return <GraduationCap className="h-4 w-4 text-blue-500" />;
     if (type === "inscription_prof") return <UserPlus className="h-4 w-4 text-purple-500" />;
+    if (type === "ajout_eleve_prof") return <UserPlus className="h-4 w-4 text-teal-600" />;
     if (type === "modification_paiement") return <DollarSign className="h-4 w-4 text-orange-500" />;
     if (type === "paiement_recu") return <DollarSign className="h-4 w-4 text-green-500" />;
     if (type === "paiement_eleve") return <DollarSign className="h-4 w-4 text-green-500" />;

@@ -27,6 +27,7 @@ function timeAgo(dateStr: string): string {
 function typeIcon(type: string) {
   if (type === "inscription_eleve") return <GraduationCap className="h-5 w-5 text-blue-500" />;
   if (type === "inscription_prof") return <UserPlus className="h-5 w-5 text-purple-500" />;
+  if (type === "ajout_eleve_prof") return <UserPlus className="h-5 w-5 text-teal-600" />;
   if (type === "modification_paiement") return <DollarSign className="h-5 w-5 text-orange-500" />;
   if (type === "paiement_recu") return <DollarSign className="h-5 w-5 text-green-500" />;
   if (type === "paiement_eleve") return <DollarSign className="h-5 w-5 text-green-500" />;
