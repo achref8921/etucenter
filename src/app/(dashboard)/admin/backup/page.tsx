@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Download, Upload, Database, Trash2, CheckCircle, AlertTriangle, FileJson, RefreshCw } from "lucide-react";
+import { Download, Upload, Database, Trash2, CheckCircle, AlertTriangle, FileSpreadsheet, RefreshCw } from "lucide-react";
+import * as XLSX from "xlsx";
+import { readBackupInfo, workbookToBackupData } from "@/lib/admin-backup-excel";
 
 interface BackupData {
   version: string;
@@ -42,7 +44,7 @@ export default function AdminBackupPage() {
       const disposition = res.headers.get("Content-Disposition");
       const filenameMatch = disposition?.match(/filename="?(.+?)"?$/);
       a.href = url;
-      a.download = filenameMatch?.[1] || `backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = filenameMatch?.[1] || `backup-${new Date().toISOString().slice(0, 10)}.xlsx`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (e: any) {
@@ -59,20 +61,22 @@ export default function AdminBackupPage() {
     const reader = new FileReader();
     reader.onload = (ev) => {
       try {
-        const data = JSON.parse(ev.target?.result as string);
+        const wb = XLSX.read(ev.target?.result as ArrayBuffer, { type: "array" });
+        const info = readBackupInfo(wb);
+        const { stats } = workbookToBackupData(wb);
         setPreview({
-          version: data.version || "unknown",
-          exportedAt: data.exportedAt || "",
-          centre: data.centre || "",
-          centreSlug: data.centreSlug || "",
-          stats: data.stats || {},
+          version: info.version || "1.0",
+          exportedAt: info.exportedAt || "",
+          centre: info.centre || "",
+          centreSlug: info.centreSlug || "",
+          stats: Object.keys(stats).length ? stats : info.stats,
         });
       } catch {
         setPreview(null);
-        alert("Fichier JSON invalide");
+        alert("Fichier Excel invalide");
       }
     };
-    reader.readAsText(f);
+    reader.readAsArrayBuffer(f);
   }
 
   async function handleImport() {
@@ -85,12 +89,12 @@ export default function AdminBackupPage() {
     setImporting(true);
     setResult(null);
     try {
-      const text = await file.text();
-      const data = JSON.parse(text);
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("mode", mode);
       const res = await fetch("/api/admin/backup/restore", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ backup: data, mode }),
+        body: formData,
       });
       const json = await res.json();
       setResult(json);
@@ -136,13 +140,13 @@ export default function AdminBackupPage() {
             </div>
             <div>
               <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Exporter les données</h2>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">Télécharger un fichier JSON avec toutes les données</p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">Télécharger un fichier Excel avec toutes les données</p>
             </div>
           </div>
 
           <div className="rounded-lg bg-blue-50 border border-blue-200 p-4 mb-4 dark:bg-blue-900/10 dark:border-blue-800">
             <p className="text-sm text-blue-700 dark:text-blue-400">
-              Le fichier de backup contient : utilisateurs, groupes, matières, séances, présences, paiements, inscriptions et taux de bénéfice.
+              Le fichier Excel de backup contient : utilisateurs, groupes, matières, séances, présences, paiements, inscriptions et taux de bénéfice (une feuille par type de données).
             </p>
           </div>
 
@@ -168,7 +172,7 @@ export default function AdminBackupPage() {
             </div>
             <div>
               <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Importer les données</h2>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">Restaurer à partir d'un fichier de backup</p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">Restaurer à partir d'un fichier Excel de backup</p>
             </div>
           </div>
 
@@ -176,7 +180,7 @@ export default function AdminBackupPage() {
             <input
               ref={fileRef}
               type="file"
-              accept=".json"
+              accept=".xlsx, .xls"
               onChange={handleFileChange}
               className="hidden"
             />
@@ -184,8 +188,8 @@ export default function AdminBackupPage() {
               onClick={() => fileRef.current?.click()}
               className="w-full flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-neutral-300 bg-neutral-50 px-4 py-6 text-sm font-medium text-neutral-600 hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-700 transition-colors dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-400 dark:hover:border-emerald-500"
             >
-              <FileJson className="h-5 w-5" />
-              {file ? file.name : "Choisir un fichier de backup (.json)"}
+              <FileSpreadsheet className="h-5 w-5" />
+              {file ? file.name : "Choisir un fichier de backup (.xlsx)"}
             </button>
 
             {preview && (

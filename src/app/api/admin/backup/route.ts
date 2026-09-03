@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
+import { buildBackupWorkbook, backupWorkbookToBuffer } from "@/lib/admin-backup-excel";
 
 export async function GET() {
   try {
@@ -91,7 +92,9 @@ export async function GET() {
       tauxPourcentage: Number(t.tauxPourcentage),
     }));
 
-    const backup = {
+    const filename = `backup-${centre?.slug || "centre"}-${new Date().toISOString().slice(0, 10)}.xlsx`;
+
+    const wb = buildBackupWorkbook({
       version: "1.0",
       exportedAt: new Date().toISOString(),
       centre: centre?.name || "Unknown",
@@ -119,14 +122,15 @@ export async function GET() {
         tauxBenefices: cleanTaux.length,
         notifications: notifications.length,
       },
-    };
+    });
 
-    const filename = `backup-${centre?.slug || "centre"}-${new Date().toISOString().slice(0, 10)}.json`;
+    const buffer = backupWorkbookToBuffer(wb);
 
-    return new NextResponse(JSON.stringify(backup, null, 2), {
+    return new NextResponse(new Uint8Array(buffer), {
       headers: {
-        "Content-Type": "application/json; charset=utf-8",
+        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Length": String(buffer.byteLength),
       },
     });
   } catch (error: any) {

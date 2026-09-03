@@ -5,6 +5,9 @@ import { logger } from "@/lib/logger";
 import { rateLimit, getRateLimitKey } from "@/lib/rate-limit";
 import bcrypt from "bcryptjs";
 import { generateTemporaryPassword } from "@/lib/passwords";
+import { backupBufferToWorkbook, workbookToBackupData, BACKUP_SHEET_MAP } from "@/lib/admin-backup-excel";
+
+const MAX_FILE_BYTES = 50 * 1024 * 1024; // limite de 50 Mo pour l'import
 
 const ALLOWED_ROLES = ["admin", "prof", "eleve"] as const;
 const ALLOWED_INSCRIPTION_STATUTS = ["actif", "inactif"] as const;
@@ -30,22 +33,49 @@ export async function POST(request: Request) {
     if (error) return error;
     const centerId = (session.user as any).centerId;
 
-    const body = await request.json();
-    const { backup, mode } = body;
+    const idMap: Record<string, string> = {};
+    const logs: string[] = [];
+    const tempPasswords: { email: string; password: string }[] = [];
+    let created = 0;
+    let skipped = 0;
 
-    if (!backup || !backup.data) {
-      return NextResponse.json({ error: "Fichier de backup invalide" }, { status: 400 });
+    const form = await request.formData();
+    const fileField = form.get("file");
+    const mode = typeof form.get("mode") === "string" ? (form.get("mode") as string) : "merge";
+
+    if (!fileField || !(fileField instanceof File)) {
+      return NextResponse.json({ error: "Fichier de backup manquant" }, { status: 400 });
+    }
+    if (fileField.size <= 0) {
+      return NextResponse.json({ error: "Fichier vide" }, { status: 400 });
+    }
+    if (fileField.size > MAX_FILE_BYTES) {
+      return NextResponse.json({ error: "Fichier trop volumineux (max 50 Mo)" }, { status: 413 });
     }
 
     if (mode !== "merge" && mode !== "full") {
       return NextResponse.json({ error: "Mode invalide (merge ou full attendu)" }, { status: 400 });
     }
 
-    const idMap: Record<string, string> = {};
-    const logs: string[] = [];
-    const tempPasswords: { email: string; password: string }[] = [];
-    let created = 0;
-    let skipped = 0;
+    // Lecture + conversion du classeur Excel vers la structure de données du backup.
+    const buffer = Buffer.from(await fileField.arrayBuffer());
+    let wb;
+    try {
+      wb = backupBufferToWorkbook(buffer);
+    } catch {
+      return NextResponse.json({ error: "Fichier Excel invalide ou corrompu" }, { status: 400 });
+    }
+    const { data, stats } = workbookToBackupData(wb);
+    const backup = { data };
+
+    if (!backup.data) {
+      return NextResponse.json({ error: "Fichier de backup invalide" }, { status: 400 });
+    }
+    logs.push(`Fichier Excel analysé. Feuilles utilisées : ${BACKUP_SHEET_MAP.map((s) => s.sheet).join(", ")}`);
+    const statsSummary = Object.entries(stats)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join(", ");
+    logs.push(`Contenu du backup : ${statsSummary || "aucune donnée"}`);
 
     const result = await prisma.$transaction(async (tx) => {
       if (mode === "merge" || mode === "full") {
