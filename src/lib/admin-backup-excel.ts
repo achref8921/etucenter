@@ -42,6 +42,16 @@ export function buildBackupWorkbook(backup: {
 }): XLSX.WorkBook {
   const wb = XLSX.utils.book_new();
 
+  for (const { sheet, key } of BACKUP_SHEET_MAP) {
+    const rows = backup.data[key] || [];
+    const sheetData = rows.map((r) => serializeRow(r));
+    const ws =
+      sheetData.length > 0
+        ? XLSX.utils.json_to_sheet(sheetData)
+        : XLSX.utils.aoa_to_sheet([["Aucune donnée"]]);
+    XLSX.utils.book_append_sheet(wb, ws, sheet);
+  }
+
   const infoRows: { Champ: string; Valeur: string | number }[] = [
     { Champ: "version", Valeur: backup.version },
     { Champ: "exportedAt", Valeur: backup.exportedAt },
@@ -54,16 +64,6 @@ export function buildBackupWorkbook(backup: {
   }
   const infoSheet = XLSX.utils.json_to_sheet(infoRows);
   XLSX.utils.book_append_sheet(wb, infoSheet, BACKUP_INFO_SHEET);
-
-  for (const { sheet, key } of BACKUP_SHEET_MAP) {
-    const rows = backup.data[key] || [];
-    const sheetData = rows.map((r) => serializeRow(r));
-    const ws =
-      sheetData.length > 0
-        ? XLSX.utils.json_to_sheet(sheetData)
-        : XLSX.utils.aoa_to_sheet([["Aucune donnée"]]);
-    XLSX.utils.book_append_sheet(wb, ws, sheet);
-  }
 
   return wb;
 }
