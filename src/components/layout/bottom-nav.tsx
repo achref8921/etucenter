@@ -63,7 +63,7 @@ export default function BottomNav({ role, variant = "indigo", peutGererEleves }:
   const baseItems = bottomNavItems[role] || [];
   const items =
     role === "prof" && peutGererEleves
-      ? [{ label: "Élèves", href: "/prof/gestion-eleves", icon: UserPlus }, ...baseItems]
+      ? [{ label: "Gestion Élèves", href: "/prof/gestion-eleves", icon: UserPlus }, ...baseItems]
       : baseItems;
   const isActiveFn = (href: string) =>
     pathname === href ||
@@ -97,9 +97,7 @@ export default function BottomNav({ role, variant = "indigo", peutGererEleves }:
                   isActive ? activeColor : "text-neutral-400 dark:text-neutral-500"
                 )}
               />
-              <span className="max-w-full truncate text-[10px] font-medium leading-tight">
-                {item.label}
-              </span>
+              <span className="w-full text-center text-[10px] font-medium leading-tight">{item.label}</span>
             </Link>
           );
         })}
