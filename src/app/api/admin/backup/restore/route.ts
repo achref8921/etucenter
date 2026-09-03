@@ -3,25 +3,10 @@ import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { rateLimit, getRateLimitKey } from "@/lib/rate-limit";
-import bcrypt from "bcryptjs";
-import { generateTemporaryPassword } from "@/lib/passwords";
-import { backupBufferToWorkbook, workbookToBackupData, BACKUP_SHEET_MAP } from "@/lib/admin-backup-excel";
+import { restoreCenterBackup, validateCenterBackup, BACKUP_KIND } from "@/lib/admin-backup-full";
 
-const MAX_FILE_BYTES = 50 * 1024 * 1024; // limite de 50 Mo pour l'import
-
-const ALLOWED_ROLES = ["admin", "prof", "eleve"] as const;
-const ALLOWED_INSCRIPTION_STATUTS = ["actif", "inactif"] as const;
-const ALLOWED_PAIEMENT_METHODES = ["especes", "virement", "cheque", "autre"] as const;
-const ALLOWED_PRESENCE_STATUTS = ["present", "absent"] as const;
-const ALLOWED_STUDENT_TX_TYPES = ["PREPAYMENT", "COURSE_CONSUMPTION", "ADJUSTMENT", "REVERSAL"] as const;
-const ALLOWED_STUDENT_TX_STATUTS = ["active", "reversed"] as const;
-const ALLOWED_TEACHER_TX_TYPES = ["EARNING", "PAYMENT", "ADJUSTMENT", "REVERSAL"] as const;
-const ALLOWED_TEACHER_TX_STATUTS = ["active", "reversed"] as const;
+const MAX_FILE_BYTES = 100 * 1024 * 1024; // limite de 100 Mo pour l'import
 const RESTORE_RATE_LIMIT = { windowMs: 60 * 60 * 1000, max: 5 };
-
-function pickAllowed<T extends readonly string[]>(value: unknown, allowed: T, fallback: T[number]): T[number] {
-  return allowed.includes(value as T[number]) ? (value as T[number]) : fallback;
-}
 
 export async function POST(request: Request) {
   try {
@@ -37,12 +22,6 @@ export async function POST(request: Request) {
     if (error) return error;
     const centerId = (session.user as any).centerId;
 
-    const idMap: Record<string, string> = {};
-    const logs: string[] = [];
-    const tempPasswords: { email: string; password: string }[] = [];
-    let created = 0;
-    let skipped = 0;
-
     const form = await request.formData();
     const fileField = form.get("file");
     const mode = typeof form.get("mode") === "string" ? (form.get("mode") as string) : "merge";
@@ -54,323 +33,54 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Fichier vide" }, { status: 400 });
     }
     if (fileField.size > MAX_FILE_BYTES) {
-      return NextResponse.json({ error: "Fichier trop volumineux (max 50 Mo)" }, { status: 413 });
+      return NextResponse.json({ error: "Fichier trop volumineux (max 100 Mo)" }, { status: 413 });
     }
-
     if (mode !== "merge" && mode !== "full") {
       return NextResponse.json({ error: "Mode invalide (merge ou full attendu)" }, { status: 400 });
     }
 
-    // Lecture + conversion du classeur Excel vers la structure de données du backup.
-    const buffer = Buffer.from(await fileField.arrayBuffer());
-    let wb;
+    const text = await fileField.text();
+    let dump: any;
     try {
-      wb = backupBufferToWorkbook(buffer);
+      dump = JSON.parse(text);
     } catch {
-      return NextResponse.json({ error: "Fichier Excel invalide ou corrompu" }, { status: 400 });
+      return NextResponse.json({ error: "Fichier de backup invalide ou corrompu (JSON illisible)" }, { status: 400 });
     }
-    const { data, stats } = workbookToBackupData(wb);
-    const backup = { data };
 
-    if (!backup.data) {
-      return NextResponse.json({ error: "Fichier de backup invalide" }, { status: 400 });
+    const errors = validateCenterBackup(dump);
+    if (errors.length > 0) {
+      return NextResponse.json({ error: `Fichier de backup invalide : ${errors.join(", ")}` }, { status: 400 });
     }
-    logs.push(`Fichier Excel analysé. Feuilles utilisées : ${BACKUP_SHEET_MAP.map((s) => s.sheet).join(", ")}`);
-    const statsSummary = Object.entries(stats)
-      .map(([k, v]) => `${k}: ${v}`)
-      .join(", ");
-    logs.push(`Contenu du backup : ${statsSummary || "aucune donnée"}`);
 
-    const result = await prisma.$transaction(async (tx) => {
-      if (mode === "merge" || mode === "full") {
-        if (mode === "full") {
-          await tx.presence.deleteMany({ where: { seance: { groupe: { centerId } } } });
-          await tx.paiement.deleteMany({ where: { groupe: { centerId } } });
-          await tx.seance.deleteMany({ where: { groupe: { centerId } } });
-          await tx.inscription.deleteMany({ where: { groupe: { centerId } } });
-          await tx.tauxBenefice.deleteMany({ where: { prof: { centerId } } });
-          await tx.notification.deleteMany({ where: { centerId } });
-          await tx.groupe.deleteMany({ where: { centerId } });
-          await tx.matiere.deleteMany({ where: { centerId } });
-          logs.push("Anciennes données supprimées (mode complet)");
-        }
+    const logs: string[] = [];
+    logs.push(`Fichier ${BACKUP_KIND} analysé (v${dump.schemaVersion}).`);
+    logs.push(`Contenu du backup : ${JSON.stringify(dump.counts || {})}.`);
+    if (dump.centerId && dump.centerId !== centerId) {
+      logs.push(`Attention : ce backup provient du centre « ${dump.centre || ""} » (un autre centre). L'import se fera dans le centre actuel.`);
+    }
 
-        if (backup.data.matieres?.length) {
-          for (const m of backup.data.matieres) {
-            const existing = await tx.matiere.findFirst({ where: { centerId, nom: m.nom } });
-            if (existing) {
-              idMap[m.id] = existing.id;
-              skipped++;
-            } else {
-              const created_ = await tx.matiere.create({
-                data: {
-                  centerId, nom: m.nom, description: m.description || null,
-                },
-              });
-              idMap[m.id] = created_.id;
-              created++;
-            }
-          }
-          logs.push(`Matieres: ${created} créées, ${skipped} ignorées`);
-        }
+    const result = await prisma.$transaction(
+      async (tx) => {
+        return restoreCenterBackup(tx, centerId, dump, mode);
+      },
+      { timeout: 180_000 }
+    );
 
-        let userCreated = 0;
-        let userSkipped = 0;
-        if (backup.data.utilisateurs?.length) {
-          for (const u of backup.data.utilisateurs) {
-            const existing = await tx.utilisateur.findFirst({ where: { email: u.email, centerId } });
-            if (existing) {
-              idMap[u.id] = existing.id;
-              userSkipped++;
-            } else {
-              const safeRole = pickAllowed(u.role, ALLOWED_ROLES, "eleve");
-              let motDePasse: string | null = u.motDePasse || null;
-              let tempPassword: string | null = null;
-              if (!motDePasse) {
-                tempPassword = generateTemporaryPassword();
-                motDePasse = await bcrypt.hash(tempPassword, 12);
-                tempPasswords.push({ email: u.email, password: tempPassword });
-              }
-              const created_ = await tx.utilisateur.create({
-                data: {
-                  centerId, nom: u.nom, prenom: u.prenom, email: u.email,
-                  telephone: u.telephone || null, role: safeRole, actif: u.actif ?? false,
-                  motDePasse, codeEleve: u.codeEleve || null,
-                  niveau: u.niveau || null, classe: u.classe || null,
-                  filiere: u.filiere || null,
-                  dateNaissance: u.dateNaissance ? new Date(u.dateNaissance) : null,
-                },
-              });
-              idMap[u.id] = created_.id;
-              userCreated++;
-            }
-          }
-          logs.push(`Utilisateurs: ${userCreated} créés, ${userSkipped} ignorés`);
-        }
+    logs.push(...result.logs);
 
-        if (backup.data.groupes?.length) {
-          for (const g of backup.data.groupes) {
-            const newProfId = g.profId ? idMap[g.profId] || null : null;
-            const newMatiereId = g.matiereId ? idMap[g.matiereId] || null : null;
-            const existing = await tx.groupe.findFirst({
-              where: { centerId, nom: g.nom },
-            });
-            if (existing) {
-              idMap[g.id] = existing.id;
-            } else {
-              const created_ = await tx.groupe.create({
-                data: {
-                  centerId, nom: g.nom, description: g.description || null,
-                  profId: newProfId, matiereId: newMatiereId,
-                  prixParSeance: g.prixParSeance || 0,
-                  capaciteMax: g.capaciteMax || null,
-                },
-              });
-              idMap[g.id] = created_.id;
-              created++;
-            }
-          }
-          logs.push(`Groupes: créés/mappés`);
-        }
-
-        if (backup.data.seances?.length) {
-          for (const s of backup.data.seances) {
-            const newGroupeId = idMap[s.groupeId];
-            if (!newGroupeId) { skipped++; continue; }
-            const existing = await tx.seance.findFirst({
-              where: { groupeId: newGroupeId, date: new Date(s.date) },
-            });
-            if (existing) {
-              idMap[s.id] = existing.id;
-            } else {
-              const created_ = await tx.seance.create({
-                data: {
-                  groupeId: newGroupeId, date: new Date(s.date),
-                  heureDebut: s.heureDebut ? new Date(s.heureDebut) : null,
-                  heureFin: s.heureFin ? new Date(s.heureFin) : null,
-                  statut: s.statut || "planifiee", notes: s.notes || null,
-                  prixParSeance: s.prixParSeance != null ? Number(s.prixParSeance) : null,
-                },
-              });
-              idMap[s.id] = created_.id;
-              created++;
-            }
-          }
-          logs.push(`Seances: créées/mappées`);
-        }
-
-        if (backup.data.inscriptions?.length) {
-          for (const ins of backup.data.inscriptions) {
-            const newEleveId = idMap[ins.eleveId];
-            const newGroupeId = idMap[ins.groupeId];
-            if (!newEleveId || !newGroupeId) { skipped++; continue; }
-            const existing = await tx.inscription.findUnique({
-              where: { eleveId_groupeId: { eleveId: newEleveId, groupeId: newGroupeId } },
-            });
-            if (!existing) {
-              await tx.inscription.create({
-                data: {
-                  eleveId: newEleveId, groupeId: newGroupeId,
-                  dateInscription: ins.dateInscription ? new Date(ins.dateInscription) : new Date(),
-                  statut: pickAllowed(ins.statut, ALLOWED_INSCRIPTION_STATUTS, "actif"),
-                },
-              });
-              created++;
-            }
-          }
-          logs.push(`Inscriptions: créées`);
-        }
-
-        if (backup.data.presences?.length) {
-          for (const p of backup.data.presences) {
-            const newSeanceId = idMap[p.seanceId];
-            const newEleveId = idMap[p.eleveId];
-            if (!newSeanceId || !newEleveId) { skipped++; continue; }
-            const existing = await tx.presence.findUnique({
-              where: { seanceId_eleveId: { seanceId: newSeanceId, eleveId: newEleveId } },
-            });
-            if (!existing) {
-              await tx.presence.create({
-                data: {
-                  seanceId: newSeanceId, eleveId: newEleveId,
-                  statut: pickAllowed(p.statut, ALLOWED_PRESENCE_STATUTS, "present"),
-                  enregistrePar: p.enregistrePar ? (idMap[p.enregistrePar] || null) : null,
-                },
-              });
-              created++;
-            }
-          }
-          logs.push(`Presences: créées`);
-        }
-
-        if (backup.data.paiements?.length) {
-          for (const pay of backup.data.paiements) {
-            const newEleveId = idMap[pay.eleveId];
-            const newGroupeId = idMap[pay.groupeId];
-            if (!newEleveId || !newGroupeId) { skipped++; continue; }
-            const existing = await tx.paiement.findFirst({
-              where: {
-                eleveId: newEleveId, groupeId: newGroupeId,
-                montant: pay.montant, datePaiement: new Date(pay.datePaiement),
-              },
-            });
-            if (!existing) {
-              await tx.paiement.create({
-                data: {
-                  eleveId: newEleveId, groupeId: newGroupeId,
-                  montant: pay.montant, datePaiement: new Date(pay.datePaiement),
-                  methodePaiement: pickAllowed(pay.methodePaiement, ALLOWED_PAIEMENT_METHODES, "especes"),
-                  reference: pay.reference || null, notes: pay.notes || null,
-                },
-              });
-              created++;
-            }
-          }
-          logs.push(`Paiements: créés`);
-        }
-
-        if (backup.data.tauxBenefices?.length) {
-          for (const tb of backup.data.tauxBenefices) {
-            const newProfId = idMap[tb.profId];
-            if (!newProfId) { skipped++; continue; }
-            const existing = await tx.tauxBenefice.findUnique({ where: { profId: newProfId } });
-            if (!existing) {
-              await tx.tauxBenefice.create({
-                data: { profId: newProfId, tauxPourcentage: tb.tauxPourcentage },
-              });
-              created++;
-            }
-          }
-          logs.push(`Taux benefices: créés`);
-        }
-
-        if (backup.data.studentTransactions?.length) {
-          for (const t of backup.data.studentTransactions) {
-            const newEleveId = idMap[t.eleveId];
-            if (!newEleveId) { skipped++; continue; }
-            const newAttendanceId = t.attendanceId ? (idMap[t.attendanceId] || null) : null;
-            const data: any = {
-              centerId,
-              eleveId: newEleveId,
-              type: pickAllowed(t.type, ALLOWED_STUDENT_TX_TYPES, "PREPAYMENT"),
-              status: pickAllowed(t.status, ALLOWED_STUDENT_TX_STATUTS, "active"),
-              amount: t.amount != null ? Number(t.amount) : 0,
-              signedAmount: t.signedAmount != null ? Number(t.signedAmount) : 0,
-              description: t.description || "",
-              paymentMethod: t.paymentMethod ? pickAllowed(t.paymentMethod, ALLOWED_PAIEMENT_METHODES, "autre") : null,
-              date: t.date ? new Date(t.date) : new Date(),
-              time: t.time ? new Date(t.time) : null,
-              receiptNumber: t.receiptNumber || null,
-              reference: t.reference || null,
-              attendanceId: newAttendanceId,
-              idempotencyKey: t.idempotencyKey ? `restore-${t.idempotencyKey}-${Date.now()}` : null,
-              notes: t.notes || null,
-              createdBy: t.createdBy ? (idMap[t.createdBy] || null) : null,
-              reversalOfId: t.reversalOfId ? (idMap[t.reversalOfId] || null) : null,
-              reversedById: t.reversedById ? (idMap[t.reversedById] || null) : null,
-              reversedAt: t.reversedAt ? new Date(t.reversedAt) : null,
-            };
-            const existing = await tx.studentTransaction.findFirst({
-              where: { centerId, eleveId: newEleveId, date: data.date, signedAmount: data.signedAmount, type: data.type },
-            });
-            if (!existing) {
-              await tx.studentTransaction.create({ data });
-              idMap[t.id] = (await tx.studentTransaction.findFirst({ where: { centerId, eleveId: newEleveId, date: data.date, signedAmount: data.signedAmount, type: data.type } }))!.id;
-              created++;
-            }
-          }
-          logs.push(`Transactions élèves: créées`);
-        }
-
-        if (backup.data.teacherTransactions?.length) {
-          for (const t of backup.data.teacherTransactions) {
-            const newTeacherId = idMap[t.teacherId];
-            if (!newTeacherId) { skipped++; continue; }
-            const data: any = {
-              centerId,
-              teacherId: newTeacherId,
-              type: pickAllowed(t.type, ALLOWED_TEACHER_TX_TYPES, "EARNING"),
-              status: pickAllowed(t.status, ALLOWED_TEACHER_TX_STATUTS, "active"),
-              amount: t.amount != null ? Number(t.amount) : 0,
-              signedAmount: t.signedAmount != null ? Number(t.signedAmount) : 0,
-              description: t.description || "",
-              paymentMethod: t.paymentMethod ? pickAllowed(t.paymentMethod, ALLOWED_PAIEMENT_METHODES, "autre") : null,
-              date: t.date ? new Date(t.date) : new Date(),
-              time: t.time ? new Date(t.time) : null,
-              receiptNumber: t.receiptNumber || null,
-              reference: t.reference || null,
-              notes: t.notes || null,
-              createdBy: t.createdBy ? (idMap[t.createdBy] || null) : null,
-              reversalOfId: t.reversalOfId ? (idMap[t.reversalOfId] || null) : null,
-              reversedById: t.reversedById ? (idMap[t.reversedById] || null) : null,
-              reversedAt: t.reversedAt ? new Date(t.reversedAt) : null,
-            };
-            const existing = await tx.teacherTransaction.findFirst({
-              where: { centerId, teacherId: newTeacherId, date: data.date, signedAmount: data.signedAmount, type: data.type },
-            });
-            if (!existing) {
-              await tx.teacherTransaction.create({ data });
-              created++;
-            }
-          }
-          logs.push(`Transactions professeurs: créées`);
-        }
-      }
-
-      return { created, skipped, logs };
-    });
+    logger.info("Backup admin restauré", { centerId, mode, created: result.created, skipped: result.skipped, tempPasswords: result.tempPasswords.length });
 
     return NextResponse.json({
       success: true,
-      message: `Import terminé: ${result.created} éléments importés, ${result.skipped} ignorés`,
-      logs: result.logs,
+      message: `Import terminé : ${result.created} éléments importés, ${result.skipped} ignorés.`,
+      logs,
       mode,
-      tempPasswords,
+      tempPasswords: result.tempPasswords,
     });
   } catch (error: any) {
     logger.error("Erreur lors de l'import de backup", { error });
     return NextResponse.json(
-      { error: "Erreur lors de l'import des données" },
+      { error: "Erreur lors de l'import des données : " + (error?.message || "") },
       { status: 500 }
     );
   }

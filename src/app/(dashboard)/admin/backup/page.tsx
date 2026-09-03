@@ -1,15 +1,14 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Download, Upload, Database, Trash2, CheckCircle, AlertTriangle, FileSpreadsheet, RefreshCw } from "lucide-react";
-import * as XLSX from "xlsx";
-import { readBackupInfo, workbookToBackupData } from "@/lib/admin-backup-excel";
+import { Download, Upload, Database, Trash2, CheckCircle, AlertTriangle, FileJson, RefreshCw } from "lucide-react";
 
-interface BackupData {
-  version: string;
-  exportedAt: string;
+interface BackupPreview {
+  kind: string;
+  schemaVersion: string;
   centre: string;
   centreSlug: string;
+  exportedAt: string;
   stats: Record<string, number>;
 }
 
@@ -20,11 +19,26 @@ interface RestoreResult {
   mode: string;
 }
 
+const statLabels: Record<string, string> = {
+  utilisateurs: "Utilisateurs",
+  groupes: "Groupes",
+  matieres: "Matieres",
+  seances: "Seances",
+  presences: "Presences",
+  paiements: "Paiements",
+  inscriptions: "Inscriptions",
+  tauxBenefices: "Taux Bénéfices",
+  notifications: "Notifications",
+  studentTransactions: "Transactions élèves",
+  teacherTransactions: "Transactions profs",
+  pushSubscriptions: "Abonnement push",
+};
+
 export default function AdminBackupPage() {
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<BackupData | null>(null);
+  const [preview, setPreview] = useState<BackupPreview | null>(null);
   const [result, setResult] = useState<RestoreResult | null>(null);
   const [mode, setMode] = useState<"merge" | "full">("merge");
   const [confirmFull, setConfirmFull] = useState(false);
@@ -44,7 +58,7 @@ export default function AdminBackupPage() {
       const disposition = res.headers.get("Content-Disposition");
       const filenameMatch = disposition?.match(/filename="?(.+?)"?$/);
       a.href = url;
-      a.download = filenameMatch?.[1] || `backup-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      a.download = filenameMatch?.[1] || `backup-${new Date().toISOString().slice(0, 10)}.educenter`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (e: any) {
@@ -61,22 +75,26 @@ export default function AdminBackupPage() {
     const reader = new FileReader();
     reader.onload = (ev) => {
       try {
-        const wb = XLSX.read(ev.target?.result as ArrayBuffer, { type: "array" });
-        const info = readBackupInfo(wb);
-        const { stats } = workbookToBackupData(wb);
+        const dump = JSON.parse(ev.target?.result as string);
+        if (dump?.kind !== "educenter-center-backup") {
+          setPreview(null);
+          alert("Fichier de backup invalide (type de fichier inconnu).");
+          return;
+        }
         setPreview({
-          version: info.version || "1.0",
-          exportedAt: info.exportedAt || "",
-          centre: info.centre || "",
-          centreSlug: info.centreSlug || "",
-          stats: Object.keys(stats).length ? stats : info.stats,
+          kind: dump.kind,
+          schemaVersion: dump.schemaVersion,
+          centre: dump.centre || "",
+          centreSlug: dump.centreSlug || "",
+          exportedAt: dump.createdAt || "",
+          stats: dump.counts || {},
         });
       } catch {
         setPreview(null);
-        alert("Fichier Excel invalide");
+        alert("Fichier de backup invalide (JSON illisible).");
       }
     };
-    reader.readAsArrayBuffer(f);
+    reader.readAsText(f);
   }
 
   async function handleImport() {
@@ -110,24 +128,12 @@ export default function AdminBackupPage() {
     setConfirmFull(false);
   }
 
-  const statLabels: Record<string, string> = {
-    utilisateurs: "Utilisateurs",
-    groupes: "Groupes",
-    matieres: "Matieres",
-    seances: "Seances",
-    presences: "Presences",
-    paiements: "Paiements",
-    inscriptions: "Inscriptions",
-    tauxBenefices: "Taux Bénéfices",
-    notifications: "Notifications",
-  };
-
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Backup & Restauration</h1>
         <p className="text-sm text-neutral-500 mt-1 dark:text-neutral-400">
-          Sauvegardez et restaurez les données de votre centre
+          Sauvegardez et restaurez la base de données complète de votre centre
         </p>
       </div>
 
@@ -140,13 +146,16 @@ export default function AdminBackupPage() {
             </div>
             <div>
               <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Exporter les données</h2>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">Télécharger un fichier Excel avec toutes les données</p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">Télécharger la sauvegarde complète de votre centre</p>
             </div>
           </div>
 
-          <div className="rounded-lg bg-blue-50 border border-blue-200 p-4 mb-4 dark:bg-blue-900/10 dark:border-blue-800">
-            <p className="text-sm text-blue-700 dark:text-blue-400">
-              Le fichier Excel de backup contient : utilisateurs, groupes, matières, séances, présences, paiements, inscriptions et taux de bénéfice (une feuille par type de données).
+          <div className="rounded-lg bg-amber-50 border border-amber-200 p-4 mb-4 dark:bg-amber-900/10 dark:border-amber-800">
+            <p className="text-sm text-amber-800 dark:text-amber-300">
+              Le fichier <strong>.educenter</strong> contient <strong>toute la base de données du centre</strong> :
+              tous les élèves et professeurs avec leurs mots de passe, les groupes, matières, séances, présences,
+              paiements, inscriptions, taux de bénéfice, notifications, et toutes les transactions financières
+              des élèves et des professeurs.
             </p>
           </div>
 
@@ -172,7 +181,7 @@ export default function AdminBackupPage() {
             </div>
             <div>
               <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Importer les données</h2>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">Restaurer à partir d'un fichier Excel de backup</p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">Restaurer à partir d&apos;un fichier .educenter</p>
             </div>
           </div>
 
@@ -180,7 +189,7 @@ export default function AdminBackupPage() {
             <input
               ref={fileRef}
               type="file"
-              accept=".xlsx, .xls"
+              accept=".educenter, .json, .backup"
               onChange={handleFileChange}
               className="hidden"
             />
@@ -188,8 +197,8 @@ export default function AdminBackupPage() {
               onClick={() => fileRef.current?.click()}
               className="w-full flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-neutral-300 bg-neutral-50 px-4 py-6 text-sm font-medium text-neutral-600 hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-700 transition-colors dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-400 dark:hover:border-emerald-500"
             >
-              <FileSpreadsheet className="h-5 w-5" />
-              {file ? file.name : "Choisir un fichier de backup (.xlsx)"}
+              <FileJson className="h-5 w-5" />
+              {file ? file.name : "Choisir un fichier de backup (.educenter)"}
             </button>
 
             {preview && (
@@ -238,7 +247,7 @@ export default function AdminBackupPage() {
                     className="h-4 w-4 rounded border-red-300 text-red-600 focus:ring-red-500"
                   />
                   <span className="text-xs text-red-700 dark:text-red-400">
-                    Je confirme que toutes les données actuelles seront supprimées avant l&apos;import
+                    Je confirme que toutes les données opérationnelles actuelles seront supprimées avant l&apos;import
                   </span>
                 </label>
               )}
