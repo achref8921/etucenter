@@ -317,11 +317,16 @@ export default function AttendanceRecordingPage() {
             ))}
           </div>
 
-          <div className="flex justify-end">
+          <div className="sticky bottom-0 -mx-px flex items-center justify-between gap-3 rounded-t-xl border border-b-0 border-neutral-200 bg-neutral-50/95 px-4 py-3 backdrop-blur dark:border-[#2a2d35] dark:bg-[#16181d]/95">
+            <p className="text-[13px] text-neutral-500 dark:text-neutral-400">
+              {markedRatio > 0
+                ? `${presentCount + absentCount} sur ${presences.length} marqué${presentCount + absentCount > 1 ? "s" : ""}`
+                : `${presences.length} élève${presences.length > 1 ? "s" : ""} à marquer`}
+            </p>
             <button
               onClick={handleSave}
               disabled={saving || isLocked}
-              className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2 text-[13px] font-medium text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
+              className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
             >
               {saving ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

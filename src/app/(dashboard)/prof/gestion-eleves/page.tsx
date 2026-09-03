@@ -361,102 +361,104 @@ export default function ProfGestionElevesPage() {
       {/* Create modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
-            <div className="mb-4 flex items-center justify-between">
+          <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+            <div className="flex shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
               <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Ajouter un élève</h2>
               <button onClick={() => setShowModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300">
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-3">
-              {modalError && (
-                <div className="flex items-start justify-between gap-2 rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 p-3 text-xs text-red-700 dark:text-red-400">
-                  <span>{modalError}</span>
-                  <button type="button" onClick={() => setModalError(null)} className="text-red-500 hover:text-red-700 dark:hover:text-red-300" aria-label="Fermer">
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              )}
-              <div>
-                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Groupe</label>
-                <select
-                  value={formData.groupeId}
-                  onChange={(e) => setFormData({ ...formData, groupeId: e.target.value })}
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="">-- Sélectionner un groupe --</option>
-                  {groupes.map((g) => {
-                    const count = g.inscriptions.length;
-                    const full = typeof g.capaciteMax === "number" && count >= g.capaciteMax;
-                    return (
-                      <option key={g.id} value={g.id} disabled={full}>
-                        {g.nom} ({count}{g.capaciteMax ? `/${g.capaciteMax}` : ""}){full ? " — complet" : ""}
-                      </option>
-                    );
-                  })}
-                </select>
-                {formErrors.groupeId && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.groupeId}</p>}
-              </div>
-              <div className="grid grid-cols-2 gap-3">
+            <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+              <div className="flex-1 space-y-3 overflow-y-auto px-6 py-4">
+                {modalError && (
+                  <div className="flex items-start justify-between gap-2 rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 p-3 text-xs text-red-700 dark:text-red-400">
+                    <span>{modalError}</span>
+                    <button type="button" onClick={() => setModalError(null)} className="text-red-500 hover:text-red-700 dark:hover:text-red-300" aria-label="Fermer">
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
                 <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Prénom *</label>
-                  <input value={formData.prenom} onChange={(e) => setFormData({ ...formData, prenom: e.target.value })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-                  {formErrors.prenom && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.prenom}</p>}
-                </div>
-                <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Nom *</label>
-                  <input value={formData.nom} onChange={(e) => setFormData({ ...formData, nom: e.target.value })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-                  {formErrors.nom && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.nom}</p>}
-                </div>
-              </div>
-              <div>
-                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Téléphone</label>
-                <input value={formData.telephone} onChange={(e) => setFormData({ ...formData, telephone: e.target.value })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-              </div>
-              <div>
-                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Email (optionnel)</label>
-                <input value={formData.email} onChange={(e) => { setFormData({ ...formData, email: e.target.value }); if (formErrors.email) { const next = { ...formErrors }; delete next.email; setFormErrors(next); } }} type="email" className={`w-full rounded-lg border ${formErrors.email ? "border-red-500" : "border-neutral-200 dark:border-[#2a2d35]"} bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500`} />
-                {formErrors.email && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.email}</p>}
-              </div>
-              <div>
-                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">
-                  Mot de passe initial <span className="text-neutral-400 dark:text-neutral-500">(optionnel — généré automatiquement si vide)</span>
-                </label>
-                <PasswordInput value={formData.motDePasse} onChange={(e) => setFormData({ ...formData, motDePasse: e.target.value })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-                {formErrors.motDePasse && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.motDePasse}</p>}
-                <p className="mt-1 text-[11px] text-neutral-400 dark:text-neutral-500">
-                  Minimum 6 caractères. L'élève pourra se connecter avec son email et ce mot de passe.
-                </p>
-              </div>
-              <div>
-                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Niveau</label>
-                <select value={formData.niveau} onChange={(e) => setFormData({ ...formData, niveau: e.target.value, classe: "", filiere: "" })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                  <option value="">-- Sélectionner --</option>
-                  <option value="primaire">Primaire</option>
-                  <option value="college">Collège</option>
-                  <option value="lycee">Lycée</option>
-                </select>
-              </div>
-              {formData.niveau && (
-                <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Classe</label>
-                  <select value={formData.classe} onChange={(e) => setFormData({ ...formData, classe: e.target.value, filiere: "" })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                    <option value="">-- Sélectionner --</option>
-                    {(classesByNiveau[formData.niveau] || []).map((c) => <option key={c} value={c}>{c}</option>)}
+                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Groupe</label>
+                  <select
+                    value={formData.groupeId}
+                    onChange={(e) => setFormData({ ...formData, groupeId: e.target.value })}
+                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    <option value="">-- Sélectionner un groupe --</option>
+                    {groupes.map((g) => {
+                      const count = g.inscriptions.length;
+                      const full = typeof g.capaciteMax === "number" && count >= g.capaciteMax;
+                      return (
+                        <option key={g.id} value={g.id} disabled={full}>
+                          {g.nom} ({count}{g.capaciteMax ? `/${g.capaciteMax}` : ""}){full ? " — complet" : ""}
+                        </option>
+                      );
+                    })}
                   </select>
-                  {formErrors.classe && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.classe}</p>}
+                  {formErrors.groupeId && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.groupeId}</p>}
                 </div>
-              )}
-              {formData.niveau === "lycee" && ["2ème", "3ème", "Bac"].includes(formData.classe) && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Prénom *</label>
+                    <input value={formData.prenom} onChange={(e) => setFormData({ ...formData, prenom: e.target.value })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                    {formErrors.prenom && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.prenom}</p>}
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Nom *</label>
+                    <input value={formData.nom} onChange={(e) => setFormData({ ...formData, nom: e.target.value })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                    {formErrors.nom && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.nom}</p>}
+                  </div>
+                </div>
                 <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Filière</label>
-                  <select value={formData.filiere} onChange={(e) => setFormData({ ...formData, filiere: e.target.value })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Téléphone</label>
+                  <input value={formData.telephone} onChange={(e) => setFormData({ ...formData, telephone: e.target.value })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Email (optionnel)</label>
+                  <input value={formData.email} onChange={(e) => { setFormData({ ...formData, email: e.target.value }); if (formErrors.email) { const next = { ...formErrors }; delete next.email; setFormErrors(next); } }} type="email" className={`w-full rounded-lg border ${formErrors.email ? "border-red-500" : "border-neutral-200 dark:border-[#2a2d35]"} bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500`} />
+                  {formErrors.email && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.email}</p>}
+                </div>
+                <div>
+                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">
+                    Mot de passe initial <span className="text-neutral-400 dark:text-neutral-500">(optionnel — généré automatiquement si vide)</span>
+                  </label>
+                  <PasswordInput value={formData.motDePasse} onChange={(e) => setFormData({ ...formData, motDePasse: e.target.value })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  {formErrors.motDePasse && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.motDePasse}</p>}
+                  <p className="mt-1 text-[11px] text-neutral-400 dark:text-neutral-500">
+                    Minimum 6 caractères. L'élève pourra se connecter avec son email et ce mot de passe.
+                  </p>
+                </div>
+                <div>
+                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Niveau</label>
+                  <select value={formData.niveau} onChange={(e) => setFormData({ ...formData, niveau: e.target.value, classe: "", filiere: "" })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
                     <option value="">-- Sélectionner --</option>
-                    {filieres.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
+                    <option value="primaire">Primaire</option>
+                    <option value="college">Collège</option>
+                    <option value="lycee">Lycée</option>
                   </select>
                 </div>
-              )}
-              <div className="flex justify-end gap-3 pt-2">
+                {formData.niveau && (
+                  <div>
+                    <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Classe</label>
+                    <select value={formData.classe} onChange={(e) => setFormData({ ...formData, classe: e.target.value, filiere: "" })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                      <option value="">-- Sélectionner --</option>
+                      {(classesByNiveau[formData.niveau] || []).map((c) => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    {formErrors.classe && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.classe}</p>}
+                  </div>
+                )}
+                {formData.niveau === "lycee" && ["2ème", "3ème", "Bac"].includes(formData.classe) && (
+                  <div>
+                    <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Filière</label>
+                    <select value={formData.filiere} onChange={(e) => setFormData({ ...formData, filiere: e.target.value })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                      <option value="">-- Sélectionner --</option>
+                      {filieres.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
+                    </select>
+                  </div>
+                )}
+              </div>
+              <div className="flex shrink-0 items-center justify-end gap-3 border-t border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
                 <button type="button" onClick={() => setShowModal(false)} className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]">Annuler</button>
                 <button type="submit" disabled={submitting} className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700 disabled:opacity-50">
                   {submitting && <Loader2 className="h-4 w-4 animate-spin" />} Insérer au groupe

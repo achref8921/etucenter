@@ -1002,9 +1002,9 @@ export default function FinancesPage() {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-lg rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6shadow-xl">
-            <div className="mb-4 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-0 shadow-xl">
+            <div className="flex shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
               <h2 className="text-lg font-semibold">Enregistrer un paiement</h2>
               <button
                 onClick={() => setShowModal(false)}
@@ -1013,7 +1013,8 @@ export default function FinancesPage() {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+              <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
               <div className="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-3">
                 <p className="mb-2 text-xs font-semibold uppercase text-blue-600 dark:text-blue-400">Filtrer par classe</p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -1204,7 +1205,8 @@ export default function FinancesPage() {
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-2">
+              </div>
+              <div className="flex shrink-0 items-center justify-end gap-3 border-t border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
@@ -1227,60 +1229,63 @@ export default function FinancesPage() {
       )}
 
       {editModal && editPaiement && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6shadow-xl">
-            <div className="mb-4 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-0 shadow-xl">
+            <div className="flex shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
               <h2 className="text-lg font-semibold">Modifier le paiement</h2>
               <button onClick={() => setEditModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="mb-4 rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3 text-sm">
-              <p className="text-neutral-600 dark:text-neutral-400">
-                <span className="font-medium">{editPaiement.eleve.prenom} {editPaiement.eleve.nom}</span>
-                {" — "}
-                {editPaiement.groupe.nom}
-              </p>
-              <p className="mt-1 text-neutral-500 dark:text-neutral-400">
-                Montant actuel: <span className="font-semibold text-neutral-900 dark:text-neutral-100">{formatCurrency(editPaiement.montant)}</span>
-              </p>
+            <div className="shrink-0 border-b border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
+              <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3 text-sm">
+                <p className="text-neutral-600 dark:text-neutral-400">
+                  <span className="font-medium">{editPaiement.eleve.prenom} {editPaiement.eleve.nom}</span>
+                  {" — "}
+                  {editPaiement.groupe.nom}
+                </p>
+                <p className="mt-1 text-neutral-500 dark:text-neutral-400">
+                  Montant actuel: <span className="font-semibold text-neutral-900 dark:text-neutral-100">{formatCurrency(editPaiement.montant)}</span>
+                </p>
+              </div>
             </div>
 
-            <form onSubmit={handleEditSubmit} className="space-y-4">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Nouveau montant (DT)</label>
-                <input
-                  type="number"
-                  value={editMontant || ""}
-                  onChange={(e) => setEditMontant(Number(e.target.value))}
-                  min={0}
-                  required
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
-                />
-                {editMontant !== Number(editPaiement.montant) && (
-                  <p className={`mt-1 text-xs ${editMontant > Number(editPaiement.montant) ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
-                    {editMontant > Number(editPaiement.montant) ? "+" : ""}
-                    {editMontant - Number(editPaiement.montant)} DT
-                  </p>
-                )}
-              </div>
+            <form onSubmit={handleEditSubmit} className="flex min-h-0 flex-1 flex-col">
+              <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Nouveau montant (DT)</label>
+                  <input
+                    type="number"
+                    value={editMontant || ""}
+                    onChange={(e) => setEditMontant(Number(e.target.value))}
+                    min={0}
+                    required
+                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  />
+                  {editMontant !== Number(editPaiement.montant) && (
+                    <p className={`mt-1 text-xs ${editMontant > Number(editPaiement.montant) ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                      {editMontant > Number(editPaiement.montant) ? "+" : ""}
+                      {editMontant - Number(editPaiement.montant)} DT
+                    </p>
+                  )}
+                </div>
 
-              <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                  Raison de la modification <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  value={editRaison}
-                  onChange={(e) => setEditRaison(e.target.value)}
-                  rows={3}
-                  required
-                  placeholder="Expliquez la raison de cette modification..."
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
-                />
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                    Raison de la modification <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={editRaison}
+                    onChange={(e) => setEditRaison(e.target.value)}
+                    rows={3}
+                    required
+                    placeholder="Expliquez la raison de cette modification..."
+                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  />
+                </div>
               </div>
-
-              <div className="flex justify-end gap-3 pt-2">
+              <div className="flex shrink-0 items-center justify-end gap-3 border-t border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
                 <button
                   type="button"
                   onClick={() => setEditModal(false)}
@@ -1303,9 +1308,9 @@ export default function FinancesPage() {
       )}
 
       {showCreditModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-lg rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6shadow-xl">
-            <div className="mb-4 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-0 shadow-xl">
+            <div className="flex shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
               <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
                 Ajouter un crédit
               </h2>
@@ -1316,7 +1321,8 @@ export default function FinancesPage() {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <form onSubmit={handleCreditSubmit} className="space-y-4">
+            <form onSubmit={handleCreditSubmit} className="flex min-h-0 flex-1 flex-col">
+              <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
               <div>
                 <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                   Élève
@@ -1501,7 +1507,8 @@ export default function FinancesPage() {
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-2">
+              </div>
+              <div className="flex shrink-0 items-center justify-end gap-3 border-t border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
                 <button
                   type="button"
                   onClick={() => setShowCreditModal(false)}
@@ -1524,9 +1531,9 @@ export default function FinancesPage() {
       )}
 
       {showDetail && detailTx && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6shadow-xl">
-            <div className="mb-4 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-0 shadow-xl">
+            <div className="flex shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
               <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
                 Détails de la transaction
               </h2>
@@ -1537,7 +1544,7 @@ export default function FinancesPage() {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="space-y-3 text-sm">
+            <div className="flex-1 space-y-3 overflow-y-auto px-6 py-4 text-sm">
               <div className="flex justify-between">
                 <span className="text-neutral-500 dark:text-neutral-400">Type</span>
                 <span className="font-medium">{TYPE_LABEL[detailTx.type] || detailTx.type}</span>
@@ -1618,7 +1625,7 @@ export default function FinancesPage() {
                 <span className="font-medium">{new Date(detailTx.createdAt).toLocaleString("fr-FR")}</span>
               </div>
             </div>
-            <div className="mt-5 flex justify-end">
+            <div className="flex shrink-0 items-center justify-end border-t border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
               <button
                 onClick={() => openReceipt(detailTx)}
                 className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700"
@@ -1632,9 +1639,9 @@ export default function FinancesPage() {
       )}
 
       {showReverseModal && reverseTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6shadow-xl">
-            <div className="mb-4 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-0 shadow-xl">
+            <div className="flex shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
               <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
                 Annuler la transaction
               </h2>
@@ -1645,27 +1652,29 @@ export default function FinancesPage() {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="mb-4 rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3 text-sm">
-              <p className="font-medium text-neutral-900 dark:text-neutral-100">
-                {TYPE_LABEL[reverseTarget.type] || reverseTarget.type} —{" "}
-                {formatCurrency(Math.abs(reverseTarget.signedAmount))}
-              </p>
-              <p className="mt-1 text-neutral-600 dark:text-neutral-400">{reverseTarget.description || "—"}</p>
+            <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
+              <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3 text-sm">
+                <p className="font-medium text-neutral-900 dark:text-neutral-100">
+                  {TYPE_LABEL[reverseTarget.type] || reverseTarget.type} —{" "}
+                  {formatCurrency(Math.abs(reverseTarget.signedAmount))}
+                </p>
+                <p className="mt-1 text-neutral-600 dark:text-neutral-400">{reverseTarget.description || "—"}</p>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                  Raison de l&apos;annulation
+                </label>
+                <textarea
+                  value={reverseReason}
+                  onChange={(e) => setReverseReason(e.target.value)}
+                  rows={3}
+                  required
+                  placeholder="Ex : Erreur de saisie, annulation du paiement..."
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
+                />
+              </div>
             </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                Raison de l&apos;annulation
-              </label>
-              <textarea
-                value={reverseReason}
-                onChange={(e) => setReverseReason(e.target.value)}
-                rows={3}
-                required
-                placeholder="Ex : Erreur de saisie, annulation du paiement..."
-                className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
-              />
-            </div>
-            <div className="mt-5 flex justify-end gap-3">
+            <div className="flex shrink-0 items-center justify-end gap-3 border-t border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
               <button
                 onClick={() => setShowReverseModal(false)}
                 className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
