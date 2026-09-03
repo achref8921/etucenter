@@ -240,6 +240,18 @@ export async function restoreCenterBackup(
       userSkipped++;
       continue;
     }
+    // email est UNIQUE au niveau mondial : s'il est déjà pris par un autre centre, on ne crée
+    // pas ce compte (éviter une violation d'unicité qui annulerait toute la transaction)
+    const emailTaken = await tx.utilisateur.findFirst({
+      where: { email: u.email },
+      select: { id: true, centerId: true },
+    });
+    if (emailTaken) {
+      logs.push(`Compte « ${u.email} » ignoré : cet e-mail existe déjà (centre ${emailTaken.centerId}).`);
+      skipped++;
+      userSkipped++;
+      continue;
+    }
     const safeRole = pick(u.role, ALLOWED_ROLES, "eleve");
     let motDePasse: string | null =
       typeof u.motDePasse === "string" && u.motDePasse.startsWith("$2") ? u.motDePasse : null;
