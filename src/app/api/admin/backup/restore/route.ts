@@ -13,6 +13,10 @@ const ALLOWED_ROLES = ["admin", "prof", "eleve"] as const;
 const ALLOWED_INSCRIPTION_STATUTS = ["actif", "inactif"] as const;
 const ALLOWED_PAIEMENT_METHODES = ["especes", "virement", "cheque", "autre"] as const;
 const ALLOWED_PRESENCE_STATUTS = ["present", "absent"] as const;
+const ALLOWED_STUDENT_TX_TYPES = ["PREPAYMENT", "COURSE_CONSUMPTION", "ADJUSTMENT", "REVERSAL"] as const;
+const ALLOWED_STUDENT_TX_STATUTS = ["active", "reversed"] as const;
+const ALLOWED_TEACHER_TX_TYPES = ["EARNING", "PAYMENT", "ADJUSTMENT", "REVERSAL"] as const;
+const ALLOWED_TEACHER_TX_STATUTS = ["active", "reversed"] as const;
 const RESTORE_RATE_LIMIT = { windowMs: 60 * 60 * 1000, max: 5 };
 
 function pickAllowed<T extends readonly string[]>(value: unknown, allowed: T, fallback: T[number]): T[number] {
@@ -278,6 +282,78 @@ export async function POST(request: Request) {
             }
           }
           logs.push(`Taux benefices: créés`);
+        }
+
+        if (backup.data.studentTransactions?.length) {
+          for (const t of backup.data.studentTransactions) {
+            const newEleveId = idMap[t.eleveId];
+            if (!newEleveId) { skipped++; continue; }
+            const newAttendanceId = t.attendanceId ? (idMap[t.attendanceId] || null) : null;
+            const data: any = {
+              centerId,
+              eleveId: newEleveId,
+              type: pickAllowed(t.type, ALLOWED_STUDENT_TX_TYPES, "PREPAYMENT"),
+              status: pickAllowed(t.status, ALLOWED_STUDENT_TX_STATUTS, "active"),
+              amount: t.amount != null ? Number(t.amount) : 0,
+              signedAmount: t.signedAmount != null ? Number(t.signedAmount) : 0,
+              description: t.description || "",
+              paymentMethod: t.paymentMethod ? pickAllowed(t.paymentMethod, ALLOWED_PAIEMENT_METHODES, "autre") : null,
+              date: t.date ? new Date(t.date) : new Date(),
+              time: t.time ? new Date(t.time) : null,
+              receiptNumber: t.receiptNumber || null,
+              reference: t.reference || null,
+              attendanceId: newAttendanceId,
+              idempotencyKey: t.idempotencyKey ? `restore-${t.idempotencyKey}-${Date.now()}` : null,
+              notes: t.notes || null,
+              createdBy: t.createdBy ? (idMap[t.createdBy] || null) : null,
+              reversalOfId: t.reversalOfId ? (idMap[t.reversalOfId] || null) : null,
+              reversedById: t.reversedById ? (idMap[t.reversedById] || null) : null,
+              reversedAt: t.reversedAt ? new Date(t.reversedAt) : null,
+            };
+            const existing = await tx.studentTransaction.findFirst({
+              where: { centerId, eleveId: newEleveId, date: data.date, signedAmount: data.signedAmount, type: data.type },
+            });
+            if (!existing) {
+              await tx.studentTransaction.create({ data });
+              idMap[t.id] = (await tx.studentTransaction.findFirst({ where: { centerId, eleveId: newEleveId, date: data.date, signedAmount: data.signedAmount, type: data.type } }))!.id;
+              created++;
+            }
+          }
+          logs.push(`Transactions élèves: créées`);
+        }
+
+        if (backup.data.teacherTransactions?.length) {
+          for (const t of backup.data.teacherTransactions) {
+            const newTeacherId = idMap[t.teacherId];
+            if (!newTeacherId) { skipped++; continue; }
+            const data: any = {
+              centerId,
+              teacherId: newTeacherId,
+              type: pickAllowed(t.type, ALLOWED_TEACHER_TX_TYPES, "EARNING"),
+              status: pickAllowed(t.status, ALLOWED_TEACHER_TX_STATUTS, "active"),
+              amount: t.amount != null ? Number(t.amount) : 0,
+              signedAmount: t.signedAmount != null ? Number(t.signedAmount) : 0,
+              description: t.description || "",
+              paymentMethod: t.paymentMethod ? pickAllowed(t.paymentMethod, ALLOWED_PAIEMENT_METHODES, "autre") : null,
+              date: t.date ? new Date(t.date) : new Date(),
+              time: t.time ? new Date(t.time) : null,
+              receiptNumber: t.receiptNumber || null,
+              reference: t.reference || null,
+              notes: t.notes || null,
+              createdBy: t.createdBy ? (idMap[t.createdBy] || null) : null,
+              reversalOfId: t.reversalOfId ? (idMap[t.reversalOfId] || null) : null,
+              reversedById: t.reversedById ? (idMap[t.reversedById] || null) : null,
+              reversedAt: t.reversedAt ? new Date(t.reversedAt) : null,
+            };
+            const existing = await tx.teacherTransaction.findFirst({
+              where: { centerId, teacherId: newTeacherId, date: data.date, signedAmount: data.signedAmount, type: data.type },
+            });
+            if (!existing) {
+              await tx.teacherTransaction.create({ data });
+              created++;
+            }
+          }
+          logs.push(`Transactions professeurs: créées`);
         }
       }
 

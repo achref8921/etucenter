@@ -13,6 +13,8 @@ export const BACKUP_SHEET_MAP: { sheet: string; key: string }[] = [
   { sheet: "Inscriptions", key: "inscriptions" },
   { sheet: "TauxBenefices", key: "tauxBenefices" },
   { sheet: "Notifications", key: "notifications" },
+  { sheet: "TransactionsEleves", key: "studentTransactions" },
+  { sheet: "TransactionsProfesseurs", key: "teacherTransactions" },
 ];
 
 // Convertit les valeurs (Date -> ISO, Decimal -> number) pour un stockage Excel fiable.
