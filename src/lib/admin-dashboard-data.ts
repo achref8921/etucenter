@@ -204,3 +204,63 @@ export async function getAdminDashboardMonthData(
     profs: profsData,
   };
 }
+
+export interface TodaySeance {
+  id: string;
+  date: string;
+  heureDebut: string | null;
+  heureFin: string | null;
+  statut: string;
+  notes: string | null;
+  prixParSeance: number | null;
+  groupe: { id: string; nom: string; matiere: { nom: string } | null };
+  prof: { id: string; nom: string; prenom: string } | null;
+  elevesCount: number;
+}
+
+export async function getAdminTodaySeances(centerId: string): Promise<TodaySeance[]> {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  const end = new Date();
+  end.setHours(23, 59, 59, 999);
+
+  const seances = await prisma.seance.findMany({
+    where: {
+      date: { gte: start, lte: end },
+      groupe: { centerId },
+      statut: { not: "annulee" },
+    },
+    select: {
+      id: true,
+      date: true,
+      heureDebut: true,
+      heureFin: true,
+      statut: true,
+      notes: true,
+      prixParSeance: true,
+      groupe: {
+        select: {
+          id: true,
+          nom: true,
+          matiere: { select: { nom: true } },
+          prof: { select: { id: true, nom: true, prenom: true } },
+        },
+      },
+      _count: { select: { presences: true } },
+    },
+    orderBy: [{ heureDebut: "asc" }, { createdAt: "desc" }],
+  });
+
+  return seances.map((s) => ({
+    id: s.id,
+    date: s.date.toISOString(),
+    heureDebut: s.heureDebut ? s.heureDebut.toISOString() : null,
+    heureFin: s.heureFin ? s.heureFin.toISOString() : null,
+    statut: s.statut,
+    notes: s.notes,
+    prixParSeance: s.prixParSeance ? Number(s.prixParSeance) : null,
+    groupe: { id: s.groupe.id, nom: s.groupe.nom, matiere: s.groupe.matiere },
+    prof: s.groupe.prof,
+    elevesCount: s._count.presences,
+  }));
+}

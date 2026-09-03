@@ -8,12 +8,34 @@ import {
   Users,
   GraduationCap,
   Banknote,
+  CalendarDays,
+  Clock,
+  UserRound,
+  CheckCircle2,
+  Circle,
 } from "lucide-react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { formatCurrency } from "@/lib/utils";
-import { getAdminDashboardMonthData } from "@/lib/admin-dashboard-data";
+import {
+  getAdminDashboardMonthData,
+  getAdminTodaySeances,
+} from "@/lib/admin-dashboard-data";
 import { MonthSelector } from "@/components/month-selector";
+
+const SEANCE_STATUT_LABEL: Record<string, string> = {
+  planifiee: "Planifiée",
+  en_cours: "En cours",
+  terminee: "Terminée",
+  annulee: "Annulée",
+};
+
+function formatTime(iso: string | null): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "—";
+  return d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+}
 
 function getCurrentMonth(): string {
   const now = new Date();
@@ -24,6 +46,13 @@ async function DashboardContent({ month }: { month: string }) {
   const session = await getServerSession(authOptions);
   const centerId = (session?.user as any)?.centerId;
   const data = await getAdminDashboardMonthData(centerId, month);
+  const todaySeances = await getAdminTodaySeances(centerId);
+
+  const todayLabel = new Date().toLocaleDateString("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
 
   return (
     <>
@@ -110,6 +139,93 @@ async function DashboardContent({ month }: { month: string }) {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 px-5 py-3 dark:border-[#2a2d35]">
+          <div className="flex items-center gap-2">
+            <CalendarDays className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />
+            <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+              Séances d'aujourd'hui
+            </h2>
+            <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400">
+              {todaySeances.length}
+            </span>
+          </div>
+          <p className="text-[12px] capitalize text-neutral-400 dark:text-neutral-500">{todayLabel}</p>
+        </div>
+
+        {todaySeances.length === 0 ? (
+          <div className="px-5 py-8 text-center text-[13px] text-neutral-400 dark:text-neutral-500">
+            Aucune séance enregistrée par les professeurs pour aujourd'hui.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-[13px]">
+              <thead>
+                <tr className="border-b border-neutral-100 dark:border-[#2a2d35]">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Heure</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Professeur</th>
+                  <th className="px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Présents</th>
+                  <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Statut</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+                {todaySeances.map((s) => (
+                  <tr key={s.id} className="transition-colors hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
+                    <td className="whitespace-nowrap px-4 py-2.5">
+                      <span className="inline-flex items-center gap-1 font-medium text-neutral-900 dark:text-neutral-100">
+                        <Clock className="h-3.5 w-3.5 text-neutral-400" />
+                        {formatTime(s.heureDebut)}
+                        {s.heureFin ? <span className="text-neutral-400">– {formatTime(s.heureFin)}</span> : null}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <p className="font-medium text-neutral-900 dark:text-neutral-100">{s.groupe.nom}</p>
+                      {s.groupe.matiere && (
+                        <p className="text-[11px] text-neutral-400 dark:text-neutral-500">{s.groupe.matiere.nom}</p>
+                      )}
+                    </td>
+                    <td className="px-4 py-2.5">
+                      {s.prof ? (
+                        <span className="inline-flex items-center gap-1.5 text-neutral-700 dark:text-neutral-300">
+                          <UserRound className="h-3.5 w-3.5 text-neutral-400" />
+                          {s.prof.prenom} {s.prof.nom}
+                        </span>
+                      ) : (
+                        <span className="text-[12px] text-neutral-400 dark:text-neutral-500">Sans professeur</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-2.5 text-center tabular-nums text-neutral-700 dark:text-neutral-300">
+                      {s.elevesCount}
+                    </td>
+                    <td className="px-4 py-2.5 text-right">
+                      <span
+                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                          s.statut === "terminee"
+                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400"
+                            : s.statut === "en_cours"
+                              ? "bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400"
+                              : "bg-neutral-100 text-neutral-600 dark:bg-[#1e2128] dark:text-neutral-300"
+                        }`}
+                      >
+                        {s.statut === "terminee" ? (
+                          <CheckCircle2 className="h-3 w-3" />
+                        ) : s.statut === "en_cours" ? (
+                          <Circle className="h-3 w-3 animate-pulse" />
+                        ) : (
+                          <Circle className="h-3 w-3" />
+                        )}
+                        {SEANCE_STATUT_LABEL[s.statut] || s.statut}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {data.profs.length > 0 && (
