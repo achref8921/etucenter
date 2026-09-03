@@ -17,6 +17,7 @@ interface RestoreResult {
   message: string;
   logs: string[];
   mode: string;
+  tempPasswords?: { email: string; password: string }[];
 }
 
 const statLabels: Record<string, string> = {
@@ -294,6 +295,20 @@ export default function AdminBackupPage() {
                   <li key={i} className="text-sm text-neutral-600 dark:text-neutral-400 flex items-center gap-2">
                     <span className="h-1.5 w-1.5 rounded-full bg-neutral-400 flex-shrink-0" />
                     {log}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {result.tempPasswords && result.tempPasswords.length > 0 && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/10">
+              <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 mb-2">
+                Mots de passe temporaires générés pour les comptes importés (sans mot de passe dans la sauvegarde) :
+              </p>
+              <ul className="space-y-1">
+                {result.tempPasswords.map((t, i) => (
+                  <li key={i} className="text-sm text-amber-800 dark:text-amber-300 font-mono">
+                    {t.email} — {t.password}
                   </li>
                 ))}
               </ul>
