@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import Providers from "@/components/providers";
 import PwaRegister from "@/components/pwa-register";
 import PushSetup from "@/components/push-setup";
+import OfflineBanner from "@/components/offline-banner";
 import "./globals.css";
 
 const inter = Inter({
@@ -49,6 +50,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <Providers>
+          <OfflineBanner />
           {children}
           <PwaRegister />
           <PushSetup />
