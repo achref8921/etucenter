@@ -1,79 +1,33 @@
-const CACHE = "etucenter-v4";
+const CACHE = "etucenter-v5";
 const STATIC_EXT = /\.(css|js|mjs|png|jpe?g|svg|ico|webp|woff2?|ttf|webmanifest)$/i;
-const PRECACHE_URLS = ["/offline.html", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png"];
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
   event.waitUntil(
-    (async () => {
-      const cache = await caches.open(CACHE);
-      await Promise.all(
-        PRECACHE_URLS.map((u) =>
-          fetch(u, { credentials: "same-origin" })
-            .then((r) => { if (r.ok) return cache.put(u, r); })
-            .catch(() => {})
+    caches.open(CACHE).then((cache) =>
+      Promise.allSettled(
+        ["/offline.html", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png"].map((u) =>
+          fetch(u, { credentials: "same-origin" }).then((r) => {
+            if (r.ok) return cache.put(u, r);
+          })
         )
-      );
-    })()
+      )
+    )
   );
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    (async () => {
-      const keys = await caches.keys();
-      await Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)));
-      await self.clients.claim();
-    })()
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
+    ).then(() => self.clients.claim())
   );
 });
 
 function notifyClients(url) {
-  self.clients
-    .matchAll({ type: "window", includeUncontrolled: true })
-    .then((c) => c.forEach((cl) => cl.postMessage({ type: "OFFLINE_SERVE", url })))
-    .catch(() => {});
-}
-
-async function networkFirst(request) {
-  const cache = await caches.open(CACHE);
-  try {
-    const response = await fetch(request);
-    if (response && response.ok) {
-      cache.put(request, response.clone());
-    }
-    return response;
-  } catch {
-    const cached = await cache.match(request);
-    if (cached) {
-      notifyClients(request.url);
-      return cached;
-    }
-    return null;
-  }
-}
-
-async function cacheFirst(request) {
-  const cache = await caches.open(CACHE);
-  const cached = await cache.match(request);
-  if (cached) return cached;
-  try {
-    const response = await fetch(request);
-    if (response && response.ok) {
-      cache.put(request, response.clone());
-    }
-    return response;
-  } catch {
-    return null;
-  }
-}
-
-async function offlinePage() {
-  const cache = await caches.open(CACHE);
-  return (await cache.match("/offline.html")) || new Response("Hors ligne", {
-    status: 503,
-    headers: { "Content-Type": "text/plain; charset=utf-8" },
-  });
+  self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((c) =>
+    c.forEach((cl) => cl.postMessage({ type: "OFFLINE_SERVE", url }))
+  ).catch(() => {});
 }
 
 self.addEventListener("fetch", (event) => {
@@ -83,42 +37,33 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  // API : network-first, cache en repli
-  if (url.pathname.startsWith("/api/")) {
-    event.respondWith(
-      networkFirst(request).then((r) => {
-        if (r) return r;
-        return new Response(JSON.stringify({ error: "Hors ligne", offline: true }), {
-          status: 503,
-          headers: { "Content-Type": "application/json; charset=utf-8" },
-        });
-      })
-    );
-    return;
-  }
+  const key = url.pathname + url.search;
 
-  // Fichiers statiques : cache-first
-  if (STATIC_EXT.test(url.pathname)) {
-    event.respondWith(
-      cacheFirst(request).then((r) => {
-        if (r) return r;
-        return new Response("", { status: 503 });
-      })
-    );
-    return;
-  }
-
-  // Pages et navigation : network-first, cache, sinon page hors ligne
   event.respondWith(
-    networkFirst(request).then((r) => {
-      if (r) return r;
-      // Tentative de servir depuis le cache générique
-      return caches.open(CACHE).then((cache) => cache.match(request)).then((c) => {
-        if (c) { notifyClients(url.pathname); return c; }
-        // Pour toute navigation (premiere ouverture offline), montrer la page hors ligne
-        if (request.mode === "navigate") return offlinePage();
-        return new Response("", { status: 503 });
-      });
+    caches.open(CACHE).then(async (cache) => {
+      // 1. Essayer le réseau
+      try {
+        const response = await fetch(request);
+        if (response && response.ok) {
+          cache.put(key, response.clone());
+          return response;
+        }
+      } catch {}
+
+      // 2. Repli sur le cache (clé = URL string, ignore Vary)
+      const cached = await cache.match(key, { ignoreVary: true });
+      if (cached) {
+        notifyClients(url.pathname);
+        return cached;
+      }
+
+      // 3. Dernier recours : page hors ligne pour la navigation
+      if (request.mode === "navigate") {
+        const offline = await cache.match("/offline.html", { ignoreVary: true });
+        if (offline) return offline;
+      }
+
+      return new Response("Hors ligne", { status: 503, headers: { "Content-Type": "text/plain; charset=utf-8" } });
     })
   );
 });
@@ -142,10 +87,9 @@ self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const url = (event.notification.data && event.notification.data.url) || "/";
   event.waitUntil(
-    (async () => {
-      const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
       for (const c of clients) { if ("focus" in c) { c.navigate(url); return c.focus(); } }
       if (self.clients.openWindow) return self.clients.openWindow(url);
-    })()
+    })
   );
 });
