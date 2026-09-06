@@ -13,8 +13,6 @@ interface GroupeData {
     nom: string;
     description: string | null;
     prixParSeance: number;
-    forfaitMontant: number | null;
-    forfaitSeances: number | null;
     capaciteMax: number;
     prof: { id: string; nom: string; prenom: string } | null;
     matiere: { id: string; nom: string } | null;
@@ -23,8 +21,9 @@ interface GroupeData {
     id: string;
     statut: string;
     inscriptionId: string;
-    prixParSeance: number | null;
-    prixParSeanceSetAt: string | null;
+    forfaitMontant: number | null;
+    forfaitSeances: number | null;
+    forfaitSetAt: string | null;
     eleve: { id: string; nom: string; prenom: string; email: string };
     stats: { presencesCount: number; absencesCount: number; totalDue: number; totalPaid: number; unpaid: number };
   }[];
@@ -82,12 +81,6 @@ export default function AdminGroupeDetailPage() {
   const [savingRattrapage, setSavingRattrapage] = useState(false);
   const [rattrapageError, setRattrapageError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [showTarifModal, setShowTarifModal] = useState(false);
-  const [savingTarif, setSavingTarif] = useState(false);
-  const [tarifMode, setTarifMode] = useState<"forfait" | "fixe">("forfait");
-  const [tarifMontant, setTarifMontant] = useState(0);
-  const [tarifSeances, setTarifSeances] = useState(0);
-  const [tarifPrixSeance, setTarifPrixSeance] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [allStudents, setAllStudents] = useState<EleveSearch[]>([]);
   const [filterNiveau, setFilterNiveau] = useState("");
@@ -96,10 +89,11 @@ export default function AdminGroupeDetailPage() {
   const [addingId, setAddingId] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [confirmRemoveEleve, setConfirmRemoveEleve] = useState<{ id: string; inscriptionId: string; name: string } | null>(null);
-  const [prixModal, setPrixModal] = useState<{ inscriptionId: string; eleveName: string } | null>(null);
-  const [prixModalValue, setPrixModalValue] = useState("");
-  const [prixModalSaving, setPrixModalSaving] = useState(false);
-  const [prixModalError, setPrixModalError] = useState<string | null>(null);
+  const [forfaitModal, setForfaitModal] = useState<{ inscriptionId: string; eleveName: string } | null>(null);
+  const [forfaitMontantVal, setForfaitMontantVal] = useState("");
+  const [forfaitSeancesVal, setForfaitSeancesVal] = useState("");
+  const [forfaitSaving, setForfaitSaving] = useState(false);
+  const [forfaitError, setForfaitError] = useState<string | null>(null);
 
   const fetchGroupe = useCallback(async () => {
     try {
@@ -200,21 +194,24 @@ export default function AdminGroupeDetailPage() {
     }
   };
 
-  const openPrixModal = (ins: { id: string; prixParSeance: number | null; eleve: { prenom: string; nom: string } }) => {
-    setPrixModal({ inscriptionId: ins.id, eleveName: `${ins.eleve.prenom} ${ins.eleve.nom}` });
-    setPrixModalValue(ins.prixParSeance != null ? String(ins.prixParSeance) : "");
-    setPrixModalError(null);
+  const openForfaitModal = (ins: { id: string; forfaitMontant: number | null; forfaitSeances: number | null; eleve: { prenom: string; nom: string } }) => {
+    setForfaitModal({ inscriptionId: ins.id, eleveName: `${ins.eleve.prenom} ${ins.eleve.nom}` });
+    setForfaitMontantVal(ins.forfaitMontant != null ? String(ins.forfaitMontant) : "");
+    setForfaitSeancesVal(ins.forfaitSeances != null ? String(ins.forfaitSeances) : "");
+    setForfaitError(null);
   };
 
-  const handleSavePrix = async () => {
-    if (!prixModal) return;
+  const handleSaveForfait = async () => {
+    if (!forfaitModal) return;
     try {
-      setPrixModalSaving(true);
-      setPrixModalError(null);
-      const val = prixModalValue.trim();
-      const body = val === "" || val === "0"
-        ? { id: prixModal.inscriptionId, prixParSeance: null }
-        : { id: prixModal.inscriptionId, prixParSeance: parseFloat(val) };
+      setForfaitSaving(true);
+      setForfaitError(null);
+      const montantVal = forfaitMontantVal.trim();
+      const seancesVal = forfaitSeancesVal.trim();
+      const body =
+        montantVal === "" || seancesVal === "" || Number(seancesVal) <= 0
+          ? { id: forfaitModal.inscriptionId, forfaitMontant: null, forfaitSeances: null }
+          : { id: forfaitModal.inscriptionId, forfaitMontant: parseFloat(montantVal), forfaitSeances: parseInt(seancesVal, 10) };
       const res = await fetch(`/api/admin/inscriptions`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -222,14 +219,14 @@ export default function AdminGroupeDetailPage() {
       });
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Erreur lors de la mise à jour du prix");
+        throw new Error(data.error || "Erreur lors de la mise à jour du forfait");
       }
-      setPrixModal(null);
+      setForfaitModal(null);
       fetchGroupe();
     } catch (err) {
-      setPrixModalError(err instanceof Error ? err.message : "Erreur inconnue");
+      setForfaitError(err instanceof Error ? err.message : "Erreur inconnue");
     } finally {
-      setPrixModalSaving(false);
+      setForfaitSaving(false);
     }
   };
 
@@ -327,51 +324,6 @@ export default function AdminGroupeDetailPage() {
 
   const g = groupe.groupe;
 
-  const computedTarifPrixSeance =
-    tarifMode === "forfait" && tarifMontant > 0 && tarifSeances > 0
-      ? Math.round((tarifMontant / tarifSeances) * 100) / 100
-      : 0;
-
-  const openTarifModal = () => {
-    const hasForfait = !!g.forfaitMontant && !!g.forfaitSeances;
-    setTarifMode(hasForfait ? "forfait" : "fixe");
-    setTarifMontant(hasForfait ? Number(g.forfaitMontant) : 0);
-    setTarifSeances(hasForfait ? Number(g.forfaitSeances) : 0);
-    setTarifPrixSeance(Number(g.prixParSeance) || 0);
-    setShowTarifModal(true);
-  };
-
-  const handleSaveTarif = async () => {
-    try {
-      setSavingTarif(true);
-      setError(null);
-      const body =
-        tarifMode === "forfait"
-          ? {
-              id,
-              forfaitMontant: tarifMontant,
-              forfaitSeances: tarifSeances,
-              prixParSeance: computedTarifPrixSeance,
-            }
-          : { id, prixParSeance: tarifPrixSeance };
-      const res = await fetch("/api/admin/groupes", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) {
-        const b = await res.json();
-        throw new Error(b.error || "Erreur lors de la mise à jour");
-      }
-      setShowTarifModal(false);
-      fetchGroupe();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur inconnue");
-    } finally {
-      setSavingTarif(false);
-    }
-  };
-
   const handleDownloadExcel = () => {
     const headers = ["Nom", "Prénom", "Email", "Présences", "Absences", "Prix/séance (DT)", "Total Dû (DT)", "Total Payé (DT)", "Impayé (DT)"];
     const rows = groupe.inscriptions.map((ins) => [
@@ -380,7 +332,7 @@ export default function AdminGroupeDetailPage() {
       ins.eleve.email,
       ins.stats.presencesCount,
       ins.stats.absencesCount,
-      ins.prixParSeance != null ? ins.prixParSeance.toFixed(2) : `défaut (${groupe.groupe.prixParSeance})`,
+      ins.forfaitMontant != null && ins.forfaitSeances ? (ins.forfaitMontant / ins.forfaitSeances).toFixed(2) : `défaut (${groupe.groupe.prixParSeance})`,
       ins.stats.totalDue.toFixed(2),
       ins.stats.totalPaid.toFixed(2),
       ins.stats.unpaid.toFixed(2),
@@ -390,7 +342,7 @@ export default function AdminGroupeDetailPage() {
       `Groupe: ${g.nom}`,
       `Prof: ${g.prof ? `${g.prof.prenom} ${g.prof.nom}` : "—"}`,
       `Matière: ${g.matiere?.nom ?? "—"}`,
-      `Prix: ${g.forfaitMontant && g.forfaitSeances ? `${g.forfaitMontant} DT / ${g.forfaitSeances} séances` : `${g.prixParSeance} DT / séance`}`,
+      `Prix: ${g.prixParSeance} DT / séance`,
       "",
       headers.join(";"),
       ...rows.map((row) => row.join(";")),
@@ -442,21 +394,7 @@ export default function AdminGroupeDetailPage() {
             <div className="flex items-center justify-between">
               <span className="text-neutral-500 dark:text-neutral-400">Tarif du groupe (défaut)</span>
               <div className="flex items-center gap-2">
-                {g.forfaitMontant && g.forfaitSeances ? (
-                  <span className="text-right">
-                    <span className="block font-medium text-neutral-900 dark:text-neutral-100">
-                      {formatCurrency(g.forfaitMontant)} / {g.forfaitSeances} séances
-                    </span>
-                    <span className="block text-[12px] text-neutral-400 dark:text-neutral-500">
-                      {formatCurrency(g.prixParSeance)} / séance
-                    </span>
-                  </span>
-                ) : (
-                  <span className="font-medium text-neutral-900 dark:text-neutral-100">{formatCurrency(g.prixParSeance)} / séance</span>
-                )}
-                <button onClick={openTarifModal} className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-2.5 py-1 text-[12px] font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]">
-                  Modifier
-                </button>
+                <span className="font-medium text-neutral-900 dark:text-neutral-100">{formatCurrency(g.prixParSeance)} / séance</span>
               </div>
             </div>
             <div className="flex justify-between"><span className="text-neutral-500 dark:text-neutral-400">Capacité max</span><span className="font-medium text-neutral-900 dark:text-neutral-100">{g.capaciteMax}</span></div>
@@ -509,7 +447,6 @@ export default function AdminGroupeDetailPage() {
               <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Email</th>
               <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Présences</th>
               <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Absences</th>
-              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Prix/séance</th>
               <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Dû</th>
               <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Payé</th>
               <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Impayé</th>
@@ -518,31 +455,30 @@ export default function AdminGroupeDetailPage() {
           </thead>
           <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
             {groupe.inscriptions.length === 0 ? (
-              <tr><td colSpan={10} className="px-4 py-2.5 text-center text-neutral-500 dark:text-neutral-400">Aucun élève inscrit</td></tr>
+              <tr><td colSpan={9} className="px-4 py-2.5 text-center text-neutral-500 dark:text-neutral-400">Aucun élève inscrit</td></tr>
             ) : (
               groupe.inscriptions.map((ins) => (
                 <tr key={ins.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
-                  <td className="px-4 py-2.5 font-medium">
-                    <Link href={`/admin/eleves/${ins.eleve.id}`} className="text-blue-600 dark:text-blue-400 hover:underline">{ins.eleve.nom}</Link>
+                  <td className="px-4 py-2.5">
+                    <div className="flex items-center gap-2">
+                      <Link href={`/admin/eleves/${ins.eleve.id}`} className="font-medium text-blue-600 dark:text-blue-400 hover:underline">{ins.eleve.nom}</Link>
+                      <button
+                        onClick={() => openForfaitModal(ins)}
+                        className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[11px] font-semibold transition-colors ${
+                          ins.forfaitMontant != null && ins.forfaitSeances
+                            ? "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-600 dark:bg-amber-900/20 dark:text-amber-300"
+                            : "border-neutral-200 bg-neutral-50 text-neutral-500 dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-400"
+                        } hover:border-blue-300 hover:bg-blue-50 dark:hover:border-blue-600 dark:hover:bg-[#1e2128]`}
+                        title={ins.forfaitMontant != null && ins.forfaitSeances ? `Forfait : ${formatCurrency(ins.forfaitMontant)} / ${ins.forfaitSeances} séances` : "Forfait inactif — cliquer pour définir"}
+                      >
+                        Forfait
+                      </button>
+                    </div>
                   </td>
                   <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">{ins.eleve.prenom}</td>
                   <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">{ins.eleve.email}</td>
                   <td className="px-4 py-2.5 text-green-600 dark:text-green-400">{ins.stats.presencesCount}</td>
                   <td className="px-4 py-2.5 text-red-600 dark:text-red-400">{ins.stats.absencesCount}</td>
-                  <td className="px-4 py-2.5 text-[13px]">
-                    <button
-                      onClick={() => openPrixModal(ins)}
-                      className={`group inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[12px] font-medium transition-colors ${
-                        ins.prixParSeance != null
-                          ? "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-600 dark:bg-amber-900/20 dark:text-amber-300"
-                          : "border-neutral-200 bg-neutral-50 text-neutral-500 dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-400"
-                      } hover:border-blue-300 hover:bg-blue-50 dark:hover:border-blue-600`}
-                      title={ins.prixParSeance != null ? `Prix spécial pour cet élève: ${formatCurrency(ins.prixParSeance)}/séance` : `Défaut du groupe: ${formatCurrency(groupe.groupe.prixParSeance)}/séance — cliquer pour fixer un prix spécial`}
-                    >
-                      {ins.prixParSeance != null ? formatCurrency(ins.prixParSeance) : formatCurrency(groupe.groupe.prixParSeance)}
-                      {ins.prixParSeance != null && <span className="text-[9px] opacity-60">★</span>}
-                    </button>
-                  </td>
                   <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">{formatCurrency(ins.stats.totalDue)}</td>
                   <td className="px-4 py-2.5 text-green-600 dark:text-green-400">{formatCurrency(ins.stats.totalPaid)}</td>
                   <td className="px-4 py-2.5">
@@ -550,13 +486,6 @@ export default function AdminGroupeDetailPage() {
                   </td>
                   <td className="px-4 py-2.5">
                     <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => openPrixModal(ins)}
-                        className="flex items-center gap-1 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 text-[12px] font-semibold text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30"
-                        title="Fixer un prix spécifique pour cet élève"
-                      >
-                        Prix
-                      </button>
                       <button
                         onClick={() => openRattrapageModal(ins.eleve)}
                         className="flex items-center gap-1 rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-2 py-1 text-[12px] font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
@@ -633,155 +562,68 @@ export default function AdminGroupeDetailPage() {
         </div>
       </div>
 
-      {prixModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setPrixModal(null)}>
+      {forfaitModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setForfaitModal(null)}>
           <div className="w-full max-w-sm rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Prix spécifique</h2>
-              <button onClick={() => setPrixModal(null)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300">
+              <h2 className="text-lg font-semibold">Forfait individuel</h2>
+              <button onClick={() => setForfaitModal(null)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <p className="mb-4 text-[13px] text-neutral-600 dark:text-neutral-400">
-              Tarif pour <span className="font-semibold text-neutral-900 dark:text-neutral-100">{prixModal.eleveName}</span>
+              Forfait pour <span className="font-semibold text-neutral-900 dark:text-neutral-100">{forfaitModal.eleveName}</span>
             </p>
             <p className="mb-3 rounded-lg bg-neutral-50 dark:bg-[#1e2128] px-3 py-2 text-[12px] text-neutral-500 dark:text-neutral-400">
               Prix par défaut du groupe : <span className="font-medium text-neutral-900 dark:text-neutral-100">{formatCurrency(groupe.groupe.prixParSeance)}</span> / séance
             </p>
-            <label className="mb-1 block text-[12px] font-medium text-neutral-700 dark:text-neutral-300">
-              Prix par séance (DT)
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={prixModalValue}
-              onChange={(e) => setPrixModalValue(e.target.value)}
-              className="w-full rounded-lg border border-neutral-300 dark:border-[#2a2d35] bg-white dark:bg-[#1e2128] px-3 py-2 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-blue-500 focus:outline-none"
-              placeholder={`Ex : ${groupe.groupe.prixParSeance}`}
-              autoFocus
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Prix (DT)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={forfaitMontantVal}
+                  onChange={(e) => setForfaitMontantVal(e.target.value)}
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#1e2128] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                  placeholder={`Ex : 110`}
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Nombre de séances</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={forfaitSeancesVal}
+                  onChange={(e) => setForfaitSeancesVal(e.target.value)}
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#1e2128] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                  placeholder={`Ex : 9`}
+                />
+              </div>
+            </div>
             <p className="mt-2 text-[11px] text-neutral-400 dark:text-neutral-500">
-              Laissez vide ou « 0 » pour utiliser le prix du groupe.
+              Les montants déjà dus avant cette modification ne changent pas.
             </p>
-            {prixModalError && (
-              <p className="mt-2 text-[12px] text-red-600 dark:text-red-400">{prixModalError}</p>
+            {forfaitError && (
+              <p className="mt-2 text-[12px] text-red-600 dark:text-red-400">{forfaitError}</p>
             )}
             <div className="mt-5 flex justify-end gap-2">
               <button
-                onClick={() => setPrixModal(null)}
+                onClick={() => setForfaitModal(null)}
                 className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-3 py-2 text-[13px] font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
               >
                 Annuler
               </button>
               <button
-                onClick={handleSavePrix}
-                disabled={prixModalSaving}
+                onClick={handleSaveForfait}
+                disabled={forfaitSaving}
                 className="flex items-center gap-1 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
               >
-                {prixModalSaving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                {forfaitSaving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                 Enregistrer
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showTarifModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Tarif du groupe (tous les élèves)</h2>
-              <button onClick={() => setShowTarifModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="space-y-4">
-              <div className="flex gap-4">
-                <button
-                  onClick={() => setTarifMode("forfait")}
-                  className={`flex-1 rounded-lg border px-3 py-2 text-[13px] font-medium ${
-                    tarifMode === "forfait"
-                      ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300"
-                      : "border-neutral-200 dark:border-[#2a2d35] text-neutral-600 dark:text-neutral-400"
-                  }`}
-                >
-                  Forfait (110 DT / N séances)
-                </button>
-                <button
-                  onClick={() => setTarifMode("fixe")}
-                  className={`flex-1 rounded-lg border px-3 py-2 text-[13px] font-medium ${
-                    tarifMode === "fixe"
-                      ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300"
-                      : "border-neutral-200 dark:border-[#2a2d35] text-neutral-600 dark:text-neutral-400"
-                  }`}
-                >
-                  Prix fixe / séance
-                </button>
-              </div>
-
-              {tarifMode === "forfait" ? (
-                <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Montant (DT)</label>
-                      <input
-                        type="number"
-                        value={tarifMontant || ""}
-                        onChange={(e) => setTarifMontant(Number(e.target.value))}
-                        min={0}
-                        placeholder="110"
-                        className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Nombre de séances</label>
-                      <input
-                        type="number"
-                        value={tarifSeances || ""}
-                        onChange={(e) => setTarifSeances(Number(e.target.value))}
-                        min={0}
-                        placeholder="5"
-                        className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      />
-                    </div>
-                  </div>
-                  {computedTarifPrixSeance > 0 && (
-                    <p className="text-[13px] text-blue-600 dark:text-blue-400">
-                      = {computedTarifPrixSeance.toFixed(2)} DT / séance
-                    </p>
-                  )}
-                </>
-              ) : (
-                <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Prix / séance (DT)</label>
-                  <input
-                    type="number"
-                    value={tarifPrixSeance}
-                    onChange={(e) => setTarifPrixSeance(Number(e.target.value))}
-                    min={0}
-                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </div>
-              )}
-
-              <div className="flex justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowTarifModal(false)}
-                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
-                >
-                  Annuler
-                </button>
-                <button
-                  onClick={handleSaveTarif}
-                  disabled={savingTarif || (tarifMode === "forfait" && computedTarifPrixSeance <= 0) || (tarifMode === "fixe" && tarifPrixSeance <= 0)}
-                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {savingTarif && <Loader2 className="h-4 w-4 animate-spin" />}
-                  Enregistrer
-                </button>
-              </div>
             </div>
           </div>
         </div>

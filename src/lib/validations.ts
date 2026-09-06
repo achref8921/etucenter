@@ -61,33 +61,9 @@ export const groupeSchema = z.object({
   description: z.string().optional(),
   profId: z.string().uuid().optional().nullable(),
   matiereId: z.string().uuid().optional().nullable(),
-  prixParSeance: z.number().positive().optional(),
-  forfaitMontant: z.number().positive().optional(),
-  forfaitSeances: z.number().int().positive().optional(),
+  prixParSeance: z.number().positive(),
   capaciteMax: z.number().int().positive().optional(),
-}).refine(
-  (data) => {
-    if (data.forfaitMontant !== undefined || data.forfaitSeances !== undefined) {
-      return data.forfaitMontant !== undefined && data.forfaitSeances !== undefined;
-    }
-    return true;
-  },
-  {
-    message: "Le montant et le nombre de séances du forfait doivent être fournis ensemble",
-    path: ["forfaitMontant"],
-  }
-).refine(
-  (data) => {
-    if (data.forfaitMontant !== undefined || data.prixParSeance !== undefined) {
-      return true;
-    }
-    return false;
-  },
-  {
-    message: "Le prix par séance ou le forfait est requis",
-    path: ["prixParSeance"],
-  }
-);
+});
 
 export const seanceSchema = z.object({
   groupeId: z.string().uuid(),

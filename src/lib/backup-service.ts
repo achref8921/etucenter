@@ -179,7 +179,12 @@ function buildGroupe(g: any) {
 }
 
 function buildInscription(i: any) {
-  return { id: i.id, eleveId: i.eleveId, groupeId: i.groupeId, dateInscription: toDate(i.dateInscription) ?? new Date(), statut: i.statut };
+  return {
+    id: i.id, eleveId: i.eleveId, groupeId: i.groupeId, dateInscription: toDate(i.dateInscription) ?? new Date(), statut: i.statut,
+    forfaitMontant: i.forfaitMontant != null ? Number(i.forfaitMontant) : null,
+    forfaitSeances: i.forfaitSeances != null ? Number(i.forfaitSeances) : null,
+    forfaitSetAt: i.forfaitSetAt ? toDate(i.forfaitSetAt) : null,
+  };
 }
 
 function buildSeance(s: any) {

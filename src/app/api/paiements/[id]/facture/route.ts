@@ -156,8 +156,9 @@ export async function GET(
         prisma.inscription.findFirst({
           where: { eleveId: paiement.eleveId, groupeId: paiement.groupeId, statut: "actif" },
           select: {
-            prixParSeance: true,
-            prixParSeanceSetAt: true,
+            forfaitMontant: true,
+            forfaitSeances: true,
+            forfaitSetAt: true,
           },
         }),
       ]);
@@ -173,7 +174,12 @@ export async function GET(
     const totalAllSeances = allPresences.length;
 
     const totalPaid = Number(totalPayments._sum.montant || 0);
-    const inscriptionPrix = inscriptionForPrice?.prixParSeance != null ? Number(inscriptionForPrice.prixParSeance) : null;
+    const inscriptionPrix =
+      inscriptionForPrice?.forfaitMontant != null &&
+      inscriptionForPrice?.forfaitSeances != null &&
+      inscriptionForPrice.forfaitSeances > 0
+        ? Number(inscriptionForPrice.forfaitMontant) / Number(inscriptionForPrice.forfaitSeances)
+        : null;
     const prixParSeance = inscriptionPrix ?? Number(paiement.groupe.prixParSeance || 0);
     const monthlyDue = prixParSeance;
     const remaining = monthlyDue - totalPaid;

@@ -56,8 +56,8 @@ export async function GET(
       prisma.$queryRaw<{ eleve_id: string; total: string }[]>(
         Prisma.sql`SELECT pr.eleve_id, COALESCE(SUM(
            CASE
-             WHEN i.prix_par_seance IS NOT NULL AND i.prix_par_seance_set_at IS NOT NULL AND s.date >= i.prix_par_seance_set_at
-             THEN i.prix_par_seance
+             WHEN i.forfait_montant IS NOT NULL AND i.forfait_seances IS NOT NULL AND i.forfait_seances > 0 AND i.forfait_set_at IS NOT NULL AND s.date >= i.forfait_set_at::date
+             THEN (i.forfait_montant / i.forfait_seances)
              ELSE COALESCE(s.prix_par_seance, g.prix_par_seance)
            END
          ), 0) as total
@@ -98,8 +98,9 @@ export async function GET(
         id: inscription.id,
         dateInscription: inscription.dateInscription,
         statut: inscription.statut,
-        prixParSeance: inscription.prixParSeance,
-        prixParSeanceSetAt: inscription.prixParSeanceSetAt,
+        forfaitMontant: inscription.forfaitMontant,
+        forfaitSeances: inscription.forfaitSeances,
+        forfaitSetAt: inscription.forfaitSetAt,
         eleve: inscription.eleve,
         stats: {
           presencesCount: presencesCountMap.get(inscription.eleveId) ?? 0,

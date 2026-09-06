@@ -301,23 +301,26 @@ export async function consumeCourseAttendance(
 
   const activeInscription = await db.inscription.findFirst({
     where: { eleveId, groupeId: groupe.id, statut: "actif" },
-    select: { id: true, prixParSeance: true, prixParSeanceSetAt: true },
+    select: { id: true, forfaitMontant: true, forfaitSeances: true, forfaitSetAt: true },
   });
   if (!activeInscription) return null;
 
   let price: number;
-  const inscriptionPrice = activeInscription.prixParSeance != null
-    ? Number(activeInscription.prixParSeance)
+  const forfaitMontant = activeInscription.forfaitMontant != null
+    ? Number(activeInscription.forfaitMontant)
     : null;
-  const inscriptionSetAt = activeInscription.prixParSeanceSetAt;
+  const forfaitSeances = activeInscription.forfaitSeances ?? null;
+  const forfaitSetAt = activeInscription.forfaitSetAt;
 
   if (
-    inscriptionPrice != null &&
-    inscriptionPrice > 0 &&
-    inscriptionSetAt &&
-    seance.date >= inscriptionSetAt
+    forfaitMontant != null &&
+    forfaitSeances != null &&
+    forfaitSeances > 0 &&
+    forfaitMontant > 0 &&
+    forfaitSetAt &&
+    seance.date >= forfaitSetAt
   ) {
-    price = inscriptionPrice;
+    price = forfaitMontant / forfaitSeances;
   } else {
     price = Number(
       seance.prixParSeance != null ? seance.prixParSeance : groupe.prixParSeance

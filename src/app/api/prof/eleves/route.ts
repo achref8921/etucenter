@@ -37,8 +37,9 @@ export async function GET(request: Request) {
       select: {
         eleveId: true,
         groupeId: true,
-        prixParSeance: true,
-        prixParSeanceSetAt: true,
+        forfaitMontant: true,
+        forfaitSeances: true,
+        forfaitSetAt: true,
         eleve: {
           select: {
             id: true,
@@ -79,8 +80,8 @@ export async function GET(request: Request) {
         id: insc.groupe.id,
         nom: insc.groupe.nom,
         matiere: insc.groupe.matiere?.nom || "—",
-        prixParSeance: insc.prixParSeance != null
-          ? Number(insc.prixParSeance)
+        prixParSeance: insc.forfaitMontant != null && insc.forfaitSeances
+          ? Number(insc.forfaitMontant) / Number(insc.forfaitSeances)
           : Number(insc.groupe.prixParSeance),
       });
     }
@@ -108,8 +109,8 @@ export async function GET(request: Request) {
               SUM(CASE WHEN pr.statut = 'absent' THEN 1 ELSE 0 END)::int as absent_count,
               COALESCE(SUM(CASE WHEN pr.statut = 'present' THEN
                 CASE
-                  WHEN i.prix_par_seance IS NOT NULL AND i.prix_par_seance_set_at IS NOT NULL AND s.date >= i.prix_par_seance_set_at
-                  THEN i.prix_par_seance
+                  WHEN i.forfait_montant IS NOT NULL AND i.forfait_seances IS NOT NULL AND i.forfait_seances > 0 AND i.forfait_set_at IS NOT NULL AND s.date >= i.forfait_set_at::date
+                  THEN (i.forfait_montant / i.forfait_seances)
                   ELSE COALESCE(s.prix_par_seance, g.prix_par_seance)
                 END
               ELSE 0 END), 0)::numeric(12,2) as due_total

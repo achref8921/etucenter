@@ -23,8 +23,9 @@ export async function GET() {
           where: { statut: "actif" },
           select: {
             groupeId: true,
-            prixParSeance: true,
-            prixParSeanceSetAt: true,
+            forfaitMontant: true,
+            forfaitSeances: true,
+            forfaitSetAt: true,
             groupe: {
               select: {
                 id: true,
@@ -66,12 +67,21 @@ export async function GET() {
       paidMap.set(`${row.eleve_id}|${row.groupe_id}`, Number(row.total || 0));
     }
 
-    const presentRows = pairEleves.length
-      ? await prisma.$queryRawUnsafe<{ eleve_id: string; groupe_id: string; n: number }[]>(
+    const dueRows = pairEleves.length
+      ? await prisma.$queryRawUnsafe<{ eleve_id: string; groupe_id: string; total: number }[]>(
           `
-          SELECT pr.eleve_id, s.groupe_id, COUNT(*)::int AS n
+          SELECT pr.eleve_id, s.groupe_id,
+            COALESCE(SUM(
+              CASE
+                WHEN i.forfait_montant IS NOT NULL AND i.forfait_seances IS NOT NULL AND i.forfait_seances > 0 AND i.forfait_set_at IS NOT NULL AND s.date >= i.forfait_set_at::date
+                THEN (i.forfait_montant / i.forfait_seances)
+                ELSE COALESCE(s.prix_par_seance, g.prix_par_seance)
+              END
+            ), 0)::float AS total
           FROM presences pr
           JOIN seances s ON pr.seance_id = s.id
+          JOIN groupes g ON s.groupe_id = g.id
+          LEFT JOIN inscriptions i ON i.eleve_id = pr.eleve_id AND i.groupe_id = g.id AND i.statut = 'actif'
           WHERE pr.statut = 'present' AND s.statut = 'terminee'
             AND pr.eleve_id = ANY($1::uuid[]) AND s.groupe_id = ANY($2::uuid[])
           GROUP BY pr.eleve_id, s.groupe_id
@@ -81,20 +91,20 @@ export async function GET() {
         )
       : [];
 
-    const presentMap = new Map<string, number>();
-    for (const row of presentRows) {
-      presentMap.set(`${row.eleve_id}|${row.groupe_id}`, Number(row.n || 0));
+    const dueMap = new Map<string, number>();
+    for (const row of dueRows) {
+      dueMap.set(`${row.eleve_id}|${row.groupe_id}`, Number(row.total || 0));
     }
 
     const result = eleves.map((e) => {
       const groupes = e.inscriptions.map((ins) => {
-        const prixParSeance = ins.prixParSeance != null
-          ? Number(ins.prixParSeance)
+        const effectivePrix = ins.forfaitMontant != null && ins.forfaitSeances
+          ? Number(ins.forfaitMontant) / Number(ins.forfaitSeances)
           : Number(ins.groupe.prixParSeance);
-        const totalDue = prixParSeance * (presentMap.get(`${e.id}|${ins.groupeId}`) || 0);
+        const totalDue = dueMap.get(`${e.id}|${ins.groupeId}`) || 0;
         const totalPaid = paidMap.get(`${e.id}|${ins.groupeId}`) || 0;
         return {
-          groupe: { id: ins.groupe.id, nom: ins.groupe.nom, prixParSeance },
+          groupe: { id: ins.groupe.id, nom: ins.groupe.nom, prixParSeance: effectivePrix },
           totalDue,
           totalPaid,
           unpaid: totalDue - totalPaid,

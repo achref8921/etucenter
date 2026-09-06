@@ -68,8 +68,8 @@ export async function GET(
                 pr.eleve_id,
                 s.groupe_id,
                 CASE
-                  WHEN i.prix_par_seance IS NOT NULL AND i.prix_par_seance_set_at IS NOT NULL AND s.date >= i.prix_par_seance_set_at
-                  THEN i.prix_par_seance
+                  WHEN i.forfait_montant IS NOT NULL AND i.forfait_seances IS NOT NULL AND i.forfait_seances > 0 AND i.forfait_set_at IS NOT NULL AND s.date >= i.forfait_set_at::date
+                  THEN (i.forfait_montant / i.forfait_seances)
                   ELSE COALESCE(s.prix_par_seance, g.prix_par_seance)
                 END as price,
                 s.date as seance_date
@@ -242,8 +242,8 @@ export async function GET(
             s.groupe_id,
             SUM(
               CASE
-                WHEN i.prix_par_seance IS NOT NULL AND i.prix_par_seance_set_at IS NOT NULL AND s.date >= i.prix_par_seance_set_at
-                THEN i.prix_par_seance
+                WHEN i.forfait_montant IS NOT NULL AND i.forfait_seances IS NOT NULL AND i.forfait_seances > 0 AND i.forfait_set_at IS NOT NULL AND s.date >= i.forfait_set_at::date
+                THEN (i.forfait_montant / i.forfait_seances)
                 ELSE COALESCE(s.prix_par_seance, g.prix_par_seance)
               END
             ) as total_due

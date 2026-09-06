@@ -6,8 +6,8 @@ export async function calculateTotalDue(eleveId: string, groupeId: string): Prom
     Prisma.sql`SELECT COALESCE(
        SUM(
          CASE
-           WHEN i.prix_par_seance IS NOT NULL AND i.prix_par_seance_set_at IS NOT NULL AND s.date >= i.prix_par_seance_set_at
-           THEN i.prix_par_seance
+           WHEN i.forfait_montant IS NOT NULL AND i.forfait_seances IS NOT NULL AND i.forfait_seances > 0 AND i.forfait_set_at IS NOT NULL AND s.date >= i.forfait_set_at::date
+           THEN (i.forfait_montant / i.forfait_seances)
            ELSE COALESCE(s.prix_par_seance, g.prix_par_seance)
          END
        ),
@@ -58,11 +58,11 @@ export async function calculateStudentStats(eleveId: string) {
     prisma.$queryRaw<{ groupe_id: string; total: string }[]>(
       Prisma.sql`SELECT s.groupe_id, COALESCE(
          SUM(
-           CASE
-             WHEN i.prix_par_seance IS NOT NULL AND i.prix_par_seance_set_at IS NOT NULL AND s.date >= i.prix_par_seance_set_at
-             THEN i.prix_par_seance
-             ELSE COALESCE(s.prix_par_seance, g.prix_par_seance)
-           END
+CASE
+              WHEN i.forfait_montant IS NOT NULL AND i.forfait_seances IS NOT NULL AND i.forfait_seances > 0 AND i.forfait_set_at IS NOT NULL AND s.date >= i.forfait_set_at::date
+              THEN (i.forfait_montant / i.forfait_seances)
+              ELSE COALESCE(s.prix_par_seance, g.prix_par_seance)
+            END
          ),
          0
        ) as total
@@ -157,8 +157,8 @@ export async function getAdminStats(centerId: string) {
             SELECT pr.eleve_id, s.groupe_id,
               SUM(
                 CASE
-                  WHEN i.prix_par_seance IS NOT NULL AND i.prix_par_seance_set_at IS NOT NULL AND s.date >= i.prix_par_seance_set_at
-                  THEN i.prix_par_seance
+                  WHEN i.forfait_montant IS NOT NULL AND i.forfait_seances IS NOT NULL AND i.forfait_seances > 0 AND i.forfait_set_at IS NOT NULL AND s.date >= i.forfait_set_at::date
+                  THEN (i.forfait_montant / i.forfait_seances)
                   ELSE COALESCE(s.prix_par_seance, g.prix_par_seance)
                 END
               ) * 1 as due_total

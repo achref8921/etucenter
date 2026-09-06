@@ -56,11 +56,16 @@ export async function getAdminDashboardMonthData(
             SELECT
               pr.eleve_id,
               s.groupe_id,
-              COALESCE(s.prix_par_seance, g.prix_par_seance) as price,
+              CASE
+                WHEN i.forfait_montant IS NOT NULL AND i.forfait_seances IS NOT NULL AND i.forfait_seances > 0 AND i.forfait_set_at IS NOT NULL AND s.date >= i.forfait_set_at::date
+                THEN (i.forfait_montant / i.forfait_seances)
+                ELSE COALESCE(s.prix_par_seance, g.prix_par_seance)
+              END as price,
               s.date as seance_date
             FROM presences pr
             JOIN seances s ON pr.seance_id = s.id
             JOIN groupes g ON s.groupe_id = g.id
+            LEFT JOIN inscriptions i ON i.eleve_id = pr.eleve_id AND i.groupe_id = g.id AND i.statut = 'actif'
             WHERE pr.statut = 'present'
               AND s.statut = 'terminee'
               AND g.center_id = $1::uuid
@@ -170,12 +175,19 @@ export async function getAdminDashboardMonthData(
         END as remaining
       FROM (
         SELECT pr.eleve_id, s.groupe_id,
-          COALESCE(s.prix_par_seance, g.prix_par_seance) * COUNT(*) as due_total
+          SUM(
+            CASE
+              WHEN i.forfait_montant IS NOT NULL AND i.forfait_seances IS NOT NULL AND i.forfait_seances > 0 AND i.forfait_set_at IS NOT NULL AND s.date >= i.forfait_set_at::date
+              THEN (i.forfait_montant / i.forfait_seances)
+              ELSE COALESCE(s.prix_par_seance, g.prix_par_seance)
+            END
+          ) as due_total
         FROM presences pr
         JOIN seances s ON pr.seance_id = s.id
         JOIN groupes g ON s.groupe_id = g.id
+        LEFT JOIN inscriptions i ON i.eleve_id = pr.eleve_id AND i.groupe_id = g.id AND i.statut = 'actif'
         WHERE pr.statut = 'present' AND s.statut = 'terminee' AND g.center_id = $1::uuid
-        GROUP BY pr.eleve_id, s.groupe_id, s.prix_par_seance, g.prix_par_seance
+        GROUP BY pr.eleve_id, s.groupe_id
       ) due
       LEFT JOIN (
         SELECT pai.eleve_id, pai.groupe_id, SUM(pai.montant) as paid_total

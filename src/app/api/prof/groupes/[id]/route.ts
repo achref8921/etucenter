@@ -61,7 +61,7 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
-    const { nom, description, capaciteMax, prixParSeance, forfaitMontant, forfaitSeances } = body;
+    const { nom, description, capaciteMax, prixParSeance } = body;
 
     const groupe = await prisma.groupe.findFirst({
       where: { id, profId: (session.user as any).id },
@@ -90,24 +90,7 @@ export async function PUT(
       }
       data.capaciteMax = capaciteMax;
     }
-    const hasForfait = forfaitMontant !== undefined || forfaitSeances !== undefined;
-    if (hasForfait) {
-      if (
-        typeof forfaitMontant !== "number" ||
-        typeof forfaitSeances !== "number" ||
-        forfaitMontant <= 0 ||
-        forfaitSeances <= 0 ||
-        !Number.isInteger(forfaitSeances)
-      ) {
-        return NextResponse.json(
-          { error: "Montant et nombre de séances du forfait requis (nombres positifs, séances entières)" },
-          { status: 400 }
-        );
-      }
-      data.forfaitMontant = forfaitMontant;
-      data.forfaitSeances = forfaitSeances;
-      data.prixParSeance = Math.round((forfaitMontant / forfaitSeances) * 100) / 100;
-    } else if (prixParSeance !== undefined) {
+    if (prixParSeance !== undefined) {
       if (typeof prixParSeance !== "number" || prixParSeance < 0) {
         return NextResponse.json({ error: "Prix invalide" }, { status: 400 });
       }
@@ -128,8 +111,6 @@ export async function PUT(
         nom: true,
         description: true,
         prixParSeance: true,
-        forfaitMontant: true,
-        forfaitSeances: true,
         capaciteMax: true,
       },
     });

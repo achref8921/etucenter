@@ -84,8 +84,8 @@ export async function GET() {
             statut: inscription.statut,
           },
           groupe: inscription.groupe,
-          effectivePrixParSeance: inscription.prixParSeance != null
-            ? Number(inscription.prixParSeance)
+          effectivePrixParSeance: inscription.forfaitMontant != null && inscription.forfaitSeances
+            ? Number(inscription.forfaitMontant) / Number(inscription.forfaitSeances)
             : Number(inscription.groupe.prixParSeance),
           stats: {
             totalDue,

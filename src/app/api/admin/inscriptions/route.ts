@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     if (error) return error;
 
     const body = await request.json();
-    const { eleveId, groupeId, prixParSeance } = body;
+    const { eleveId, groupeId } = body;
 
     if (!eleveId || !groupeId) {
       return NextResponse.json(
@@ -84,9 +84,6 @@ export async function POST(request: NextRequest) {
       data: {
         eleveId,
         groupeId,
-        ...(prixParSeance != null && prixParSeance !== ""
-          ? { prixParSeance: Number(prixParSeance), prixParSeanceSetAt: new Date() }
-          : {}),
       },
       include: {
         eleve: {
@@ -170,8 +167,7 @@ export async function PATCH(request: NextRequest) {
     if (error) return error;
 
     const body = await request.json();
-    const { id: bodyId, prixParSeance } = body;
-    const id = bodyId ?? new URL(request.url).searchParams.get("id");
+    const { id, forfaitMontant, forfaitSeances } = body;
 
     if (!id) {
       return NextResponse.json({ error: "id est requis" }, { status: 400 });
@@ -188,12 +184,17 @@ export async function PATCH(request: NextRequest) {
     }
 
     const updateData: any = {};
-    if (prixParSeance === "" || prixParSeance === null) {
-      updateData.prixParSeance = null;
-      updateData.prixParSeanceSetAt = null;
-    } else if (prixParSeance != null) {
-      updateData.prixParSeance = Number(prixParSeance);
-      updateData.prixParSeanceSetAt = new Date();
+    const hasMontant = forfaitMontant !== undefined && forfaitMontant !== "" && forfaitMontant !== null;
+    const hasSeances = forfaitSeances !== undefined && forfaitSeances !== "" && forfaitSeances !== null;
+
+    if (hasMontant || hasSeances) {
+      updateData.forfaitMontant = Number(forfaitMontant);
+      updateData.forfaitSeances = Number(forfaitSeances);
+      updateData.forfaitSetAt = new Date();
+    } else {
+      updateData.forfaitMontant = null;
+      updateData.forfaitSeances = null;
+      updateData.forfaitSetAt = null;
     }
 
     const updated = await prisma.inscription.update({
@@ -205,17 +206,18 @@ export async function PATCH(request: NextRequest) {
       },
     });
 
-    logger.info("Prix par séance mis à jour pour l'inscription", {
+    logger.info("Forfait par élève mis à jour pour l'inscription", {
       adminId: (session.user as any).id,
       inscriptionId: inscription.id,
       eleveId: inscription.eleveId,
       groupeId: inscription.groupeId,
-      nouveauPrix: updateData.prixParSeance ?? "groupe",
+      forfaitMontant: updateData.forfaitMontant ?? null,
+      forfaitSeances: updateData.forfaitSeances ?? null,
     });
 
     return NextResponse.json(updated);
   } catch (err) {
-    logger.error("Erreur lors de la mise à jour du prix de l'inscription", { error: err });
+    logger.error("Erreur lors de la mise à jour du forfait de l'inscription", { error: err });
     return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });
   }
 }
