@@ -1,4 +1,4 @@
-const CACHE = "etucenter-v6";
+const CACHE = "etucenter-v7";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
@@ -30,34 +30,25 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  const key = url.pathname + url.search;
-
   event.respondWith(
     (async () => {
-      // 1. Toujours essayer le réseau d'abord
       try {
         const response = await fetch(request);
-        // Mettre en cache en arrière-plan si succès
         if (response && response.ok) {
-          caches.open(CACHE).then((cache) => {
-            cache.put(key, response.clone()).catch(() => {});
-          }).catch(() => {});
+          const cache = await caches.open(CACHE);
+          await cache.put(request, response.clone());
         }
         return response;
       } catch {}
 
-      // 2. Hors ligne : servir depuis le cache
       try {
-        const cache = await caches.open(CACHE);
-        const cached = await cache.match(key, { ignoreVary: true });
+        const cached = await caches.match(request, { ignoreVary: true });
         if (cached) return cached;
       } catch {}
 
-      // 3. Page de navigation sans cache : page hors ligne
       if (request.mode === "navigate") {
         try {
-          const cache = await caches.open(CACHE);
-          const offline = await cache.match("/offline.html", { ignoreVary: true });
+          const offline = await caches.match("/offline.html", { ignoreVary: true });
           if (offline) return offline;
         } catch {}
       }
