@@ -170,7 +170,8 @@ export async function PATCH(request: NextRequest) {
     if (error) return error;
 
     const body = await request.json();
-    const { id, prixParSeance } = body;
+    const { id: bodyId, prixParSeance } = body;
+    const id = bodyId ?? new URL(request.url).searchParams.get("id");
 
     if (!id) {
       return NextResponse.json({ error: "id est requis" }, { status: 400 });
