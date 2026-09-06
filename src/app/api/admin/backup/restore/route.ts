@@ -22,7 +22,15 @@ export async function POST(request: Request) {
     if (error) return error;
     const centerId = (session.user as any).centerId;
 
-    const form = await request.formData();
+    let form: FormData;
+    try {
+      form = await request.formData();
+    } catch {
+      return NextResponse.json(
+        { error: "Fichier de backup manquant : requête non reconnue comme formulaire" },
+        { status: 400 }
+      );
+    }
     const fileField = form.get("file");
     const mode = typeof form.get("mode") === "string" ? (form.get("mode") as string) : "merge";
 

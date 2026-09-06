@@ -59,7 +59,7 @@ export default withAuth(
       return NextResponse.redirect(new URL("/login?error=session_conflict", req.url));
     }
 
-    if (role === "super_admin" && !pathname.startsWith("/super-admin") && !pathname.startsWith("/api/super-admin") && !pathname.startsWith("/api/notifications")) {
+    if (role === "super_admin" && !pathname.startsWith("/super-admin") && !pathname.startsWith("/api/super-admin") && !pathname.startsWith("/api/notifications") && !(pathname.startsWith("/api/admin/utilisateurs/") && pathname.endsWith("/permanent"))) {
       if (pathname.startsWith("/api/")) {
         return NextResponse.json({ error: "Session expirée ou accès non autorisé" }, { status: 401 });
       }

@@ -52,8 +52,8 @@ export const utilisateurSchema = z.object({
 });
 
 export const matiereSchema = z.object({
-  nom: z.string().min(2),
-  description: z.string().optional(),
+  nom: z.string().trim().min(2),
+  description: z.string().trim().optional(),
 });
 
 export const groupeSchema = z.object({
