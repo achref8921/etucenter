@@ -11,6 +11,8 @@ interface Groupe {
   nom: string;
   description: string | null;
   prixParSeance: number;
+  forfaitMontant: number | null;
+  forfaitSeances: number | null;
   capaciteMax: number;
   prof: { id: string; nom: string; prenom: string } | null;
   matiere: { id: string; nom: string } | null;
@@ -33,6 +35,8 @@ interface GroupeFormData {
   profId: string;
   matiereId: string;
   prixParSeance: number;
+  forfaitMontant: number;
+  forfaitSeances: number;
   capaciteMax: number;
 }
 
@@ -59,6 +63,8 @@ export default function GroupesPage() {
     profId: "",
     matiereId: "",
     prixParSeance: 0,
+    forfaitMontant: 0,
+    forfaitSeances: 0,
     capaciteMax: 30,
   });
 
@@ -97,6 +103,18 @@ export default function GroupesPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+    if (name === "forfaitMontant" || name === "forfaitSeances") {
+      const num = Number(value);
+      setFormData((prev) => {
+        const next = { ...prev, [name]: num };
+        if (next.forfaitMontant > 0 && next.forfaitSeances > 0) {
+          next.prixParSeance =
+            Math.round((next.forfaitMontant / next.forfaitSeances) * 100) / 100;
+        }
+        return next;
+      });
+      return;
+    }
     setFormData((prev) => ({
       ...prev,
       [name]: name === "prixParSeance" || name === "capaciteMax" ? Number(value) : value,
@@ -115,8 +133,15 @@ export default function GroupesPage() {
         profId: formData.profId,
         matiereId: formData.matiereId,
         capaciteMax: formData.capaciteMax,
-        prixParSeance: formData.prixParSeance,
       };
+      if (formData.forfaitMontant > 0 && formData.forfaitSeances > 0) {
+        payload.forfaitMontant = formData.forfaitMontant;
+        payload.forfaitSeances = formData.forfaitSeances;
+        payload.prixParSeance =
+          Math.round((formData.forfaitMontant / formData.forfaitSeances) * 100) / 100;
+      } else {
+        payload.prixParSeance = formData.prixParSeance;
+      }
       if (isEditing) payload.id = editingGroupe.id;
 
       const res = await fetch("/api/admin/groupes", {
@@ -130,7 +155,7 @@ export default function GroupesPage() {
       }
       setShowModal(false);
       setEditingGroupe(null);
-      setFormData({ nom: "", description: "", profId: "", matiereId: "", prixParSeance: 0, capaciteMax: 30 });
+      setFormData({ nom: "", description: "", profId: "", matiereId: "", prixParSeance: 0, forfaitMontant: 0, forfaitSeances: 0, capaciteMax: 30 });
       fetchData();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur inconnue");
@@ -181,7 +206,7 @@ export default function GroupesPage() {
 
   const openCreate = () => {
     setEditingGroupe(null);
-    setFormData({ nom: "", description: "", profId: "", matiereId: "", prixParSeance: 0, capaciteMax: 30 });
+    setFormData({ nom: "", description: "", profId: "", matiereId: "", prixParSeance: 0, forfaitMontant: 0, forfaitSeances: 0, capaciteMax: 30 });
     setShowModal(true);
   };
 
@@ -193,6 +218,8 @@ export default function GroupesPage() {
       profId: groupe.prof?.id || "",
       matiereId: groupe.matiere?.id || "",
       prixParSeance: Number(groupe.prixParSeance) || 0,
+      forfaitMontant: Number(groupe.forfaitMontant) || 0,
+      forfaitSeances: Number(groupe.forfaitSeances) || 0,
       capaciteMax: Number(groupe.capaciteMax) || 30,
     });
     setShowModal(true);
@@ -331,7 +358,18 @@ export default function GroupesPage() {
                       {groupe.matiere?.nom || "—"}
                     </td>
                     <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">
-                      <span>{formatCurrency(groupe.prixParSeance)} / séance</span>
+                      {groupe.forfaitMontant && groupe.forfaitSeances ? (
+                        <span className="flex flex-col">
+                          <span className="font-medium text-neutral-900 dark:text-neutral-100">
+                            {formatCurrency(groupe.forfaitMontant)} / {groupe.forfaitSeances} séances
+                          </span>
+                          <span className="text-[12px] text-neutral-400 dark:text-neutral-500">
+                            {formatCurrency(groupe.prixParSeance)} / séance
+                          </span>
+                        </span>
+                      ) : (
+                        <span>{formatCurrency(groupe.prixParSeance)} / séance</span>
+                      )}
                     </td>
                     <td className="px-4 py-2.5">
                       <div className="flex items-center gap-3">
@@ -431,6 +469,49 @@ export default function GroupesPage() {
                   ))}
                 </select>
               </div>
+              <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3">
+                <p className="mb-2 text-[12px] font-semibold text-neutral-600 dark:text-neutral-300">
+                  Tarif par forfait (ex. 110 DT pour 5 séances)
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">
+                      Montant du forfait (DT)
+                    </label>
+                    <input
+                      name="forfaitMontant"
+                      type="number"
+                      value={formData.forfaitMontant || ""}
+                      onChange={handleChange}
+                      min={0}
+                      placeholder="110"
+                      className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">
+                      Nombre de séances
+                    </label>
+                    <input
+                      name="forfaitSeances"
+                      type="number"
+                      value={formData.forfaitSeances || ""}
+                      onChange={handleChange}
+                      min={0}
+                      placeholder="5"
+                      className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+                {formData.forfaitMontant > 0 && formData.forfaitSeances > 0 && (
+                  <p className="mt-2 text-[13px] text-blue-600 dark:text-blue-400">
+                    = {formData.prixParSeance.toFixed(2)} DT / séance
+                  </p>
+                )}
+                <p className="mt-1 text-[12px] text-neutral-400 dark:text-neutral-500">
+                  Prix par séance calculé automatiquement = montant ÷ nombre de séances
+                </p>
+              </div>
               <div>
                 <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">
                   Prix / séance (DT)
@@ -442,7 +523,8 @@ export default function GroupesPage() {
                   onChange={handleChange}
                   required
                   min={0}
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  disabled={formData.forfaitMontant > 0 && formData.forfaitSeances > 0}
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
                 />
               </div>
               <div>

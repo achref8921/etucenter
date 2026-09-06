@@ -14,6 +14,8 @@ export async function GET() {
         id: true,
         nom: true,
         prixParSeance: true,
+        forfaitMontant: true,
+        forfaitSeances: true,
         _count: {
           select: {
             inscriptions: { where: { statut: "actif" } },
@@ -28,6 +30,8 @@ export async function GET() {
       id: g.id,
       nom: g.nom,
       prixParSeance: Number(g.prixParSeance),
+      forfaitMontant: g.forfaitMontant !== null ? Number(g.forfaitMontant) : null,
+      forfaitSeances: g.forfaitSeances,
       nombreEleves: g._count.inscriptions,
       nombreSeances: g._count.seances,
     }));

@@ -13,6 +13,8 @@ interface GroupeData {
     nom: string;
     description: string | null;
     prixParSeance: number;
+    forfaitMontant: number | null;
+    forfaitSeances: number | null;
     capaciteMax: number;
     prof: { id: string; nom: string; prenom: string } | null;
     matiere: { id: string; nom: string } | null;
@@ -94,6 +96,12 @@ export default function AdminGroupeDetailPage() {
   const [forfaitSeancesVal, setForfaitSeancesVal] = useState("");
   const [forfaitSaving, setForfaitSaving] = useState(false);
   const [forfaitError, setForfaitError] = useState<string | null>(null);
+  const [showTarifModal, setShowTarifModal] = useState(false);
+  const [savingTarif, setSavingTarif] = useState(false);
+  const [tarifMode, setTarifMode] = useState<"forfait" | "fixe">("forfait");
+  const [tarifMontant, setTarifMontant] = useState(0);
+  const [tarifSeances, setTarifSeances] = useState(0);
+  const [tarifPrixSeance, setTarifPrixSeance] = useState(0);
 
   const fetchGroupe = useCallback(async () => {
     try {
@@ -324,6 +332,51 @@ export default function AdminGroupeDetailPage() {
 
   const g = groupe.groupe;
 
+  const computedTarifPrixSeance =
+    tarifMode === "forfait" && tarifMontant > 0 && tarifSeances > 0
+      ? Math.round((tarifMontant / tarifSeances) * 100) / 100
+      : 0;
+
+  const openTarifModal = () => {
+    const hasForfait = !!g.forfaitMontant && !!g.forfaitSeances;
+    setTarifMode(hasForfait ? "forfait" : "fixe");
+    setTarifMontant(hasForfait ? Number(g.forfaitMontant) : 0);
+    setTarifSeances(hasForfait ? Number(g.forfaitSeances) : 0);
+    setTarifPrixSeance(Number(g.prixParSeance) || 0);
+    setShowTarifModal(true);
+  };
+
+  const handleSaveTarif = async () => {
+    try {
+      setSavingTarif(true);
+      setError(null);
+      const body =
+        tarifMode === "forfait"
+          ? {
+              id,
+              forfaitMontant: tarifMontant,
+              forfaitSeances: tarifSeances,
+              prixParSeance: computedTarifPrixSeance,
+            }
+          : { id, prixParSeance: tarifPrixSeance };
+      const res = await fetch("/api/admin/groupes", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const b = await res.json();
+        throw new Error(b.error || "Erreur lors de la mise à jour");
+      }
+      setShowTarifModal(false);
+      fetchGroupe();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setSavingTarif(false);
+    }
+  };
+
   const handleDownloadExcel = () => {
     const headers = ["Nom", "Prénom", "Email", "Présences", "Absences", "Prix/séance (DT)", "Total Dû (DT)", "Total Payé (DT)", "Impayé (DT)"];
     const rows = groupe.inscriptions.map((ins) => [
@@ -342,7 +395,7 @@ export default function AdminGroupeDetailPage() {
       `Groupe: ${g.nom}`,
       `Prof: ${g.prof ? `${g.prof.prenom} ${g.prof.nom}` : "—"}`,
       `Matière: ${g.matiere?.nom ?? "—"}`,
-      `Prix: ${g.prixParSeance} DT / séance`,
+      `Prix: ${g.forfaitMontant && g.forfaitSeances ? `${g.forfaitMontant} DT / ${g.forfaitSeances} séances` : `${g.prixParSeance} DT / séance`}`,
       "",
       headers.join(";"),
       ...rows.map((row) => row.join(";")),
@@ -394,7 +447,21 @@ export default function AdminGroupeDetailPage() {
             <div className="flex items-center justify-between">
               <span className="text-neutral-500 dark:text-neutral-400">Tarif du groupe (défaut)</span>
               <div className="flex items-center gap-2">
-                <span className="font-medium text-neutral-900 dark:text-neutral-100">{formatCurrency(g.prixParSeance)} / séance</span>
+                {g.forfaitMontant && g.forfaitSeances ? (
+                  <span className="text-right">
+                    <span className="block font-medium text-neutral-900 dark:text-neutral-100">
+                      {formatCurrency(g.forfaitMontant)} / {g.forfaitSeances} séances
+                    </span>
+                    <span className="block text-[12px] text-neutral-400 dark:text-neutral-500">
+                      {formatCurrency(g.prixParSeance)} / séance
+                    </span>
+                  </span>
+                ) : (
+                  <span className="font-medium text-neutral-900 dark:text-neutral-100">{formatCurrency(g.prixParSeance)} / séance</span>
+                )}
+                <button onClick={openTarifModal} className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-2.5 py-1 text-[12px] font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]">
+                  Modifier
+                </button>
               </div>
             </div>
             <div className="flex justify-between"><span className="text-neutral-500 dark:text-neutral-400">Capacité max</span><span className="font-medium text-neutral-900 dark:text-neutral-100">{g.capaciteMax}</span></div>
@@ -561,6 +628,101 @@ export default function AdminGroupeDetailPage() {
         </table>
         </div>
       </div>
+
+      {showTarifModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Tarif du groupe (tous les élèves)</h2>
+              <button onClick={() => setShowTarifModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setTarifMode("forfait")}
+                  className={`flex-1 rounded-lg border px-3 py-2 text-[13px] font-medium ${tarifMode === "forfait" ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300" : "border-neutral-200 dark:border-[#2a2d35] text-neutral-600 dark:text-neutral-400"}`}
+                >
+                  Forfait (110 DT / N séances)
+                </button>
+                <button
+                  onClick={() => setTarifMode("fixe")}
+                  className={`flex-1 rounded-lg border px-3 py-2 text-[13px] font-medium ${tarifMode === "fixe" ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300" : "border-neutral-200 dark:border-[#2a2d35] text-neutral-600 dark:text-neutral-400"}`}
+                >
+                  Prix fixe / séance
+                </button>
+              </div>
+
+              {tarifMode === "forfait" ? (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Montant (DT)</label>
+                      <input
+                        type="number"
+                        value={tarifMontant || ""}
+                        onChange={(e) => setTarifMontant(Number(e.target.value))}
+                        min={0}
+                        placeholder="110"
+                        className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Nombre de séances</label>
+                      <input
+                        type="number"
+                        value={tarifSeances || ""}
+                        onChange={(e) => setTarifSeances(Number(e.target.value))}
+                        min={0}
+                        placeholder="5"
+                        className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+                  {computedTarifPrixSeance > 0 && (
+                    <p className="text-[13px] text-blue-600 dark:text-blue-400">
+                      = {computedTarifPrixSeance.toFixed(2)} DT / séance
+                    </p>
+                  )}
+                  <p className="text-[11px] text-neutral-400 dark:text-neutral-500">
+                    Le prix par séance sera calculé automatiquement (montant ÷ nombre de séances) et appliqué aux futurs calculs du groupe.
+                  </p>
+                </>
+              ) : (
+                <div>
+                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Prix / séance (DT)</label>
+                  <input
+                    type="number"
+                    value={tarifPrixSeance}
+                    onChange={(e) => setTarifPrixSeance(Number(e.target.value))}
+                    min={0}
+                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowTarifModal(false)}
+                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleSaveTarif}
+                  disabled={savingTarif || (tarifMode === "forfait" && computedTarifPrixSeance <= 0) || (tarifMode === "fixe" && tarifPrixSeance <= 0)}
+                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {savingTarif && <Loader2 className="h-4 w-4 animate-spin" />}
+                  Enregistrer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {forfaitModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setForfaitModal(null)}>
