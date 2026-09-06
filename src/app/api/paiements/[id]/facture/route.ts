@@ -110,7 +110,7 @@ export async function GET(
       year: "numeric",
     });
 
-    const [totalSeances, presences, allPresences, totalPayments, allInscriptions] =
+    const [totalSeances, presences, allPresences, totalPayments, allInscriptions, inscriptionForPrice] =
       await Promise.all([
         prisma.seance.count({
           where: {
@@ -153,6 +153,13 @@ export async function GET(
             },
           },
         }),
+        prisma.inscription.findFirst({
+          where: { eleveId: paiement.eleveId, groupeId: paiement.groupeId, statut: "actif" },
+          select: {
+            prixParSeance: true,
+            prixParSeanceSetAt: true,
+          },
+        }),
       ]);
 
     const presentCount = presences.filter((p) => p.statut === "present").length;
@@ -166,7 +173,8 @@ export async function GET(
     const totalAllSeances = allPresences.length;
 
     const totalPaid = Number(totalPayments._sum.montant || 0);
-    const prixParSeance = Number(paiement.groupe.prixParSeance || 0);
+    const inscriptionPrix = inscriptionForPrice?.prixParSeance != null ? Number(inscriptionForPrice.prixParSeance) : null;
+    const prixParSeance = inscriptionPrix ?? Number(paiement.groupe.prixParSeance || 0);
     const monthlyDue = prixParSeance;
     const remaining = monthlyDue - totalPaid;
 

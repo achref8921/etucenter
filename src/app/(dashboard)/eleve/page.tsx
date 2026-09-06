@@ -32,6 +32,7 @@ interface GroupeData {
     prof: { id: string; nom: string; prenom: string } | null;
     matiere: { id: string; nom: string } | null;
   };
+  effectivePrixParSeance: number;
   stats: {
     totalDue: number;
     totalPaid: number;
@@ -237,7 +238,7 @@ function FragmentRow({
             "—"
           )}
         </td>
-        <td className="px-4 py-2.5 text-[13px] tabular-nums text-neutral-600 dark:text-neutral-400">{formatCurrency(g.groupe.prixParSeance)}</td>
+        <td className="px-4 py-2.5 text-[13px] tabular-nums text-neutral-600 dark:text-neutral-400">{formatCurrency(g.effectivePrixParSeance)}</td>
         <td className="px-4 py-2.5">
           {g.stats.unpaid > 0 ? (
             <span className="inline-block rounded-full px-2 py-0.5 text-[11px] font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">

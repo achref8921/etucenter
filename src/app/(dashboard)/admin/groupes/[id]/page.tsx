@@ -23,6 +23,8 @@ interface GroupeData {
     id: string;
     statut: string;
     inscriptionId: string;
+    prixParSeance: number | null;
+    prixParSeanceSetAt: string | null;
     eleve: { id: string; nom: string; prenom: string; email: string };
     stats: { presencesCount: number; absencesCount: number; totalDue: number; totalPaid: number; unpaid: number };
   }[];
@@ -94,6 +96,9 @@ export default function AdminGroupeDetailPage() {
   const [addingId, setAddingId] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [confirmRemoveEleve, setConfirmRemoveEleve] = useState<{ id: string; inscriptionId: string; name: string } | null>(null);
+  const [editingPrixId, setEditingPrixId] = useState<string | null>(null);
+  const [editingPrixValue, setEditingPrixValue] = useState("");
+  const [savingPrixId, setSavingPrixId] = useState<string | null>(null);
 
   const fetchGroupe = useCallback(async () => {
     try {
@@ -191,6 +196,31 @@ export default function AdminGroupeDetailPage() {
       setError(err instanceof Error ? err.message : "Erreur inconnue");
     } finally {
       setRemovingId(null);
+    }
+  };
+
+  const handleSavePrix = async (inscriptionId: string) => {
+    try {
+      setSavingPrixId(inscriptionId);
+      const val = editingPrixValue.trim();
+      const body = val === "" || val === "0"
+        ? { prixParSeance: null }
+        : { prixParSeance: parseFloat(val) };
+      const res = await fetch(`/api/admin/inscriptions?id=${inscriptionId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Erreur lors de la mise à jour du prix");
+      }
+      setEditingPrixId(null);
+      fetchGroupe();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setSavingPrixId(null);
     }
   };
 
@@ -334,13 +364,14 @@ export default function AdminGroupeDetailPage() {
   };
 
   const handleDownloadExcel = () => {
-    const headers = ["Nom", "Prénom", "Email", "Présences", "Absences", "Total Dû (DT)", "Total Payé (DT)", "Impayé (DT)"];
+    const headers = ["Nom", "Prénom", "Email", "Présences", "Absences", "Prix/séance (DT)", "Total Dû (DT)", "Total Payé (DT)", "Impayé (DT)"];
     const rows = groupe.inscriptions.map((ins) => [
       ins.eleve.nom,
       ins.eleve.prenom,
       ins.eleve.email,
       ins.stats.presencesCount,
       ins.stats.absencesCount,
+      ins.prixParSeance != null ? ins.prixParSeance.toFixed(2) : `défaut (${groupe.groupe.prixParSeance})`,
       ins.stats.totalDue.toFixed(2),
       ins.stats.totalPaid.toFixed(2),
       ins.stats.unpaid.toFixed(2),
@@ -469,6 +500,7 @@ export default function AdminGroupeDetailPage() {
               <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Email</th>
               <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Présences</th>
               <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Absences</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Prix/séance</th>
               <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Dû</th>
               <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Payé</th>
               <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Impayé</th>
@@ -477,7 +509,7 @@ export default function AdminGroupeDetailPage() {
           </thead>
           <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
             {groupe.inscriptions.length === 0 ? (
-              <tr><td colSpan={9} className="px-4 py-2.5 text-center text-neutral-500 dark:text-neutral-400">Aucun élève inscrit</td></tr>
+              <tr><td colSpan={10} className="px-4 py-2.5 text-center text-neutral-500 dark:text-neutral-400">Aucun élève inscrit</td></tr>
             ) : (
               groupe.inscriptions.map((ins) => (
                 <tr key={ins.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
@@ -488,6 +520,42 @@ export default function AdminGroupeDetailPage() {
                   <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">{ins.eleve.email}</td>
                   <td className="px-4 py-2.5 text-green-600 dark:text-green-400">{ins.stats.presencesCount}</td>
                   <td className="px-4 py-2.5 text-red-600 dark:text-red-400">{ins.stats.absencesCount}</td>
+                  <td className="px-4 py-2.5 text-[13px]">
+                    {editingPrixId === ins.id ? (
+                      <div className="flex items-center gap-1">
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={editingPrixValue}
+                          onChange={(e) => setEditingPrixValue(e.target.value)}
+                          className="w-20 rounded border border-blue-300 px-1.5 py-0.5 text-[13px] dark:border-blue-600 dark:bg-[#1e2128] dark:text-white"
+                          placeholder="0"
+                          autoFocus
+                          onKeyDown={(e) => { if (e.key === "Enter") handleSavePrix(ins.id); if (e.key === "Escape") setEditingPrixId(null); }}
+                        />
+                        <button onClick={() => handleSavePrix(ins.id)} disabled={savingPrixId === ins.id} className="rounded bg-blue-600 p-0.5 text-white hover:bg-blue-700 disabled:opacity-50">
+                          {savingPrixId === ins.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <span className="text-[10px] font-bold">OK</span>}
+                        </button>
+                        <button onClick={() => setEditingPrixId(null)} className="rounded p-0.5 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300">
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => { setEditingPrixId(ins.id); setEditingPrixValue(ins.prixParSeance != null ? String(ins.prixParSeance) : ""); }}
+                        className={`group inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[12px] font-medium transition-colors ${
+                          ins.prixParSeance != null
+                            ? "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-600 dark:bg-amber-900/20 dark:text-amber-300"
+                            : "border-neutral-200 bg-neutral-50 text-neutral-500 dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-400"
+                        } hover:border-blue-300 hover:bg-blue-50 dark:hover:border-blue-600`}
+                        title={ins.prixParSeance != null ? `Prix spécial: ${formatCurrency(ins.prixParSeance)}/séance (défaut: ${formatCurrency(groupe.groupe.prixParSeance)})` : `Défaut: ${formatCurrency(groupe.groupe.prixParSeance)}/séance — cliquer pour modifier`}
+                      >
+                        {ins.prixParSeance != null ? formatCurrency(ins.prixParSeance) : formatCurrency(groupe.groupe.prixParSeance)}
+                        {ins.prixParSeance != null && <span className="text-[9px] opacity-60">★</span>}
+                      </button>
+                    )}
+                  </td>
                   <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">{formatCurrency(ins.stats.totalDue)}</td>
                   <td className="px-4 py-2.5 text-green-600 dark:text-green-400">{formatCurrency(ins.stats.totalPaid)}</td>
                   <td className="px-4 py-2.5">

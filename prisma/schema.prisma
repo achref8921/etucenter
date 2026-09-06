@@ -214,6 +214,8 @@ model Inscription {
   groupeId        String            @map("groupe_id") @db.Uuid
   dateInscription DateTime          @default(now()) @map("date_inscription")
   statut          InscriptionStatut @default(actif)
+  prixParSeance   Decimal?          @map("prix_par_seance") @db.Decimal(10, 2)
+  prixParSeanceSetAt DateTime?      @map("prix_par_seance_set_at")
 
   eleve  Utilisateur @relation(fields: [eleveId], references: [id], onDelete: Cascade)
   groupe Groupe      @relation(fields: [groupeId], references: [id], onDelete: Cascade)

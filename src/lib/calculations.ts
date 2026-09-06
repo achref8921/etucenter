@@ -4,12 +4,19 @@ import { Prisma } from "@prisma/client";
 export async function calculateTotalDue(eleveId: string, groupeId: string): Promise<number> {
   const result = await prisma.$queryRaw<{ total: string | null }[]>(
     Prisma.sql`SELECT COALESCE(
-       SUM(COALESCE(s.prix_par_seance, g.prix_par_seance)),
+       SUM(
+         CASE
+           WHEN i.prix_par_seance IS NOT NULL AND i.prix_par_seance_set_at IS NOT NULL AND s.date >= i.prix_par_seance_set_at
+           THEN i.prix_par_seance
+           ELSE COALESCE(s.prix_par_seance, g.prix_par_seance)
+         END
+       ),
        0
      ) as total
      FROM presences pr
      JOIN seances s ON pr.seance_id = s.id
      JOIN groupes g ON s.groupe_id = g.id
+     LEFT JOIN inscriptions i ON i.eleve_id = pr.eleve_id AND i.groupe_id = g.id AND i.statut = 'actif'
      WHERE pr.eleve_id = ${eleveId}::uuid
        AND pr.statut = 'present'
        AND s.groupe_id = ${groupeId}::uuid
@@ -50,12 +57,19 @@ export async function calculateStudentStats(eleveId: string) {
   const [dueResults, paidResults, presencesCounts, absencesCounts] = await Promise.all([
     prisma.$queryRaw<{ groupe_id: string; total: string }[]>(
       Prisma.sql`SELECT s.groupe_id, COALESCE(
-         SUM(COALESCE(s.prix_par_seance, g.prix_par_seance)),
+         SUM(
+           CASE
+             WHEN i.prix_par_seance IS NOT NULL AND i.prix_par_seance_set_at IS NOT NULL AND s.date >= i.prix_par_seance_set_at
+             THEN i.prix_par_seance
+             ELSE COALESCE(s.prix_par_seance, g.prix_par_seance)
+           END
+         ),
          0
        ) as total
        FROM presences pr
        JOIN seances s ON pr.seance_id = s.id
        JOIN groupes g ON s.groupe_id = g.id
+       LEFT JOIN inscriptions i ON i.eleve_id = pr.eleve_id AND i.groupe_id = g.id AND i.statut = 'actif'
        WHERE pr.eleve_id = ${eleveId}::uuid
          AND pr.statut = 'present'
          AND s.statut = 'terminee'
@@ -140,12 +154,20 @@ export async function getAdminStats(centerId: string) {
               ELSE 0 
             END as remaining
           FROM (
-            SELECT pr.eleve_id, s.groupe_id, COALESCE(s.prix_par_seance, g.prix_par_seance) * COUNT(*) as due_total
+            SELECT pr.eleve_id, s.groupe_id,
+              SUM(
+                CASE
+                  WHEN i.prix_par_seance IS NOT NULL AND i.prix_par_seance_set_at IS NOT NULL AND s.date >= i.prix_par_seance_set_at
+                  THEN i.prix_par_seance
+                  ELSE COALESCE(s.prix_par_seance, g.prix_par_seance)
+                END
+              ) * 1 as due_total
             FROM presences pr
             JOIN seances s ON pr.seance_id = s.id
             JOIN groupes g ON s.groupe_id = g.id
+            LEFT JOIN inscriptions i ON i.eleve_id = pr.eleve_id AND i.groupe_id = g.id AND i.statut = 'actif'
             WHERE pr.statut = 'present' AND s.statut = 'terminee' AND g.center_id = ${centerId}::uuid
-            GROUP BY pr.eleve_id, s.groupe_id, s.prix_par_seance, g.prix_par_seance
+            GROUP BY pr.eleve_id, s.groupe_id
           ) due
           LEFT JOIN (
             SELECT pai.eleve_id, pai.groupe_id, SUM(pai.montant) as paid_total

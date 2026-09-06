@@ -48,19 +48,28 @@ export async function GET() {
 
       prisma.$queryRawUnsafe<Record<string, unknown>[]>(`
         SELECT COALESCE(SUM(GREATEST(
-          (g.prix_par_seance - COALESCE(pa.total_paid, 0)::numeric), 0
+          (due_per_student.total_due - COALESCE(pa.total_paid, 0)::numeric), 0
         )::float), 0) AS total_unpaid
         FROM (
-          SELECT DISTINCT pr.eleve_id, s.groupe_id
+          SELECT pr.eleve_id, s.groupe_id,
+            SUM(
+              CASE
+                WHEN i.prix_par_seance IS NOT NULL AND i.prix_par_seance_set_at IS NOT NULL AND s.date >= i.prix_par_seance_set_at
+                THEN i.prix_par_seance
+                ELSE COALESCE(s.prix_par_seance, g.prix_par_seance)
+              END
+            ) as total_due
           FROM presences pr
           JOIN seances s ON pr.seance_id = s.id
-          WHERE pr.statut = 'present' AND s.statut = 'terminee'
-        ) p
-        JOIN groupes g ON p.groupe_id = g.id AND g.center_id = $1::uuid
+          JOIN groupes g ON s.groupe_id = g.id
+          LEFT JOIN inscriptions i ON i.eleve_id = pr.eleve_id AND i.groupe_id = g.id AND i.statut = 'actif'
+          WHERE pr.statut = 'present' AND s.statut = 'terminee' AND g.center_id = $1::uuid
+          GROUP BY pr.eleve_id, s.groupe_id
+        ) due_per_student
         LEFT JOIN (
           SELECT eleve_id, groupe_id, SUM(montant)::float AS total_paid
           FROM paiements GROUP BY eleve_id, groupe_id
-        ) pa ON p.eleve_id = pa.eleve_id AND p.groupe_id = pa.groupe_id
+        ) pa ON due_per_student.eleve_id = pa.eleve_id AND due_per_student.groupe_id = pa.groupe_id
       `, centerId),
 
       prisma.$queryRawUnsafe<Record<string, unknown>[]>(`

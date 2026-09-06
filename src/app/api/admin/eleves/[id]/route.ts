@@ -72,6 +72,8 @@ export async function GET(
         id: inscription.id,
         dateInscription: inscription.dateInscription,
         statut: inscription.statut,
+        prixParSeance: inscription.prixParSeance,
+        prixParSeanceSetAt: inscription.prixParSeanceSetAt,
         groupe: inscription.groupe,
         stats: stats
           ? {

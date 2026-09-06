@@ -54,10 +54,17 @@ export async function GET(
 
     const [dueResults, paidResults, presenceCounts, absenceCounts] = await Promise.all([
       prisma.$queryRaw<{ eleve_id: string; total: string }[]>(
-        Prisma.sql`SELECT pr.eleve_id, COALESCE(SUM(COALESCE(s.prix_par_seance, g.prix_par_seance)), 0) as total
+        Prisma.sql`SELECT pr.eleve_id, COALESCE(SUM(
+           CASE
+             WHEN i.prix_par_seance IS NOT NULL AND i.prix_par_seance_set_at IS NOT NULL AND s.date >= i.prix_par_seance_set_at
+             THEN i.prix_par_seance
+             ELSE COALESCE(s.prix_par_seance, g.prix_par_seance)
+           END
+         ), 0) as total
          FROM presences pr
          JOIN seances s ON pr.seance_id = s.id
          JOIN groupes g ON s.groupe_id = g.id
+         LEFT JOIN inscriptions i ON i.eleve_id = pr.eleve_id AND i.groupe_id = g.id AND i.statut = 'actif'
          WHERE pr.statut = 'present' AND s.statut = 'terminee' AND s.groupe_id = ${id}::uuid
            AND pr.eleve_id = ANY(${safeEleveIds}::uuid[])
          GROUP BY pr.eleve_id`,
@@ -91,6 +98,8 @@ export async function GET(
         id: inscription.id,
         dateInscription: inscription.dateInscription,
         statut: inscription.statut,
+        prixParSeance: inscription.prixParSeance,
+        prixParSeanceSetAt: inscription.prixParSeanceSetAt,
         eleve: inscription.eleve,
         stats: {
           presencesCount: presencesCountMap.get(inscription.eleveId) ?? 0,

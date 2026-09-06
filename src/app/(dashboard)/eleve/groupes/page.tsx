@@ -33,6 +33,7 @@ interface GroupeData {
     prof: { id: string; nom: string; prenom: string; telephone: string | null; email: string } | null;
     matiere: { id: string; nom: string } | null;
   };
+  effectivePrixParSeance: number;
   stats: {
     totalDue: number;
     totalPaid: number;
@@ -135,7 +136,7 @@ export default function EleveGroupesPage() {
                     <div className="flex justify-between">
                       <span className="text-neutral-500 dark:text-neutral-400">Prix/Séance</span>
                       <span className="font-medium tabular-nums text-gray-900 dark:text-gray-100">
-                        {formatCurrency(g.groupe.prixParSeance)}
+                        {formatCurrency(g.effectivePrixParSeance)}
                       </span>
                     </div>
                   </div>

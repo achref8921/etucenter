@@ -34,7 +34,11 @@ export async function GET(request: Request) {
         statut: "actif",
         eleve: { deletedAt: null },
       },
-      include: {
+      select: {
+        eleveId: true,
+        groupeId: true,
+        prixParSeance: true,
+        prixParSeanceSetAt: true,
         eleve: {
           select: {
             id: true,
@@ -75,7 +79,9 @@ export async function GET(request: Request) {
         id: insc.groupe.id,
         nom: insc.groupe.nom,
         matiere: insc.groupe.matiere?.nom || "—",
-        prixParSeance: Number(insc.groupe.prixParSeance),
+        prixParSeance: insc.prixParSeance != null
+          ? Number(insc.prixParSeance)
+          : Number(insc.groupe.prixParSeance),
       });
     }
 
@@ -100,10 +106,17 @@ export async function GET(request: Request) {
               COUNT(*)::int as total_seances,
               SUM(CASE WHEN pr.statut = 'present' THEN 1 ELSE 0 END)::int as present_count,
               SUM(CASE WHEN pr.statut = 'absent' THEN 1 ELSE 0 END)::int as absent_count,
-              COALESCE(SUM(CASE WHEN pr.statut = 'present' THEN COALESCE(s.prix_par_seance, g.prix_par_seance) ELSE 0 END), 0)::numeric(12,2) as due_total
+              COALESCE(SUM(CASE WHEN pr.statut = 'present' THEN
+                CASE
+                  WHEN i.prix_par_seance IS NOT NULL AND i.prix_par_seance_set_at IS NOT NULL AND s.date >= i.prix_par_seance_set_at
+                  THEN i.prix_par_seance
+                  ELSE COALESCE(s.prix_par_seance, g.prix_par_seance)
+                END
+              ELSE 0 END), 0)::numeric(12,2) as due_total
        FROM presences pr
        JOIN seances s ON pr.seance_id = s.id
        JOIN groupes g ON s.groupe_id = g.id
+       LEFT JOIN inscriptions i ON i.eleve_id = pr.eleve_id AND i.groupe_id = g.id AND i.statut = 'actif'
        WHERE pr.eleve_id = ANY($1::uuid[]) AND s.groupe_id = ANY($2::uuid[]) AND s.statut = 'terminee'
        GROUP BY pr.eleve_id, s.groupe_id`,
       studentIds,

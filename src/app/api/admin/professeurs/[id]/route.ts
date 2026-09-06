@@ -67,11 +67,16 @@ export async function GET(
               SELECT
                 pr.eleve_id,
                 s.groupe_id,
-                COALESCE(s.prix_par_seance, g.prix_par_seance) as price,
+                CASE
+                  WHEN i.prix_par_seance IS NOT NULL AND i.prix_par_seance_set_at IS NOT NULL AND s.date >= i.prix_par_seance_set_at
+                  THEN i.prix_par_seance
+                  ELSE COALESCE(s.prix_par_seance, g.prix_par_seance)
+                END as price,
                 s.date as seance_date
               FROM presences pr
               JOIN seances s ON pr.seance_id = s.id
               JOIN groupes g ON s.groupe_id = g.id
+              LEFT JOIN inscriptions i ON i.eleve_id = pr.eleve_id AND i.groupe_id = g.id AND i.statut = 'actif'
               WHERE pr.statut = 'present'
                 AND s.statut = 'terminee'
                 AND g.prof_id = $1::uuid
@@ -235,13 +240,20 @@ export async function GET(
           SELECT
             pr.eleve_id,
             s.groupe_id,
-            COALESCE(s.prix_par_seance, g.prix_par_seance) * COUNT(*) as total_due
+            SUM(
+              CASE
+                WHEN i.prix_par_seance IS NOT NULL AND i.prix_par_seance_set_at IS NOT NULL AND s.date >= i.prix_par_seance_set_at
+                THEN i.prix_par_seance
+                ELSE COALESCE(s.prix_par_seance, g.prix_par_seance)
+              END
+            ) as total_due
           FROM presences pr
           JOIN seances s ON pr.seance_id = s.id
           JOIN groupes g ON s.groupe_id = g.id
+          LEFT JOIN inscriptions i ON i.eleve_id = pr.eleve_id AND i.groupe_id = g.id AND i.statut = 'actif'
           WHERE pr.statut = 'present' AND s.statut = 'terminee'
             AND g.prof_id = $1::uuid AND g.center_id = $2::uuid
-          GROUP BY pr.eleve_id, s.groupe_id, s.prix_par_seance, g.prix_par_seance
+          GROUP BY pr.eleve_id, s.groupe_id
         ),
         student_payments AS (
           SELECT

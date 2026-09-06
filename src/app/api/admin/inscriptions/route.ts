@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     if (error) return error;
 
     const body = await request.json();
-    const { eleveId, groupeId } = body;
+    const { eleveId, groupeId, prixParSeance } = body;
 
     if (!eleveId || !groupeId) {
       return NextResponse.json(
@@ -81,7 +81,13 @@ export async function POST(request: NextRequest) {
     }
 
     const inscription = await prisma.inscription.create({
-      data: { eleveId, groupeId },
+      data: {
+        eleveId,
+        groupeId,
+        ...(prixParSeance != null && prixParSeance !== ""
+          ? { prixParSeance: Number(prixParSeance), prixParSeanceSetAt: new Date() }
+          : {}),
+      },
       include: {
         eleve: {
           select: { id: true, nom: true, prenom: true },
@@ -154,6 +160,61 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ message: "Inscription supprimée avec succès" });
   } catch (error) {
     logger.error("Erreur lors de la suppression de l'inscription", { error });
+    return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const { session, error } = await requireActiveCenter(request.method, ADMIN_ROLES);
+    if (error) return error;
+
+    const body = await request.json();
+    const { id, prixParSeance } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: "id est requis" }, { status: 400 });
+    }
+
+    const centreId = (session.user as any).centerId;
+
+    const inscription = await prisma.inscription.findFirst({
+      where: { id, groupe: { centerId: centreId } },
+    });
+
+    if (!inscription) {
+      return NextResponse.json({ error: "Inscription non trouvée" }, { status: 404 });
+    }
+
+    const updateData: any = {};
+    if (prixParSeance === "" || prixParSeance === null) {
+      updateData.prixParSeance = null;
+      updateData.prixParSeanceSetAt = null;
+    } else if (prixParSeance != null) {
+      updateData.prixParSeance = Number(prixParSeance);
+      updateData.prixParSeanceSetAt = new Date();
+    }
+
+    const updated = await prisma.inscription.update({
+      where: { id: inscription.id },
+      data: updateData,
+      include: {
+        eleve: { select: { id: true, nom: true, prenom: true } },
+        groupe: { select: { id: true, nom: true, prixParSeance: true } },
+      },
+    });
+
+    logger.info("Prix par séance mis à jour pour l'inscription", {
+      adminId: (session.user as any).id,
+      inscriptionId: inscription.id,
+      eleveId: inscription.eleveId,
+      groupeId: inscription.groupeId,
+      nouveauPrix: updateData.prixParSeance ?? "groupe",
+    });
+
+    return NextResponse.json(updated);
+  } catch (err) {
+    logger.error("Erreur lors de la mise à jour du prix de l'inscription", { error: err });
     return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });
   }
 }

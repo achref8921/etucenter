@@ -23,6 +23,8 @@ export async function GET() {
           where: { statut: "actif" },
           select: {
             groupeId: true,
+            prixParSeance: true,
+            prixParSeanceSetAt: true,
             groupe: {
               select: {
                 id: true,
@@ -86,7 +88,9 @@ export async function GET() {
 
     const result = eleves.map((e) => {
       const groupes = e.inscriptions.map((ins) => {
-        const prixParSeance = Number(ins.groupe.prixParSeance);
+        const prixParSeance = ins.prixParSeance != null
+          ? Number(ins.prixParSeance)
+          : Number(ins.groupe.prixParSeance);
         const totalDue = prixParSeance * (presentMap.get(`${e.id}|${ins.groupeId}`) || 0);
         const totalPaid = paidMap.get(`${e.id}|${ins.groupeId}`) || 0;
         return {

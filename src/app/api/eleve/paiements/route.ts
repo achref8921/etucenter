@@ -22,7 +22,11 @@ export async function GET() {
       }),
       prisma.inscription.findMany({
         where: { eleveId, statut: "actif" },
-        include: {
+        select: {
+          id: true,
+          groupeId: true,
+          prixParSeance: true,
+          prixParSeanceSetAt: true,
           groupe: {
             select: { id: true, nom: true, prixParSeance: true },
           },
@@ -45,7 +49,7 @@ export async function GET() {
             seance: { groupeId: ins.groupeId, statut: "terminee" },
           },
         });
-        const totalDue = Number(ins.groupe.prixParSeance) * presencesCount;
+        const totalDue = (ins.prixParSeance != null ? Number(ins.prixParSeance) : Number(ins.groupe.prixParSeance)) * presencesCount;
         return {
           groupe: { id: ins.groupe.id, nom: ins.groupe.nom },
           totalPaid,

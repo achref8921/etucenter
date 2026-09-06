@@ -107,6 +107,8 @@ export async function gatherCenterBackup(
     inscriptions: inscriptions.map((i) => ({
       id: i.id, eleveId: i.eleveId, groupeId: i.groupeId,
       dateInscription: toIso(i.dateInscription), statut: i.statut,
+      prixParSeance: i.prixParSeance != null ? num(i.prixParSeance) : null,
+      prixParSeanceSetAt: i.prixParSeanceSetAt ? toIso(i.prixParSeanceSetAt) : null,
     })),
     seances: seances.map((s) => ({
       id: s.id, groupeId: s.groupeId, date: toIso(s.date),
@@ -348,6 +350,9 @@ export async function restoreCenterBackup(
         eleveId: newEleveId, groupeId: newGroupeId,
         dateInscription: (i.dateInscription && date(i.dateInscription)) ?? new Date(),
         statut: pick(i.statut, ALLOWED_INSCRIPTION_STATUTS, "actif"),
+        ...(i.prixParSeance != null
+          ? { prixParSeance: Number(i.prixParSeance), prixParSeanceSetAt: i.prixParSeanceSetAt ? date(i.prixParSeanceSetAt) : new Date() }
+          : {}),
       },
     });
     created++;

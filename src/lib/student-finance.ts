@@ -301,13 +301,28 @@ export async function consumeCourseAttendance(
 
   const activeInscription = await db.inscription.findFirst({
     where: { eleveId, groupeId: groupe.id, statut: "actif" },
-    select: { id: true },
+    select: { id: true, prixParSeance: true, prixParSeanceSetAt: true },
   });
   if (!activeInscription) return null;
 
-  const price = Number(
-    seance.prixParSeance != null ? seance.prixParSeance : groupe.prixParSeance
-  );
+  let price: number;
+  const inscriptionPrice = activeInscription.prixParSeance != null
+    ? Number(activeInscription.prixParSeance)
+    : null;
+  const inscriptionSetAt = activeInscription.prixParSeanceSetAt;
+
+  if (
+    inscriptionPrice != null &&
+    inscriptionPrice > 0 &&
+    inscriptionSetAt &&
+    seance.date >= inscriptionSetAt
+  ) {
+    price = inscriptionPrice;
+  } else {
+    price = Number(
+      seance.prixParSeance != null ? seance.prixParSeance : groupe.prixParSeance
+    );
+  }
   if (!price || price <= 0) return null;
 
   const amount = round2(price);
