@@ -256,16 +256,6 @@ export async function consumeCourseAttendance(
 ) {
   const { centerId, eleveId, attendanceId, actorId } = input;
 
-  const existing = await findConsumption(db, eleveId, attendanceId);
-  if (existing) {
-    if (existing.status === "active") return existing;
-    if (existing.status === "reversed") {
-      await reactivateConsumption(db, existing);
-      return existing;
-    }
-    return existing;
-  }
-
   const attendance = await db.presence.findUnique({
     where: { id: attendanceId },
     include: {
@@ -301,7 +291,7 @@ export async function consumeCourseAttendance(
 
   const activeInscription = await db.inscription.findFirst({
     where: { eleveId, groupeId: groupe.id, statut: "actif" },
-    select: { id: true, forfaitMontant: true, forfaitSeances: true, forfaitSetAt: true },
+    select: { id: true, forfaitMontant: true, forfaitSeances: true },
   });
   if (!activeInscription) return null;
 
@@ -309,16 +299,15 @@ export async function consumeCourseAttendance(
   const forfaitMontant = activeInscription.forfaitMontant != null
     ? Number(activeInscription.forfaitMontant)
     : null;
-  const forfaitSeances = activeInscription.forfaitSeances ?? null;
-  const forfaitSetAt = activeInscription.forfaitSetAt;
+  const forfaitSeances = activeInscription.forfaitSeances
+    ? Number(activeInscription.forfaitSeances)
+    : null;
 
   if (
     forfaitMontant != null &&
     forfaitSeances != null &&
     forfaitSeances > 0 &&
-    forfaitMontant > 0 &&
-    forfaitSetAt &&
-    seance.date >= forfaitSetAt
+    forfaitMontant > 0
   ) {
     price = forfaitMontant / forfaitSeances;
   } else {
@@ -331,6 +320,50 @@ export async function consumeCourseAttendance(
   const amount = round2(price);
   const date = seance.date;
   const description = `Consommation de cours — ${groupe.matiere?.nom || groupe.nom}`;
+
+  const existing = await findConsumption(db, eleveId, attendanceId);
+  if (existing) {
+    if (existing.status === "reversed") {
+      await reactivateConsumption(db, existing);
+    }
+    const fixAmount = Number(existing.amount) !== amount;
+    let refreshed = existing;
+    if (fixAmount || existing.status === "reversed") {
+      refreshed = await db.studentTransaction.update({
+        where: { id: existing.id },
+        data: {
+          amount,
+          signedAmount: round2(-amount),
+          notes: `Séance du ${date.toLocaleDateString("fr-FR")}`,
+        },
+        include: { eleve: { select: ELEVE_SELECT } },
+      });
+      if (fixAmount) {
+        await db.systemLog.create({
+          data: {
+            action: "finance.student.consume.reprice",
+            entity: "student_transaction",
+            entityId: existing.id,
+            userId: actorId ?? null,
+            details: {
+              eleveId,
+              attendanceId,
+              seanceId: seance.id,
+              previous: Number(existing.amount),
+              amount,
+            },
+          },
+        });
+        logger.info("Consommation de cours recalculée", {
+          attendanceId,
+          previous: Number(existing.amount),
+          amount,
+        });
+      }
+    }
+    if (existing.status === "active" && !fixAmount) return existing;
+    return refreshed;
+  }
 
   try {
     const transaction = await db.studentTransaction.create({

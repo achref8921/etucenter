@@ -99,6 +99,7 @@ export async function POST(request: NextRequest) {
     }
 
     const names = eleves.map((el) => `${el.prenom} ${el.nom}`).join(", ");
+    const billedByEleve = new Map<string, number>();
 
     const { seance, presences, consumptions } = await prisma.$transaction(async (tx) => {
       const s = await tx.seance.create({
@@ -124,26 +125,33 @@ export async function POST(request: NextRequest) {
         );
         createdPresences.push(p);
         createdConsumptions.push(c);
+        if (c && c.amount) billedByEleve.set(el.id, Number(c.amount));
       }
       return { seance: s, presences: createdPresences, consumptions: createdConsumptions };
     });
 
     const when = heureDebut ? `le ${formatDateFr(date)} à ${heureDebut}` : `le ${formatDateFr(date)}`;
     const titre = "Séance de rattrapage ajoutée";
-    const message = `Une séance a été ajoutée pour vous ${when} dans le groupe "${groupe.nom}". Elle est facturée ${price.toFixed(2)} DT (comptabilisée dans votre dossier).`;
+    const pushBody = `Une séance a été ajoutée pour vous ${when} dans le groupe "${groupe.nom}".`;
+    const messageFor = (el: { id: string }) => {
+      const billed = billedByEleve.get(el.id);
+      return billed != null
+        ? `${pushBody} Elle est facturée ${billed.toFixed(2)} DT (comptabilisée dans votre dossier).`
+        : pushBody;
+    };
 
     await prisma.notification.createMany({
       data: eleves.map((el) => ({
         centerId,
         destinataireId: el.id,
         titre,
-        message,
+        message: messageFor(el),
         type: "nouvelle_seance",
       })),
     });
     await sendPushToUsers(eleveIdList, {
       title: titre,
-      body: message,
+      body: pushBody,
       url: "/eleve/notifications",
     }).catch(() => {});
 

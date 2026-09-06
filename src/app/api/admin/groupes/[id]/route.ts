@@ -56,7 +56,7 @@ export async function GET(
       prisma.$queryRaw<{ eleve_id: string; total: string }[]>(
         Prisma.sql`SELECT pr.eleve_id, COALESCE(SUM(
            CASE
-             WHEN i.forfait_montant IS NOT NULL AND i.forfait_seances IS NOT NULL AND i.forfait_seances > 0 AND i.forfait_set_at IS NOT NULL AND s.date >= i.forfait_set_at::date
+             WHEN i.forfait_montant IS NOT NULL AND i.forfait_seances IS NOT NULL AND i.forfait_seances > 0
              THEN (i.forfait_montant / i.forfait_seances)
              ELSE COALESCE(s.prix_par_seance, g.prix_par_seance)
            END
