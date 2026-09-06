@@ -186,7 +186,7 @@ export async function getAdminDashboardMonthData(
         JOIN seances s ON pr.seance_id = s.id
         JOIN groupes g ON s.groupe_id = g.id
         LEFT JOIN inscriptions i ON i.eleve_id = pr.eleve_id AND i.groupe_id = g.id AND i.statut = 'actif'
-        WHERE pr.statut = 'present' AND s.statut = 'terminee' AND g.center_id = $1::uuid
+        WHERE pr.statut = 'present' AND s.statut <> 'annulee' AND g.center_id = $1::uuid
         GROUP BY pr.eleve_id, s.groupe_id
       ) due
       LEFT JOIN (

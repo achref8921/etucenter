@@ -65,7 +65,7 @@ export async function GET(
          JOIN seances s ON pr.seance_id = s.id
          JOIN groupes g ON s.groupe_id = g.id
          LEFT JOIN inscriptions i ON i.eleve_id = pr.eleve_id AND i.groupe_id = g.id AND i.statut = 'actif'
-         WHERE pr.statut = 'present' AND s.statut = 'terminee' AND s.groupe_id = ${id}::uuid
+         WHERE pr.statut = 'present' AND s.statut <> 'annulee' AND s.groupe_id = ${id}::uuid
            AND pr.eleve_id = ANY(${safeEleveIds}::uuid[])
          GROUP BY pr.eleve_id`,
       ),

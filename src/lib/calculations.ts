@@ -20,7 +20,7 @@ export async function calculateTotalDue(eleveId: string, groupeId: string): Prom
      WHERE pr.eleve_id = ${eleveId}::uuid
        AND pr.statut = 'present'
        AND s.groupe_id = ${groupeId}::uuid
-       AND s.statut = 'terminee'`,
+       AND s.statut <> 'annulee'`,
   );
 
   return Number(result[0]?.total ?? 0);
@@ -72,7 +72,7 @@ CASE
        LEFT JOIN inscriptions i ON i.eleve_id = pr.eleve_id AND i.groupe_id = g.id AND i.statut = 'actif'
        WHERE pr.eleve_id = ${eleveId}::uuid
          AND pr.statut = 'present'
-         AND s.statut = 'terminee'
+         AND s.statut <> 'annulee'
          AND s.groupe_id = ANY(${groupeIds}::uuid[])
        GROUP BY s.groupe_id`,
     ),
@@ -166,7 +166,7 @@ export async function getAdminStats(centerId: string) {
             JOIN seances s ON pr.seance_id = s.id
             JOIN groupes g ON s.groupe_id = g.id
             LEFT JOIN inscriptions i ON i.eleve_id = pr.eleve_id AND i.groupe_id = g.id AND i.statut = 'actif'
-            WHERE pr.statut = 'present' AND s.statut = 'terminee' AND g.center_id = ${centerId}::uuid
+            WHERE pr.statut = 'present' AND s.statut <> 'annulee' AND g.center_id = ${centerId}::uuid
             GROUP BY pr.eleve_id, s.groupe_id
           ) due
           LEFT JOIN (
