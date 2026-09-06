@@ -94,6 +94,8 @@ export async function POST(request: NextRequest) {
             { status: 409 }
           );
         }
+        const capacityError = await checkCapacity(groupeId, groupe.capaciteMax);
+        if (capacityError) return capacityError;
         const inscription = await prisma.inscription.update({
           where: { id: existingInscription.id },
           data: { statut: "actif" },

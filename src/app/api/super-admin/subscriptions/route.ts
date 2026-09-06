@@ -17,6 +17,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Données manquantes" }, { status: 400 });
     }
 
+    if (!["month", "quarter", "year"].includes(duree)) {
+      return NextResponse.json(
+        { error: "Durée d'abonnement invalide (month, quarter ou year)" },
+        { status: 400 }
+      );
+    }
+
     const center = await prisma.center.findUnique({ where: { id: centerId } });
     if (!center) {
       return NextResponse.json({ error: "Centre introuvable" }, { status: 404 });

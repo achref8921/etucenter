@@ -453,7 +453,9 @@ export async function restoreSystemBackup(opts: { id: string; actorId: string })
       for (const u of dump.tables.utilisateurs || []) {
         const centerId = idMap[u.centerId];
         if (!centerId) continue;
-        const existing = await tx.utilisateur.findUnique({ where: { email: u.email } });
+        const existing = await tx.utilisateur.findFirst({
+          where: { OR: [{ id: u.id }, { email: u.email }] },
+        });
         if (existing) { idMap[u.id] = existing.id; bump(merged, "utilisateurs"); continue; }
 
         let codeEleve = str(u.codeEleve);
@@ -494,7 +496,9 @@ export async function restoreSystemBackup(opts: { id: string; actorId: string })
       for (const m of dump.tables.matieres || []) {
         const centerId = idMap[m.centerId];
         if (!centerId) continue;
-        const existing = await tx.matiere.findFirst({ where: { centerId, nom: m.nom } });
+        const existing = await tx.matiere.findFirst({
+          where: { OR: [{ id: m.id }, { centerId, nom: m.nom }] },
+        });
         if (existing) { idMap[m.id] = existing.id; bump(merged, "matieres"); continue; }
         const created = await tx.matiere.create({ data: { ...buildMatiere(m), centerId } });
         idMap[m.id] = created.id;
@@ -504,7 +508,9 @@ export async function restoreSystemBackup(opts: { id: string; actorId: string })
       for (const g of dump.tables.groupes || []) {
         const centerId = idMap[g.centerId];
         if (!centerId) continue;
-        const existing = await tx.groupe.findFirst({ where: { centerId, nom: g.nom } });
+        const existing = await tx.groupe.findFirst({
+          where: { OR: [{ id: g.id }, { centerId, nom: g.nom }] },
+        });
         if (existing) { idMap[g.id] = existing.id; bump(merged, "groupes"); continue; }
         const created = await tx.groupe.create({
           data: {
@@ -522,7 +528,9 @@ export async function restoreSystemBackup(opts: { id: string; actorId: string })
         const groupeId = idMap[s.groupeId];
         if (!groupeId) continue;
         const date = toDate(s.date) ?? new Date();
-        const existing = await tx.seance.findFirst({ where: { groupeId, date } });
+        const existing = await tx.seance.findFirst({
+          where: { OR: [{ id: s.id }, { groupeId, date }] },
+        });
         if (existing) { idMap[s.id] = existing.id; bump(merged, "seances"); continue; }
         const created = await tx.seance.create({ data: { ...buildSeance(s), groupeId, date } });
         idMap[s.id] = created.id;
@@ -533,7 +541,9 @@ export async function restoreSystemBackup(opts: { id: string; actorId: string })
         const eleveId = idMap[i.eleveId];
         const groupeId = idMap[i.groupeId];
         if (!eleveId || !groupeId) continue;
-        const existing = await tx.inscription.findUnique({ where: { eleveId_groupeId: { eleveId, groupeId } } });
+        const existing = await tx.inscription.findFirst({
+          where: { OR: [{ id: i.id }, { eleveId, groupeId }] },
+        });
         if (existing) { bump(merged, "inscriptions"); continue; }
         await tx.inscription.create({ data: { ...buildInscription(i), eleveId, groupeId } });
         bump(counts, "inscriptions");
@@ -543,7 +553,9 @@ export async function restoreSystemBackup(opts: { id: string; actorId: string })
         const seanceId = idMap[p.seanceId];
         const eleveId = idMap[p.eleveId];
         if (!seanceId || !eleveId) continue;
-        const existing = await tx.presence.findUnique({ where: { seanceId_eleveId: { seanceId, eleveId } } });
+        const existing = await tx.presence.findFirst({
+          where: { OR: [{ id: p.id }, { seanceId, eleveId }] },
+        });
         if (existing) { bump(merged, "presences"); continue; }
         await tx.presence.create({
           data: {
@@ -562,7 +574,9 @@ export async function restoreSystemBackup(opts: { id: string; actorId: string })
         if (!eleveId || !groupeId) continue;
         const datePaiement = toDate(p.datePaiement) ?? new Date();
         const montant = Number(p.montant ?? 0);
-        const existing = await tx.paiement.findFirst({ where: { eleveId, groupeId, montant, datePaiement } });
+        const existing = await tx.paiement.findFirst({
+          where: { OR: [{ id: p.id }, { eleveId, groupeId, montant, datePaiement }] },
+        });
         if (existing) { bump(merged, "paiements"); continue; }
         await tx.paiement.create({ data: { ...buildPaiement(p), eleveId, groupeId, montant, datePaiement } });
         bump(counts, "paiements");
@@ -571,7 +585,9 @@ export async function restoreSystemBackup(opts: { id: string; actorId: string })
       for (const t of dump.tables.tauxBenefices || []) {
         const profId = idMap[t.profId];
         if (!profId) continue;
-        const existing = await tx.tauxBenefice.findUnique({ where: { profId } });
+        const existing = await tx.tauxBenefice.findFirst({
+          where: { OR: [{ id: t.id }, { profId }] },
+        });
         if (existing) { bump(merged, "tauxBenefices"); continue; }
         await tx.tauxBenefice.create({ data: { ...buildTaux(t), profId } });
         bump(counts, "tauxBenefices");
@@ -581,6 +597,8 @@ export async function restoreSystemBackup(opts: { id: string; actorId: string })
         const destinataireId = idMap[n.destinataireId];
         if (!destinataireId) continue;
         const centerId = idMap[n.centerId] || n.centerId;
+        const existing = await tx.notification.findUnique({ where: { id: n.id } });
+        if (existing) { bump(merged, "notifications"); continue; }
         await tx.notification.create({ data: { ...buildNotification(n), centerId, destinataireId } });
         bump(counts, "notifications");
       }

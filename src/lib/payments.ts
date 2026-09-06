@@ -70,7 +70,7 @@ export async function processStudentPayment(input: ProcessStudentPaymentInput) {
         paymentMethod: methodePaiement,
         reference: paymentRef,
         notes: notes ?? null,
-        idempotencyKey: `paiement:${created.id}`,
+        idempotencyKey: idempotencyKey ?? `paiement:${created.id}`,
         createdBy: createdBy ?? null,
       },
       tx
