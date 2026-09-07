@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Power, PowerOff, RotateCcw, Search, Loader2, X, KeyRound, Database, History, Eraser } from "lucide-react";
+import { Power, PowerOff, RotateCcw, Search, Loader2, X, KeyRound, Database, History, Eraser, Pencil } from "lucide-react";
 import PasswordInput from "@/components/password-input";
 import ConfirmDelete from "@/components/confirm-delete";
 
@@ -17,6 +17,9 @@ interface UtilisateurData {
   codeEleve: string | null;
   codeProf: string | null;
   centerId: string;
+  niveau: string | null;
+  classe: string | null;
+  filiere: string | null;
   createdAt: string;
   center: { id: string; name: string; active: boolean };
 }
@@ -32,6 +35,23 @@ const roleLabels: Record<string, string> = {
   eleve: "Élève",
   super_admin: "Super Admin",
 };
+
+const classesByNiveau: Record<string, string[]> = {
+  primaire: ["1ère année", "2ème année", "3ème année", "4ème année", "5ème année", "6ème année"],
+  college: ["7ème", "8ème", "9ème"],
+  lycee: ["1ère", "2ème", "3ème", "Bac"],
+};
+
+const filieres = [
+  { value: "lettres", label: "Lettres" },
+  { value: "economique", label: "Économique" },
+  { value: "informatique", label: "Informatique" },
+  { value: "technique", label: "Technique" },
+  { value: "sciences", label: "Sciences" },
+  { value: "math", label: "Mathématiques" },
+];
+
+const niveauLabels: Record<string, string> = { primaire: "Primaire", college: "Collège", lycee: "Lycée" };
 
 export default function SuperAdminUtilisateursPage() {
   const [users, setUsers] = useState<UtilisateurData[]>([]);
@@ -57,6 +77,13 @@ export default function SuperAdminUtilisateursPage() {
   const [deleteUser, setDeleteUser] = useState<UtilisateurData | null>(null);
   const [deletingPermanent, setDeletingPermanent] = useState(false);
   const [success, setSuccess] = useState("");
+  const [editUser, setEditUser] = useState<UtilisateurData | null>(null);
+  const [editEmail, setEditEmail] = useState("");
+  const [editNiveau, setEditNiveau] = useState("");
+  const [editClasse, setEditClasse] = useState("");
+  const [editFiliere, setEditFiliere] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [editError, setEditError] = useState("");
 
   interface RestoreCandidate {
     id: string;
@@ -141,6 +168,48 @@ export default function SuperAdminUtilisateursPage() {
     setResetUser(null);
     setNewPassword("");
     setResetSubmitting(false);
+  }
+
+  async function handleEditUser() {
+    if (!editUser) return;
+    setEditing(true);
+    setEditError("");
+    const payload: Record<string, unknown> = { id: editUser.id };
+    if (editEmail.trim()) payload.email = editEmail.trim();
+    if (editUser.role === "eleve") {
+      if (editNiveau) payload.niveau = editNiveau;
+      if (editClasse) payload.classe = editClasse;
+      if (editFiliere) payload.filiere = editFiliere;
+    }
+    const res = await fetch("/api/super-admin/utilisateurs", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const body = await res.json();
+    if (!res.ok) {
+      setEditError(body.error || "Erreur");
+      setEditing(false);
+      return;
+    }
+    setUsers((prev) => prev.map((u) => (u.id === editUser.id ? { ...u, ...body } : u)));
+    setEditUser(null);
+    setEditEmail("");
+    setEditNiveau("");
+    setEditClasse("");
+    setEditFiliere("");
+    setEditing(false);
+  }
+
+  function openEdit(user: UtilisateurData) {
+    setEditUser(user);
+    setEditEmail(user.email || "");
+    setEditNiveau(user.niveau || "");
+    setEditClasse(user.classe || "");
+    setEditFiliere(user.filiere || "");
+    setEditError("");
+    setError("");
+    setSuccess("");
   }
 
   async function openRestore(user: UtilisateurData) {
@@ -360,6 +429,13 @@ export default function SuperAdminUtilisateursPage() {
                       </button>
                     )}
                     <button
+                      onClick={() => openEdit(u)}
+                      title="Modifier l'email et le niveau scolaire (élèves)"
+                      className="rounded-lg p-1.5 text-neutral-400 hover:bg-emerald-50 hover:text-emerald-600 transition-colors dark:text-neutral-500 dark:hover:bg-emerald-900/20 dark:hover:text-emerald-400"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
                       onClick={() => openRestore(u)}
                       title="Restaurer les dernières données depuis une sauvegarde"
                       className="rounded-lg p-1.5 text-neutral-400 hover:bg-blue-50 hover:text-blue-600 transition-colors dark:text-neutral-500 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
@@ -388,6 +464,91 @@ export default function SuperAdminUtilisateursPage() {
         </table>
       </div>
 
+      {editUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl dark:bg-[#181b22]">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Modifier le profil</h2>
+              <button onClick={() => { setEditUser(null); setEditEmail(""); setEditNiveau(""); setEditClasse(""); setEditFiliere(""); }} className="text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="mb-4 text-[13px] text-neutral-600 dark:text-neutral-400">
+              Modifier <span className="font-semibold text-neutral-900 dark:text-neutral-100">{editUser.prenom} {editUser.nom}</span> ({editUser.center.name}) — {roleLabels[editUser.role] || editUser.role}
+            </p>
+            {editError && (
+              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">{editError}</div>
+            )}
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Email</label>
+                <input
+                  type="email"
+                  value={editEmail}
+                  onChange={(e) => setEditEmail(e.target.value)}
+                  className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-neutral-900 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-100 dark:focus:border-violet-400"
+                />
+              </div>
+              {editUser.role === "eleve" && (
+                <>
+                  <div>
+                    <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Niveau scolaire</label>
+                    <select
+                      value={editNiveau}
+                      onChange={(e) => { setEditNiveau(e.target.value); setEditClasse(""); setEditFiliere(""); }}
+                      className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-neutral-700 focus:border-violet-500 focus:outline-none dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-200"
+                    >
+                      <option value="">— Aucun —</option>
+                      {Object.keys(classesByNiveau).map((n) => (
+                        <option key={n} value={n}>{niveauLabels[n]}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Classe</label>
+                    <select
+                      value={editClasse}
+                      onChange={(e) => { setEditClasse(e.target.value); setEditFiliere(""); }}
+                      disabled={!editNiveau}
+                      className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-neutral-700 focus:border-violet-500 focus:outline-none disabled:opacity-50 dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-200"
+                    >
+                      <option value="">{editNiveau ? "— Sélectionner —" : "Choisir d'abord le niveau"}</option>
+                      {(editNiveau ? classesByNiveau[editNiveau] || [] : []).map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {editNiveau === "lycee" && ["2ème", "3ème", "Bac"].includes(editClasse) && (
+                    <div>
+                      <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Filière</label>
+                      <select
+                        value={editFiliere}
+                        onChange={(e) => setEditFiliere(e.target.value)}
+                        className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-neutral-700 focus:border-violet-500 focus:outline-none dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-200"
+                      >
+                        <option value="">— Sélectionner —</option>
+                        {filieres.map((f) => (
+                          <option key={f.value} value={f.value}>{f.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+            <div className="mt-5 flex justify-end gap-3">
+              <button type="button" onClick={() => { setEditUser(null); setEditEmail(""); setEditNiveau(""); setEditClasse(""); setEditFiliere(""); }} className="rounded-lg px-4 py-2.5 text-[13px] font-medium text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-[#1e2128]">Annuler</button>
+              <button
+                onClick={handleEditUser}
+                disabled={editing}
+                className="flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-violet-700 disabled:opacity-50 dark:hover:bg-violet-500"
+              >
+                {editing && <Loader2 className="h-4 w-4 animate-spin" />} Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {resetUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl dark:bg-[#181b22]">
