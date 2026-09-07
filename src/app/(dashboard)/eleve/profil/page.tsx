@@ -71,12 +71,6 @@ export default function EleveProfilPage() {
     formState: { errors },
   } = useForm<FormInputs>();
 
-  const defaultForm = () => ({
-    nom: profil?.nom ?? "",
-    prenom: profil?.prenom ?? "",
-    telephone: profil?.telephone ?? "",
-  });
-
   const [scolaire, setScolaire] = useState({ niveau: "", classe: "", filiere: "" });
 
   useEffect(() => {
@@ -88,7 +82,11 @@ export default function EleveProfilPage() {
         if (!res.ok) throw new Error("Erreur lors du chargement du profil");
         const data = await res.json();
         setProfil(data);
-        reset(defaultForm());
+        reset({
+          nom: data.nom,
+          prenom: data.prenom,
+          telephone: data.telephone ?? "",
+        });
         setScolaire({
           niveau: data.niveau ?? "",
           classe: data.classe ?? "",
