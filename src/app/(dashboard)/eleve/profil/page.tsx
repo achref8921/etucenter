@@ -13,6 +13,9 @@ interface Profil {
   prenom: string;
   email: string;
   telephone: string | null;
+  niveau: string | null;
+  classe: string | null;
+  filiere: string | null;
   role: string;
   image: string | null;
   dateNaissance: string | null;
@@ -25,6 +28,28 @@ interface FormInputs {
   prenom: string;
   telephone: string;
 }
+
+const niveauLabels: Record<string, string> = {
+  primaire: "Primaire",
+  college: "Collège",
+  lycee: "Lycée",
+};
+
+const classesByNiveau: Record<string, string[]> = {
+  primaire: ["CP", "CE1", "CE2", "CM1", "CM2"],
+  college: ["7ème", "8ème", "9ème"],
+  lycee: ["1ère", "2ème", "3ème", "Bac"],
+};
+
+const filieres = ["informatique", "maths", "economie", "lettres", "sciences"];
+
+const filiereLabels: Record<string, string> = {
+  informatique: "Informatique",
+  maths: "Maths",
+  economie: "Économie",
+  lettres: "Lettres",
+  sciences: "Sciences",
+};
 
 export default function EleveProfilPage() {
   const router = useRouter();
@@ -46,6 +71,14 @@ export default function EleveProfilPage() {
     formState: { errors },
   } = useForm<FormInputs>();
 
+  const defaultForm = () => ({
+    nom: profil?.nom ?? "",
+    prenom: profil?.prenom ?? "",
+    telephone: profil?.telephone ?? "",
+  });
+
+  const [scolaire, setScolaire] = useState({ niveau: "", classe: "", filiere: "" });
+
   useEffect(() => {
     const fetchProfil = async () => {
       try {
@@ -55,10 +88,11 @@ export default function EleveProfilPage() {
         if (!res.ok) throw new Error("Erreur lors du chargement du profil");
         const data = await res.json();
         setProfil(data);
-        reset({
-          nom: data.nom,
-          prenom: data.prenom,
-          telephone: data.telephone ?? "",
+        reset(defaultForm());
+        setScolaire({
+          niveau: data.niveau ?? "",
+          classe: data.classe ?? "",
+          filiere: data.filiere ?? "",
         });
       } catch (err) {
         setError(err instanceof Error ? err.message : "Erreur inconnue");
@@ -71,6 +105,15 @@ export default function EleveProfilPage() {
   }, [reset]);
 
   const onSubmit = async (data: FormInputs) => {
+    if (scolaire.niveau && !scolaire.classe) {
+      setError("Veuillez sélectionner votre classe");
+      return;
+    }
+    const classesLycee = ["2ème", "3ème", "Bac"];
+    if (scolaire.niveau === "lycee" && classesLycee.includes(scolaire.classe) && !scolaire.filiere) {
+      setError("Veuillez sélectionner votre filière");
+      return;
+    }
     try {
       setSaving(true);
       setError(null);
@@ -82,6 +125,9 @@ export default function EleveProfilPage() {
           nom: data.nom,
           prenom: data.prenom,
           telephone: data.telephone || null,
+          niveau: scolaire.niveau || null,
+          classe: scolaire.classe || null,
+          filiere: scolaire.filiere || null,
         }),
       });
       if (!res.ok) {
@@ -90,6 +136,16 @@ export default function EleveProfilPage() {
       }
       const updated = await res.json();
       setProfil(updated);
+      reset({
+        nom: updated.nom,
+        prenom: updated.prenom,
+        telephone: updated.telephone ?? "",
+      });
+      setScolaire({
+        niveau: updated.niveau ?? "",
+        classe: updated.classe ?? "",
+        filiere: updated.filiere ?? "",
+      });
       setEditing(false);
       setSuccess("Profil mis à jour avec succès");
     } catch (err) {
@@ -105,6 +161,11 @@ export default function EleveProfilPage() {
         nom: profil.nom,
         prenom: profil.prenom,
         telephone: profil.telephone ?? "",
+      });
+      setScolaire({
+        niveau: profil.niveau ?? "",
+        classe: profil.classe ?? "",
+        filiere: profil.filiere ?? "",
       });
     }
     setEditing(false);
@@ -205,6 +266,49 @@ export default function EleveProfilPage() {
                   className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
+              <div>
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Niveau scolaire</label>
+                <select
+                  value={scolaire.niveau}
+                  onChange={(e) => setScolaire({ niveau: e.target.value, classe: "", filiere: "" })}
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="">-- Sélectionner --</option>
+                  {Object.entries(niveauLabels).map(([k, v]) => (
+                    <option key={k} value={k}>{v}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Classe</label>
+                <select
+                  value={scolaire.classe}
+                  onChange={(e) => setScolaire({ ...scolaire, classe: e.target.value, filiere: "" })}
+                  disabled={!scolaire.niveau}
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
+                >
+                  <option value="">-- Sélectionner --</option>
+                  {scolaire.niveau &&
+                    (classesByNiveau[scolaire.niveau] || []).map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                </select>
+              </div>
+              {scolaire.niveau === "lycee" && ["2ème", "3ème", "Bac"].includes(scolaire.classe) && (
+                <div>
+                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Filière</label>
+                  <select
+                    value={scolaire.filiere}
+                    onChange={(e) => setScolaire({ ...scolaire, filiere: e.target.value })}
+                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    <option value="">-- Sélectionner --</option>
+                    {filieres.map((f) => (
+                      <option key={f} value={f}>{filiereLabels[f]}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
@@ -246,6 +350,14 @@ export default function EleveProfilPage() {
               <div>
                 <dt className="text-[13px] font-medium text-neutral-500 dark:text-neutral-400">Téléphone</dt>
                 <dd className="mt-1 text-[13px] text-gray-900 dark:text-gray-100">{profil.telephone ?? "—"}</dd>
+              </div>
+              <div>
+                <dt className="text-[13px] font-medium text-neutral-500 dark:text-neutral-400">Niveau scolaire</dt>
+                <dd className="mt-1 text-[13px] text-gray-900 dark:text-gray-100">
+                  {profil.niveau
+                    ? `${niveauLabels[profil.niveau] ?? profil.niveau}${profil.classe ? ` — ${profil.classe}` : ""}${profil.filiere ? ` — ${filiereLabels[profil.filiere] ?? profil.filiere}` : ""}`
+                    : "—"}
+                </dd>
               </div>
               <div>
                 <dt className="text-[13px] font-medium text-neutral-500 dark:text-neutral-400">Date de naissance</dt>
