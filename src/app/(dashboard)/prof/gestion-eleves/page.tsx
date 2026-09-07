@@ -122,8 +122,11 @@ export default function ProfGestionElevesPage() {
     if (!formData.groupeId) newErrors.groupeId = "Requis";
     if (!formData.nom.trim()) newErrors.nom = "Requis";
     if (!formData.prenom.trim()) newErrors.prenom = "Requis";
+    if (!formData.email.trim() || !/^\S+@\S+\.\S+$/.test(formData.email.trim())) newErrors.email = "Email valide requis";
+    if (formData.motDePasse.length < 6) newErrors.motDePasse = "Minimum 6 caractères requis";
+    if (!formData.niveau) newErrors.niveau = "Requis";
     if (formData.niveau && !formData.classe) newErrors.classe = "Requis";
-    if (formData.motDePasse && formData.motDePasse.length < 6) newErrors.motDePasse = "Min 6 caractères";
+    if (formData.niveau === "lycee" && ["2ème", "3ème", "Bac"].includes(formData.classe) && !formData.filiere) newErrors.filiere = "Requise";
     if (Object.keys(newErrors).length > 0) { setFormErrors(newErrors); return; }
 
     try {
@@ -133,11 +136,11 @@ export default function ProfGestionElevesPage() {
         groupeId: formData.groupeId,
         nom: formData.nom,
         prenom: formData.prenom,
-        email: formData.email || undefined,
+        email: formData.email.trim(),
         telephone: formData.telephone || undefined,
-        motDePasse: formData.motDePasse || undefined,
-        niveau: formData.niveau || undefined,
-        classe: formData.classe || undefined,
+        motDePasse: formData.motDePasse,
+        niveau: formData.niveau,
+        classe: formData.classe,
         filiere: formData.filiere || undefined,
       };
       const res = await fetch("/api/prof/gestion-eleves", {
@@ -415,33 +418,32 @@ export default function ProfGestionElevesPage() {
                   <input value={formData.telephone} onChange={(e) => setFormData({ ...formData, telephone: e.target.value })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                 </div>
                 <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Email (optionnel)</label>
+                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Email *</label>
                   <input value={formData.email} onChange={(e) => { setFormData({ ...formData, email: e.target.value }); if (formErrors.email) { const next = { ...formErrors }; delete next.email; setFormErrors(next); } }} type="email" className={`w-full rounded-lg border ${formErrors.email ? "border-red-500" : "border-neutral-200 dark:border-[#2a2d35]"} bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500`} />
                   {formErrors.email && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.email}</p>}
                 </div>
                 <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">
-                    Mot de passe initial <span className="text-neutral-400 dark:text-neutral-500">(optionnel — généré automatiquement si vide)</span>
-                  </label>
-                  <PasswordInput value={formData.motDePasse} onChange={(e) => setFormData({ ...formData, motDePasse: e.target.value })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Mot de passe initial *</label>
+                  <PasswordInput value={formData.motDePasse} onChange={(e) => setFormData({ ...formData, motDePasse: e.target.value })} className={`w-full rounded-lg border ${formErrors.motDePasse ? "border-red-500" : "border-neutral-200 dark:border-[#2a2d35]"} bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500`} />
                   {formErrors.motDePasse && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.motDePasse}</p>}
                   <p className="mt-1 text-[11px] text-neutral-400 dark:text-neutral-500">
-                    Minimum 6 caractères. L'élève pourra se connecter avec son email et ce mot de passe.
+                    Minimum 6 caractères. L'élève se connectera avec cet email et ce mot de passe.
                   </p>
                 </div>
                 <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Niveau</label>
-                  <select value={formData.niveau} onChange={(e) => setFormData({ ...formData, niveau: e.target.value, classe: "", filiere: "" })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Niveau *</label>
+                  <select value={formData.niveau} onChange={(e) => { setFormData({ ...formData, niveau: e.target.value, classe: "", filiere: "" }); if (formErrors.niveau) { const next = { ...formErrors }; delete next.niveau; setFormErrors(next); } }} className={`w-full rounded-lg border ${formErrors.niveau ? "border-red-500" : "border-neutral-200 dark:border-[#2a2d35]"} bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500`}>
                     <option value="">-- Sélectionner --</option>
                     <option value="primaire">Primaire</option>
                     <option value="college">Collège</option>
                     <option value="lycee">Lycée</option>
                   </select>
+                  {formErrors.niveau && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.niveau}</p>}
                 </div>
                 {formData.niveau && (
                   <div>
-                    <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Classe</label>
-                    <select value={formData.classe} onChange={(e) => setFormData({ ...formData, classe: e.target.value, filiere: "" })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Classe *</label>
+                    <select value={formData.classe} onChange={(e) => { setFormData({ ...formData, classe: e.target.value, filiere: "" }); if (formErrors.classe) { const next = { ...formErrors }; delete next.classe; setFormErrors(next); } }} className={`w-full rounded-lg border ${formErrors.classe ? "border-red-500" : "border-neutral-200 dark:border-[#2a2d35]"} bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500`}>
                       <option value="">-- Sélectionner --</option>
                       {(classesByNiveau[formData.niveau] || []).map((c) => <option key={c} value={c}>{c}</option>)}
                     </select>
@@ -450,11 +452,12 @@ export default function ProfGestionElevesPage() {
                 )}
                 {formData.niveau === "lycee" && ["2ème", "3ème", "Bac"].includes(formData.classe) && (
                   <div>
-                    <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Filière</label>
-                    <select value={formData.filiere} onChange={(e) => setFormData({ ...formData, filiere: e.target.value })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Filière *</label>
+                    <select value={formData.filiere} onChange={(e) => { setFormData({ ...formData, filiere: e.target.value }); if (formErrors.filiere) { const next = { ...formErrors }; delete next.filiere; setFormErrors(next); } }} className={`w-full rounded-lg border ${formErrors.filiere ? "border-red-500" : "border-neutral-200 dark:border-[#2a2d35]"} bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500`}>
                       <option value="">-- Sélectionner --</option>
                       {filieres.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
                     </select>
+                    {formErrors.filiere && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.filiere}</p>}
                   </div>
                 )}
               </div>

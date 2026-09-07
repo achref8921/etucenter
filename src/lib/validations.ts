@@ -49,7 +49,24 @@ export const utilisateurSchema = z.object({
   niveau: z.enum(["primaire", "college", "lycee"]).optional(),
   classe: z.string().optional(),
   filiere: z.enum(["lettres", "economique", "informatique", "technique", "sciences", "math"]).optional(),
-});
+}).refine(
+  (data) => {
+    if (data.role === "eleve") {
+      return !!data.niveau && !!data.classe;
+    }
+    return true;
+  },
+  { message: "Le niveau et la classe sont requis pour les élèves", path: ["niveau"] }
+).refine(
+  (data) => {
+    if (data.role === "eleve" && data.niveau === "lycee" && data.classe) {
+      const lyceeClasses = ["2ème", "3ème", "Bac"];
+      return lyceeClasses.includes(data.classe) ? !!data.filiere : true;
+    }
+    return true;
+  },
+  { message: "La filière est requise pour le lycée (2ème, 3ème, Bac)", path: ["filiere"] }
+);
 
 export const matiereSchema = z.object({
   nom: z.string().trim().min(2),

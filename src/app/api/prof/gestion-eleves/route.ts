@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireProfCanManageEleves } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
-import { generateRandomCode, generateInitialPassword } from "@/lib/utils";
+import { generateRandomCode } from "@/lib/utils";
 import { sendPushToUsers } from "@/lib/push";
 import bcrypt from "bcryptjs";
 
@@ -156,22 +156,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Groupe non trouvé ou non autorisé" }, { status: 404 });
     }
 
-    let finalEmail = email?.trim() || "";
+    const validNiveaux = ["primaire", "college", "lycee"];
+    const validFilieres = ["lettres", "economique", "informatique", "technique", "sciences", "math"];
+
+    if (!email || !email.trim()) {
+      return NextResponse.json({ error: "L'email est requis" }, { status: 400 });
+    }
+    if (!niveau || !validNiveaux.includes(niveau)) {
+      return NextResponse.json({ error: "Le niveau scolaire est requis" }, { status: 400 });
+    }
+    if (!classe || !classe.trim()) {
+      return NextResponse.json({ error: "La classe est requise" }, { status: 400 });
+    }
+    if (niveau === "lycee" && ["2ème", "3ème", "Bac"].includes(classe) && !filiere) {
+      return NextResponse.json({ error: "La filière est requise pour le lycée (2ème, 3ème, Bac)" }, { status: 400 });
+    }
+    if (!motDePasse || typeof motDePasse !== "string" || motDePasse.length < 6) {
+      return NextResponse.json(
+        { error: "Le mot de passe initial est requis (minimum 6 caractères)" },
+        { status: 400 }
+      );
+    }
+
+    let finalEmail = email.trim();
     if (finalEmail) {
       const emailExists = await prisma.utilisateur.findUnique({ where: { email: finalEmail } });
       if (emailExists) {
         return NextResponse.json({ error: "Un utilisateur avec cet email existe déjà" }, { status: 409 });
       }
     }
-
-    if (motDePasse !== undefined && (typeof motDePasse !== "string" || motDePasse.length < 6)) {
-      return NextResponse.json(
-        { error: "Le mot de passe doit contenir au moins 6 caractères" },
-        { status: 400 }
-      );
-    }
-
-    const initialPassword = motDePasse && motDePasse.trim() ? motDePasse : generateInitialPassword();
 
     let codeEleve: string;
     let exists = true;
@@ -183,28 +196,21 @@ export async function POST(request: NextRequest) {
 
     const eleveCode = codeEleve!;
 
-    const validNiveaux = ["primaire", "college", "lycee"];
-    if (niveau && !validNiveaux.includes(niveau)) {
-      return NextResponse.json({ error: "Niveau invalide" }, { status: 400 });
-    }
-
     const capacityError = await checkCapacity(groupeId, groupe.capaciteMax);
     if (capacityError) return capacityError;
-
-    const loginEmail = finalEmail || `eleve-${eleveCode}-${centerId.slice(0, 8)}@etucenter.local`;
 
     const eleve = await prisma.utilisateur.create({
       data: {
         centerId,
         nom: (nom as string).trim(),
         prenom: (prenom as string).trim(),
-        email: loginEmail,
-        motDePasse: await bcrypt.hash(initialPassword, 12),
+        email: finalEmail,
+        motDePasse: await bcrypt.hash(motDePasse, 12),
         role: "eleve",
         actif: true,
         telephone: telephone?.trim() || null,
-        niveau: niveau || null,
-        classe: classe?.trim() || null,
+        niveau,
+        classe: (classe as string).trim(),
         filiere: filiere || null,
         codeEleve: eleveCode,
       },
@@ -250,8 +256,8 @@ export async function POST(request: NextRequest) {
         eleve,
         inscription,
         credentials: {
-          email: loginEmail,
-          motDePasse: initialPassword,
+          email: finalEmail,
+          motDePasse,
           codeEleve: eleveCode,
         },
       },
