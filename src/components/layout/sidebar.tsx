@@ -63,7 +63,7 @@ export const navItemsByRole: Record<Role, NavItem[]> = {
     { label: "Mes Seances", href: "/eleve/seances", icon: Calendar },
     { label: "Mes Paiements", href: "/eleve/paiements", icon: FileText },
     { label: "Mon Compte", href: "/eleve/compte", icon: Wallet },
-    { label: "Mon Profil", href: "/profil", icon: User },
+    { label: "Mon Profil", href: "/eleve/profil", icon: User },
     { label: "Mes Presences", href: "/eleve/presences", icon: ClipboardCheck },
     { label: "Notifications", href: "/eleve/notifications", icon: Bell },
   ],

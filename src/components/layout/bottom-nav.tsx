@@ -53,6 +53,8 @@ const bottomNavItems: Record<Role, NavItem[]> = {
     { label: "Dashboard", href: "/eleve", icon: LayoutDashboard },
     { label: "Groupes", href: "/eleve/groupes", icon: GraduationCap },
     { label: "Seances", href: "/eleve/seances", icon: Calendar },
+    { label: "Compte", href: "/eleve/compte", icon: Wallet },
+    { label: "Profil", href: "/eleve/profil", icon: User },
     { label: "Paiements", href: "/eleve/paiements", icon: FileText },
     { label: "Presences", href: "/eleve/presences", icon: ClipboardCheck },
   ],
