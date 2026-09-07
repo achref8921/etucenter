@@ -3,8 +3,25 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, User, Loader2, Wallet, ArrowUpRight, CheckCircle2, AlertCircle, ClipboardCheck } from "lucide-react";
+import { ArrowLeft, User, Loader2, Wallet, ArrowUpRight, CheckCircle2, AlertCircle, ClipboardCheck, Pencil, X } from "lucide-react";
 import { formatDate, formatDateTime, formatCurrency } from "@/lib/utils";
+
+const classesByNiveau: Record<string, string[]> = {
+  primaire: ["1ère année", "2ème année", "3ème année", "4ème année", "5ème année", "6ème année"],
+  college: ["7ème", "8ème", "9ème"],
+  lycee: ["1ère", "2ème", "3ème", "Bac"],
+};
+
+const filieres = [
+  { value: "lettres", label: "Lettres" },
+  { value: "economique", label: "Économique" },
+  { value: "informatique", label: "Informatique" },
+  { value: "technique", label: "Technique" },
+  { value: "sciences", label: "Sciences" },
+  { value: "math", label: "Mathématiques" },
+];
+
+const niveauLabels: Record<string, string> = { primaire: "Primaire", college: "Collège", lycee: "Lycée" };
 
 interface EleveData {
   eleve: {
@@ -90,6 +107,12 @@ export default function AdminEleveDetailPage() {
   const [financeLoading, setFinanceLoading] = useState(false);
   const [transactions, setTransactions] = useState<StudentTransaction[]>([]);
   const [presenceFilter, setPresenceFilter] = useState<"toutes" | "present" | "absent">("toutes");
+  const [niveauEdit, setNiveauEdit] = useState(false);
+  const [editNiveau, setEditNiveau] = useState("");
+  const [editClasse, setEditClasse] = useState("");
+  const [editFiliere, setEditFiliere] = useState("");
+  const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -128,6 +151,43 @@ export default function AdminEleveDetailPage() {
     };
     fetchBalance();
   }, [id]);
+
+  function openNiveauEdit() {
+    setEditNiveau(eleve?.eleve.niveau || "");
+    setEditClasse(eleve?.eleve.classe || "");
+    setEditFiliere(eleve?.eleve.filiere || "");
+    setEditError("");
+    setNiveauEdit(true);
+  }
+
+  async function saveNiveau() {
+    if (!eleve) return;
+    setEditSaving(true);
+    setEditError("");
+    const payload: Record<string, string> = {};
+    if (editNiveau) payload.niveau = editNiveau;
+    if (editClasse) payload.classe = editClasse;
+    if (editFiliere) payload.filiere = editFiliere;
+    try {
+      const res = await fetch(`/api/admin/eleves/${eleve.eleve.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const body = await res.json();
+      if (!res.ok) {
+        setEditError(body.error || "Erreur");
+        setEditSaving(false);
+        return;
+      }
+      setEleve((prev) => (prev ? { ...prev, eleve: { ...prev.eleve, ...body } } : prev));
+      setNiveauEdit(false);
+      setEditSaving(false);
+    } catch {
+      setEditError("Erreur réseau");
+      setEditSaving(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -249,6 +309,15 @@ export default function AdminEleveDetailPage() {
             <p className="text-xs font-medium uppercase text-neutral-400 dark:text-neutral-500">Filière</p>
             <p className="mt-1 text-sm text-neutral-900 dark:text-neutral-100">{e.filiere ? e.filiere.charAt(0).toUpperCase() + e.filiere.slice(1) : "—"}</p>
           </div>
+        </div>
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={openNiveauEdit}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition-colors dark:bg-blue-900/20 dark:text-blue-300 dark:hover:bg-blue-900/30"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            Modifier le niveau scolaire
+          </button>
         </div>
       </div>
 
@@ -596,6 +665,76 @@ export default function AdminEleveDetailPage() {
         </table>
         </div>
       </div>
+
+      {niveauEdit && eleve && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl dark:bg-[#181b22]">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Niveau scolaire</h2>
+              <button onClick={() => setNiveauEdit(false)} className="text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            {editError && (
+              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">{editError}</div>
+            )}
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Niveau</label>
+                <select
+                  value={editNiveau}
+                  onChange={(e) => { setEditNiveau(e.target.value); setEditClasse(""); setEditFiliere(""); }}
+                  className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-neutral-700 focus:border-violet-500 focus:outline-none dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-200"
+                >
+                  <option value="">— Aucun —</option>
+                  {Object.keys(classesByNiveau).map((n) => (
+                    <option key={n} value={n}>{niveauLabels[n]}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Classe</label>
+                <select
+                  value={editClasse}
+                  onChange={(e) => { setEditClasse(e.target.value); setEditFiliere(""); }}
+                  disabled={!editNiveau}
+                  className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-neutral-700 focus:border-violet-500 focus:outline-none disabled:opacity-50 dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-200"
+                >
+                  <option value="">{editNiveau ? "— Sélectionner —" : "Choisir d'abord le niveau"}</option>
+                  {(editNiveau ? classesByNiveau[editNiveau] || [] : []).map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+              {editNiveau === "lycee" && ["2ème", "3ème", "Bac"].includes(editClasse) && (
+                <div>
+                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Filière</label>
+                  <select
+                    value={editFiliere}
+                    onChange={(e) => setEditFiliere(e.target.value)}
+                    className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-neutral-700 focus:border-violet-500 focus:outline-none dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-200"
+                  >
+                    <option value="">— Sélectionner —</option>
+                    {filieres.map((f) => (
+                      <option key={f.value} value={f.value}>{f.label}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+            <div className="mt-5 flex justify-end gap-3">
+              <button type="button" onClick={() => setNiveauEdit(false)} className="rounded-lg px-4 py-2.5 text-[13px] font-medium text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-[#1e2128]">Annuler</button>
+              <button
+                onClick={saveNiveau}
+                disabled={editSaving}
+                className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-blue-700 disabled:opacity-50 dark:hover:bg-blue-500"
+              >
+                {editSaving && <Loader2 className="h-4 w-4 animate-spin" />} Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
