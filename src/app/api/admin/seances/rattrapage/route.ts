@@ -41,8 +41,8 @@ export async function POST(request: NextRequest) {
 
     const eleves = await prisma.utilisateur.findMany({
       where: isProf
-        ? { id: { in: eleveIdList }, role: "eleve", deletedAt: null }
-        : { id: { in: eleveIdList }, centerId, role: "eleve", deletedAt: null },
+        ? { id: { in: eleveIdList }, role: "eleve", deletedAt: null, ghost: false }
+        : { id: { in: eleveIdList }, centerId, role: "eleve", deletedAt: null, ghost: false },
       select: { id: true, prenom: true, nom: true },
     });
     if (eleves.length !== eleveIdList.length) {

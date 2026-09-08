@@ -85,7 +85,7 @@ async function computeMonthlyHistory(
       twelveMonthsAgo
     ),
     prisma.utilisateur.findMany({
-      where: { role: "prof", centerId: centreId, deletedAt: null },
+      where: { role: "prof", centerId: centreId, deletedAt: null, ghost: false },
       select: {
         id: true,
         tauxBenefice: { select: { tauxPourcentage: true } },

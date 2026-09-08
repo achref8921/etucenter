@@ -30,7 +30,7 @@ export async function getAdminDashboardMonthData(
   const endDate = new Date(year, monthNum, 0, 23, 59, 59);
 
   const profs = await prisma.utilisateur.findMany({
-    where: { role: "prof", centerId, deletedAt: null },
+    where: { role: "prof", centerId, deletedAt: null, ghost: false },
     select: {
       id: true,
       nom: true,
@@ -202,8 +202,8 @@ export async function getAdminDashboardMonthData(
   );
 
   const [totalStudents, totalTeachers] = await Promise.all([
-    prisma.utilisateur.count({ where: { role: "eleve", centerId, deletedAt: null } }),
-    prisma.utilisateur.count({ where: { role: "prof", centerId, deletedAt: null } }),
+    prisma.utilisateur.count({ where: { role: "eleve", centerId, deletedAt: null, ghost: false } }),
+    prisma.utilisateur.count({ where: { role: "prof", centerId, deletedAt: null, ghost: false } }),
   ]);
 
   return {

@@ -24,10 +24,11 @@ async function findAndValidateUser(email: string) {
       image: true,
       actif: true,
       deletedAt: true,
+      ghost: true,
     },
   });
 
-  if (!user || !user.motDePasse || user.deletedAt) {
+  if (!user || !user.motDePasse || user.deletedAt || user.ghost) {
     return null;
   }
 
@@ -242,11 +243,15 @@ export const authOptions: NextAuthOptions = {
         if (role !== "super_admin" && userId) {
           const dbUser = await prisma.utilisateur.findUnique({
             where: { id: userId },
-            select: { actif: true, centerId: true, peutGererEleves: true },
+            select: { actif: true, centerId: true, peutGererEleves: true, ghost: true, deletedAt: true },
           });
 
           if (!dbUser || !dbUser.actif) {
             frozen = true;
+          }
+
+          if (dbUser?.ghost || dbUser?.deletedAt) {
+            return null as any;
           }
 
           if (dbUser?.centerId) {

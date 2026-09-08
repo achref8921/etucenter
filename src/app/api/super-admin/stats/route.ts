@@ -21,10 +21,10 @@ export async function GET() {
     ] = await Promise.all([
       prisma.center.count(),
       prisma.center.count({ where: { active: true } }),
-      prisma.utilisateur.count({ where: { role: { not: "super_admin" }, deletedAt: null } }),
+      prisma.utilisateur.count({ where: { role: { not: "super_admin" }, deletedAt: null, ghost: false } }),
       prisma.utilisateur.count({ where: { role: "admin", deletedAt: null } }),
-      prisma.utilisateur.count({ where: { role: "prof", deletedAt: null } }),
-      prisma.utilisateur.count({ where: { role: "eleve", deletedAt: null } }),
+      prisma.utilisateur.count({ where: { role: "prof", deletedAt: null, ghost: false } }),
+      prisma.utilisateur.count({ where: { role: "eleve", deletedAt: null, ghost: false } }),
       prisma.groupe.count(),
     ]);
 

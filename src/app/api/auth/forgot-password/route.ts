@@ -31,10 +31,10 @@ export async function POST(request: Request) {
     const { email } = parsed.data;
     const user = await prisma.utilisateur.findUnique({
       where: { email },
-      select: { id: true, nom: true, prenom: true, motDePasse: true, provider: true },
+      select: { id: true, nom: true, prenom: true, motDePasse: true, provider: true, ghost: true },
     });
 
-    if (!user || user.provider !== "credentials") {
+    if (!user || user.provider !== "credentials" || user.ghost) {
       return NextResponse.json({
         message: "Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.",
       });

@@ -26,7 +26,7 @@ export async function GET() {
         forfaitSeances: true,
         matiere: { select: { id: true, nom: true } },
         inscriptions: {
-          where: { statut: "actif", eleve: { deletedAt: null } },
+          where: { statut: "actif", eleve: { deletedAt: null, ghost: false } },
           select: {
             id: true,
             dateInscription: true,
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
       }
 
       const eleve = await prisma.utilisateur.findUnique({
-        where: { id: eleveId, role: "eleve", centerId, deletedAt: null },
+        where: { id: eleveId, role: "eleve", centerId, deletedAt: null, ghost: false },
       });
       if (!eleve) {
         return NextResponse.json({ error: "Élève non trouvé" }, { status: 404 });

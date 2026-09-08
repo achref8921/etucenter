@@ -125,6 +125,7 @@ model Utilisateur {
   classe         String?   @db.VarChar(50)
   filiere        Filiere?
   deletedAt      DateTime? @map("deleted_at")
+  ghost          Boolean   @default(false) @map("ghost")
 
   provider              String?   @default("credentials") @db.VarChar(50)
   providerId            String?   @map("provider_id") @db.VarChar(255)

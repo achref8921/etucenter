@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { Plus, Trash2, X, Loader2, Filter, ToggleLeft, ToggleRight, Search, Download, KeyRound, UserCog } from "lucide-react";
 import PasswordInput from "@/components/password-input";
 import ConfirmDelete from "@/components/confirm-delete";
+import ConfirmGhostDelete, { GhostImpactData } from "@/components/confirm-ghost-delete";
 
 interface Utilisateur {
   id: string;
@@ -15,6 +16,7 @@ interface Utilisateur {
   telephone: string | null;
   role: string;
   actif: boolean;
+  ghost?: boolean;
   peutGererEleves: boolean;
   codeEleve: string | null;
   codeProf: string | null;
@@ -56,6 +58,10 @@ export default function UtilisateursPage() {
   const [filiereFilter, setFiliereFilter] = useState("ALL");
   const [etatFilter, setEtatFilter] = useState("ALL");
   const [confirmDelete, setConfirmDelete] = useState<{ id: string } | null>(null);
+  const [ghostTarget, setGhostTarget] = useState<{ id: string; prenom: string; nom: string } | null>(null);
+  const [ghostImpact, setGhostImpact] = useState<GhostImpactData | null>(null);
+  const [ghostSubmitting, setGhostSubmitting] = useState(false);
+  const [ghostError, setGhostError] = useState<string | null>(null);
   const [resetPwd, setResetPwd] = useState<{ id: string; name: string } | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [resetSubmitting, setResetSubmitting] = useState(false);
@@ -198,6 +204,46 @@ export default function UtilisateursPage() {
     }
   };
 
+  const handleGhostDeleteOpen = async (user: Utilisateur) => {
+    setGhostError(null);
+    setGhostImpact(null);
+    setGhostTarget({ id: user.id, prenom: user.prenom, nom: user.nom });
+    try {
+      const res = await fetch(`/api/admin/utilisateurs/${user.id}/ghost`, { method: "GET" });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || "Impossible de charger l'impact");
+      }
+      const data = await res.json();
+      setGhostImpact(data.impact as GhostImpactData);
+    } catch (err) {
+      setGhostError(err instanceof Error ? err.message : "Erreur inconnue");
+    }
+  };
+
+  const handleGhostDeleteConfirm = async (id: string, motDePasse: string) => {
+    try {
+      setGhostSubmitting(true);
+      setGhostError(null);
+      const res = await fetch(`/api/admin/utilisateurs/${id}/ghost`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ motDePasse }),
+      });
+      const body = await res.json();
+      if (!res.ok) {
+        throw new Error(body.error || "Erreur lors de la suppression définitive");
+      }
+      setGhostTarget(null);
+      setGhostImpact(null);
+      fetchUsers();
+    } catch (err) {
+      setGhostError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setGhostSubmitting(false);
+    }
+  };
+
   const handleToggleActif = async (id: string, currentActif: boolean) => {
     try {
       setTogglingId(id);
@@ -316,6 +362,7 @@ export default function UtilisateursPage() {
   };
 
   const roleNav = (u: Utilisateur) => {
+    if (u.ghost) return "#";
     if (u.role === "ELEVE" || u.role === "eleve") return `/admin/eleves/${u.id}`;
     if (u.role === "PROF" || u.role === "prof") return `/admin/professeurs/${u.id}`;
     return "#";
@@ -444,10 +491,17 @@ export default function UtilisateursPage() {
                       ) : "—"}
                     </td>
                     <td className="px-4 py-2.5">
-                      <button onClick={(e) => { e.stopPropagation(); handleToggleActif(user.id, user.actif); }} disabled={togglingId === user.id} className="flex items-center gap-1 disabled:opacity-50" title={user.actif ? "Désactiver" : "Activer"}>
-                        {togglingId === user.id ? <Loader2 className="h-4 w-4 animate-spin text-neutral-400 dark:text-neutral-500" /> : user.actif ? <ToggleRight className="h-6 w-6 text-green-500 dark:text-green-400" /> : <ToggleLeft className="h-6 w-6 text-neutral-300 dark:text-[#2a2d35]" />}
-                        <span className={`text-[11px] font-medium ${user.actif ? "text-green-600 dark:text-green-400" : "text-neutral-400 dark:text-neutral-500"}`}>{user.actif ? "Actif" : "Inactif"}</span>
-                      </button>
+                      {user.ghost ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-red-100 dark:bg-red-900/30 px-2 py-0.5 text-[11px] font-medium text-red-700 dark:text-red-400" title="Compte supprimé par son titulaire, données conservées pour l'administration">
+                          <Trash2 className="h-3 w-3" />
+                          Compte supprimé
+                        </span>
+                      ) : (
+                        <button onClick={(e) => { e.stopPropagation(); handleToggleActif(user.id, user.actif); }} disabled={togglingId === user.id} className="flex items-center gap-1 disabled:opacity-50" title={user.actif ? "Désactiver" : "Activer"}>
+                          {togglingId === user.id ? <Loader2 className="h-4 w-4 animate-spin text-neutral-400 dark:text-neutral-500" /> : user.actif ? <ToggleRight className="h-6 w-6 text-green-500 dark:text-green-400" /> : <ToggleLeft className="h-6 w-6 text-neutral-300 dark:text-[#2a2d35]" />}
+                          <span className={`text-[11px] font-medium ${user.actif ? "text-green-600 dark:text-green-400" : "text-neutral-400 dark:text-neutral-500"}`}>{user.actif ? "Actif" : "Inactif"}</span>
+                        </button>
+                      )}
                     </td>
                     <td className="px-4 py-2.5">
                       {user.role === "prof" || user.role === "PROF" ? (
@@ -461,14 +515,20 @@ export default function UtilisateursPage() {
                     </td>
                     <td className="px-4 py-2.5">
                       <div className="flex items-center gap-1">
-                        {isSuperAdmin && (
+                        {!user.ghost && isSuperAdmin && (
                           <button onClick={(e) => { e.stopPropagation(); setResetPwd({ id: user.id, name: `${user.prenom} ${user.nom}` }); setNewPassword(""); setResetError(null); }} className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300" title="Réinitialiser le mot de passe">
                             <KeyRound className="h-4 w-4" />
                           </button>
                         )}
-                        <button onClick={(e) => { e.stopPropagation(); setConfirmDelete({ id: user.id }); }} disabled={deletingId === user.id} className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 disabled:opacity-50">
-                          {deletingId === user.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                        </button>
+                        {user.ghost ? (
+                          <button onClick={(e) => { e.stopPropagation(); handleGhostDeleteOpen(user); }} className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300" title="Effacer définitivement le compte et toutes ses données">
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        ) : (
+                          <button onClick={(e) => { e.stopPropagation(); setConfirmDelete({ id: user.id }); }} disabled={deletingId === user.id} className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 disabled:opacity-50">
+                            {deletingId === user.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -575,6 +635,7 @@ export default function UtilisateursPage() {
           </div>
         </div>
       )}
+      <ConfirmGhostDelete open={!!ghostTarget} user={ghostTarget} impact={ghostImpact} error={ghostError} loading={ghostSubmitting} onConfirm={handleGhostDeleteConfirm} onCancel={() => { setGhostTarget(null); setGhostImpact(null); setGhostError(null); }} />
       <ConfirmDelete open={!!confirmDelete} title="Archiver l'utilisateur" message="L'utilisateur sera archivé : il ne pourra plus se connecter, mais toutes ses données (inscriptions, paiements, présences) seront conservées. Vous pourrez le réactiver à tout moment." onConfirm={() => { if (confirmDelete) handleDelete(confirmDelete.id); setConfirmDelete(null); }} onCancel={() => setConfirmDelete(null)} loading={deletingId === confirmDelete?.id} />
 
       {resetPwd && (

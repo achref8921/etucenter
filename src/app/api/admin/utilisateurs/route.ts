@@ -25,6 +25,7 @@ export async function GET() {
         telephone: true,
         role: true,
         actif: true,
+        ghost: true,
         peutGererEleves: true,
         codeEleve: true,
         codeProf: true,
@@ -166,6 +167,10 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Seul un super admin peut modifier un admin" }, { status: 403 });
     }
 
+    if (user.ghost) {
+      return NextResponse.json({ error: "Ce compte a été supprimé. Utilisez la suppression définitive pour l'effacer." }, { status: 400 });
+    }
+
     if (motDePasse !== undefined && (session.user as any).role !== "super_admin") {
       return NextResponse.json({ error: "Seul un super admin peut réinitialiser le mot de passe" }, { status: 403 });
     }
@@ -243,6 +248,10 @@ export async function DELETE(request: NextRequest) {
 
     if (existingUser.role === "admin" && (session.user as any).role !== "super_admin") {
       return NextResponse.json({ error: "Seul un super admin peut supprimer un admin" }, { status: 403 });
+    }
+
+    if (existingUser.ghost) {
+      return NextResponse.json({ error: "Ce compte est déjà supprimé. Utilisez la suppression définitive pour l'effacer." }, { status: 400 });
     }
 
     // Suppression douce (archivage) : les données liées (inscriptions, paiements,

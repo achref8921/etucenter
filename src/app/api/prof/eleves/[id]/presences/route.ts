@@ -19,6 +19,7 @@ export async function GET(
         id,
         role: "eleve",
         deletedAt: null,
+        ghost: false,
         inscriptions: { some: { statut: "actif", groupe: { profId: userId } } },
       },
       select: { id: true, nom: true, prenom: true },

@@ -38,6 +38,18 @@ export async function POST(request: Request) {
       );
     }
 
+    const target = await prisma.utilisateur.findUnique({
+      where: { id: userId },
+      select: { ghost: true, deletedAt: true },
+    });
+
+    if (!target || target.ghost || target.deletedAt) {
+      return NextResponse.json(
+        { error: "Le lien de réinitialisation est invalide ou a expiré." },
+        { status: 400 }
+      );
+    }
+
     const hashedPassword = await bcrypt.hash(motDePasse, 12);
 
     await prisma.utilisateur.update({

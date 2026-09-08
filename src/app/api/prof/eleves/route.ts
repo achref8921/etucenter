@@ -32,7 +32,7 @@ export async function GET(request: Request) {
       where: {
         groupeId: { in: groupeIds },
         statut: "actif",
-        eleve: { deletedAt: null },
+        eleve: { deletedAt: null, ghost: false },
       },
       select: {
         eleveId: true,
