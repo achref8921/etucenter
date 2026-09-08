@@ -56,7 +56,6 @@ export function getRateLimitKey(request: Request, prefix: string): string {
 }
 
 export const AUTH_RATE_LIMITS = {
-  login: { windowMs: 15 * 60 * 1000, max: 5 },
   register: { windowMs: 60 * 60 * 1000, max: 3 },
   forgotPassword: { windowMs: 60 * 60 * 1000, max: 3 },
   resetPassword: { windowMs: 15 * 60 * 1000, max: 5 },
