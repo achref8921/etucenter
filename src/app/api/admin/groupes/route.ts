@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { groupeSchema } from "@/lib/validations";
+import {
+  computeGroupeDeleteImpact,
+  deleteGroupeWithFinancialControl,
+  hasSensitiveGroupeImpact,
+} from "@/lib/groupe-impact";
 
 export async function GET() {
   try {
@@ -172,6 +178,9 @@ export async function DELETE(request: NextRequest) {
     const { session, error } = await requireActiveCenter(request.method, ADMIN_ROLES);
     if (error) return error;
 
+    const admin = session.user as any;
+    const centerId = admin.centerId;
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
@@ -180,13 +189,64 @@ export async function DELETE(request: NextRequest) {
     }
 
     const existingGroupe = await prisma.groupe.findUnique({ where: { id } });
-    if (!existingGroupe || existingGroupe.centerId !== (session.user as any).centerId) {
+    if (!existingGroupe || existingGroupe.centerId !== centerId) {
       return NextResponse.json({ error: "Groupe non trouvé" }, { status: 404 });
+    }
+
+    const impact = await computeGroupeDeleteImpact(centerId, id);
+
+    if (hasSensitiveGroupeImpact(impact)) {
+      const body = await request.json().catch(() => ({}));
+      const { mode, motDePasse } = body;
+
+      if (mode !== "only" && mode !== "full") {
+        return NextResponse.json(
+          {
+            error: "Choix requis : 'only' (supprimer le groupe uniquement) ou 'full' (supprimer et effacer l'impact financier)",
+            impact,
+          },
+          { status: 400 }
+        );
+      }
+
+      if (!motDePasse) {
+        return NextResponse.json(
+          { error: "Le mot de passe est requis pour confirmer la suppression", impact },
+          { status: 400 }
+        );
+      }
+
+      const user = await prisma.utilisateur.findUnique({ where: { id: admin.id } });
+      if (!user || !user.motDePasse) {
+        return NextResponse.json({ error: "Compte sans mot de passe" }, { status: 400 });
+      }
+
+      const isValid = await bcrypt.compare(motDePasse, user.motDePasse);
+      if (!isValid) {
+        return NextResponse.json({ error: "Mot de passe incorrect" }, { status: 401 });
+      }
+
+      await deleteGroupeWithFinancialControl(id, mode, centerId, admin.id);
+
+      logger.info("Groupe supprimé (avec contrôle de l'impact financier)", {
+        adminId: admin.id,
+        deletedGroupId: id,
+        mode,
+        impact,
+      });
+
+      return NextResponse.json({
+        message:
+          mode === "full"
+            ? "Groupe supprimé et traces financières effacées"
+            : "Groupe supprimé (opérations financières conservées)",
+        impact,
+      });
     }
 
     await prisma.groupe.delete({ where: { id } });
 
-    logger.info("Groupe supprimé", { adminId: (session.user as any).id, deletedGroupId: id });
+    logger.info("Groupe supprimé", { adminId: admin.id, deletedGroupId: id });
 
     return NextResponse.json({ message: "Groupe supprimé avec succès" });
   } catch (error) {

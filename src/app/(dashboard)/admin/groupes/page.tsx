@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Plus, Trash2, X, Loader2, Pencil, Check, Search } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import ConfirmDelete from "@/components/confirm-delete";
+import ConfirmGroupeDelete, { type GroupeDeleteImpact } from "@/components/confirm-groupe-delete";
 
 interface Groupe {
   id: string;
@@ -54,6 +55,8 @@ export default function GroupesPage() {
   const [selectedProfId, setSelectedProfId] = useState<string>("");
   const [savingProfId, setSavingProfId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<{ id: string } | null>(null);
+  const [deleteFlow, setDeleteFlow] = useState<{ groupe: Groupe; impact: GroupeDeleteImpact } | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [filterProfId, setFilterProfId] = useState("");
   const [filterMatiereId, setFilterMatiereId] = useState("");
@@ -164,18 +167,51 @@ export default function GroupesPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const openDelete = async (groupe: Groupe) => {
+    try {
+      setDeleteError(null);
+      setDeletingId(groupe.id);
+      const res = await fetch(`/api/admin/groupes/impact?id=${groupe.id}`);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || "Erreur lors de l'analyse du groupe");
+      }
+      const data = await res.json();
+      if (data.sensitive) {
+        setDeleteFlow({ groupe, impact: data.impact });
+      } else {
+        setConfirmDelete({ id: groupe.id });
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleDelete = async (id: string, mode?: "only" | "full", motDePasse?: string) => {
     try {
       setDeletingId(id);
       setError(null);
-      const res = await fetch(`/api/admin/groupes?id=${id}`, { method: "DELETE" });
+      setDeleteError(null);
+      const res = await fetch(`/api/admin/groupes?id=${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: mode ? JSON.stringify({ mode, motDePasse }) : undefined,
+      });
       if (!res.ok) {
         const body = await res.json();
         throw new Error(body.error || "Erreur lors de la suppression");
       }
+      setDeleteFlow(null);
       fetchData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur inconnue");
+      const message = err instanceof Error ? err.message : "Erreur inconnue";
+      if (mode) {
+        setDeleteError(message);
+      } else {
+        setError(message);
+      }
     } finally {
       setDeletingId(null);
     }
@@ -381,7 +417,7 @@ export default function GroupesPage() {
                           <Pencil className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => setConfirmDelete({ id: groupe.id })}
+                          onClick={() => openDelete(groupe)}
                           disabled={deletingId === groupe.id}
                           className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 disabled:opacity-50"
                         >
@@ -563,6 +599,17 @@ export default function GroupesPage() {
         </div>
       )}
       <ConfirmDelete open={!!confirmDelete} title="Supprimer le groupe" message="Êtes-vous sûr de vouloir supprimer ce groupe ? Cette action est irréversible." onConfirm={() => { if (confirmDelete) handleDelete(confirmDelete.id); setConfirmDelete(null); }} onCancel={() => setConfirmDelete(null)} loading={deletingId === confirmDelete?.id} />
+      <ConfirmGroupeDelete
+        open={!!deleteFlow}
+        groupe={deleteFlow ? { id: deleteFlow.groupe.id, nom: deleteFlow.groupe.nom } : null}
+        impact={deleteFlow ? deleteFlow.impact : null}
+        onConfirm={(mode, motDePasse) => {
+          if (deleteFlow) handleDelete(deleteFlow.groupe.id, mode, motDePasse);
+        }}
+        onCancel={() => { setDeleteFlow(null); setDeleteError(null); }}
+        loading={deletingId === deleteFlow?.groupe.id}
+        error={deleteError}
+      />
     </div>
   );
 }
