@@ -65,7 +65,7 @@ function AnimatedValue({ value, format }: { value: number; format: "currency" | 
 
 export function StatCards({ cards }: { cards: StatCardData[] }) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4">
       {cards.map((card, index) => {
         const Icon = ICONS[card.icon] ?? Wallet;
         const subTone =
@@ -79,20 +79,20 @@ export function StatCards({ cards }: { cards: StatCardData[] }) {
             key={card.title}
             href={card.href}
             style={{ animationDelay: `${index * 60}ms` }}
-            className="group animate-fade-in-up rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-5 transition-all duration-200 hover:-translate-y-1 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-lg"
+            className="group animate-fade-in-up rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-4 transition-all duration-200 hover:-translate-y-1 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-lg sm:p-5"
           >
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">{card.title}</p>
-                <p className="mt-1 text-xl font-bold text-neutral-900 dark:text-neutral-100 group-hover:text-blue-600">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 sm:text-[12px]">{card.title}</p>
+                <p className="mt-1 truncate text-lg font-bold text-neutral-900 dark:text-neutral-100 group-hover:text-blue-600 sm:text-xl">
                   <AnimatedValue value={card.value} format={card.format} />
                 </p>
                 {card.sub && (
-                  <p className={`mt-1 text-[12px] font-medium ${subTone}`}>{card.sub}</p>
+                  <p className={`mt-1 truncate text-[11px] font-medium ${subTone} sm:text-[12px]`}>{card.sub}</p>
                 )}
               </div>
               <div
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-110`}
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-110 sm:h-10 sm:w-10`}
               >
                 <Icon className="h-5 w-5 text-neutral-400 dark:text-neutral-500" />
               </div>

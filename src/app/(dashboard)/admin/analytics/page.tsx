@@ -97,7 +97,7 @@ export default function AdminAnalyticsPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <KpiCard
           icon={Users}
           iconBg="bg-blue-500"
@@ -318,13 +318,13 @@ function KpiCard({
   change?: number;
 }) {
   return (
-    <div className="rounded-xl border border-neutral-200 bg-white p-5  dark:border-[#2a2d35] dark:bg-[#181b22]">
+    <div className="rounded-xl border border-neutral-200 bg-white p-4  dark:border-[#2a2d35] dark:bg-[#181b22] sm:p-5">
       <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{label}</p>
-          <p className="mt-1 text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">{value}</p>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[11px] font-medium text-neutral-500 dark:text-neutral-400 sm:text-xs">{label}</p>
+          <p className="mt-1 truncate text-lg font-bold tracking-tight text-neutral-900 dark:text-neutral-100 sm:text-xl">{value}</p>
           {suffix && (
-            <p className="mt-0.5 text-xs text-neutral-400 dark:text-neutral-500">{suffix}</p>
+            <p className="mt-0.5 truncate text-[10px] text-neutral-400 dark:text-neutral-500 sm:text-xs">{suffix}</p>
           )}
           {change !== undefined && (
             <div className="mt-1 flex items-center gap-1">
@@ -341,7 +341,7 @@ function KpiCard({
             </div>
           )}
         </div>
-        <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${iconBg}`}>
+        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl sm:h-10 sm:w-10 ${iconBg}`}>
           <Icon className="h-5 w-5 text-white" />
         </div>
       </div>

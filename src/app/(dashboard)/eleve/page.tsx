@@ -298,7 +298,7 @@ function FragmentRow({
                 <h3 className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
                   Ma situation financière
                 </h3>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
                   <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2">
                     <p className="text-[11px] uppercase text-neutral-400 dark:text-neutral-500">Total dû</p>
                     <p className="text-[13px] font-bold tabular-nums text-gray-900 dark:text-gray-100">

@@ -126,17 +126,17 @@ export default function SuperAdminAnalyticsPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <div className="rounded-xl border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Mcenters actifs</p>
-              <p className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-100">{data.activeCenters}</p>
+              <p className="mt-1 truncate text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">{data.activeCenters}</p>
               <p className="text-xs text-neutral-400 dark:text-neutral-500">
                 total: {data.totalCenters} | suspendus: {data.suspendedCenters}
               </p>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 dark:bg-[#1e2128]">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-neutral-100 sm:h-10 sm:w-10 dark:bg-[#1e2128]">
               <Building2 className="h-5 w-5 text-neutral-500" />
             </div>
           </div>
@@ -146,14 +146,14 @@ export default function SuperAdminAnalyticsPage() {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Revenus ce mois</p>
-              <p className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+              <p className="mt-1 truncate text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">
                 {data.thisMonthAmount.toLocaleString("fr-TN")} DT
               </p>
               <p className="text-xs text-neutral-400 dark:text-neutral-500">
                 {data.subscriptionsThisMonth} abonnements actifs
               </p>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 dark:bg-[#1e2128]">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-neutral-100 sm:h-10 sm:w-10 dark:bg-[#1e2128]">
               <DollarSign className="h-5 w-5 text-neutral-500" />
             </div>
           </div>
@@ -163,12 +163,12 @@ export default function SuperAdminAnalyticsPage() {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Utilisateurs totaux</p>
-              <p className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-100">{data.totalUsers}</p>
+              <p className="mt-1 truncate text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">{data.totalUsers}</p>
               <p className="text-xs text-neutral-400 dark:text-neutral-500">
                 {data.totalStudents} élèves | {data.totalTeachers} profs
               </p>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 dark:bg-[#1e2128]">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-neutral-100 sm:h-10 sm:w-10 dark:bg-[#1e2128]">
               <Users className="h-5 w-5 text-neutral-500" />
             </div>
           </div>
@@ -178,14 +178,14 @@ export default function SuperAdminAnalyticsPage() {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Revenu total</p>
-              <p className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+              <p className="mt-1 truncate text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">
                 {data.totalSubAmount.toLocaleString("fr-TN")} DT
               </p>
               <p className="text-xs text-neutral-400 dark:text-neutral-500">
                 {data.totalGroups} groupes
               </p>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 dark:bg-[#1e2128]">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-neutral-100 sm:h-10 sm:w-10 dark:bg-[#1e2128]">
               <TrendingUp className="h-5 w-5 text-neutral-500" />
             </div>
           </div>

@@ -220,7 +220,7 @@ export default function ProfDashboardPage() {
           </div>
 
           {/* Compact stats row */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-3">
             <Link
               href="/prof/seances"
               className="group rounded-xl border border-neutral-200 bg-white px-4 py-3 transition-all duration-200 hover:border-indigo-200 dark:border-[#2a2d35] dark:bg-[#181b22] dark:hover:border-indigo-500/20"

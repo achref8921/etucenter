@@ -67,6 +67,16 @@
   font-feature-settings: 'ss01', 'cv01';
 }
 
+html {
+  /* Garde le texte cohérent quel que soit le DPI / le zoom du système */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: hidden;
+}
+
 .dark * {
   scrollbar-color: #374151 transparent;
 }

@@ -62,7 +62,7 @@ async function DashboardContent({ month }: { month: string }) {
             <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
               Bénéfice Net du Centre
             </p>
-            <p className="mt-2 text-3xl font-bold tabular-nums text-indigo-600 dark:text-indigo-400">
+            <p className="mt-2 text-2xl font-bold tabular-nums text-indigo-600 dark:text-indigo-400 sm:text-3xl">
               {formatCurrency(data.netCenterEarnings)}
             </p>
             <p className="mt-1 text-[12px] text-neutral-400 dark:text-neutral-500">
@@ -73,7 +73,7 @@ async function DashboardContent({ month }: { month: string }) {
             <Banknote className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
           </div>
         </div>
-        <div className="mt-4 grid grid-cols-3 gap-4 border-t border-neutral-100 pt-4 dark:border-[#2a2d35]">
+        <div className="mt-4 grid grid-cols-1 gap-3 border-t border-neutral-100 pt-4 sm:grid-cols-3 sm:gap-4 dark:border-[#2a2d35]">
           <div>
             <p className="text-[12px] text-neutral-400 dark:text-neutral-500">Revenu Brut</p>
             <p className="text-[13px] font-semibold tabular-nums text-neutral-900 dark:text-neutral-100">
