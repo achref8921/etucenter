@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Calendar, Plus, X, Loader2, Pencil, Trash2, CalendarPlus } from "lucide-react";
 import { formatDate, formatTime } from "@/lib/utils";
 import ConfirmDelete from "@/components/confirm-delete";
+import TimeInput from "@/components/time-input";
 import { useToast } from "@/components/ui/toast";
 import { SkeletonPage } from "@/components/ui/skeleton";
 
@@ -583,21 +584,11 @@ export default function ProfSeancesPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Heure début</label>
-                  <input
-                    type="time"
-                    value={rattrapageHeureDebut}
-                    onChange={(e) => setRattrapageHeureDebut(e.target.value)}
-                    className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
+                  <TimeInput value={rattrapageHeureDebut} onChange={setRattrapageHeureDebut} />
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Heure fin</label>
-                  <input
-                    type="time"
-                    value={rattrapageHeureFin}
-                    onChange={(e) => setRattrapageHeureFin(e.target.value)}
-                    className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
+                  <TimeInput value={rattrapageHeureFin} onChange={setRattrapageHeureFin} />
                 </div>
               </div>
               <div>
@@ -659,11 +650,11 @@ export default function ProfSeancesPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Heure début</label>
-                  <input type="time" value={createHeureDebut} onChange={(e) => setCreateHeureDebut(e.target.value)} className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  <TimeInput value={createHeureDebut} onChange={setCreateHeureDebut} />
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Heure fin</label>
-                  <input type="time" value={createHeureFin} onChange={(e) => setCreateHeureFin(e.target.value)} className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  <TimeInput value={createHeureFin} onChange={setCreateHeureFin} />
                 </div>
               </div>
               <div>
@@ -699,11 +690,11 @@ export default function ProfSeancesPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Heure début</label>
-                  <input type="time" value={editHeureDebut} onChange={(e) => setEditHeureDebut(e.target.value)} className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  <TimeInput value={editHeureDebut} onChange={setEditHeureDebut} />
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Heure fin</label>
-                  <input type="time" value={editHeureFin} onChange={(e) => setEditHeureFin(e.target.value)} className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  <TimeInput value={editHeureFin} onChange={setEditHeureFin} />
                 </div>
               </div>
               <div>

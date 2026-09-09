@@ -20,6 +20,7 @@ import {
   Coins,
 } from "lucide-react";
 import { formatCurrency, formatDateTime, formatDate } from "@/lib/utils";
+import TimeInput from "@/components/time-input";
 
 interface Stats {
   totalRevenue: number;
@@ -1485,12 +1486,7 @@ export default function FinancesPage() {
                   <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Heure
                   </label>
-                  <input
-                    type="time"
-                    value={creditForm.time}
-                    onChange={(e) => setCreditForm({ ...creditForm, time: e.target.value })}
-                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
-                  />
+                  <TimeInput value={creditForm.time} onChange={(v) => setCreditForm({ ...creditForm, time: v })} />
                 </div>
               </div>
 

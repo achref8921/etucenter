@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Users, Loader2, X, Search, Download, Trash2, CalendarPlus } from "lucide-react";
 import { formatDate, formatCurrency, formatTime } from "@/lib/utils";
 import ConfirmDelete from "@/components/confirm-delete";
+import TimeInput from "@/components/time-input";
 
 interface GroupeData {
   groupe: {
@@ -816,21 +817,11 @@ export default function AdminGroupeDetailPage() {
                 </div>
                 <div>
                   <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Heure début</label>
-                  <input
-                    type="time"
-                    value={rattrapageHeureDebut}
-                    onChange={(e) => setRattrapageHeureDebut(e.target.value)}
-                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
+                  <TimeInput value={rattrapageHeureDebut} onChange={setRattrapageHeureDebut} />
                 </div>
                 <div>
                   <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Heure fin</label>
-                  <input
-                    type="time"
-                    value={rattrapageHeureFin}
-                    onChange={(e) => setRattrapageHeureFin(e.target.value)}
-                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
+                  <TimeInput value={rattrapageHeureFin} onChange={setRattrapageHeureFin} />
                 </div>
               </div>
               <div>
