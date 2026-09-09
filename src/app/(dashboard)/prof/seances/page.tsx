@@ -504,7 +504,7 @@ export default function ProfSeancesPage() {
 
       {showRattrapageModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="modal-panel flex w-full max-w-md flex-col overflow-hidden rounded-xl bg-white dark:bg-[#181b22]">
+          <div className="modal-panel flex w-full max-w-md flex-col rounded-xl bg-white shadow-xl dark:bg-[#181b22]">
             <div className="flex flex-shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-neutral-800">
               <h2 className="text-lg font-semibold dark:text-neutral-100">Séance passée</h2>
               <button onClick={() => setShowRattrapageModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"><X className="h-5 w-5" /></button>
@@ -637,7 +637,7 @@ export default function ProfSeancesPage() {
 
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="modal-panel flex w-full max-w-md flex-col overflow-hidden rounded-xl bg-white dark:bg-[#181b22]">
+          <div className="modal-panel flex w-full max-w-md flex-col rounded-xl bg-white shadow-xl dark:bg-[#181b22]">
             <div className="flex flex-shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-neutral-800">
               <h2 className="text-lg font-semibold dark:text-neutral-100">Nouvelle Séance</h2>
               <button type="button" onClick={() => setShowCreateModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"><X className="h-5 w-5" /></button>
@@ -683,7 +683,7 @@ export default function ProfSeancesPage() {
 
       {showEditModal && editSeance && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="modal-panel flex w-full max-w-md flex-col overflow-hidden rounded-xl bg-white dark:bg-[#181b22]">
+          <div className="modal-panel flex w-full max-w-md flex-col rounded-xl bg-white shadow-xl dark:bg-[#181b22]">
             <div className="flex flex-shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-neutral-800">
               <h2 className="text-lg font-semibold dark:text-neutral-100">Modifier la Séance</h2>
               <button type="button" onClick={() => setShowEditModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"><X className="h-5 w-5" /></button>

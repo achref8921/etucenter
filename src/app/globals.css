@@ -110,8 +110,15 @@ body {
   padding: 1rem;
   padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+}
+
+/* Les champs (heure/date/select...) répondent immédiatement au toucher, même dans
+   une zone défilable : la pression n'est plus avalée comme un geste de défilement. */
+input,
+select,
+textarea {
+  touch-action: manipulation;
 }
 
 .fixed.inset-0.z-50.flex.items-center.justify-center > *,
