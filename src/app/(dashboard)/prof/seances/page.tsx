@@ -504,12 +504,12 @@ export default function ProfSeancesPage() {
 
       {showRattrapageModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-xl bg-white dark:bg-[#181b22] p-6">
-            <div className="mb-4 flex items-center justify-between">
+          <div className="modal-panel flex w-full max-w-md flex-col overflow-hidden rounded-xl bg-white dark:bg-[#181b22]">
+            <div className="flex flex-shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-neutral-800">
               <h2 className="text-lg font-semibold dark:text-neutral-100">Séance passée</h2>
               <button onClick={() => setShowRattrapageModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"><X className="h-5 w-5" /></button>
             </div>
-            <div className="space-y-4">
+            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-4">
               <div>
                 <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Groupe</label>
                 <select
@@ -613,23 +613,23 @@ export default function ProfSeancesPage() {
               {rattrapageError && (
                 <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">{rattrapageError}</div>
               )}
-              <div className="flex justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowRattrapageModal(false)}
-                  className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
-                >
-                  Annuler
-                </button>
-                <button
-                  onClick={handleSaveRattrapage}
-                  disabled={savingRattrapage}
-                  className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
-                >
-                  {savingRattrapage && <Loader2 className="h-4 w-4 animate-spin" />}
-                  Ajouter et déduire
-                </button>
-              </div>
+            </div>
+            <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-neutral-200 px-6 py-4 dark:border-[#2a2d35]">
+              <button
+                type="button"
+                onClick={() => setShowRattrapageModal(false)}
+                className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleSaveRattrapage}
+                disabled={savingRattrapage}
+                className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+              >
+                {savingRattrapage && <Loader2 className="h-4 w-4 animate-spin" />}
+                Ajouter et déduire
+              </button>
             </div>
           </div>
         </div>
@@ -637,12 +637,12 @@ export default function ProfSeancesPage() {
 
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-xl bg-white dark:bg-[#181b22] p-6">
-            <div className="mb-4 flex items-center justify-between">
+          <div className="modal-panel flex w-full max-w-md flex-col overflow-hidden rounded-xl bg-white dark:bg-[#181b22]">
+            <div className="flex flex-shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-neutral-800">
               <h2 className="text-lg font-semibold dark:text-neutral-100">Nouvelle Séance</h2>
-              <button onClick={() => setShowCreateModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"><X className="h-5 w-5" /></button>
+              <button type="button" onClick={() => setShowCreateModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"><X className="h-5 w-5" /></button>
             </div>
-            <form onSubmit={handleCreateSubmit} className="space-y-4">
+            <form id="create-seance-form" onSubmit={handleCreateSubmit} className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-4">
               <div>
                 <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Groupe</label>
                 <select value={createGroupeId} onChange={(e) => setCreateGroupeId(e.target.value)} className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
@@ -670,28 +670,28 @@ export default function ProfSeancesPage() {
                 <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Notes</label>
                 <textarea value={createNotes} onChange={(e) => setCreateNotes(e.target.value)} rows={3} className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
               </div>
-              <div className="flex justify-end gap-3 pt-2">
-                <button type="button" onClick={() => setShowCreateModal(false)} className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]">Annuler</button>
-                <button type="submit" disabled={submitting} className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
-                  {submitting && <Loader2 className="h-4 w-4 animate-spin" />} Créer
-                </button>
-              </div>
             </form>
+            <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-neutral-200 px-6 py-4 dark:border-[#2a2d35]">
+              <button type="button" onClick={() => setShowCreateModal(false)} className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]">Annuler</button>
+              <button type="submit" form="create-seance-form" disabled={submitting} className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
+                {submitting && <Loader2 className="h-4 w-4 animate-spin" />} Créer
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {showEditModal && editSeance && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-xl bg-white dark:bg-[#181b22] p-6">
-            <div className="mb-4 flex items-center justify-between">
+          <div className="modal-panel flex w-full max-w-md flex-col overflow-hidden rounded-xl bg-white dark:bg-[#181b22]">
+            <div className="flex flex-shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-neutral-800">
               <h2 className="text-lg font-semibold dark:text-neutral-100">Modifier la Séance</h2>
-              <button onClick={() => setShowEditModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"><X className="h-5 w-5" /></button>
+              <button type="button" onClick={() => setShowEditModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"><X className="h-5 w-5" /></button>
             </div>
-            <div className="mb-3 rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3 text-sm text-neutral-600 dark:text-neutral-400">
-              {editSeance.groupe.nom} — {formatDate(editSeance.date)}
-            </div>
-            <form onSubmit={handleEditSubmit} className="space-y-4">
+            <form id="edit-seance-form" onSubmit={handleEditSubmit} className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-4">
+              <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3 text-sm text-neutral-600 dark:text-neutral-400">
+                {editSeance.groupe.nom} — {formatDate(editSeance.date)}
+              </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Date</label>
                 <input type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
@@ -719,13 +719,13 @@ export default function ProfSeancesPage() {
                 <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Notes</label>
                 <textarea value={editNotes} onChange={(e) => setEditNotes(e.target.value)} rows={3} className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
               </div>
-              <div className="flex justify-end gap-3 pt-2">
-                <button type="button" onClick={() => setShowEditModal(false)} className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]">Annuler</button>
-                <button type="submit" disabled={submitting} className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
-                  {submitting && <Loader2 className="h-4 w-4 animate-spin" />} Enregistrer
-                </button>
-              </div>
             </form>
+            <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-neutral-200 px-6 py-4 dark:border-[#2a2d35]">
+              <button type="button" onClick={() => setShowEditModal(false)} className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]">Annuler</button>
+              <button type="submit" form="edit-seance-form" disabled={submitting} className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
+                {submitting && <Loader2 className="h-4 w-4 animate-spin" />} Enregistrer
+              </button>
+            </div>
           </div>
         </div>
       )}

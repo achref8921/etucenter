@@ -100,6 +100,31 @@ body {
   opacity: 0.6;
 }
 
+/* ===== Modales : centrage + défilement sûrs sur tous les écrans (mobile / faible DPI) =====
+   - la couche (overlay) devient scrollable à la place de la panneau seul ;
+   - margin:auto centre le panneau quand il tient à l'écran et laisse défiler lorsqu'il
+     est plus haut que l'écran : le bouton Enregistrer / Annuler reste toujours atteignable.
+*/
+.fixed.inset-0.z-50.flex.items-center.justify-center,
+.fixed.inset-0.z-\[9999\].flex.items-center.justify-center {
+  padding: 1rem;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.fixed.inset-0.z-50.flex.items-center.justify-center > *,
+.fixed.inset-0.z-\[9999\].flex.items-center.justify-center > * {
+  margin: auto;
+}
+
+/* Panneau de modale : hauteur limitée à l'écran (avec repli pour les vieux navigateurs) */
+.modal-panel {
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
+}
+
 @keyframes toast-in {
   from { opacity: 0; transform: translateX(24px) scale(0.97); }
   to { opacity: 1; transform: none; }
