@@ -14,12 +14,12 @@ export interface LlmInput {
   history: HistoryTurn[];
 }
 
-const MODEL = process.env.GEMINI_MODEL || "gemini-2.0-flash";
+const MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
 
 const MAX_HISTORY = 8;
 const MAX_TURN = 300;
-const MAX_OUTPUT_TOKENS = 420;
-const TIMEOUT_MS = 10_000;
+const MAX_OUTPUT_TOKENS = 1400;
+const TIMEOUT_MS = 15_000;
 
 function truncate(s: string, max: number): string {
   return s.length > max ? `${s.slice(0, max).trim()}…` : s;
@@ -128,7 +128,10 @@ async function callGemini(contents: { role: string; parts: { text: string }[] }[
 
   try {
     const data = (await res.json()) as any;
-    const text = data?.candidates?.[0]?.content?.parts?.map((p: any) => p?.text ?? "").join("");
+    const text = data?.candidates?.[0]?.content?.parts
+      ?.filter((p: any) => p && typeof p.text === "string")
+      ?.map((p: any) => p.text)
+      .join("");
     if (typeof text !== "string") return null;
     return cleanup(text);
   } catch (err) {

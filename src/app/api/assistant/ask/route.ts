@@ -53,7 +53,7 @@ export async function POST(request: Request) {
 
     const llmLimitMax = Number(process.env.ASSISTANT_LLM_RATE_LIMIT || 10);
     const llmQuota = llmEnabled()
-      ? rateLimit(getRateLimitKey(request, "assistant-llm"), {
+      ? rateLimit(`assistant-llm:${user.id}`, {
           windowMs: 60 * 1000,
           max: Number.isFinite(llmLimitMax) && llmLimitMax > 0 ? llmLimitMax : 10,
         })
