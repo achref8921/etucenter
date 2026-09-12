@@ -10,8 +10,8 @@ interface ChatMessage {
   chips?: string[];
 }
 
-const DEFAULT_AR = "مرحبًا 👋 تحكم في مركزك بسرعة.\nاكتب أي أمر بالعربية أو الفرنسية، مثلاً «ربح هذا الشهر» أو «من لم يسدد».";
-const DEFAULT_FR = "Bonjour 👋 Gérez votre centre en un instant.\nÉcrivez une commande en arabe ou en français, ex. « bénéfice du mois » ou « qui n'a pas payé ».";
+const DEFAULT_AR = "مرحبًا، أنا آش 👋 في خدمتك — تحكم في مركزك بسرعة.\nاكتب أي أمر بالعربية أو الفرنسية، مثلاً «ربح هذا الشهر» أو «من لم يسدد».";
+const DEFAULT_FR = "Bonjour, je suis Ash 👋 à votre service — gérez votre centre en un instant.\nÉcrivez une commande en arabe ou en français, ex. « bénéfice du mois » ou « qui n'a pas payé ».";
 
 export default function AssistantWidget({ isProf }: { isProf: boolean }) {
   const [open, setOpen] = useState(false);
@@ -83,7 +83,7 @@ export default function AssistantWidget({ isProf }: { isProf: boolean }) {
               <Bot className="h-4 w-4" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">Assistant</p>
+              <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">Ash</p>
               <p className="text-[11px] text-gray-500 dark:text-gray-400">
                 {isProf ? "Vos groupes & salaires" : "Votre centre — chiffres en direct"}
               </p>

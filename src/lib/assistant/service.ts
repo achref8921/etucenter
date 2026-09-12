@@ -63,11 +63,25 @@ export async function answer(
   rawMessage: string,
   opts?: AnswerOptions
 ): Promise<AssistantAnswer> {
-  const base = await answerCore(role, userId, centerId, rawMessage);
+  const [user, center] = await Promise.all([
+    prisma.utilisateur.findUnique({
+      where: { id: userId },
+      select: { prenom: true, nom: true },
+    }),
+    prisma.center.findUnique({
+      where: { id: centerId },
+      select: { name: true },
+    }),
+  ]).catch(() => [null, null] as const);
+  const userName = user ? [user.prenom, user.nom].filter(Boolean).join(" ").trim() : "";
+  const centerName = center?.name ? center.name.trim() : "";
+  const base = await answerCore(role, userId, centerId, rawMessage, userName);
   if (!opts?.useLlm) return base;
   const reply = await naturalizeAnswer({
     role,
     lang: base.lang,
+    userName,
+    centerName,
     rawMessage,
     answer: base,
     history: opts.history ?? [],
@@ -80,7 +94,8 @@ async function answerCore(
   role: Role,
   userId: string,
   centerId: string,
-  rawMessage: string
+  rawMessage: string,
+  userName: string
 ): Promise<AssistantAnswer> {
   const isProf = role === "prof";
   const parsed = parseIntent(rawMessage, isProf);
@@ -1177,7 +1192,18 @@ async function answerCore(
 
       case "help":
       default: {
-        return fallback(pick(lang, ASSISTANT_HELP_AR, ASSISTANT_HELP_FR));
+        const arrivee = userName
+          ? pick(
+              lang,
+              role === "prof"
+                ? `🙋 أهلاً أستاذ/أستاذة ${userName}، أنا آش، في خدمتك.`
+                : `🙋 أهلاً بك مديرنا ${userName}، أنا آش، في خدمتك.`,
+              role === "prof"
+                ? `🙋 Bonjour ${userName}, je suis Ash, à votre service.`
+                : `🙋 Bonjour ${userName}, je suis Ash, à votre service.`
+            )
+          : pick(lang, "🙋 أهلاً، أنا آش، في خدمتك.", "🙋 Bonjour, je suis Ash, à votre service.");
+        return fallback(arrivee + "\n\n" + pick(lang, ASSISTANT_HELP_AR, ASSISTANT_HELP_FR));
       }
     }
   } catch (err) {

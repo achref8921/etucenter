@@ -436,7 +436,7 @@ export function suggestionChips(isProf: boolean): string[] {
   ];
 }
 
-export const ASSISTANT_HELP_AR = `أنا مساعدك الذكي — أقدم لك التقرير الجاهز وتنبهك بلا انتظار حساب. جرّب:
+export const ASSISTANT_HELP_AR = `أنا آش، مساعدك الذكي — أقدم لك التقرير الجاهز وتنبهك بلا انتظار حساب. جرّب:
 • ملخص اليوم / ملخص الشهر (تقرير كامل)
 • مؤشر صحة المركز (درجة 0-100)
 • نسبة التحصيل هذا الشهر
@@ -451,7 +451,7 @@ export const ASSISTANT_HELP_AR = `أنا مساعدك الذكي — أقدم ل
 • دون أي حاضرة؟ حصص اليوم
 ويمكنك السؤال بالفرنسية أيضًا.`;
 
-export const ASSISTANT_HELP_FR = `Je suis votre assistant — je vous sors le bilan prêt à lire. Essayez :
+export const ASSISTANT_HELP_FR = `Je suis Ash, votre assistant dévoué — je vous sors le bilan prêt à lire. Essayez :
 • Résumé du jour / du mois (rapport complet)
 • Indice de santé du centre (0-100)
 • Taux de recouvrement du mois
