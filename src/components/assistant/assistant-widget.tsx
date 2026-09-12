@@ -29,6 +29,9 @@ export default function AssistantWidget({ isProf }: { isProf: boolean }) {
   async function send(text: string) {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
+    const history = messages
+      .slice(-8)
+      .map((m) => ({ role: m.from, text: m.text }));
     setMessages((m) => [...m, { id: Date.now(), from: "user", text: trimmed }]);
     setInput("");
     setLoading(true);
@@ -36,7 +39,7 @@ export default function AssistantWidget({ isProf }: { isProf: boolean }) {
       const res = await fetch("/api/assistant/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: trimmed }),
+        body: JSON.stringify({ message: trimmed, history }),
       });
       if (!res.ok) {
         let msg = "Une erreur est survenue, réessayez.";

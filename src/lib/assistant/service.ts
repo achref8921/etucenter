@@ -8,6 +8,7 @@ import {
   ASSISTANT_HELP_FR,
 } from "./engine";
 import type { Lang } from "./engine";
+import { naturalizeAnswer, type HistoryTurn } from "./llm";
 import {
   money,
   int,
@@ -41,15 +42,41 @@ export interface AssistantAnswer {
   reply: string;
   chips: string[];
   ok: boolean;
+  llm: boolean;
 }
 
-type Role = "admin" | "prof";
+export type Role = "admin" | "prof";
+
+export interface AnswerOptions {
+  history?: HistoryTurn[];
+  useLlm?: boolean;
+}
 
 function pick(lang: Lang, ar: string, fr: string): string {
   return lang === "ar" ? ar : fr;
 }
 
 export async function answer(
+  role: Role,
+  userId: string,
+  centerId: string,
+  rawMessage: string,
+  opts?: AnswerOptions
+): Promise<AssistantAnswer> {
+  const base = await answerCore(role, userId, centerId, rawMessage);
+  if (!opts?.useLlm) return base;
+  const reply = await naturalizeAnswer({
+    role,
+    lang: base.lang,
+    rawMessage,
+    answer: base,
+    history: opts.history ?? [],
+  });
+  if (!reply) return base;
+  return { ...base, reply, llm: true };
+}
+
+async function answerCore(
   role: Role,
   userId: string,
   centerId: string,
@@ -68,6 +95,7 @@ export async function answer(
     reply: msg,
     chips,
     ok: true,
+    llm: false,
   });
 
   try {
