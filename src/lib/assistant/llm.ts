@@ -17,6 +17,7 @@ export interface LlmInput {
 }
 
 const MODEL = (process.env.GEMINI_MODEL || "gemini-3.6-flash").trim();
+const GROQ_MODEL = (process.env.GROQ_MODEL || "openai/gpt-oss-120b").trim();
 
 const MAX_HISTORY = 8;
 const MAX_TURN = 300;
@@ -42,6 +43,7 @@ function systemPrompt(role: Role, lang: Lang, userName: string, centerName: stri
     `Le centre n'est pas appelé « EtuCenter » : tu ne prononces JAMAIS le nom « EtuCenter », tu parles uniquement du centre « ${centerName || "de ce centre"} ».`,
     `Tu t'adresses à ${addressee} : comme un serviteur dévoué et poli, tu le/la nommes en t'adressant à lui/elle (prénom seul à chaque fois suffit), en utilisant des formules de respect adaptées à la langue et au rôle (« أهلاً أستاذ/أستاذة X » pour un prof, « أهلاً مديرنا/المديرة X » pour un admin, « حاضر », « على خدمتك », « باستراحة » en arabe tunisien ; « Bonjour Monsieur/Madame X », « à votre service » en français).`,
     `Utilisateur authentifié : ${scopeDescription(role)}`,
+    `Dans ta première réponse d'une conversation (l'historique fourni est vide), salue l'utilisateur, présente-toi en une ou deux phrases comme « Ash » et mentionne le nom du centre « ${centerName || "ce centre"} » au moins une fois.`,
     lang === "ar"
       ? "Réponds TOUJOURS en arabe (tunisien, chaleureux, respectueux et naturel). Appelle l'utilisateur par son nom au moins une fois, poliment. Ne garde jamais de numéro en dehors des DONNÉES ; reformule, résume, nuance, propose la suite — sans inventer."
       : "Réponds TOUJOURS en français, naturel, respectueux et chaleureux. Appelle l'utilisateur par son nom au moins une fois, poliment. Ne garde jamais de chiffre hors des DONNÉES ; reformule, résume, nuance, propose la suite — sans inventer.",
@@ -56,38 +58,53 @@ function systemPrompt(role: Role, lang: Lang, userName: string, centerName: stri
   ].join("\n");
 }
 
+function conversationBlock(input: LlmInput): string {
+  const hist = input.history.slice(-MAX_HISTORY).map((h) =>
+    h.role === "user"
+      ? `- Utilisateur : ${truncate(h.text, MAX_TURN)}`
+      : `- Assistant : ${truncate(h.text, MAX_TURN)}`
+  );
+  return hist.length > 0
+    ? `CONVERSATION PRÉCÉDENTE (pour contexte)\n${hist.join("\n")}`
+    : "CONVERSATION PRÉCÉDENTE : (aucune)";
+}
+
+function dataBlock(input: LlmInput): string {
+  const suggestions =
+    Array.isArray(input.answer.chips) && input.answer.chips.length > 0
+      ? input.answer.chips.join(" | ")
+      : "(aucune)";
+  return [
+    "--- DONNÉES (calculées par le serveur, seules valeurs fiables) ---",
+    `Intention reconnue : ${input.answer.intent}`,
+    `Réponse factuelle du serveur : ${input.answer.reply}`,
+    `SUGGESTIONS autorisées : ${suggestions}`,
+  ].join("\n");
+}
+
 function buildContents(input: LlmInput) {
   const contents: { role: string; parts: { text: string }[] }[] = [];
 
   contents.push({ role: "user", parts: [{ text: systemPrompt(input.role, input.lang, input.userName, input.centerName) }] });
   contents.push({ role: "model", parts: [{ text: "Compris. Je réponds uniquement à partir des DONNÉES du serveur, dans la langue de l'utilisateur." }] });
 
-  const hist = input.history.slice(-MAX_HISTORY).map((h) =>
-    h.role === "user"
-      ? `- Utilisateur : ${truncate(h.text, MAX_TURN)}`
-      : `- Assistant : ${truncate(h.text, MAX_TURN)}`
-  );
-  const conversationBlock =
-    hist.length > 0 ? `CONVERSATION PRÉCÉDENTE (pour contexte)\n${hist.join("\n")}` : "CONVERSATION PRÉCÉDENTE : (aucune)";
-
-  const suggestions =
-    Array.isArray(input.answer.chips) && input.answer.chips.length > 0
-      ? input.answer.chips.join(" | ")
-      : "(aucune)";
-
-  const dataBlock = [
-    "--- DONNÉES (calculées par le serveur, seules valeurs fiables) ---",
-    `Intention reconnue : ${input.answer.intent}`,
-    `Réponse factuelle du serveur : ${input.answer.reply}`,
-    `SUGGESTIONS autorisées : ${suggestions}`,
-  ].join("\n");
-
   contents.push({
     role: "user",
-    parts: [{ text: `${conversationBlock}\n\nDERNIER MESSAGE DE L'UTILISATEUR :\n${truncate(input.rawMessage, MAX_TURN)}\n\n${dataBlock}\n\nRéponds maintenant.` }],
+    parts: [{ text: `${conversationBlock(input)}\n\nDERNIER MESSAGE DE L'UTILISATEUR :\n${truncate(input.rawMessage, MAX_TURN)}\n\n${dataBlock(input)}\n\nRéponds maintenant.` }],
   });
 
   return contents;
+}
+
+function buildMessages(input: LlmInput): { role: string; content: string }[] {
+  const messages: { role: string; content: string }[] = [];
+  messages.push({ role: "system", content: systemPrompt(input.role, input.lang, input.userName, input.centerName) });
+  messages.push({ role: "assistant", content: "Compris. Je réponds uniquement à partir des DONNÉES du serveur, dans la langue de l'utilisateur." });
+  messages.push({
+    role: "user",
+    content: `${conversationBlock(input)}\n\nDERNIER MESSAGE DE L'UTILISATEUR :\n${truncate(input.rawMessage, MAX_TURN)}\n\n${dataBlock(input)}\n\nRéponds maintenant.`,
+  });
+  return messages;
 }
 
 function cleanup(text: string): string | null {
@@ -148,12 +165,59 @@ async function callGemini(contents: { role: string; parts: { text: string }[] }[
   }
 }
 
+async function callGroq(messages: { role: string; content: string }[]): Promise<string | null> {
+  const apiKey = (process.env.GROQ_API_KEY || "").trim();
+  if (!apiKey) return null;
+
+  let res: Response;
+  try {
+    res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        messages,
+        temperature: 0.6,
+        max_tokens: MAX_OUTPUT_TOKENS,
+      }),
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+  } catch (err) {
+    console.warn("[assistant-llm] échec réseau Groq:", err instanceof Error ? err.message : err);
+    return null;
+  }
+
+  if (!res.ok) {
+    console.warn(`[assistant-llm] erreur Groq API ${res.status}:`, await res.text().catch(() => ""));
+    return null;
+  }
+
+  try {
+    const data = (await res.json()) as any;
+    const text = data?.choices?.[0]?.message?.content;
+    if (typeof text !== "string") return null;
+    return cleanup(text);
+  } catch (err) {
+    console.warn("[assistant-llm] réponse Groq illisible:", err);
+    return null;
+  }
+}
+
 export async function naturalizeAnswer(input: LlmInput): Promise<string | null> {
-  if (!process.env.GEMINI_API_KEY) return null;
+  const groqKey = (process.env.GROQ_API_KEY || "").trim();
+  const geminiKey = (process.env.GEMINI_API_KEY || "").trim();
+  if (!groqKey && !geminiKey) return null;
+
+  if (groqKey) {
+    const out = await callGroq(buildMessages(input));
+    if (out) return out;
+    if (!geminiKey) return null;
+  }
+
   const contents = buildContents(input);
-  return callGemini(contents);
+  return geminiKey ? callGemini(contents) : null;
 }
 
 export function llmEnabled(): boolean {
-  return Boolean(process.env.GEMINI_API_KEY);
+  return Boolean((process.env.GROQ_API_KEY || "").trim() || (process.env.GEMINI_API_KEY || "").trim());
 }

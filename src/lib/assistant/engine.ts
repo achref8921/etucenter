@@ -308,6 +308,12 @@ function intentFrom(raw: string, isProf: boolean, parsed: ParsedIntent | null): 
     return { kind: "prof_info", period: parsed?.period ?? "month", lang: parsed?.lang ?? detectLang(raw) };
   }
 
+  // ── "شكون انت؟ / qui es-tu ?" → salutation, PAS une fiche élève ──
+  if (/^(شكون|من هو|من تكون|من يكون|من انت)\s+(انت|انتي|نت|نتي|اهو|هيا)[؟?,،.;:!]*$/.test(t) ||
+      /^(qui es tu|qui etes vous|qu est ce que tu es|qui es ce|c est qui|who are you)\b/.test(fr)) {
+    return { kind: "help", period: "all", lang: parsed?.lang ?? detectLang(raw) };
+  }
+
   // ── demande libre d'infos sur un élève (ou prof) par nom, sans le mot "télève" ──
   if (has(t, "معلومات علي", "معلومات على", "معلومات عن", "معلومات حول", "اعطني معلومات", "اعطيني معلومات", "عطيني معلومات",
           "ملف", "بطاقة", "تفاصيل", "من هو", "من يكون", "شكون", "اوريني", "وريني", "قولي علي", "قولي على", "احكيلي علي",
