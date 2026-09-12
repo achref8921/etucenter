@@ -995,6 +995,68 @@ export async function answer(
         );
       }
 
+      case "prof_info": {
+        const mk = monthKey(now);
+        const d = await getAdminDashboardMonthData(centerId, mk);
+        const prof = await findBestMatch(
+          rawMessage,
+          d.profs.map((p) => ({ id: p.prof.id, search: `${p.prof.prenom} ${p.prof.nom}`.toLowerCase() }))
+        );
+        if (!prof) {
+          return fallback(
+            pick(
+              lang,
+              "لم أجد أستاذًا بهذا الاسم في مركزك. أعد السؤال مع ذكر الاسم كاملًا.",
+              "Je n'ai pas trouvé ce professeur. Précisez le nom complet."
+            )
+          );
+        }
+        if (isProf && prof.id !== userId) {
+          return fallback(
+            pick(
+              lang,
+              "معلومات هذا الأستاذ خاصة بإدارة المركز ولا يمكنني عرضها لك.",
+              "Les informations de ce professeur sont réservées à la direction."
+            )
+          );
+        }
+        const matched = d.profs.find((p) => p.prof.id === prof.id)!;
+        const groupes = await prisma.groupe.findMany({
+          where: { centerId, profId: prof.id },
+          orderBy: { nom: "asc" },
+          select: {
+            id: true,
+            nom: true,
+            matiere: { select: { nom: true } },
+            _count: { select: { inscriptions: { where: { statut: "actif" } } } },
+          },
+        });
+        const students = groupes.reduce((s, g) => s + Number(g._count.inscriptions ?? 0), 0);
+        const pscope = { centerId, profId: prof.id };
+        const [att, fin, ratt] = await Promise.all([
+          attendanceCounts(pscope, "month", now),
+          getTeacherDashboardFinance(centerId, prof.id),
+          rattrapageSeances(pscope, "month", now),
+        ]);
+        const gNames = groupes.map((g) => `${g.nom}${g.matiere ? ` (${g.matiere.nom})` : ""}`).join("، ") || (lang === "ar" ? "لا يوجد" : "aucun");
+        const attPct = att.total > 0 ? `${Math.round((att.present / att.total) * 100)}%` : "—";
+        return fallback(
+          pick(
+            lang,
+            `👤 ${matched.prof.prenom} ${matched.prof.nom} — ${mk}\n` +
+              `🧩 ${int(groupes.length)} مجموعات (${int(students)} تلميذ): ${gNames}\n` +
+              `💵 إيراد الحصص: ${money(matched.netRevenue)} · ربح المركز: ${money(matched.beneficeCentre)} (${matched.taux}%)\n` +
+              `💳 قابل للصرف: ${money(fin.claimable)}${fin.impayeNet > 0 ? ` · إجمالي المستحق: ${money(fin.impayeNet)}` : ""}\n` +
+              `📋 حضور مجموعاته: ${int(att.present)}/${int(att.total)} (${attPct}) · 🔁 تعويضات: ${int(ratt.length)}`,
+            `👤 ${matched.prof.prenom} ${matched.prof.nom} — ${mk}\n` +
+              `🧩 ${int(groupes.length)} groupes (${int(students)} élèves) : ${gNames.replace(/،/g, ",")}\n` +
+              `💵 Revenu séances : ${money(matched.netRevenue)} · Part centre : ${money(matched.beneficeCentre)} (${matched.taux}%)\n` +
+              `💳 À réclamer : ${money(fin.claimable)}${fin.impayeNet > 0 ? ` · Dû : ${money(fin.impayeNet)}` : ""}\n` +
+              `📋 Présence de ses groupes : ${int(att.present)}/${int(att.total)} (${attPct}) · 🔁 Rattrapages : ${int(ratt.length)}`
+          )
+        );
+      }
+
       case "prof_verification": {
         const rows = await profVerificationToday(centerId, now);
         if (rows.length === 0) {

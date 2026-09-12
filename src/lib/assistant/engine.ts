@@ -45,6 +45,7 @@ export type IntentKind =
   | "new_students"
   | "payment_habits"
   | "student_profile"
+  | "prof_info"
   | "prof_verification"
   | "my_day"
   | "my_month"
@@ -272,8 +273,11 @@ function intentFrom(raw: string, isProf: boolean, parsed: ParsedIntent | null): 
   }
 
   // ── profil d'un élève ──
-  if (has(t, "ملف التلميذ", "ملف الطالب", "ملف المشترك", "بيانات التلميذ", "سيرة التلميذ", "بطاقة التلميذ", "ملف تلميذ", "ملف طالب") ||
-      has(fr, "profil de l eleve", "profil eleve", "fiche eleve", "fiche de l eleve", "profil de l etudiant")) {
+  if (has(t, "ملف التلميذ", "ملف الطالب", "ملف المشترك", "بيانات التلميذ", "سيرة التلميذ", "بطاقة التلميذ", "ملف تلميذ", "ملف طالب",
+          "معلومات عن التلميذ", "معلومات التلميذ", "معلومات عن الطالب", "تفاصيل التلميذ", "تفاصيل الطالب",
+          "من هو التلميذ", "من يكون التلميذ", "شكون التلميذ", "عن التلميذ", "على التلميذ", "وراء التلميذ") ||
+      has(fr, "profil de l eleve", "profil eleve", "fiche eleve", "fiche de l eleve", "profil de l etudiant",
+          "informations sur l eleve", "info eleve", "details eleve", "qui est l eleve", "parle moi du eleve")) {
     return admin("student_profile");
   }
 
@@ -293,6 +297,15 @@ function intentFrom(raw: string, isProf: boolean, parsed: ParsedIntent | null): 
   if ((has(t, "استاذ", "اساتذة", "المعلم") && has(t, "لم يثبت", "لم يسجلوا", "بلا تصريح", "بلا حضور")) ||
       (has(fr, "prof", "professeurs") && has(fr, "non pointe", "sans pointage", "a verifier", "non verifie"))) {
     return admin("prof_verification");
+  }
+
+  // ── informations sur un prof précis (par nom) ──
+  if (has(t, "معلومات عن الاستاذ", "معلومات الاستاذ", "معلومات على الاستاذ", "بيانات الاستاذ", "تفاصيل الاستاذ",
+          "من هو الاستاذ", "من يكون الاستاذ", "شكون الاستاذ", "خبرني عن الاستاذ", "اوريني الاستاذ",
+          "على الاستاذ", "عن الاستاذ") ||
+      has(fr, "informations sur le prof", "informations prof", "info prof", "details prof", "fiche prof",
+          "profil du prof", "parle moi du prof", "qui est le prof")) {
+    return { kind: "prof_info", period: parsed?.period ?? "month", lang: parsed?.lang ?? detectLang(raw) };
   }
 
   // ── attendance / absence ──

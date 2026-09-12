@@ -472,7 +472,19 @@ const AR_TO_LATIN: Record<string, string> = {
 
 function romanize(s: string): string {
   let out = "";
-  for (const c of s.toLowerCase()) {
+  const low = s.toLowerCase();
+  for (let i = 0; i < low.length; i++) {
+    const c = low[i];
+    if (c === "ي" && i + 1 < low.length && low[i + 1] === "ا") {
+      out += "ya";
+      i++;
+      continue;
+    }
+    if (c === "ي" && i + 1 < low.length && low[i + 1] === "و") {
+      out += "yo";
+      i++;
+      continue;
+    }
     const m = AR_TO_LATIN[c] ?? c;
     out += m;
   }
