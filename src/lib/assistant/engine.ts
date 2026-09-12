@@ -34,6 +34,22 @@ export type IntentKind =
   | "student_attendance"
   | "my_finance"
   | "my_remaining_seances"
+  | "daily_brief"
+  | "monthly_brief"
+  | "health_score"
+  | "collection_rate"
+  | "projection"
+  | "at_risk_students"
+  | "debtors_by_group"
+  | "churn_risk"
+  | "new_students"
+  | "payment_habits"
+  | "student_profile"
+  | "prof_verification"
+  | "my_day"
+  | "my_month"
+  | "my_group_debtors"
+  | "admin_only"
   | "help";
 
 export interface ParsedIntent {
@@ -129,10 +145,81 @@ function intentFrom(raw: string, isProf: boolean, parsed: ParsedIntent | null): 
   const t = normalizeAr(raw);
   const fr = normalizeFr(raw);
 
+  const admin = (kind: IntentKind, profAlt?: IntentKind): ParsedIntent => {
+    if (isProf) {
+      return {
+        kind: profAlt ?? "admin_only",
+        period: parsed?.period ?? "month",
+        lang: parsed?.lang ?? detectLang(raw),
+      };
+    }
+    return { kind, period: parsed?.period ?? "month", lang: parsed?.lang ?? detectLang(raw) };
+  };
+
   // ── my_finance (prof) ──
   if (has(t, "رصيدي", "مستحقاتي", "ارباحي", "ربحي", "حقوقي", "دوري", "حسابي المالي", "رصيد", "حصتي", "حصتك", "حصة المالية", "ماليتي") ||
       has(fr, "mon solde", "mes gains", "mes droits", "ma compta", "claimable", "mon compte financier", "ma part")) {
     if (isProf) return { kind: "my_finance", period: "month", lang: parsed?.lang ?? detectLang(raw) };
+  }
+
+  // ── plan du jour / bilan du mois (prof) ──
+  if (isProf) {
+    if (has(t, "خطة اليوم", "خطة يومي", "برنامج اليوم", "برنامج يومي", "جدول اليوم", "ماذا عندي اليوم", "اللي عندي اليوم", "ما عندي اليوم") ||
+        has(fr, "mon programme", "mon jour", "ma journee")) {
+      return { kind: "my_day", period: "today", lang: parsed?.lang ?? detectLang(raw) };
+    }
+    if (has(t, "ملخصي", "ملخص الشهر", "وضعي الشهر", "ملخص شهري", "ملخص هذا الشهر", "حسابي مع المادة") ||
+        has(fr, "mon resume", "mon rapport", "ma synthese")) {
+      return { kind: "my_month", period: "month", lang: parsed?.lang ?? detectLang(raw) };
+    }
+  }
+
+  // ── briefs (admin) ──
+  if (has(t, "ملخص اليوم", "تقريير اليوم", "تقرير اليوم", "برييف", "الوضع اليوم", "حالة اليوم", "نلخصلي اليوم", "نقاط اليوم") ||
+      has(fr, "resume du jour", "rapport du jour", "brief du jour", "point du jour", "recap du jour")) {
+    return admin("daily_brief", "my_day");
+  }
+  if (has(t, "ملخص الشهر", "ملخص هذا الشهر", "تقرير الشهر", "ملخص شهري", "تقرير شهري", "الوضع العام", "وضع المركز", "حالة المركز") ||
+      has(fr, "resume du mois", "rapport mensuel", "recap", "bilan du mois")) {
+    return admin("monthly_brief", "my_month");
+  }
+
+  // ── santé du centre / score ──
+  if (has(t, "صحة المركز", "مؤشر المركز", "مؤشر صحة", "مؤشر الصحة", "درجة المركز", "نقطة المركز", "نقاط المركز") ||
+      has(fr, "sante du centre", "sante", "indicateur", "score", "health")) {
+    return admin("health_score");
+  }
+
+  // ── impayés de MES groupes (prof) ──
+  if (isProf &&
+      (has(t, "مجموعتي", "مجموعاتي", "مجموعة", "قروباتي") &&
+       (has(t, "لم يدفع", "لم يخلص", "مديون", "مدين", "لم يسدد", "المتاخرات", "متاخرات", "مستخلصاتي", "تحصيل") ||
+        has(fr, "qui me doit", "mes debiteurs", "mes impayes", "debiteur", "impaye", "doit", "recouvrement")))) {
+    return { kind: "my_group_debtors", period: parsed?.period ?? "all", lang: parsed?.lang ?? detectLang(raw) };
+  }
+
+  // ── élèves à risque (admin) ──
+  if (has(t, "تلاميذ الخطر", "طلاب الخطر", "الخطر", "اكبر مديونية", "اكثر مديونية", "اكبر المديونيات", "اولويات الدفع", "لازم نخلصهم", "لازم نطالب") ||
+      has(fr, "a risque", "dangereux", "plus grosses dettes", "grosse dette", "priorite de paiement")) {
+    return admin("at_risk_students", "my_group_debtors");
+  }
+
+  // ── recouvrement (admin) ──
+  if (has(t, "نسبة التحصيل", "التحصيل", "الاستخلاص", "نسبة الاستخلاص", "كم استخلصنا", "نسبة المدفوع", "نسبة الدفع") ||
+      has(fr, "taux de recouvrement", "recouvrement", "encaissement", "taux d encaissement")) {
+    return admin("collection_rate");
+  }
+
+  // ── impayés par groupe (admin) ──
+  if (has(t, "حسب المجموعة", "حسب المجموعات", "لكل مجموعة", "المتاخرات حسب المجموعة", "المدينون حسب المجموعة", "مجموعة اكثر مديونية") ||
+      has(fr, "par groupe", "par groupes")) {
+    return admin("debtors_by_group", "my_group_debtors");
+  }
+
+  // ── prévision / projection (admin) ──
+  if (has(t, "توقعات الشهر", "توقع الشهر", "نتتبع الشهر", "كم نتوقع", "توقعات", "متوقع", "الايراد المتوقع", "الايراد المنتظر") ||
+      has(fr, "prevision", "previsions", "projection", "forecast", "estimation")) {
+    return admin("projection");
   }
 
   // ── profit d'un prof précis (admin) ──
@@ -168,7 +255,7 @@ function intentFrom(raw: string, isProf: boolean, parsed: ParsedIntent | null): 
 
   // ── unpaid ──
   const unpaidWord = has(t, "متاخرات", "متأخرات", "متدخل", "مديون", "مدين", "لم يسدد", "لم يدفع", "لم يخلص", "لم يسد") ||
-    has(fr, "impaye", "impayes", "dette", "debiteur", "debitrice", "recouvrement", "arriere", "pas paye", "sans payer", "doit");
+    has(fr, "impaye", "impayes", "dette", "debiteur", "debitrice", "arriere", "pas paye", "sans payer", "doit");
   if (unpaidWord) {
     const isTotal = has(t, "كم", "اجمالي", "المجموع", "مجموع", "قيمة", "المبلغ") || has(fr, "combien", "total");
     return {
@@ -176,6 +263,36 @@ function intentFrom(raw: string, isProf: boolean, parsed: ParsedIntent | null): 
       period: parsed?.period ?? "all",
       lang: parsed?.lang ?? detectLang(raw),
     };
+  }
+
+  // ── élèves inactifs / churn (admin) ──
+  if (has(t, "لم يحضر منذ", "لم يحضروا", "توقف عن الحضور", "توقفوا عن الحضور", "غير نشطين", "غير نشط", "متوقفين", "منذ فترة", "منذ اسبوع", "منذ ايام", "بلا نشاط", "غير فعالين", "من زمان") ||
+      has(fr, "inactif", "inactifs", "ne vient plus", "ne viennent plus", "plus depuis", "abandon")) {
+    return admin("churn_risk");
+  }
+
+  // ── profil d'un élève ──
+  if (has(t, "ملف التلميذ", "ملف الطالب", "ملف المشترك", "بيانات التلميذ", "سيرة التلميذ", "بطاقة التلميذ", "ملف تلميذ", "ملف طالب") ||
+      has(fr, "profil de l eleve", "profil eleve", "fiche eleve", "fiche de l eleve", "profil de l etudiant")) {
+    return admin("student_profile");
+  }
+
+  // ── nouvelles inscriptions ──
+  if (has(t, "المنضمين", "جدد هذا الشهر", "انضموا هذا الشهر", "تسجيلات جديدة", "تلاميذ جدد", "الجدد", "من انضم", "انضم") ||
+      has(fr, "nouvelles inscriptions", "nouveaux eleves", "inscrits ce mois", "nouvelles insc")) {
+    return admin("new_students");
+  }
+
+  // ── habitudes de paiement (admin) ──
+  if (has(t, "طرق الدفع", "انواع الدفع", "طريقة الدفع", "كيف يدفعون", "عادات الدفع", "افضل شهر", "اكثر شهر تحصيل") ||
+      has(fr, "methodes de paiement", "habitudes de paiement", "comment ils paient", "moyens de paiement")) {
+    return admin("payment_habits");
+  }
+
+  // ── profs sans pointage aujourd'hui (admin) ──
+  if ((has(t, "استاذ", "اساتذة", "المعلم") && has(t, "لم يثبت", "لم يسجلوا", "بلا تصريح", "بلا حضور")) ||
+      (has(fr, "prof", "professeurs") && has(fr, "non pointe", "sans pointage", "a verifier", "non verifie"))) {
+    return admin("prof_verification");
   }
 
   // ── attendance / absence ──
@@ -279,44 +396,51 @@ export function parseIntent(raw: string, isProf: boolean): ParsedIntent {
 export function suggestionChips(isProf: boolean): string[] {
   if (isProf) {
     return [
-      "حصصي هذا الاسبوع",
+      "برنامج يومي",
       "من غاب اليوم؟",
-      "تلاميذ مجموعتي",
-      "اكثر تلميذ غيابا",
+      "من لم يدفع في مجموعتي؟",
+      "حصصي هذا الاسبوع",
+      "ملخصي الشهري",
       "تعويضاتي",
     ];
   }
   return [
+    "ملخص اليوم",
     "ربح هذا الشهر",
     "من لم يسدد؟",
-    "معدل الغياب هذا الشهر",
-    "اكثر مجموعة غيابا",
-    "حصص اليوم",
-    "ربح كل استاذ",
+    "تلاميذ الخطر",
+    "نسبة التحصيل",
+    "مؤشر صحة المركز",
+    "توقعات الشهر",
   ];
 }
 
-export const ASSISTANT_HELP_AR = `أنا مساعدك الذكي، أساعدك بالأرقام من بياناتك فقط. جرّب:
-• ربح هذا الشهر
-• مقارنة الربح مع الشهر الماضي
-• من لم يسدد؟
-• معدل الغياب هذا الشهر
-• اكثر مجموعة غيابا
-• حصص اليوم
-• ربح كل استاذ
-• ربح استاذ (بالاسم)
-• عدد التلاميذ والاساتذة
-• مجموعات مادة (الاسم)
-ويمكنك أن تسأل بنفس الصياغة بالفرنسية.`;
+export const ASSISTANT_HELP_AR = `أنا مساعدك الذكي — أقدم لك التقرير الجاهز وتنبهك بلا انتظار حساب. جرّب:
+• ملخص اليوم / ملخص الشهر (تقرير كامل)
+• مؤشر صحة المركز (درجة 0-100)
+• نسبة التحصيل هذا الشهر
+• تلاميذ الخطر (كبار المديونية)
+• المتأخرون حسب المجموعة
+• من توقف عن الحضور منذ مدة؟
+• من انضم هذا الشهر؟
+• طرق الدفع وأفضل شهر تحصيل
+• توقعات نهاية الشهر
+• ملف تلميذ بالاسم (رصيد، حضور، الحصة القادمة)
+• ربح هذا الشهر / مقارنة / كل استاذ / استاذ بالاسم
+• دون أي حاضرة؟ حصص اليوم
+ويمكنك السؤال بالفرنسية أيضًا.`;
 
-export const ASSISTANT_HELP_FR = `Je suis votre assistant, je réponds uniquement avec les chiffres de votre base. Essayez :
-• Bénéfice du mois
-• Comparer avec le mois dernier
-• Qui n'a pas payé ?
-• Taux d'absence du mois
-• Groupe le plus absent
-• Séances du jour
-• Gains de chaque professeur
-• Gain d'un professeur (par nom)
-• Nombre d'élèves et de profs
-• Groupes d'une matière (nom)`;
+export const ASSISTANT_HELP_FR = `Je suis votre assistant — je vous sors le bilan prêt à lire. Essayez :
+• Résumé du jour / du mois (rapport complet)
+• Indice de santé du centre (0-100)
+• Taux de recouvrement du mois
+• Élèves à risque (grosses dettes)
+• Impayés par groupe
+• Qui ne vient plus ?
+• Nouvelles inscriptions du mois
+• Méthodes de paiement & meilleur mois
+• Prévisions de fin de mois
+• Fiche élève (solde, présence, prochaine séance)
+• Bénéfice du mois / comparaison / par prof / d'un prof
+• Séances du jour, absences, rattrapages
+Vous pouvez aussi poser vos questions en arabe.`;

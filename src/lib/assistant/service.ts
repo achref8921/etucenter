@@ -25,6 +25,14 @@ import {
   rattrapageSeances,
   findBestMatch,
   candidateStudents,
+  revenueToday,
+  collectionStats,
+  paymentMethods,
+  churnRisk,
+  newStudentsMonth,
+  profVerificationToday,
+  presenceCountsBySeance,
+  studentProfileData,
 } from "./queries";
 
 export interface AssistantAnswer {
@@ -203,25 +211,32 @@ export async function answer(
         );
       }
 
-      // ─────────────────────────── IMPAYÉS (admin) ──────────────────────────
+      // ─────────────────────────── IMPAYÉS (rôle-aware) ─────────────────────
       case "unpaid_total": {
-        const u = await unpaidRows(centerId, parsed.period, now);
+        const u = await unpaidRows(centerId, parsed.period, now, isProf ? userId : undefined);
         const periodTxt = parsed.period === "all" ? "" : parsed.period === "month" ? " هذا الشهر" : " هذه الفترة";
+        const scopeTxt = isProf ? " في مجموعاتك" : "";
         return fallback(
           pick(
             lang,
-            `💳 إجمالي المتأخرات${periodTxt}: ${money(u.total)}\n` +
+            `💳 إجمالي المتأخرات${scopeTxt}${periodTxt}: ${money(u.total)}\n` +
               `عدد المديونين: ${int(u.count)}`,
-            `💳 Total impayés${parsed.period === "month" ? " du mois" : ""}: ${money(u.total)}\n` +
+            `💳 Total impayés${isProf ? " de vos groupes" : ""}${parsed.period === "month" ? " du mois" : ""}: ${money(u.total)}\n` +
               `Débiteurs : ${int(u.count)}`
           )
         );
       }
 
       case "unpaid_list": {
-        const u = await unpaidRows(centerId, parsed.period, now);
+        const u = await unpaidRows(centerId, parsed.period, now, isProf ? userId : undefined);
         if (u.rows.length === 0) {
-          return fallback(pick(lang, "رائع — لا يوجد أي تلميذ متأخر.", "Parfait — aucun impayé."));
+          return fallback(
+            pick(
+              lang,
+              isProf ? "رائع — لا يوجد أي مدين في مجموعاتك." : "رائع — لا يوجد أي تلميذ متأخر.",
+              isProf ? "Parfait — aucun impayé dans vos groupes." : "Parfait — aucun impayé."
+            )
+          );
         }
         const lines = u.rows
           .slice(0, 8)
@@ -230,9 +245,9 @@ export async function answer(
         return fallback(
           pick(
             lang,
-            `🔻 المتأخرون (${int(u.count)}) — إجمالي ${money(u.total)}:\n${lines}` +
+            `🔻 ${isProf ? "مديونو مجموعاتك" : "المتأخرون"} (${int(u.count)}) — إجمالي ${money(u.total)}:\n${lines}` +
               (u.rows.length > 8 ? `\n… والبقية (${u.rows.length - 8})` : ""),
-            `🔻 Débiteurs (${int(u.count)}) — total ${money(u.total)}:\n${lines}` +
+            `🔻 ${isProf ? "Débiteurs de vos groupes" : "Débiteurs"} (${int(u.count)}) — total ${money(u.total)}:\n${lines}` +
               (u.rows.length > 8 ? `\n… et ${u.rows.length - 8} autres` : "")
           )
         );
@@ -671,6 +686,425 @@ export async function answer(
           )
         );
       }
+
+      // ─────────────────────────── BRIEFS & DÉCISION (admin) ───────────────
+      case "daily_brief": {
+        const [rev, seances, abs, unpaid, unv, ratt] = await Promise.all([
+          revenueToday(centerId, now),
+          seancesInRange(scope, "today", now),
+          absentList(scope, "today", now),
+          unpaidRows(centerId, "month", now),
+          prisma.seance.count({
+            where: { statut: "terminee", presences: { none: {} }, groupe: { centerId } },
+          }),
+          rattrapageSeances(scope, "today", now),
+        ]);
+        const dateTxt = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+        return fallback(
+          pick(
+            lang,
+            `📋 ملخص اليوم (${dateTxt}):\n` +
+              `💵 تحصيل اليوم: ${money(rev.total)} (${int(rev.count)} عملية)\n` +
+              `📅 حصص اليوم: ${int(seances.length)} · 🚶 غياب: ${int(abs.length)}\n` +
+              `💳 متأخرات الشهر: ${money(unpaid.total)} (${int(unpaid.count)} مدين)\n` +
+              `⚠️ حصص منتهية بلا حضور: ${int(unv)} · 🔁 تعويضات اليوم: ${int(ratt.length)}`,
+            `📋 Résumé du jour (${dateTxt}):\n` +
+              `💵 Encaissé aujourd'hui : ${money(rev.total)} (${int(rev.count)} opérations)\n` +
+              `📅 Séances du jour : ${int(seances.length)} · 🚶 Absents : ${int(abs.length)}\n` +
+              `💳 Impayés du mois : ${money(unpaid.total)} (${int(unpaid.count)} débiteurs)\n` +
+              `⚠️ Séances sans pointage : ${int(unv)} · 🔁 Rattrapages du jour : ${int(ratt.length)}`
+          )
+        );
+      }
+
+      case "monthly_brief": {
+        const mk = monthKey(now);
+        const [d, unpaid, att, col, news, unv, students] = await Promise.all([
+          getAdminDashboardMonthData(centerId, mk),
+          unpaidRows(centerId, "month", now),
+          attendanceCounts(scope, "month", now),
+          collectionStats(centerId, now),
+          newStudentsMonth(centerId, now),
+          prisma.seance.count({
+            where: { statut: "terminee", presences: { none: {} }, groupe: { centerId } },
+          }),
+          prisma.utilisateur.count({ where: { role: "eleve", centerId, deletedAt: null, ghost: false } }),
+        ]);
+        const attTxt = att.total > 0 ? `${Math.round((att.present / att.total) * 100)}%` : "—";
+        return fallback(
+          pick(
+            lang,
+            `📈 ملخص ${mk}:\n` +
+              `💼 ربح المركز: ${money(d.netCenterEarnings)} · إيراد الحصص: ${money(d.netPaidSessionsRevenue)}\n` +
+              `👨‍🏫 أجور الأساتذة: ${money(Math.max(0, d.netPaidSessionsRevenue - d.netCenterEarnings))}\n` +
+              `💳 متأخرات: ${money(unpaid.total)} (${int(unpaid.count)}) · تحصيل: ${Math.round(col.rate * 100)}%\n` +
+              `📋 حضور الشهر: ${attTxt} · تلاميذ نشطون: ${int(students)}\n` +
+              `🆕 منضمون: ${int(news.count)} · ⚠️ حصص بلا حضور: ${int(unv)}`,
+            `📈 Résumé ${mk}:\n` +
+              `💼 Bénéfice du centre : ${money(d.netCenterEarnings)} · Revenu séances : ${money(d.netPaidSessionsRevenue)}\n` +
+              `👨‍🏫 Salaires profs : ${money(Math.max(0, d.netPaidSessionsRevenue - d.netCenterEarnings))}\n` +
+              `💳 Impayés : ${money(unpaid.total)} (${int(unpaid.count)}) · Recouvrement : ${Math.round(col.rate * 100)}%\n` +
+              `📋 Présence du mois : ${attTxt} · Élèves actifs : ${int(students)}\n` +
+              `🆕 Inscrits : ${int(news.count)} · ⚠️ Séances sans pointage : ${int(unv)}`
+          )
+        );
+      }
+
+      case "health_score": {
+        const [att, col, u, churn, students] = await Promise.all([
+          attendanceCounts(scope, "month", now),
+          collectionStats(centerId, now),
+          unpaidRows(centerId, "all", now),
+          churnRisk(centerId, 14, now),
+          prisma.utilisateur.count({ where: { role: "eleve", centerId, deletedAt: null, ghost: false } }),
+        ]);
+        const attRate = att.total > 0 ? att.present / att.total : 1;
+        const colRate = col.rate;
+        const debtPct = students > 0 ? u.count / students : 0;
+        const churnPct = students > 0 ? Math.min(1, churn.length / (students * 0.5)) : 0;
+        const attScore = Math.round(attRate * 30);
+        const colScore = Math.round(colRate * 35);
+        const debtScore = Math.round((1 - Math.min(1, debtPct)) * 20);
+        const churnScore = Math.round((1 - churnPct) * 15);
+        const score = attScore + colScore + debtScore + churnScore;
+        const verdict = score >= 80 ? "ممتاز 🏆" : score >= 60 ? "جيد ✅" : score >= 40 ? "متوسط ⚠️" : "تحتاج تدخلًا 🚨";
+        return fallback(
+          pick(
+            lang,
+            `🩺 مؤشر صحة المركز: ${int(score)}/100 (${verdict})\n` +
+              `• الحضور: ${int(attScore)}/30 (${Math.round(attRate * 100)}%)\n` +
+              `• التحصيل: ${int(colScore)}/35 (${Math.round(colRate * 100)}%)\n` +
+              `• المديونية: ${int(debtScore)}/20 (${int(u.count)} من ${int(students)} مدين)\n` +
+              `• النشاط: ${int(churnScore)}/15 (${int(churn.length)} متوقف عن الحضور)`,
+            `🩺 Indice de santé : ${int(score)}/100 (${verdict === "ممتاز 🏆" ? "Excellent 🏆" : verdict === "جيد ✅" ? "Bon ✅" : verdict === "متوسط ⚠️" ? "Moyen ⚠️" : "A surveiller 🚨"})\n` +
+              `• Présence : ${int(attScore)}/30 (${Math.round(attRate * 100)}%)\n` +
+              `• Recouvrement : ${int(colScore)}/35 (${Math.round(colRate * 100)}%)\n` +
+              `• Dettes : ${int(debtScore)}/20 (${int(u.count)} / ${int(students)} débiteurs)\n` +
+              `• Activité : ${int(churnScore)}/15 (${int(churn.length)} inactifs)`
+          )
+        );
+      }
+
+      case "collection_rate": {
+        const col = await collectionStats(centerId, now);
+        const remaining = Math.max(0, col.due - col.paid);
+        return fallback(
+          pick(
+            lang,
+            `💳 نسبة التحصيل ${monthKey(now)}: ${Math.round(col.rate * 100)}%\n` +
+              `مسدَّد: ${money(col.paid)} · المستحق: ${money(col.due)}\n` +
+              `المتبقي على التحصيل: ${money(remaining)}`,
+            `💳 Taux de recouvrement ${monthKey(now)} : ${Math.round(col.rate * 100)}%\n` +
+              `Payé : ${money(col.paid)} · Dû : ${money(col.due)}\n` +
+              `Reste à encaisser : ${money(remaining)}`
+          )
+        );
+      }
+
+      case "projection": {
+        const mk = monthKey(now);
+        const d = await getAdminDashboardMonthData(centerId, mk);
+        const dim = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+        const elapsed = now.getDate();
+        const projected = Math.round(((d.netPaidSessionsRevenue / elapsed) * dim + Number.EPSILON) * 100) / 100;
+        const centerProj =
+          d.netPaidSessionsRevenue > 0
+            ? Math.round((d.netCenterEarnings / d.netPaidSessionsRevenue) * projected * 100) / 100
+            : 0;
+        const remaining = Math.max(0, Math.round((projected - d.netPaidSessionsRevenue) * 100) / 100);
+        return fallback(
+          pick(
+            lang,
+            `🔮 توقعات ${mk}:\n` +
+              `إيراد الحصص حتى الآن: ${money(d.netPaidSessionsRevenue)} (يوم ${int(elapsed)} من ${int(dim)})\n` +
+              `بالوتيرة الحالية → نهاية الشهر: ~${money(projected)}\n` +
+              `حصة المركز عند نهاية الشهر: ~${money(centerProj)}\n` +
+              `ما تبقى لتحصيله: ${money(remaining)}`,
+            `🔮 Prévision ${mk}:\n` +
+              `Revenu actuel : ${money(d.netPaidSessionsRevenue)} (jour ${int(elapsed)}/${int(dim)})\n` +
+              `Rythme actuel → fin de mois : ~${money(projected)}\n` +
+              `Part du centre fin de mois : ~${money(centerProj)}\n` +
+              `Reste à encaisser : ${money(remaining)}`
+          )
+        );
+      }
+
+      case "at_risk_students": {
+        const u = await unpaidRows(centerId, "all", now);
+        if (u.rows.length === 0) {
+          return fallback(pick(lang, "رائع — لا يوجد أي تلميذ متأخر.", "Parfait — aucun débiteur."));
+        }
+        const delayed = u.rows.map((r) => ({
+          ...r,
+          days: r.lastPaid ? Math.floor((now.getTime() - r.lastPaid.getTime()) / 86400000) : null,
+        }));
+        const lines = delayed
+          .slice(0, 8)
+          .map(
+            (r, i) =>
+              `${i + 1}. ${r.prenom} ${r.nom} — ${money(r.remaining)} (${r.groupeNom}) · ${
+                r.days === null ? "بلا أي دفع سابق" : r.days > 30 ? `آخر دفع قبل ${int(r.days)} يوم 🔴` : `آخر دفع قبل ${int(r.days)} يوم`
+              }`
+          )
+          .join("\n");
+        return fallback(
+          pick(
+            lang,
+            `🚨 تلاميذ الخطر (${int(delayed.length)} بإجمالي ${money(u.total)}):\n${lines}\n` +
+              `💡 رتبهم من الأكبر دينًا واتصل بهم أو فعّل التذكير بالدفع.`,
+            `🚨 Élèves à risque (${int(delayed.length)}, total ${money(u.total)}):\n${lines}\n` +
+              `💡 Classez-les par dette et relancez-les.`
+          )
+        );
+      }
+
+      case "debtors_by_group": {
+        const u = await unpaidRows(centerId, "all", now);
+        if (u.rows.length === 0) {
+          return fallback(pick(lang, "لا توجد متأخرات.", "Aucun impayé."));
+        }
+        const byG = new Map<string, { cnt: number; sum: number }>();
+        for (const r of u.rows) {
+          const cur = byG.get(r.groupeNom) ?? { cnt: 0, sum: 0 };
+          cur.cnt++;
+          cur.sum = Math.round((cur.sum + r.remaining) * 100) / 100;
+          byG.set(r.groupeNom, cur);
+        }
+        const lines = [...byG.entries()]
+          .sort((a, b) => b[1].sum - a[1].sum)
+          .map(([g, v]) => `• ${g}: ${int(v.cnt)} — ${money(v.sum)}`)
+          .join("\n");
+        return fallback(
+          pick(
+            lang,
+            `📦 المتأخرات حسب المجموعة (إجمالي ${money(u.total)}):\n${lines}`,
+            `📦 Impayés par groupe (total ${money(u.total)}):\n${lines}`
+          )
+        );
+      }
+
+      case "churn_risk": {
+        const rows = await churnRisk(centerId, 14, now);
+        if (rows.length === 0) {
+          return fallback(pick(lang, "لا يوجد تلاميذ توقفوا عن الحضور مؤخرًا.", "Aucun élève inactif récemment."));
+        }
+        const lines = rows
+          .slice(0, 8)
+          .map((r) => `• ${r.prenom} ${r.nom} — ${r.groupeNom}${r.lastDate ? ` · آخر حضور ${r.lastDate.toISOString().slice(0, 10)}` : ""}`)
+          .join("\n");
+        return fallback(
+          pick(
+            lang,
+            `🚶 متوقفون عن الحضور (14 يومًا الأخيرة, ${int(rows.length)}):\n${lines}\n` +
+              `💡 راجعهم للاطمئنان أو أرخِف الإثر من التسجيل.`,
+            `🚶 Inactifs depuis 14 jours (${int(rows.length)}):\n${lines}\n` +
+              `💡 À relancer ou à archiver.`
+          )
+        );
+      }
+
+      case "new_students": {
+        const { count, rows } = await newStudentsMonth(centerId, now);
+        if (count === 0) {
+          return fallback(pick(lang, "لا يوجد منضمون جدد هذا الشهر.", "Aucune nouvelle inscription ce mois-ci."));
+        }
+        const lines = rows
+          .slice(0, 8)
+          .map((r) => `• ${r.prenom} ${r.nom}${r.classe ? ` (${r.classe})` : ""} — ${r.createdAt.toISOString().slice(0, 10)}`)
+          .join("\n");
+        return fallback(
+          pick(
+            lang,
+            `🆕 من انضم هذا الشهر (${int(count)}):\n${lines}`,
+            `🆕 Nouvelles inscriptions du mois (${int(count)}):\n${lines}`
+          )
+        );
+      }
+
+      case "payment_habits": {
+        const { methods, bestMonth } = await paymentMethods(centerId, now);
+        if (methods.length === 0) {
+          return fallback(pick(lang, "لا توجد مدفوعات مسجلة هذا الشهر بعد.", "Aucun paiement ce mois-ci."));
+        }
+        const labels: Record<string, string> = {
+          especes: "نقدًا",
+          virement: "تحويل بنكي",
+          cheque: "شيك",
+          autre: "غير ذلك",
+        };
+        const frLabels: Record<string, string> = {
+          especes: "Espèces",
+          virement: "Virement",
+          cheque: "Chèque",
+          autre: "Autre",
+        };
+        const lines = methods.map((m) => `• ${lang === "ar" ? labels[m.methode] ?? m.methode : frLabels[m.methode] ?? m.methode}: ${money(m.total)} (${int(m.nb)} عملية)`).join("\n");
+        const bestTxt = bestMonth
+          ? `\n🏆 أفضل شهر تحصيل (آخر 6): ${bestMonth.ym} — ${money(bestMonth.total)}`
+          : "";
+        return fallback(
+          pick(
+            lang,
+            `💳 طرق الدفع — ${monthKey(now)}:\n${lines}${bestTxt}`,
+            `💳 Méthodes de paiement — ${monthKey(now)}:\n${lines}${bestTxt}`
+          )
+        );
+      }
+
+      case "student_profile": {
+        const students = await candidateStudents(centerId, isProf ? userId : undefined);
+        const match = await findBestMatch(rawMessage, students);
+        if (!match) {
+          return fallback(
+            pick(
+              lang,
+              "لم أجد تلميذًا بهذا الاسم. تحقق من الإملاء واذكر الاسم الكامل.",
+              "Je n'ai pas trouvé cet élève. Précisez le nom complet."
+            )
+          );
+        }
+        const p = await studentProfileData(centerId, match.id, isProf ? userId : undefined, now);
+        const balTxt = p.netBalance >= 0 ? "رصيد مسبق" : "متأخر المحفظة";
+        const balFr = p.netBalance >= 0 ? "Solde prépayé" : "Déficit de portefeuille";
+        const nextTxt =
+          p.nextSeance && p.nextSeance.heure
+            ? `${p.nextSeance.date.toISOString().slice(0, 10)} ${p.nextSeance.heure} — ${p.nextSeance.groupeNom}`
+            : p.nextSeance
+              ? `${p.nextSeance.date.toISOString().slice(0, 10)} — ${p.nextSeance.groupeNom}`
+              : "لا توجد حصة قادمة";
+        const nextFr =
+          p.nextSeance && p.nextSeance.heure
+            ? `${p.nextSeance.date.toISOString().slice(0, 10)} ${p.nextSeance.heure} — ${p.nextSeance.groupeNom}`
+            : p.nextSeance
+              ? `${p.nextSeance.date.toISOString().slice(0, 10)} — ${p.nextSeance.groupeNom}`
+              : "aucune séance à venir";
+        return fallback(
+          pick(
+            lang,
+            `👤 ${match.prenom} ${match.nom}${match.classe ? ` — ${match.classe}` : ""}\n` +
+              `${match.telephone ? `📱 ${match.telephone} · ` : ""}🧩 ${p.groupes.join("، ") || "بدون مجموعة"}\n` +
+              `💳 ${balTxt}: ${money(Math.abs(p.netBalance))}\n` +
+              `📋 حضور: ${int(p.present)}/${int(p.total)} (${p.pct}%)${p.lastDate ? ` · آخر: ${p.lastDate.toISOString().slice(0, 10)}` : ""}\n` +
+              `🔜 الحصة القادمة: ${nextTxt}`,
+            `👤 ${match.prenom} ${match.nom}${match.classe ? ` — ${match.classe}` : ""}\n` +
+              `${match.telephone ? `📱 ${match.telephone} · ` : ""}🧩 ${p.groupes.join(", ") || "sans groupe"}\n` +
+              `💳 ${balFr}: ${money(Math.abs(p.netBalance))}\n` +
+              `📋 Présences : ${int(p.present)}/${int(p.total)} (${p.pct}%)${p.lastDate ? ` · dernier : ${p.lastDate.toISOString().slice(0, 10)}` : ""}\n` +
+              `🔜 Prochaine séance : ${nextFr}`
+          )
+        );
+      }
+
+      case "prof_verification": {
+        const rows = await profVerificationToday(centerId, now);
+        if (rows.length === 0) {
+          return fallback(pick(lang, "✅ جميع الأساتذة ثبّتوا حضور حصص اليوم.", "✅ Tous les profs ont pointé leurs séances du jour."));
+        }
+        const lines = rows
+          .slice(0, 8)
+          .map((r) => `• ${r.prenom} ${r.nom}: ${int(r.nb)} حصص${r.groupes.length > 0 ? ` (${r.groupes.join("، ")})` : ""}`)
+          .join("\n");
+        return fallback(
+          pick(
+            lang,
+            `⚠️ أساتذة لم يثبتوا حضورًا اليوم (${int(rows.length)}):\n${lines}`,
+            `⚠️ Profs sans pointage aujourd'hui (${int(rows.length)}):\n${lines}`
+          )
+        );
+      }
+
+      // ─────────────────────────── PROF : journée / bilan / dettes ──────────
+      case "my_day": {
+        const { from: f0, to: t0 } = periodRange("today", now);
+        const seances = await prisma.seance.findMany({
+          where: {
+            date: { gte: f0 ?? undefined, lte: t0 ?? undefined },
+            statut: { not: "annulee" },
+            groupe: { profId: userId },
+          },
+          orderBy: [{ heureDebut: "asc" }],
+          select: {
+            id: true,
+            heureDebut: true,
+            groupe: { select: { nom: true, matiere: { select: { nom: true } } } },
+          },
+        });
+        if (seances.length === 0) {
+          return fallback(pick(lang, "لا توجد حصص لك اليوم. 👌", "Aucune séance pour vous aujourd'hui. 👌"));
+        }
+        const pc = await presenceCountsBySeance(seances.map((s) => s.id));
+        const lines = seances
+          .map((s) => {
+            const c = pc.get(s.id) ?? { present: 0, absent: 0 };
+            const nb = c.present + c.absent;
+            const h = s.heureDebut ? s.heureDebut.toISOString().slice(11, 16) : "";
+            return `• ${h} — ${s.groupe.nom}${s.groupe.matiere ? ` (${s.groupe.matiere.nom})` : ""} — ${int(nb)} تلميذ · حضور ${int(c.present)} · غياب ${int(c.absent)}`;
+          })
+          .join("\n");
+        return fallback(
+          pick(
+            lang,
+            `🗓️ برنامجك اليوم (${int(seances.length)}):\n${lines}`,
+            `🗓️ Votre journée (${int(seances.length)}):\n${lines}`
+          )
+        );
+      }
+
+      case "my_month": {
+        const mk = monthKey(now);
+        const fin = await getTeacherDashboardFinance(centerId, userId);
+        const [ratt, att, seances] = await Promise.all([
+          rattrapageSeances(scope, "month", now),
+          attendanceCounts(scope, "month", now),
+          seancesInRange(scope, "month", now),
+        ]);
+        const term = seances.filter((s) => s.statut === "terminee").length;
+        const plan = seances.filter((s) => s.statut !== "terminee").length;
+        return fallback(
+          pick(
+            lang,
+            `📋 ملخصي — ${mk}:\n` +
+              `💵 المستحق لك (claimable): ${money(fin.claimable)}${fin.impayeNet > 0 ? ` · إجمالي مستحق: ${money(fin.impayeNet)}` : ""}\n` +
+              `📅 حصصك: ${int(term)} منتهية / ${int(plan)} مجدولة في الشهر\n` +
+              `🚶 غيابات مجموعاتك: ${int(att.absent)}\n` +
+              `🔁 تعويضاتك: ${int(ratt.length)}`,
+            `📋 Mon bilan — ${mk}:\n` +
+              `💵 À réclamer (claimable) : ${money(fin.claimable)}${fin.impayeNet > 0 ? ` · Total dû : ${money(fin.impayeNet)}` : ""}\n` +
+              `📅 Séances : ${int(term)} terminées / ${int(plan)} planifiées\n` +
+              `🚶 Absences dans vos groupes : ${int(att.absent)}\n` +
+              `🔁 Vos rattrapages : ${int(ratt.length)}`
+          )
+        );
+      }
+
+      case "my_group_debtors": {
+        const u = await unpaidRows(centerId, parsed.period === "all" ? "all" : "month", now, userId);
+        if (u.rows.length === 0) {
+          return fallback(pick(lang, "رائع — لا يوجد مدينون في مجموعاتك. 🎉", "Parfait — aucun débiteur dans vos groupes. 🎉"));
+        }
+        const lines = u.rows
+          .slice(0, 8)
+          .map((r, i) => `${i + 1}. ${r.prenom} ${r.nom} — ${money(r.remaining)} (${r.groupeNom})`)
+          .join("\n");
+        return fallback(
+          pick(
+            lang,
+            `💳 مديونو مجموعاتك (${int(u.count)} — ${money(u.total)}):\n${lines}` +
+              (u.rows.length > 8 ? `\n… والبقية (${u.rows.length - 8})` : ""),
+            `💳 Débiteurs de vos groupes (${int(u.count)} — ${money(u.total)}):\n${lines}` +
+              (u.rows.length > 8 ? `\n… et ${u.rows.length - 8} autres` : "")
+          )
+        );
+      }
+
+      case "admin_only":
+        return fallback(
+          pick(
+            lang,
+            "هذه المعلومة خاصة بإدارة المركز. يمكنك أن تسألني عن: برنامجك اليوم، من غاب اليوم، من لم يدفع في مجموعاتك، ملخصك الشهري، تعويضاتك، أو رصيدك المالي.",
+            "Cette information est réservée à la direction. Vous pouvez me demander : votre programme du jour, les absences du jour, qui ne paie pas dans vos groupes, votre bilan mensuel, vos rattrapages ou votre solde."
+          )
+        );
 
       case "help":
       default: {
