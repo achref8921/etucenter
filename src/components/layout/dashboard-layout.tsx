@@ -10,6 +10,7 @@ import SessionGuard from "@/components/session-guard";
 import { ToastProvider } from "@/components/ui/toast";
 import BackButton from "@/components/ui/back-button";
 import { Role } from "@/types/role";
+import AssistantWidget from "@/components/assistant/assistant-widget";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -101,6 +102,9 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
       </div>
 
       <BottomNav role={user.role} peutGererEleves={user.peutGererEleves} />
+      {(user.role === "admin" || user.role === "prof") && (
+        <AssistantWidget isProf={user.role === "prof"} />
+      )}
     </div>
   );
 }
