@@ -14,7 +14,7 @@ export interface LlmInput {
   history: HistoryTurn[];
 }
 
-const MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+const MODEL = (process.env.GEMINI_MODEL || "gemini-3.6-flash").trim();
 
 const MAX_HISTORY = 8;
 const MAX_TURN = 300;
@@ -96,7 +96,7 @@ function cleanup(text: string): string | null {
 }
 
 async function callGemini(contents: { role: string; parts: { text: string }[] }[]): Promise<string | null> {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = (process.env.GEMINI_API_KEY || "").trim();
   if (!apiKey) return null;
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(MODEL)}:generateContent?key=${encodeURIComponent(apiKey)}`;
