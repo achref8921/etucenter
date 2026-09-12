@@ -51,6 +51,23 @@ interface EleveSearch {
   filiere: string | null;
 }
 
+const niveauLabels: Record<string, string> = { primaire: "Primaire", college: "Collège", lycee: "Lycée" };
+
+const classesByNiveau: Record<string, string[]> = {
+  primaire: ["1ère année", "2ème année", "3ème année", "4ème année", "5ème année", "6ème année"],
+  college: ["7ème", "8ème", "9ème"],
+  lycee: ["1ère", "2ème", "3ème", "Bac"],
+};
+
+const filiereLabels: Record<string, string> = {
+  lettres: "Lettres",
+  economique: "Économique",
+  informatique: "Informatique",
+  technique: "Technique",
+  sciences: "Sciences",
+  math: "Mathématiques",
+};
+
 const statusLabels: Record<string, string> = {
   planifiee: "Planifiée",
   en_cours: "En cours",
@@ -86,7 +103,7 @@ export default function AdminGroupeDetailPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [allStudents, setAllStudents] = useState<EleveSearch[]>([]);
-  const [filterNiveau, setFilterNiveau] = useState("");
+  const [filterClasse, setFilterClasse] = useState("");
   const [filterFiliere, setFilterFiliere] = useState("");
   const [loadingStudents, setLoadingStudents] = useState(false);
   const [addingId, setAddingId] = useState<string | null>(null);
@@ -127,7 +144,7 @@ export default function AdminGroupeDetailPage() {
     if (showAddModal) {
       loadAllStudents();
       setSearchQuery("");
-      setFilterNiveau("");
+      setFilterClasse("");
       setFilterFiliere("");
     }
   }, [showAddModal]);
@@ -155,9 +172,9 @@ export default function AdminGroupeDetailPage() {
       searchQuery === "" ||
       `${e.prenom} ${e.nom}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
       e.email.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchNiveau = filterNiveau === "" || e.niveau === filterNiveau;
+    const matchClasse = filterClasse === "" || e.classe === filterClasse;
     const matchFiliere = filterFiliere === "" || e.filiere === filterFiliere;
-    return matchSearch && matchNiveau && matchFiliere;
+    return matchSearch && matchClasse && matchFiliere;
   });
 
   const handleAddEleve = async (eleveId: string) => {
@@ -173,7 +190,7 @@ export default function AdminGroupeDetailPage() {
         throw new Error(body.error || "Erreur lors de l'inscription");
       }
       setSearchQuery("");
-      setFilterNiveau("");
+      setFilterClasse("");
       setFilterFiliere("");
       loadAllStudents();
       fetchGroupe();
@@ -869,7 +886,7 @@ export default function AdminGroupeDetailPage() {
           <div className="w-full max-w-lg rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Ajouter un élève</h2>
-              <button onClick={() => { setShowAddModal(false); setSearchQuery(""); setFilterNiveau(""); setFilterFiliere(""); }} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300">
+              <button onClick={() => { setShowAddModal(false); setSearchQuery(""); setFilterClasse(""); setFilterFiliere(""); }} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -885,14 +902,16 @@ export default function AdminGroupeDetailPage() {
             </div>
             <div className="mb-3 flex gap-2">
               <select
-                value={filterNiveau}
-                onChange={(e) => setFilterNiveau(e.target.value)}
+                value={filterClasse}
+                onChange={(e) => setFilterClasse(e.target.value)}
                 className="flex-1 rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
-                <option value="">Tous les niveaux</option>
-                <option value="primaire">Primaire</option>
-                <option value="college">Collège</option>
-                <option value="lycee">Lycée</option>
+                <option value="">Toutes les classes</option>
+                {(["primaire", "college", "lycee"] as const).map((n) =>
+                  (classesByNiveau[n] || []).map((c) => (
+                    <option key={c} value={c}>{niveauLabels[n]} — {c}</option>
+                  ))
+                )}
               </select>
               <select
                 value={filterFiliere}
@@ -921,9 +940,8 @@ export default function AdminGroupeDetailPage() {
                         <p className="text-[13px] font-medium text-neutral-900 dark:text-neutral-100">{e.prenom} {e.nom}</p>
                         <p className="text-[12px] text-neutral-400 dark:text-neutral-500">
                           {e.email}
-                          {e.niveau && ` — ${e.niveau}`}
-                          {e.classe && ` ${e.classe}`}
-                          {e.filiere && ` (${e.filiere})`}
+                          {e.niveau && ` · ${niveauLabels[e.niveau] ?? e.niveau}${e.classe ? ` — ${e.classe}` : ""}`}
+                          {e.filiere && ` (${filiereLabels[e.filiere] ?? e.filiere})`}
                         </p>
                       </div>
                       <button onClick={() => handleAddEleve(e.id)} disabled={addingId === e.id} className="ml-3 shrink-0 rounded-lg bg-blue-600 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-blue-700 disabled:opacity-50">
