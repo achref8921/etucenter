@@ -465,7 +465,7 @@ interface NamedEntity {
 const AR_TO_LATIN: Record<string, string> = {
   "ا": "a", "أ": "a", "إ": "a", "آ": "a", "ب": "b", "ت": "t", "ث": "th",
   "ج": "j", "ح": "h", "خ": "kh", "د": "d", "ذ": "z", "ر": "r", "ز": "z",
-  "س": "s", "ش": "ch", "ص": "s", "ض": "d", "ط": "t", "ظ": "z", "ع": "",
+  "س": "s", "ش": "ch", "ص": "s", "ض": "d", "ط": "t", "ظ": "z", "ع": "a",
   "غ": "gh", "ف": "f", "ق": "g", "ك": "k", "ل": "l", "م": "m", "ن": "n",
   "ه": "h", "و": "o", "ي": "i", "ة": "a",
 };
@@ -507,6 +507,14 @@ function lev(a: string, b: string): number {
   return dp[b.length];
 }
 
+function levMatch(a: string, b: string): boolean {
+  const d = lev(a, b);
+  if (d === 0) return true;
+  if (a.length >= 4 && b.length >= 4) return d <= 2;
+  if (a.length >= 3 && b.length >= 3) return d <= 1;
+  return false;
+}
+
 export async function findBestMatch<T extends NamedEntity>(msg: string, items: T[]): Promise<T | null> {
   const hay = msg.toLowerCase().replace(/[أإآ]/g, "ا");
   const msgTokens = hay
@@ -532,14 +540,14 @@ export async function findBestMatch<T extends NamedEntity>(msg: string, items: T
         }
       }
       for (const rw of romanWords) {
-        if (lev(mt, rw) <= 2 || (mt.length >= 3 && rw.includes(mt))) {
+        if (levMatch(mt, rw) || (mt.length >= 3 && rw.includes(mt))) {
           score++;
         }
       }
     }
     for (const mr of msgRomanized) {
       for (const rw of romanWords) {
-        if (lev(mr, rw) <= 2) {
+        if (levMatch(mr, rw)) {
           score++;
         }
       }

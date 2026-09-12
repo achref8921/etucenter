@@ -308,6 +308,14 @@ function intentFrom(raw: string, isProf: boolean, parsed: ParsedIntent | null): 
     return { kind: "prof_info", period: parsed?.period ?? "month", lang: parsed?.lang ?? detectLang(raw) };
   }
 
+  // ── demande libre d'infos sur un élève (ou prof) par nom, sans le mot "télève" ──
+  if (has(t, "معلومات علي", "معلومات على", "معلومات عن", "معلومات حول", "اعطني معلومات", "اعطيني معلومات", "عطيني معلومات",
+          "ملف", "بطاقة", "تفاصيل", "من هو", "من يكون", "شكون", "اوريني", "وريني", "قولي علي", "قولي على", "احكيلي علي",
+          "احكيلي على", "حكيني علي", "حكيني على", "خبرني علي", "خبرني على", "خبرني عن") ||
+      has(fr, "informations sur", "info sur", "donne moi", "donnes moi", "parle moi de", "fiche de", "profil de", "qui est")) {
+    return admin("student_profile");
+  }
+
   // ── attendance / absence ──
   const absenceWord = has(t, "غياب", "غايب", "الغائبين", "غاب") || has(fr, "absence", "absent", "manque");
   const presenceWord = has(t, "حضور", "حضر") || has(fr, "presence", "attendance");

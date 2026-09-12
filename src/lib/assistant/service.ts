@@ -983,6 +983,18 @@ async function answerCore(
         const students = await candidateStudents(centerId, isProf ? userId : undefined);
         const match = await findBestMatch(rawMessage, students);
         if (!match) {
+          if (!isProf) {
+            const mk = monthKey(now);
+            const d = await getAdminDashboardMonthData(centerId, mk);
+            const prof = await findBestMatch(
+              rawMessage,
+              d.profs.map((p) => ({ id: p.prof.id, search: `${p.prof.prenom} ${p.prof.nom}`.toLowerCase() }))
+            );
+            if (prof) {
+              const pf = await profFiche(centerId, prof.id, mk, now);
+              return fallback(pick(lang, pf.ar, pf.fr));
+            }
+          }
           return fallback(
             pick(
               lang,
@@ -1048,41 +1060,8 @@ async function answerCore(
             )
           );
         }
-        const matched = d.profs.find((p) => p.prof.id === prof.id)!;
-        const groupes = await prisma.groupe.findMany({
-          where: { centerId, profId: prof.id },
-          orderBy: { nom: "asc" },
-          select: {
-            id: true,
-            nom: true,
-            matiere: { select: { nom: true } },
-            _count: { select: { inscriptions: { where: { statut: "actif" } } } },
-          },
-        });
-        const students = groupes.reduce((s, g) => s + Number(g._count.inscriptions ?? 0), 0);
-        const pscope = { centerId, profId: prof.id };
-        const [att, fin, ratt] = await Promise.all([
-          attendanceCounts(pscope, "month", now),
-          getTeacherDashboardFinance(centerId, prof.id),
-          rattrapageSeances(pscope, "month", now),
-        ]);
-        const gNames = groupes.map((g) => `${g.nom}${g.matiere ? ` (${g.matiere.nom})` : ""}`).join("، ") || (lang === "ar" ? "لا يوجد" : "aucun");
-        const attPct = att.total > 0 ? `${Math.round((att.present / att.total) * 100)}%` : "—";
-        return fallback(
-          pick(
-            lang,
-            `👤 ${matched.prof.prenom} ${matched.prof.nom} — ${mk}\n` +
-              `🧩 ${int(groupes.length)} مجموعات (${int(students)} تلميذ): ${gNames}\n` +
-              `💵 إيراد الحصص: ${money(matched.netRevenue)} · ربح المركز: ${money(matched.beneficeCentre)} (${matched.taux}%)\n` +
-              `💳 قابل للصرف: ${money(fin.claimable)}${fin.impayeNet > 0 ? ` · إجمالي المستحق: ${money(fin.impayeNet)}` : ""}\n` +
-              `📋 حضور مجموعاته: ${int(att.present)}/${int(att.total)} (${attPct}) · 🔁 تعويضات: ${int(ratt.length)}`,
-            `👤 ${matched.prof.prenom} ${matched.prof.nom} — ${mk}\n` +
-              `🧩 ${int(groupes.length)} groupes (${int(students)} élèves) : ${gNames.replace(/،/g, ",")}\n` +
-              `💵 Revenu séances : ${money(matched.netRevenue)} · Part centre : ${money(matched.beneficeCentre)} (${matched.taux}%)\n` +
-              `💳 À réclamer : ${money(fin.claimable)}${fin.impayeNet > 0 ? ` · Dû : ${money(fin.impayeNet)}` : ""}\n` +
-              `📋 Présence de ses groupes : ${int(att.present)}/${int(att.total)} (${attPct}) · 🔁 Rattrapages : ${int(ratt.length)}`
-          )
-        );
+        const pf = await profFiche(centerId, prof.id, mk, now);
+        return fallback(pick(lang, pf.ar, pf.fr));
       }
 
       case "prof_verification": {
@@ -1217,4 +1196,48 @@ function startOfDayLocal(d: Date): Date {
   const x = new Date(d);
   x.setHours(0, 0, 0, 0);
   return x;
+}
+
+async function profFiche(
+  centerId: string,
+  profId: string,
+  mk: string,
+  now: Date
+): Promise<{ ar: string; fr: string }> {
+  const d = await getAdminDashboardMonthData(centerId, mk);
+  const matched = d.profs.find((p) => p.prof.id === profId);
+  if (!matched) return { ar: "لا يوجد.", fr: "Aucun." };
+  const groupes = await prisma.groupe.findMany({
+    where: { centerId, profId },
+    orderBy: { nom: "asc" },
+    select: {
+      id: true,
+      nom: true,
+      matiere: { select: { nom: true } },
+      _count: { select: { inscriptions: { where: { statut: "actif" } } } },
+    },
+  });
+  const students = groupes.reduce((s, g) => s + Number(g._count.inscriptions ?? 0), 0);
+  const pscope = { centerId, profId };
+  const [att, fin, ratt] = await Promise.all([
+    attendanceCounts(pscope, "month", now),
+    getTeacherDashboardFinance(centerId, profId),
+    rattrapageSeances(pscope, "month", now),
+  ]);
+  const gNames = groupes.map((g) => `${g.nom}${g.matiere ? ` (${g.matiere.nom})` : ""}`).join("، ") || "لا يوجد";
+  const attPct = att.total > 0 ? `${Math.round((att.present / att.total) * 100)}%` : "—";
+  return {
+    ar:
+      `👤 ${matched.prof.prenom} ${matched.prof.nom} — ${mk}\n` +
+      `🧩 ${int(groupes.length)} مجموعات (${int(students)} تلميذ): ${gNames}\n` +
+      `💵 إيراد الحصص: ${money(matched.netRevenue)} · ربح المركز: ${money(matched.beneficeCentre)} (${matched.taux}%)\n` +
+      `💳 قابل للصرف: ${money(fin.claimable)}${fin.impayeNet > 0 ? ` · إجمالي المستحق: ${money(fin.impayeNet)}` : ""}\n` +
+      `📋 حضور مجموعاته: ${int(att.present)}/${int(att.total)} (${attPct}) · 🔁 تعويضات: ${int(ratt.length)}`,
+    fr:
+      `👤 ${matched.prof.prenom} ${matched.prof.nom} — ${mk}\n` +
+      `🧩 ${int(groupes.length)} groupes (${int(students)} élèves) : ${gNames.replace(/،/g, ",")}\n` +
+      `💵 Revenu séances : ${money(matched.netRevenue)} · Part centre : ${money(matched.beneficeCentre)} (${matched.taux}%)\n` +
+      `💳 À réclamer : ${money(fin.claimable)}${fin.impayeNet > 0 ? ` · Dû : ${money(fin.impayeNet)}` : ""}\n` +
+      `📋 Présence de ses groupes : ${int(att.present)}/${int(att.total)} (${attPct}) · 🔁 Rattrapages : ${int(ratt.length)}`,
+  };
 }
