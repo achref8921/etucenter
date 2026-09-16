@@ -26,6 +26,10 @@ export async function GET() {
         matiere: {
           select: { id: true, nom: true },
         },
+        inscriptions: {
+          where: { statut: "actif" },
+          select: { id: true, eleveId: true },
+        },
         _count: {
           select: { inscriptions: { where: { statut: "actif" } } },
         },

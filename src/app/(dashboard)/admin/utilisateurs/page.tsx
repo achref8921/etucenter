@@ -40,6 +40,14 @@ const filieres = [
   { value: "math", label: "Mathématiques" },
 ];
 
+interface GroupeOption {
+  id: string;
+  nom: string;
+  matiere: { id: string; nom: string } | null;
+  prof: { id: string; nom: string; prenom: string } | null;
+  eleveIds: string[];
+}
+
 export default function UtilisateursPage() {
   const router = useRouter();
   const { data: session } = useSession();
@@ -56,7 +64,8 @@ export default function UtilisateursPage() {
   const [niveauFilter, setNiveauFilter] = useState("ALL");
   const [classeFilter, setClasseFilter] = useState("ALL");
   const [filiereFilter, setFiliereFilter] = useState("ALL");
-  const [etatFilter, setEtatFilter] = useState("ALL");
+  const [groupeFilter, setGroupeFilter] = useState("ALL");
+  const [groupes, setGroupes] = useState<GroupeOption[]>([]);
   const [confirmDelete, setConfirmDelete] = useState<{ id: string } | null>(null);
   const [ghostTarget, setGhostTarget] = useState<{ id: string; prenom: string; nom: string } | null>(null);
   const [ghostImpact, setGhostImpact] = useState<GhostImpactData | null>(null);
@@ -98,7 +107,29 @@ export default function UtilisateursPage() {
 
   useEffect(() => {
     fetchUsers();
+    fetchGroups();
   }, []);
+
+  const fetchGroups = async () => {
+    try {
+      const res = await fetch("/api/admin/groupes");
+      if (!res.ok) return;
+      const data = (await res.json()) as any[];
+      setGroupes(
+        data.map((g) => ({
+          id: g.id,
+          nom: g.nom,
+          matiere: g.matiere ?? null,
+          prof: g.prof ?? null,
+          eleveIds: (g.inscriptions ?? [])
+            .filter((i: any) => i.statut === "actif")
+            .map((i: any) => i.eleveId as string),
+        }))
+      );
+    } catch {
+      /* silencieux : le filtre groupes ne s'affiche pas si indisponible */
+    }
+  };
 
   const resetForm = () => {
     setFormData({ nom: "", prenom: "", email: "", motDePasse: "", telephone: "", role: "prof", niveau: "", classe: "", filiere: "" });
@@ -311,7 +342,10 @@ export default function UtilisateursPage() {
     if (niveauFilter !== "ALL") parts.push(`Niveau: ${niveauLabels[niveauFilter] || niveauFilter}`);
     if (classeFilter !== "ALL") parts.push(`Classe: ${classeFilter}`);
     if (filiereFilter !== "ALL") parts.push(`Filière: ${filiereLabels[filiereFilter] || filiereFilter}`);
-    if (etatFilter !== "ALL") parts.push(`État: ${etatFilter}`);
+    if (groupeFilter !== "ALL") {
+      const g = groupes.find((x) => x.id === groupeFilter);
+      if (g) parts.push(`Groupe: ${g.nom}${g.prof ? ` (${g.prof.prenom} ${g.prof.nom})` : ""}`);
+    }
 
     const csvContent = [
       ...(parts.length > 0 ? [`Filtres: ${parts.join(" | ")}`, `Total: ${rows.length} élèves`, ""] : []),
@@ -338,7 +372,10 @@ export default function UtilisateursPage() {
       if (niveauFilter !== "ALL" && u.niveau !== niveauFilter) return false;
       if (classeFilter !== "ALL" && u.classe !== classeFilter) return false;
       if (filiereFilter !== "ALL" && u.filiere !== filiereFilter) return false;
-      if (etatFilter !== "ALL" && ((etatFilter === "ACTIF" && !u.actif) || (etatFilter === "INACTIF" && u.actif))) return false;
+      if (groupeFilter !== "ALL") {
+        const g = groupes.find((x) => x.id === groupeFilter);
+        if (!g || !g.eleveIds.includes(u.id)) return false;
+      }
     }
 
     if (!searchQuery.trim()) return true;
@@ -383,7 +420,7 @@ export default function UtilisateursPage() {
             <Filter className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
             <div className="flex gap-2">
               {["ALL", "ADMIN", "PROF", "ELEVE"].map((r) => (
-                <button key={r} onClick={() => { setRoleFilter(r); setNiveauFilter("ALL"); setClasseFilter("ALL"); setFiliereFilter("ALL"); setEtatFilter("ALL"); }} className={`rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors ${roleFilter === r ? "bg-blue-600 text-white" : "bg-neutral-100 dark:bg-[#2a2d35] text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-[#1e2128]"}`}>
+                <button key={r} onClick={() => { setRoleFilter(r); setNiveauFilter("ALL"); setClasseFilter("ALL"); setFiliereFilter("ALL"); setGroupeFilter("ALL"); }} className={`rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors ${roleFilter === r ? "bg-blue-600 text-white" : "bg-neutral-100 dark:bg-[#2a2d35] text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-[#1e2128]"}`}>
                   {r === "ALL" ? "Tous" : r === "ELEVE" ? "Élèves" : r === "PROF" ? "Prof" : "Admins"}
                 </button>
               ))}
@@ -425,20 +462,30 @@ export default function UtilisateursPage() {
               <option value="sciences">Sciences</option>
               <option value="math">Mathématiques</option>
             </select>
-            <select value={etatFilter} onChange={(e) => setEtatFilter(e.target.value)} className="rounded-md border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-2 py-1 focus:border-blue-500 focus:outline-none">
-              <option value="ALL">État</option>
-              <option value="ACTIF">Actif</option>
-              <option value="INACTIF">Inactif</option>
+            <select value={groupeFilter} onChange={(e) => setGroupeFilter(e.target.value)} className="rounded-md border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-2 py-1 focus:border-blue-500 focus:outline-none">
+              <option value="ALL">Groupe</option>
+              {groupes.map((g) => (
+                <option key={g.id} value={g.id}>{g.nom}{g.matiere ? ` — ${g.matiere.nom}` : ""}{g.prof ? ` · ${g.prof.prenom} ${g.prof.nom}` : ""}</option>
+              ))}
             </select>
-            {(niveauFilter !== "ALL" || classeFilter !== "ALL" || filiereFilter !== "ALL" || etatFilter !== "ALL") && (
+            {groupeFilter !== "ALL" && (() => {
+              const g = groupes.find((x) => x.id === groupeFilter);
+              return g ? (
+                <span className="rounded-full bg-blue-100 dark:bg-blue-900/20 px-2 py-1 text-[12px] font-medium text-blue-800 dark:text-blue-300">
+                  {g.eleveIds.length} élève{g.eleveIds.length > 1 ? "s" : ""}
+                  {g.prof ? ` · Prof : ${g.prof.prenom} ${g.prof.nom}` : ""}
+                </span>
+              ) : null;
+            })()}
+            {(niveauFilter !== "ALL" || classeFilter !== "ALL" || filiereFilter !== "ALL" || groupeFilter !== "ALL") && (
               <>
-                <button onClick={() => { setNiveauFilter("ALL"); setClasseFilter("ALL"); setFiliereFilter("ALL"); setEtatFilter("ALL"); }} className="text-[13px] text-blue-600 dark:text-blue-400 hover:underline">Réinitialiser</button>
+                <button onClick={() => { setNiveauFilter("ALL"); setClasseFilter("ALL"); setFiliereFilter("ALL"); setGroupeFilter("ALL"); }} className="text-[13px] text-blue-600 dark:text-blue-400 hover:underline">Réinitialiser</button>
                 <button onClick={handleDownloadExcel} className="flex items-center gap-1 rounded-md border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-2 py-1 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128] ml-auto">
                   <Download className="h-3 w-3" /> Télécharger Excel ({filteredUsers.filter((u) => u.role === "eleve" || u.role === "ELEVE").length})
                 </button>
               </>
             )}
-            {!(niveauFilter !== "ALL" || classeFilter !== "ALL" || filiereFilter !== "ALL" || etatFilter !== "ALL") && (
+            {!(niveauFilter !== "ALL" || classeFilter !== "ALL" || filiereFilter !== "ALL" || groupeFilter !== "ALL") && (
               <button onClick={handleDownloadExcel} className="flex items-center gap-1 rounded-md border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-2 py-1 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128] ml-auto">
                 <Download className="h-3 w-3" /> Télécharger tous ({filteredUsers.filter((u) => u.role === "eleve" || u.role === "ELEVE").length})
               </button>
