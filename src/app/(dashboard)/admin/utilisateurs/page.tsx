@@ -121,9 +121,7 @@ export default function UtilisateursPage() {
           nom: g.nom,
           matiere: g.matiere ?? null,
           prof: g.prof ?? null,
-          eleveIds: (g.inscriptions ?? [])
-            .filter((i: any) => i.statut === "actif")
-            .map((i: any) => i.eleveId as string),
+          eleveIds: (g.inscriptions ?? []).map((i: any) => i.eleveId as string),
         }))
       );
     } catch {
