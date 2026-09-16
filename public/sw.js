@@ -1,4 +1,6 @@
-const CACHE = "etucenter-v7";
+const CACHE = "etucenter-v8";
+
+const SKIP_CACHE = /^\/(?:api\/|_next\/data\/)/;
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
@@ -29,6 +31,13 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+
+  // Les réponses API ne doivent jamais être servies depuis le cache :
+  // le filtre groupes->élèves dépend de données fraîches /api/admin/groupes.
+  if (url.pathname.startsWith("/api/")) {
+    event.respondWith(fetch(request));
+    return;
+  }
 
   event.respondWith(
     (async () => {
