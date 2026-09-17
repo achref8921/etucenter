@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { Loader2, Send, Search, Check, Eye, Bell, Users, X } from "lucide-react";
+import { Loader2, Send, Search, Check, Eye, Bell, Users, X, MessageCircle } from "lucide-react";
 
 interface EleveOption {
   id: string;
   nom: string;
   prenom: string;
   codeEleve: string | null;
+  telephone: string | null;
   classe: string | null;
   niveau: string | null;
 }
@@ -79,6 +80,47 @@ export default function NotificationComposer({
   };
 
   const canSend = titre.trim().length >= 2 && message.trim().length >= 1 && selected.length > 0;
+
+  const normalizeWhatsAppNumber = (tel: string): string | null => {
+    const digits = tel.replace(/[^\d]/g, "");
+    if (digits.length < 8) return null;
+    let num = digits.startsWith("00") ? digits.slice(2) : digits;
+    if (num.startsWith("0")) num = num.slice(1);
+    if (!num.startsWith("216") && num.length <= 9) num = "216" + num;
+    return num;
+  };
+
+  const handleSendWhatsApp = async () => {
+    if (!canSend) return;
+    setError(null);
+    setSuccess(null);
+
+    const withNum = selectedEleves.filter((e) => e.telephone && normalizeWhatsAppNumber(e.telephone));
+    const withoutNum = selectedEleves.filter((e) => !e.telephone || !normalizeWhatsAppNumber(e.telephone));
+    const texte = `${titre.trim()}\n\n${message.trim()}`;
+
+    if (withNum.length === 0) {
+      setError("Aucun élève sélectionné ne possède de numéro de téléphone valide.");
+      return;
+    }
+
+    const confirmMsg =
+      `Ouvrir WhatsApp pour ${withNum.length} élève(s) avec le message prêt à envoyer ?\n` +
+      (withoutNum.length > 0
+        ? `\n${withoutNum.length} élève(s) seront ignorés (pas de numéro) : ${withoutNum.map((e) => `${e.prenom} ${e.nom}`).join(", ")}`
+        : "");
+
+    if (!window.confirm(confirmMsg)) return;
+
+    for (const e of withNum) {
+      const num = normalizeWhatsAppNumber(e.telephone!);
+      if (!num) continue;
+      const url = `https://wa.me/${num}?text=${encodeURIComponent(texte)}`;
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+
+    setSuccess(`Ouverture de ${withNum.length} conversation(s) WhatsApp. Appuyez sur Envoyer dans chaque fenêtre.`);
+  };
 
   const handleSend = async () => {
     if (!canSend) return;
@@ -318,6 +360,15 @@ export default function NotificationComposer({
               <Send className="h-4 w-4" />
             )}
             Envoyer
+          </button>
+          <button
+            type="button"
+            onClick={handleSendWhatsApp}
+            disabled={!canSend || submitting}
+            className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+          >
+            <MessageCircle className="h-4 w-4" />
+            Envoyer via WhatsApp
           </button>
         </div>
       </div>

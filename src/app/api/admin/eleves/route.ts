@@ -16,6 +16,7 @@ export async function GET() {
         nom: true,
         prenom: true,
         codeEleve: true,
+        telephone: true,
         niveau: true,
         classe: true,
         filiere: true,
@@ -110,7 +111,7 @@ export async function GET() {
           unpaid: totalDue - totalPaid,
         };
       });
-      return { id: e.id, nom: e.nom, prenom: e.prenom, codeEleve: e.codeEleve, niveau: e.niveau, classe: e.classe, filiere: e.filiere, groupes };
+      return { id: e.id, nom: e.nom, prenom: e.prenom, codeEleve: e.codeEleve, telephone: e.telephone, niveau: e.niveau, classe: e.classe, filiere: e.filiere, groupes };
     });
 
     return NextResponse.json(result);
