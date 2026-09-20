@@ -50,70 +50,19 @@ export async function getAdminDashboardMonthData(
 
   const [netRevenueByProf, eleveCounts] = await Promise.all([
     profIds.length
-      ? prisma.$queryRawUnsafe<{ prof_id: string; net_revenue: number }[]>(
+      ? prisma.$queryRawUnsafe<{ prof_id: string | null; net_revenue: number }[]>(
           `
-          WITH all_sessions AS (
-            SELECT
-              pr.eleve_id,
-              s.groupe_id,
-              CASE
-                WHEN i.forfait_montant IS NOT NULL AND i.forfait_seances IS NOT NULL AND i.forfait_seances > 0
-                THEN (i.forfait_montant / i.forfait_seances)
-                ELSE COALESCE(s.prix_par_seance, g.prix_par_seance)
-              END as price,
-              s.date as seance_date
-            FROM presences pr
-            JOIN seances s ON pr.seance_id = s.id
-            JOIN groupes g ON s.groupe_id = g.id
-            LEFT JOIN inscriptions i ON i.eleve_id = pr.eleve_id AND i.groupe_id = g.id AND i.statut = 'actif'
-            WHERE pr.statut = 'present'
-              AND s.statut = 'terminee'
-              AND g.center_id = $1::uuid
-              AND s.date <= $2::timestamptz
-          ),
-          student_dues AS (
-            SELECT
-              eleve_id, groupe_id,
-              SUM(price) as total_due,
-              SUM(CASE WHEN seance_date >= $3::timestamptz THEN price ELSE 0 END) as due_this_month
-            FROM all_sessions
-            GROUP BY eleve_id, groupe_id
-          ),
-          student_payments AS (
-            SELECT
-              pai.eleve_id,
-              pai.groupe_id,
-              SUM(pai.montant) as total_paid
-            FROM paiements pai
-            JOIN groupes g ON pai.groupe_id = g.id
-            WHERE g.center_id = $1::uuid
-              AND pai.date_paiement <= $2::timestamptz
-            GROUP BY pai.eleve_id, pai.groupe_id
-          ),
-          paid_this_month AS (
-            SELECT
-              sd.eleve_id,
-              sd.groupe_id,
-              GREATEST(0,
-                LEAST(sd.due_this_month,
-                  GREATEST(0, COALESCE(sp.total_paid, 0) - (sd.total_due - sd.due_this_month))
-                )
-              ) as paid_amount
-            FROM student_dues sd
-            LEFT JOIN student_payments sp
-              ON sd.eleve_id = sp.eleve_id AND sd.groupe_id = sp.groupe_id
-            WHERE sd.due_this_month > 0
-          )
-          SELECT
-            g.prof_id,
-            COALESCE(SUM(pm.paid_amount), 0)::float as net_revenue
-          FROM paid_this_month pm
-          JOIN groupes g ON pm.groupe_id = g.id
+          SELECT g.prof_id, COALESCE(SUM(pa.montant), 0)::float AS net_revenue
+          FROM paiements pa
+          JOIN groupes g ON pa.groupe_id = g.id
+          WHERE g.center_id = $1::uuid
+            AND pa.date_paiement >= $2::timestamptz
+            AND pa.date_paiement <= $3::timestamptz
           GROUP BY g.prof_id
           `,
           centerId,
-          endDate,
-          startDate
+          startDate,
+          endDate
         )
       : [],
     profIds.length
@@ -130,7 +79,7 @@ export async function getAdminDashboardMonthData(
   ]);
 
   const revenueMap = new Map<string, number>();
-  for (const r of netRevenueByProf) revenueMap.set(r.prof_id, Number(r.net_revenue || 0));
+  for (const r of netRevenueByProf) revenueMap.set(r.prof_id ?? "", Number(r.net_revenue || 0));
   const countMap = new Map<string, number>();
   for (const r of eleveCounts) countMap.set(r.prof_id ?? "", Number(r.nb || 0));
 
