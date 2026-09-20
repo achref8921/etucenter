@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
-import { createStudentTransaction } from "@/lib/student-finance";
+import { createStudentTransaction, deleteStudentPaiement } from "@/lib/student-finance";
 import { creditTeacherForPayment, reverseTeacherEarningsForReference } from "@/lib/teacher-finance";
 import { sendPushToUser } from "@/lib/push";
 
@@ -117,5 +117,48 @@ export async function PATCH(
     return NextResponse.json(updated);
   } catch (error) {
     return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });
+  }
+}
+
+/**
+ * DELETE — Suppression RADICALE (définitive) d'un paiement élève.
+ *
+ * Efface TOUTES les traces : le paiement, toutes les StudentTransactions
+ * (crédit élève + REVERSALs) et toutes les TeacherTransactions (part du prof
+ * + REVERSALs). Nothing comptable ne subsiste. La suppression est notifiée
+ * à l'élève via push.
+ */
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { session, error } = await requireActiveCenter(request.method, ADMIN_ROLES);
+    if (error) return error;
+
+    const { id } = await params2;
+    const centreId = (session.user as any).centerId;
+    const adminId = (session.user as any).id;
+
+    const result = await deleteStudentPaiement({
+      centerId: centreId,
+      paiementId: id,
+      actorId: adminId,
+    });
+
+    await sendPushToUser(result.eleveId, {
+      title: "Paiement supprimé",
+      body: `Votre paiement pour le groupe "${result.groupeNom}" a été supprimé définitivement par l'administration. Toutes les traces de ce paiement ont été effacées (crédit élève et part du professeur).`,
+      url: "/eleve/notifications",
+    }).catch(() => {});
+
+    return NextResponse.json(result);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    const status = message === "PAIEMENT_INTROUVABLE" ? 404 : 500;
+    return NextResponse.json(
+      { error: status === 404 ? "Paiement non trouvé" : "Erreur interne du serveur" },
+      { status }
+    );
   }
 }

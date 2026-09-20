@@ -37,9 +37,10 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const [ledger, balance] = await Promise.all([
+    const [ledger, balance, netBalance] = await Promise.all([
       listStudentTransactions({ centerId, eleveId: studentId, from, to, type, page }),
       studentId ? getStudentBalance(centerId, studentId) : Promise.resolve(0),
+      studentId ? getStudentNetBalance(centerId, studentId) : Promise.resolve(0),
     ]);
 
     return NextResponse.json({
@@ -49,6 +50,7 @@ export async function GET(request: NextRequest) {
       pageSize: ledger.pageSize,
       totalPages: ledger.totalPages,
       balance,
+      netBalance,
       filters: { studentId, type, from: fromRaw ?? null, to: toRaw ?? null },
     });
   } catch (error) {

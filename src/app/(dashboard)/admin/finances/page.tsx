@@ -12,6 +12,7 @@ import {
   Plus,
   X,
   Pencil,
+  Trash2,
   FileText,
   Undo2,
   Wallet,
@@ -156,6 +157,9 @@ export default function FinancesPage() {
   const [editMontant, setEditMontant] = useState<number>(0);
   const [editRaison, setEditRaison] = useState("");
   const [editSubmitting, setEditSubmitting] = useState(false);
+
+  const [deleteTarget, setDeleteTarget] = useState<Paiement | null>(null);
+  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
 
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [loadingStudents, setLoadingStudents] = useState(true);
@@ -383,6 +387,27 @@ export default function FinancesPage() {
       setError(err instanceof Error ? err.message : "Erreur inconnue");
     } finally {
       setEditSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      setDeleteSubmitting(true);
+      setError(null);
+      const res = await fetch(`/api/admin/paiements/${deleteTarget.id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || "Erreur lors de la suppression");
+      }
+      setDeleteTarget(null);
+      await refreshAll();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setDeleteSubmitting(false);
     }
   };
 

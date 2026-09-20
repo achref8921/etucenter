@@ -141,7 +141,7 @@ export default function AdminEleveDetailPage() {
         const res = await fetch(`/api/admin/student-finance?studentId=${id}`);
         if (!res.ok) return;
         const data = await res.json();
-        setFinanceBalance(data.balance);
+        setFinanceBalance(data.netBalance ?? data.balance);
         setTransactions(data.transactions ?? []);
       } catch {
         setFinanceBalance(null);

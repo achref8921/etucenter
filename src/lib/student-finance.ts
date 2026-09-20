@@ -762,3 +762,128 @@ export async function getStudentFinanceOverview(centerId: string) {
     negativeCount,
   };
 }
+
+export interface DeleteStudentPaiementInput {
+  centerId: string;
+  paiementId: string;
+  actorId?: string | null;
+}
+
+/**
+ * Suppression RADICALE (définitive) d'un paiement élève.
+ *
+ * À la différence de reverseStudentTransaction (qui garde une trace comptable
+ * sous forme de REVERSAL), cette fonction efface TOUTES les traces de la
+ * défise : le paiement, toutes les StudentTransactions liées au groupe et
+ * toutes les TeacherTransactions liées (part du prof), y compris les
+ * REVERSALs — puis notifie l'élève.
+ */
+export async function deleteStudentPaiement(input: DeleteStudentPaiementInput) {
+  return prisma.$transaction(async (tx) => {
+    const paiement = await tx.paiement.findUnique({
+      where: { id: input.paiementId },
+      include: {
+        eleve: { select: { id: true, prenom: true, nom: true } },
+        groupe: { select: { id: true, nom: true, centerId: true, profId: true } },
+      },
+    });
+
+    if (!paiement || paiement.groupe.centerId !== input.centerId) {
+      throw new Error("PAIEMENT_INTROUVABLE");
+    }
+
+    const ref = `paiement:${paiement.id}`;
+
+    // 1) Toutes les StudentTransactions liées (crédit élève, ajustements, REVERSALs)
+    const studentTxRows = await tx.studentTransaction.findMany({
+      where: { centerId: input.centerId, reference: ref },
+      select: { id: true },
+    });
+    const studentTxIds = new Set(studentTxRows.map((r) => r.id));
+
+    // Par sécurité, récupérons aussi les transactions liées par reversalOfId
+    // (au cas où une REVERSAL n'aurait pas le même reference).
+    const reversalLinked = await tx.studentTransaction.findMany({
+      where: { centerId: input.centerId, reversalOfId: { in: [...studentTxIds] } },
+      select: { id: true },
+    });
+    for (const r of reversalLinked) studentTxIds.add(r.id);
+
+    if (studentTxIds.size > 0) {
+      await tx.studentTransaction.deleteMany({
+        where: { id: { in: [...studentTxIds] } },
+      });
+    }
+
+    // 2) Toutes les TeacherTransactions liées à ce paiement (part du prof + REVERSALs)
+    const teacherTxRows = await tx.teacherTransaction.findMany({
+      where: { centerId: input.centerId, reference: ref },
+      select: { id: true },
+    });
+    const teacherTxIds = new Set(teacherTxRows.map((r) => r.id));
+
+    const teacherReversalLinked = await tx.teacherTransaction.findMany({
+      where: { centerId: input.centerId, reversalOfId: { in: [...teacherTxIds] } },
+      select: { id: true },
+    });
+    for (const r of teacherReversalLinked) teacherTxIds.add(r.id);
+
+    if (teacherTxIds.size > 0) {
+      await tx.teacherTransaction.deleteMany({
+        where: { id: { in: [...teacherTxIds] } },
+      });
+    }
+
+    // 3) Ligne du paiement elle-même (DELETE provoque les cascades vers :
+    //    eleve/notification éventuelles, en fonction du schéma).
+    await tx.paiement.delete({ where: { id: paiement.id } });
+
+    // 4) Notification à l'élève que la défise a été supprimée définitivement.
+    await tx.notification.create({
+      data: {
+        centerId: input.centerId,
+        destinataireId: paiement.eleveId,
+        titre: "Paiement supprimé",
+        message: `Votre paiement pour le groupe "${paiement.groupe.nom}" a été supprimé définitivement par l'administration. Toutes les traces de ce paiement (crédit élève et part du professeur) ont été effacées.`,
+        type: "paiement_supprime",
+      },
+    });
+
+    // 5) Journal système (audit de l'action radicale).
+    await tx.systemLog.create({
+      data: {
+        action: "finance.student.paiement.delete",
+        entity: "paiement",
+        entityId: paiement.id,
+        userId: input.actorId ?? null,
+        details: {
+          eleveId: paiement.eleveId,
+          groupeId: paiement.groupe.id,
+          groupeNom: paiement.groupe.nom,
+          montant: Number(paiement.montant),
+          studentTransactionsDeleted: studentTxIds.size,
+          teacherTransactionsDeleted: teacherTxIds.size,
+          radical: true,
+        },
+      },
+    });
+
+    logger.info("Paiement élève supprimé définitivement (radical)", {
+      paiementId: paiement.id,
+      eleveId: paiement.eleveId,
+      groupeId: paiement.groupe.id,
+      actorId: input.actorId ?? null,
+      montant: Number(paiement.montant),
+    });
+
+    return {
+      id: paiement.id,
+      montant: Number(paiement.montant),
+      eleveId: paiement.eleveId,
+      eleveNom: `${paiement.eleve.prenom} ${paiement.eleve.nom}`.trim(),
+      groupeNom: paiement.groupe.nom,
+      studentTransactionsDeleted: [...studentTxIds].length,
+      teacherTransactionsDeleted: [...teacherTxIds].length,
+    };
+  });
+}
