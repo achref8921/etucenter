@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { MontantInput } from "@/components/montant-input";
 import {
   Loader2,
   Plus,
@@ -544,10 +545,9 @@ export default function FinancesProfesseursPage() {
                 <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                   Montant (DT)
                 </label>
-                <input
-                  type="number"
+                <MontantInput
                   value={form.amount || ""}
-                  onChange={(e) => setForm({ ...form, amount: Number(e.target.value) })}
+                  onChange={(v) => setForm({ ...form, amount: v })}
                   min={0}
                   step="0.01"
                   required

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { RevenueBarChart, CenterPieChart } from "@/components/charts/analytics-charts";
+import { MontantInput } from "@/components/montant-input";
 import {
   Building2, Users, DollarSign, AlertTriangle, TrendingUp, Loader2,
   Plus, X as XIcon, Clock, Ban, CheckCircle,
@@ -365,10 +366,9 @@ export default function SuperAdminAnalyticsPage() {
               </div>
               <div>
                 <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Montant (DT)</label>
-                <input
-                  type="number"
-                  value={addForm.montant}
-                  onChange={(e) => setAddForm({ ...addForm, montant: e.target.value })}
+                <MontantInput
+                  value={addForm.montant ? parseFloat(addForm.montant) || 0 : ""}
+                  onChange={(v) => setAddForm({ ...addForm, montant: v === 0 ? "" : String(v) })}
                   min={0}
                   required
                   className="w-full rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22] px-3 py-2 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"

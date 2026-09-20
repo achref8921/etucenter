@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Users, Loader2, X, Search, Download, Trash2, CalendarPlus } from "lucide-react";
+import { MontantInput } from "@/components/montant-input";
 import { formatDate, formatCurrency, formatTime } from "@/lib/utils";
 import ConfirmDelete from "@/components/confirm-delete";
 import TimeInput from "@/components/time-input";
@@ -677,10 +678,9 @@ export default function AdminGroupeDetailPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Montant (DT)</label>
-                      <input
-                        type="number"
+                      <MontantInput
                         value={tarifMontant || ""}
-                        onChange={(e) => setTarifMontant(Number(e.target.value))}
+                        onChange={setTarifMontant}
                         min={0}
                         placeholder="110"
                         className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -710,10 +710,9 @@ export default function AdminGroupeDetailPage() {
               ) : (
                 <div>
                   <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Prix / séance (DT)</label>
-                  <input
-                    type="number"
-                    value={tarifPrixSeance}
-                    onChange={(e) => setTarifPrixSeance(Number(e.target.value))}
+                  <MontantInput
+                    value={tarifPrixSeance || ""}
+                    onChange={setTarifPrixSeance}
                     min={0}
                     className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
@@ -760,12 +759,11 @@ export default function AdminGroupeDetailPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Prix (DT)</label>
-                <input
-                  type="number"
+                <MontantInput
                   step="0.01"
-                  min="0"
-                  value={forfaitMontantVal}
-                  onChange={(e) => setForfaitMontantVal(e.target.value)}
+                  min={0}
+                  value={forfaitMontantVal ? parseFloat(forfaitMontantVal) || 0 : ""}
+                  onChange={(v) => setForfaitMontantVal(v === 0 ? "" : String(v))}
                   className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#1e2128] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none"
                   placeholder={`Ex : 110`}
                   autoFocus

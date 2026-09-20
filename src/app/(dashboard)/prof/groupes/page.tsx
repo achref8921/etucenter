@@ -6,6 +6,7 @@ import { GraduationCap, Loader2, Save, Users, Calendar, Edit3, X } from "lucide-
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
 import { SkeletonPage } from "@/components/ui/skeleton";
+import { MontantInput } from "@/components/montant-input";
 
 interface GroupeList {
   id: string;
@@ -244,11 +245,10 @@ export default function ProfGroupesPage() {
                     {editingId === g.id ? (
                       hasForfait ? (
                         <div className="flex items-center gap-1.5">
-                          <input
-                            type="number"
+                          <MontantInput
                             min={0}
                             value={editForfaitMontant || ""}
-                            onChange={(e) => setEditForfaitMontant(Number(e.target.value))}
+                            onChange={setEditForfaitMontant}
                             className="w-20 rounded-xl border border-blue-300 dark:border-blue-600 bg-white dark:bg-[#181b22] px-2 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                             autoFocus
                           />
@@ -265,11 +265,10 @@ export default function ProfGroupesPage() {
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <input
-                            type="number"
+                          <MontantInput
                             min={0}
-                            value={editPrice}
-                            onChange={(e) => setEditPrice(Number(e.target.value))}
+                            value={editPrice || ""}
+                            onChange={setEditPrice}
                             className="w-24 rounded-xl border border-blue-300 dark:border-blue-600 bg-white dark:bg-[#181b22] px-2 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                             autoFocus
                           />
@@ -418,12 +417,11 @@ export default function ProfGroupesPage() {
                       </label>
                       <div className="flex items-end gap-2">
                         <div className="flex-1">
-                          <input
-                            type="number"
+                          <MontantInput
                             min={0}
                             step="0.01"
                             value={detailForm.forfaitMontant || ""}
-                            onChange={(e) => setDetailForm({ ...detailForm, forfaitMontant: Number(e.target.value) })}
+                            onChange={(v) => setDetailForm({ ...detailForm, forfaitMontant: v })}
                             placeholder="Montant (DT)"
                             className="w-full rounded-xl border border-neutral-300 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                           />
@@ -450,12 +448,11 @@ export default function ProfGroupesPage() {
                   ) : (
                     <div>
                       <label className="mb-1 block text-[12px] font-medium text-neutral-500 dark:text-neutral-400">Prix / séance (DT)</label>
-                      <input
-                        type="number"
+                      <MontantInput
                         min={0}
                         step="0.01"
                         value={detailForm.prixParSeance || ""}
-                        onChange={(e) => setDetailForm({ ...detailForm, prixParSeance: Number(e.target.value) })}
+                        onChange={(v) => setDetailForm({ ...detailForm, prixParSeance: v })}
                         className="w-full rounded-xl border border-neutral-300 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                       />
                     </div>

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, Trash2, X, Loader2, Pencil, Check, Search } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { MontantInput } from "@/components/montant-input";
 import ConfirmDelete from "@/components/confirm-delete";
 import ConfirmGroupeDelete, { type GroupeDeleteImpact } from "@/components/confirm-groupe-delete";
 
@@ -514,11 +515,19 @@ export default function GroupesPage() {
                     <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">
                       Montant du forfait (DT)
                     </label>
-                    <input
+                    <MontantInput
                       name="forfaitMontant"
-                      type="number"
                       value={formData.forfaitMontant || ""}
-                      onChange={handleChange}
+                      onChange={(v) =>
+                        setFormData((prev) => {
+                          const next = { ...prev, forfaitMontant: v };
+                          if (next.forfaitMontant > 0 && next.forfaitSeances > 0) {
+                            next.prixParSeance =
+                              Math.round((next.forfaitMontant / next.forfaitSeances) * 100) / 100;
+                          }
+                          return next;
+                        })
+                      }
                       min={0}
                       placeholder="110"
                       className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -552,11 +561,10 @@ export default function GroupesPage() {
                 <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">
                   Prix / séance (DT)
                 </label>
-                <input
+                <MontantInput
                   name="prixParSeance"
-                  type="number"
-                  value={formData.prixParSeance}
-                  onChange={handleChange}
+                  value={formData.prixParSeance || ""}
+                  onChange={(v) => setFormData((prev) => ({ ...prev, prixParSeance: v }))}
                   required
                   min={0}
                   disabled={formData.forfaitMontant > 0 && formData.forfaitSeances > 0}

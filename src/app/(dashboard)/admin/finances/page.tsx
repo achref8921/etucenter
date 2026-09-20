@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { MontantInput } from "@/components/montant-input";
 import {
   DollarSign,
   AlertTriangle,
@@ -1160,10 +1161,9 @@ export default function FinancesPage() {
 
               <div>
                 <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Montant (DT)</label>
-                <input
-                  type="number"
+                <MontantInput
                   value={montant || ""}
-                  onChange={(e) => setMontant(Number(e.target.value))}
+                  onChange={setMontant}
                   min={0}
                   required
                   className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
@@ -1256,10 +1256,9 @@ export default function FinancesPage() {
               <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Nouveau montant (DT)</label>
-                  <input
-                    type="number"
+                  <MontantInput
                     value={editMontant || ""}
-                    onChange={(e) => setEditMontant(Number(e.target.value))}
+                    onChange={setEditMontant}
                     min={0}
                     required
                     className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
@@ -1387,10 +1386,9 @@ export default function FinancesPage() {
                 <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                   Montant (DT)
                 </label>
-                <input
-                  type="number"
+                <MontantInput
                   value={creditForm.amount || ""}
-                  onChange={(e) => setCreditForm({ ...creditForm, amount: Number(e.target.value) })}
+                  onChange={(v) => setCreditForm({ ...creditForm, amount: v })}
                   min={0}
                   step="0.01"
                   required
