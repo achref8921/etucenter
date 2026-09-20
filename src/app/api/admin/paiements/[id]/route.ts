@@ -136,7 +136,7 @@ export async function DELETE(
     const { session, error } = await requireActiveCenter(request.method, ADMIN_ROLES);
     if (error) return error;
 
-    const { id } = await params2;
+    const { id } = await params;
     const centreId = (session.user as any).centerId;
     const adminId = (session.user as any).id;
 
