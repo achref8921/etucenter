@@ -6,6 +6,7 @@ import { studentTransactionSchema } from "@/lib/validations";
 import {
   createStudentTransaction,
   getStudentBalance,
+  getStudentNetBalance,
   listStudentTransactions,
 } from "@/lib/student-finance";
 import { processStudentPayment } from "@/lib/payments";
