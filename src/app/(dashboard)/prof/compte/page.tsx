@@ -35,6 +35,9 @@ const METHODE_LABEL: Record<string, string> = {
   autre: "Autre",
 };
 
+const isStudentGain = (tx: TransactionRow) =>
+  tx.type === "EARNING" && (tx.reference?.startsWith("paiement:") ?? false);
+
 export default function ProfComptePage() {
   const [transactions, setTransactions] = useState<TransactionRow[]>([]);
   const [claimable, setClaimable] = useState(0);
@@ -192,11 +195,13 @@ export default function ProfComptePage() {
                             : tx.type === "PAYMENT"
                               ? "bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-400"
                               : tx.type === "EARNING"
-                                ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400"
+                                ? isStudentGain(tx)
+                                  ? "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400"
+                                  : "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400"
                                 : "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-400"
                         }`}
                       >
-                        {TYPE_LABEL[tx.type]}
+                        {isStudentGain(tx) ? "Gain élève" : TYPE_LABEL[tx.type]}
                       </span>
                       {tx.status === "reversed" && (
                         <span className="ml-1 inline-block rounded-full bg-gray-100 dark:bg-slate-700 px-2 py-0.5 text-[12px] text-neutral-600 dark:text-neutral-300">

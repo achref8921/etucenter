@@ -57,6 +57,9 @@ const METHODE_LABEL: Record<string, string> = {
   autre: "Autre",
 };
 
+const isStudentGain = (tx: TransactionRow) =>
+  tx.type === "EARNING" && (tx.reference?.startsWith("paiement:") ?? false);
+
 export default function FinancesProfesseursPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -427,11 +430,13 @@ export default function FinancesProfesseursPage() {
                               : tx.type === "PAYMENT"
                                 ? "bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-400"
                                 : tx.type === "EARNING"
-                                  ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400"
+                                  ? isStudentGain(tx)
+                                    ? "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400"
+                                    : "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400"
                                   : "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-400"
                           }`}
                         >
-                          {TYPE_LABEL[tx.type]}
+                          {isStudentGain(tx) ? "Gain élève" : TYPE_LABEL[tx.type]}
                         </span>
                         {tx.status === "reversed" && (
                           <span className="ml-1 inline-block rounded-full bg-neutral-100 dark:bg-[#2a2d35] px-2 py-0.5 text-xs text-neutral-600 dark:text-neutral-300">
@@ -612,7 +617,7 @@ export default function FinancesProfesseursPage() {
             </div>
             <div className="mb-4 rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3 text-sm">
               <p className="text-neutral-600 dark:text-neutral-400">
-                <span className="font-medium">{TYPE_LABEL[reverseTarget.type]}</span> —{" "}
+                <span className="font-medium">{isStudentGain(reverseTarget) ? "Gain élève" : TYPE_LABEL[reverseTarget.type]}</span> —{" "}
                 {reverseTarget.description}
               </p>
               <p className="mt-1 text-neutral-500 dark:text-neutral-400">

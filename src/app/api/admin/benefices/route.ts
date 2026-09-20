@@ -31,7 +31,6 @@ export async function GET(request: NextRequest) {
         datePaiement: { gte: startDate, lte: endDate },
       },
       orderBy: { datePaiement: "desc" },
-      take: 20,
       include: {
         eleve: { select: { id: true, nom: true, prenom: true } },
         groupe: { select: { id: true, nom: true } },
