@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { trackEventSafe } from "@/lib/analytics";
 import { requireActiveCenter, PROF_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
@@ -75,6 +76,14 @@ export async function GET(request: NextRequest) {
     const canModify = canModifyAttendance(seance.date, seance.heureDebut, seance.heureFin, clientNow);
 
     logger.info("Présences récupérées", { profId: (session.user as any).id, seanceId, count: presences.length });
+
+    void trackEventSafe({
+      userId: (session.user as any).id,
+      centerId: (session.user as any).centerId,
+      event: "ATTENDANCE_VIEWED",
+      feature: "Présences",
+      metadata: { seanceId },
+    });
 
     return NextResponse.json({ presences, canModify });
   } catch (error) {
@@ -251,6 +260,18 @@ export async function POST(request: NextRequest) {
       await sendPushToUsers(eleveIds, { title: titre, body: message, url: "/eleve/presences" }).catch(() => {});
       logger.info("Notifications d'absence envoyées", { seanceId, count: eleveIds.length });
     }
+
+    void trackEventSafe({
+      userId,
+      centerId: (session.user as any).centerId,
+      event: "ATTENDANCE_MARKED",
+      path: "/prof/presences",
+      feature: "Présences",
+      metadata: {
+        seanceId,
+        markedCount: results.length,
+      },
+    });
 
     return NextResponse.json(results);
   } catch (error) {

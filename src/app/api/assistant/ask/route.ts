@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { trackEventSafe } from "@/lib/analytics";
 import { requireActiveCenter, ADMIN_ROLES, PROF_ROLES } from "@/lib/auth-helpers";
 import { rateLimit, getRateLimitKey } from "@/lib/rate-limit";
 import { answer } from "@/lib/assistant/service";
@@ -67,6 +68,15 @@ export async function POST(request: Request) {
     if (!result.ok) {
       return NextResponse.json({ error: "Erreur interne" }, { status: 500 });
     }
+
+    void trackEventSafe({
+      userId: user.id,
+      centerId: user.centerId,
+      event: "ASSISTANT_USED",
+      path: "/api/assistant/ask",
+      feature: "Assistant",
+      metadata: { role },
+    });
 
     return NextResponse.json(result);
   } catch (err) {

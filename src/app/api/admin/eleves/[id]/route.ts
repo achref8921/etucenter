@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { trackEventSafe } from "@/lib/analytics";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
@@ -128,6 +129,14 @@ export async function GET(
       eleveId: id,
     });
 
+    void trackEventSafe({
+      userId: (session.user as any).id,
+      centerId: centreId,
+      event: "STUDENT_VIEWED",
+      feature: "Élèves",
+      metadata: { studentId: id },
+    });
+
     return NextResponse.json({ eleve, inscriptions: inscriptionsWithStats, paiements, presences });
   } catch (error) {
     logger.error("Erreur lors de la récupération des détails élève", { error });
@@ -219,6 +228,14 @@ export async function PATCH(
     } catch (logError) {
       logger.error("Echec du journal systemLog du changement de niveau", { logError });
     }
+
+    void trackEventSafe({
+      userId: (session.user as any).id,
+      centerId: centreId,
+      event: "STUDENT_UPDATED",
+      feature: "Élèves",
+      metadata: { studentId: id },
+    });
 
     return NextResponse.json(updated);
   } catch (error) {

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { trackEventSafe } from "@/lib/analytics";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { createStudentTransaction, deleteStudentPaiement } from "@/lib/student-finance";
@@ -114,6 +115,14 @@ export async function PATCH(
       url: "/eleve/notifications",
     }).catch(() => {});
 
+    void trackEventSafe({
+      userId: adminId,
+      centerId: centreId,
+      event: "PAYMENT_UPDATED",
+      feature: "Paiements",
+      metadata: { paymentId: id },
+    });
+
     return NextResponse.json(updated);
   } catch (error) {
     return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });
@@ -151,6 +160,14 @@ export async function DELETE(
       body: `Votre paiement pour le groupe "${result.groupeNom}" a été supprimé définitivement par l'administration. Toutes les traces de ce paiement ont été effacées (crédit élève et part du professeur).`,
       url: "/eleve/notifications",
     }).catch(() => {});
+
+    void trackEventSafe({
+      userId: adminId,
+      centerId: centreId,
+      event: "PAYMENT_DELETED",
+      feature: "Paiements",
+      metadata: { paymentId: id },
+    });
 
     return NextResponse.json(result);
   } catch (error) {

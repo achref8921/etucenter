@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { trackEventSafe } from "@/lib/analytics";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
@@ -28,6 +29,15 @@ export async function GET() {
     });
 
     logger.info("Liste des paiements récupérée", { adminId: (session.user as any).id, count: paiements.length });
+
+    void trackEventSafe({
+      userId: (session.user as any).id,
+      centerId,
+      event: "PAYMENT_VIEWED",
+      path: "/admin/paiements",
+      feature: "Paiements",
+      metadata: { count: paiements.length },
+    });
 
     return NextResponse.json(paiements);
   } catch (error) {
@@ -113,6 +123,18 @@ export async function POST(request: NextRequest) {
       groupeId,
       montant: Number(montant),
       profCredited: Number(teacherTransaction?.signedAmount ?? 0),
+    });
+
+    void trackEventSafe({
+      userId: adminId,
+      centerId,
+      event: "PAYMENT_CREATED",
+      feature: "Paiements",
+      metadata: {
+        paymentId: paiement.id,
+        studentId: paiement.eleveId,
+        groupId: paiement.groupeId,
+      },
     });
 
     return NextResponse.json(

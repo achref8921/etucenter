@@ -13,6 +13,7 @@ import {
   Database,
   Users,
   Activity,
+  MousePointerClick,
 } from "lucide-react";
 
 interface NavItem {
@@ -26,6 +27,7 @@ const navItems: NavItem[] = [
   { label: "Centers", href: "/super-admin/centers", icon: Building2 },
   { label: "Utilisateurs", href: "/super-admin/utilisateurs", icon: Users },
   { label: "Analytiques", href: "/super-admin/analytics", icon: BarChart3 },
+  { label: "Usage", href: "/super-admin/usage", icon: MousePointerClick },
   { label: "Sauvegardes", href: "/super-admin/backups", icon: Database },
   { label: "Monitoring", href: "/super-admin/monitoring", icon: Activity },
   { label: "System Logs", href: "/super-admin/logs", icon: ScrollText },

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { trackEventSafe } from "@/lib/analytics";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 
@@ -112,6 +113,15 @@ export async function GET() {
         };
       });
       return { id: e.id, nom: e.nom, prenom: e.prenom, codeEleve: e.codeEleve, telephone: e.telephone, niveau: e.niveau, classe: e.classe, filiere: e.filiere, groupes };
+    });
+
+    void trackEventSafe({
+      userId: (session.user as any).id,
+      centerId,
+      event: "STUDENT_VIEWED",
+      path: "/admin/eleves",
+      feature: "Élèves",
+      metadata: { count: result.length },
     });
 
     return NextResponse.json(result);

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { trackEventSafe } from "@/lib/analytics";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
@@ -38,6 +39,15 @@ export async function GET() {
     });
 
     logger.info("Liste des groupes récupérée", { adminId: (session.user as any).id, count: groupes.length });
+
+    void trackEventSafe({
+      userId: (session.user as any).id,
+      centerId,
+      event: "GROUP_VIEWED",
+      path: "/admin/groupes",
+      feature: "Groupes",
+      metadata: { count: groupes.length },
+    });
 
     return NextResponse.json(groupes);
   } catch (error) {
@@ -101,6 +111,14 @@ export async function POST(request: NextRequest) {
     });
 
     logger.info("Groupe créé", { adminId: (session.user as any).id, groupId: groupe.id, nom: groupe.nom });
+
+    void trackEventSafe({
+      userId: (session.user as any).id,
+      centerId: (session.user as any).centerId,
+      event: "GROUP_CREATED",
+      feature: "Groupes",
+      metadata: { groupId: groupe.id },
+    });
 
     return NextResponse.json(groupe, { status: 201 });
   } catch (error) {

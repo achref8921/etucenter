@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { trackEventSafe } from "@/lib/analytics";
 import { requireActiveCenter, ADMIN_ROLES, ELEVE_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
@@ -195,6 +196,14 @@ export async function GET(
   </div>
 </body>
 </html>`;
+
+    void trackEventSafe({
+      userId: user.id,
+      centerId: user.centerId,
+      event: "REPORT_EXPORTED",
+      feature: "Finances",
+      metadata: { type: "student_receipt" },
+    });
 
     return new NextResponse(html, {
       headers: { "Content-Type": "text/html; charset=utf-8" },

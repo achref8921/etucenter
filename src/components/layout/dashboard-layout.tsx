@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { usePathname } from "next/navigation";
 import Sidebar from "./sidebar";
 import Header from "./header";
@@ -11,6 +11,7 @@ import { ToastProvider } from "@/components/ui/toast";
 import BackButton from "@/components/ui/back-button";
 import { Role } from "@/types/role";
 import AssistantWidget from "@/components/assistant/assistant-widget";
+import UsageTracker from "@/components/usage-tracker";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -71,6 +72,9 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-[#0f1114]">
       <SessionGuard />
+      <Suspense fallback={null}>
+        <UsageTracker />
+      </Suspense>
       <Sidebar
         role={user.role}
         centerName={centerName}

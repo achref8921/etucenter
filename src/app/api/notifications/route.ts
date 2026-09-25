@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { trackEventSafe } from "@/lib/analytics";
 import { prisma } from "@/lib/prisma";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { notificationSendSchema } from "@/lib/validations";
@@ -22,6 +23,15 @@ export async function GET() {
         where: { destinataireId: userId, lu: false },
       }),
     ]);
+
+    void trackEventSafe({
+      userId,
+      centerId: (session.user as any).centerId,
+      event: "NOTIFICATION_VIEWED",
+      path: "/notifications",
+      feature: "Notifications",
+      metadata: { count: notifications.length },
+    });
 
     return NextResponse.json({ notifications, nonLues });
   } catch (error) {

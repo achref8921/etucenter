@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { trackEventSafe } from "@/lib/analytics";
 import { requireActiveCenter } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 
@@ -446,6 +447,14 @@ export async function GET(
   </div>
 </body>
 </html>`;
+
+    void trackEventSafe({
+      userId: (session.user as any).id,
+      centerId: userCenterId,
+      event: "REPORT_EXPORTED",
+      feature: "Paiements",
+      metadata: { type: "invoice", paymentId: id },
+    });
 
     return new NextResponse(html, {
       headers: {
