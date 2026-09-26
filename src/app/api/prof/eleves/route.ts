@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { clientNowFromOffset } from "@/lib/utils";
 import { finalizePassedSeances } from "@/lib/seance-finalizer";
+import { attachHasImage } from "@/lib/user-images";
 
 export async function GET(request: Request) {
   try {
@@ -203,7 +204,9 @@ export async function GET(request: Request) {
 
     logger.info("Eleves prof récupérés", { userId, count: result.length });
 
-    return NextResponse.json(result);
+    const withAvatars = await attachHasImage(result);
+
+    return NextResponse.json(withAvatars);
   } catch (error) {
     logger.error("Erreur lors de la récupération des eleves", { error });
     return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });

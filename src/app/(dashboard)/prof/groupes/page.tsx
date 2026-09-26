@@ -7,6 +7,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
 import { SkeletonPage } from "@/components/ui/skeleton";
 import { MontantInput } from "@/components/montant-input";
+import UserAvatar from "@/components/user-avatar";
 
 interface GroupeList {
   id: string;
@@ -27,7 +28,7 @@ interface GroupeDetail {
   forfaitSeances: number | null;
   capaciteMax: number;
   matiere: { id: string; nom: string } | null;
-  inscriptions: { id: string; eleve: { id: string; nom: string; prenom: string; email: string } }[];
+  inscriptions: { id: string; eleve: { id: string; nom: string; prenom: string; email: string; hasImage?: boolean } }[];
   seances: { id: string; date: string; statut: string; _count: { presences: number } }[];
 }
 
@@ -503,9 +504,7 @@ export default function ProfGroupesPage() {
                 ) : (
                   groupe.inscriptions.map((ins) => (
                     <div key={ins.id} className="flex items-center gap-3 py-2.5">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 text-[12px] font-semibold text-blue-700 dark:text-blue-300">
-                        {ins.eleve.prenom[0]}{ins.eleve.nom[0]}
-                      </div>
+                      <UserAvatar userId={ins.eleve.id} nom={ins.eleve.nom} prenom={ins.eleve.prenom} hasImage={ins.eleve.hasImage} size="xs" />
                       <div>
                         <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">{ins.eleve.prenom} {ins.eleve.nom}</p>
                         <p className="text-[12px] text-neutral-500 dark:text-neutral-400">{ins.eleve.email}</p>

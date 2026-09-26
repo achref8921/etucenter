@@ -137,7 +137,9 @@ export async function GET(
       metadata: { studentId: id },
     });
 
-    return NextResponse.json({ eleve, inscriptions: inscriptionsWithStats, paiements, presences });
+    const { image, ...eleveWithoutImage } = eleve;
+
+    return NextResponse.json({ eleve: { ...eleveWithoutImage, hasImage: image !== null }, inscriptions: inscriptionsWithStats, paiements, presences });
   } catch (error) {
     logger.error("Erreur lors de la récupération des détails élève", { error });
     return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });

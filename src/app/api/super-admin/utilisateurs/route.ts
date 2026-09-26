@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
+import { attachHasImage } from "@/lib/user-images";
 
 export async function GET(request: NextRequest) {
   try {
@@ -67,7 +68,9 @@ export async function GET(request: NextRequest) {
       take: 500,
     });
 
-    return NextResponse.json(utilisateurs);
+    const withAvatars = await attachHasImage(utilisateurs);
+
+    return NextResponse.json(withAvatars);
   } catch (error) {
     logger.error("Erreur lors de la récupération des utilisateurs", { error });
     return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });

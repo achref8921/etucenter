@@ -117,7 +117,7 @@ model Utilisateur {
   motDePasse     String?   @map("mot_de_passe") @db.VarChar(255)
   telephone      String?   @db.VarChar(20)
   role           Role
-  image          String?   @db.VarChar(500)
+  image          String?
   dateNaissance  DateTime? @map("date_naissance") @db.Date
   actif          Boolean   @default(false)
   peutGererEleves Boolean  @default(false) @map("peut_gerer_eleves")

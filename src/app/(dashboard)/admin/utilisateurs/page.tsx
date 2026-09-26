@@ -7,6 +7,7 @@ import { Plus, Trash2, X, Loader2, Filter, ToggleLeft, ToggleRight, Search, Down
 import PasswordInput from "@/components/password-input";
 import ConfirmDelete from "@/components/confirm-delete";
 import ConfirmGhostDelete, { GhostImpactData } from "@/components/confirm-ghost-delete";
+import UserAvatar from "@/components/user-avatar";
 
 interface Utilisateur {
   id: string;
@@ -23,6 +24,7 @@ interface Utilisateur {
   niveau: string | null;
   classe: string | null;
   filiere: string | null;
+  hasImage?: boolean;
 }
 
 const classesByNiveau: Record<string, string[]> = {
@@ -525,7 +527,12 @@ export default function UtilisateursPage() {
                         <span className="inline-block rounded bg-emerald-100 dark:bg-emerald-900/20 px-2 py-0.5 font-mono text-xs font-bold text-emerald-700 dark:text-emerald-400">{user.codeProf || "—"}</span>
                       ) : "—"}
                     </td>
-                    <td className="px-4 py-2.5 font-medium">{user.prenom} {user.nom}</td>
+                    <td className="px-4 py-2.5 font-medium">
+                      <span className="flex items-center gap-2.5">
+                        <UserAvatar userId={user.id} nom={user.nom} prenom={user.prenom} hasImage={user.hasImage} size="xs" />
+                        <span className="truncate">{user.prenom} {user.nom}</span>
+                      </span>
+                    </td>
                     <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">{user.email}</td>
                     <td className="px-4 py-2.5">
                       <span className="inline-block rounded-full px-2 py-0.5 text-[11px] font-medium bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300">{roleLabel(user.role)}</span>

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { User, Loader2, Save, Edit3, Lock, Mail, Phone, Calendar, Eye, EyeOff, Trash2 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import ConfirmPermanentDelete from "@/components/confirm-permanent-delete";
+import AvatarUpload from "@/components/avatar-upload";
 
 interface Profil {
   id: string;
@@ -13,6 +14,7 @@ interface Profil {
   email: string;
   telephone: string | null;
   role: string;
+  image: string | null;
   dateNaissance: string | null;
   createdAt: string;
 }
@@ -187,6 +189,21 @@ export default function ProfilPage() {
 
       {profil && (
         <>
+          <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm">
+            <div className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
+              <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Photo de Profil</h2>
+            </div>
+            <div className="p-6">
+              <AvatarUpload
+                currentImage={profil.image}
+                endpoint="/api/profil"
+                onUpdated={(image) =>
+                  setProfil((p) => (p ? { ...p, image } : p))
+                }
+              />
+            </div>
+          </div>
+
           <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm">
             <div className="flex items-center justify-between border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
               <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Informations Personnelles</h2>

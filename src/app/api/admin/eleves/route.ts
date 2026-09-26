@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { trackEventSafe } from "@/lib/analytics";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
+import { attachHasImage } from "@/lib/user-images";
 
 export async function GET() {
   try {
@@ -115,6 +116,8 @@ export async function GET() {
       return { id: e.id, nom: e.nom, prenom: e.prenom, codeEleve: e.codeEleve, telephone: e.telephone, niveau: e.niveau, classe: e.classe, filiere: e.filiere, groupes };
     });
 
+    const withAvatars = await attachHasImage(result);
+
     void trackEventSafe({
       userId: (session.user as any).id,
       centerId,
@@ -124,7 +127,7 @@ export async function GET() {
       metadata: { count: result.length },
     });
 
-    return NextResponse.json(result);
+    return NextResponse.json(withAvatars);
   } catch (error) {
     return NextResponse.json({ error: "Erreur interne" }, { status: 500 });
   }

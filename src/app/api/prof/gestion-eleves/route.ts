@@ -3,6 +3,7 @@ import { requireProfCanManageEleves } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { generateRandomCode } from "@/lib/utils";
+import { getImageIdSet } from "@/lib/user-images";
 import { sendPushToUsers } from "@/lib/push";
 import bcrypt from "bcryptjs";
 
@@ -50,7 +51,19 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json(groupes);
+    const imageIds = await getImageIdSet(
+      groupes.flatMap((g) => (g.inscriptions ?? []).map((ins) => ins.eleve?.id).filter(Boolean) as string[])
+    );
+
+    const groupesWithAvatars = groupes.map((g) => ({
+      ...g,
+      inscriptions: (g.inscriptions ?? []).map((ins) => ({
+        ...ins,
+        eleve: ins.eleve ? { ...ins.eleve, hasImage: imageIds.has(ins.eleve.id) } : ins.eleve,
+      })),
+    }));
+
+    return NextResponse.json(groupesWithAvatars);
   } catch (error) {
     logger.error("Erreur lors de la récupération des élèves par le prof", { error });
     return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });

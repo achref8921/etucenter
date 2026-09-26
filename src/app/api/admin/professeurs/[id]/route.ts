@@ -316,8 +316,10 @@ export async function GET(
       professeurId: id,
     });
 
+    const { image: profImage, ...professeurWithoutImage } = professeur;
+
     return NextResponse.json({
-      professeur,
+      professeur: { ...professeurWithoutImage, hasImage: profImage !== null },
       groupes,
       seances: seancesWithStats,
       finance: {

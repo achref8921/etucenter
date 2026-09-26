@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Power, PowerOff, Eye, X, Trash2, Users, UserPlus, Search } from "lucide-react";
 import ConfirmDelete from "@/components/confirm-delete";
+import UserAvatar from "@/components/user-avatar";
 
 interface CenterData {
   id: string;
@@ -25,6 +26,7 @@ interface AdminData {
   telephone: string | null;
   actif: boolean;
   createdAt: string;
+  hasImage?: boolean;
 }
 
 export default function SuperAdminCentersPage() {
@@ -498,9 +500,7 @@ export default function SuperAdminCentersPage() {
                 {admins.map((admin) => (
                   <div key={admin.id} className="flex items-center justify-between rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 dark:border-[#2a2d35] dark:bg-[#1e2128]">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-neutral-100 dark:bg-[#1e2128] text-[13px] font-bold text-neutral-500">
-                        {admin.prenom[0]}{admin.nom[0]}
-                      </div>
+                      <UserAvatar userId={admin.id} nom={admin.nom} prenom={admin.prenom} hasImage={admin.hasImage} size="xs" className="rounded-lg" />
                       <div>
                         <p className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">{admin.prenom} {admin.nom}</p>
                         <p className="text-xs text-neutral-500 dark:text-neutral-400">{admin.email}</p>

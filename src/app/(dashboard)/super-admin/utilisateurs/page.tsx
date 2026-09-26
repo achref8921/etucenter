@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Power, PowerOff, RotateCcw, Search, Loader2, X, KeyRound, Database, History, Eraser, Pencil } from "lucide-react";
 import PasswordInput from "@/components/password-input";
 import ConfirmDelete from "@/components/confirm-delete";
+import UserAvatar from "@/components/user-avatar";
 
 interface UtilisateurData {
   id: string;
@@ -22,6 +23,7 @@ interface UtilisateurData {
   filiere: string | null;
   createdAt: string;
   center: { id: string; name: string; active: boolean };
+  hasImage?: boolean;
 }
 
 interface CenterOption {
@@ -380,9 +382,7 @@ export default function SuperAdminUtilisateursPage() {
               <tr key={u.id} className="hover:bg-neutral-100/50 transition-colors dark:hover:bg-[#1e2128]">
                 <td className="px-4 py-2.5">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-neutral-100 dark:bg-[#1e2128] text-xs font-bold text-neutral-500">
-                      {u.prenom[0]}{u.nom[0]}
-                    </div>
+                    <UserAvatar userId={u.id} nom={u.nom} prenom={u.prenom} hasImage={u.hasImage} size="xs" className="rounded-lg" />
                     <div>
                       <p className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">{u.prenom} {u.nom}</p>
                       <p className="text-xs text-neutral-500 dark:text-neutral-400">{u.email}</p>

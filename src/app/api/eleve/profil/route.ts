@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireActiveCenter, ELEVE_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
-import { sanitizeImageValue } from "@/lib/utils";
+import { isValidImageDataUrl, sanitizeImageValue } from "@/lib/utils";
 
 export async function GET() {
   try {
@@ -53,7 +53,12 @@ export async function PUT(request: NextRequest) {
     if (nom !== undefined) data.nom = nom;
     if (prenom !== undefined) data.prenom = prenom;
     if (telephone !== undefined) data.telephone = telephone;
-    if (image !== undefined) data.image = sanitizeImageValue(image);
+    if (image !== undefined) {
+      if (image !== null && image !== "" && !isValidImageDataUrl(image) && !/^https?:\/\//i.test(String(image).trim())) {
+        return NextResponse.json({ error: "Image invalide" }, { status: 400 });
+      }
+      data.image = sanitizeImageValue(image);
+    }
 
     const validNiveaux = ["primaire", "college", "lycee"];
     const validFilieres = ["informatique", "maths", "economie", "lettres", "sciences"];

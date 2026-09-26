@@ -5,7 +5,6 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
-  User,
   Loader2,
   Wallet,
   FileText,
@@ -15,6 +14,7 @@ import {
 } from "lucide-react";
 import { formatDate, formatCurrency, formatTime } from "@/lib/utils";
 import { MonthSelector } from "@/components/month-selector";
+import UserAvatar from "@/components/user-avatar";
 
 interface ProfesseurData {
   professeur: {
@@ -23,6 +23,8 @@ interface ProfesseurData {
     prenom: string;
     email: string;
     telephone: string | null;
+    updatedAt?: string;
+    hasImage?: boolean;
   };
   groupes: {
     id: string;
@@ -158,9 +160,7 @@ export default function AdminProfesseurDetailPage() {
 
       <div className="rounded-lg border border-neutral-200 bg-white p-6 dark:border-[#2a2d35] dark:bg-[#181b22]">
         <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
-            <User className="h-7 w-7 text-green-600 dark:text-green-400" />
-          </div>
+          <UserAvatar userId={p.id} nom={p.nom} prenom={p.prenom} hasImage={p.hasImage} version={p.updatedAt} size="md" />
           <div className="space-y-1">
             <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
               {p.prenom} {p.nom}

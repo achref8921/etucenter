@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, User, Loader2, Wallet, ArrowUpRight, CheckCircle2, AlertCircle, ClipboardCheck, Pencil, X } from "lucide-react";
+import { ArrowLeft, Loader2, Wallet, ArrowUpRight, CheckCircle2, AlertCircle, ClipboardCheck, Pencil, X } from "lucide-react";
 import { formatDate, formatDateTime, formatCurrency } from "@/lib/utils";
+import UserAvatar from "@/components/user-avatar";
 
 const classesByNiveau: Record<string, string[]> = {
   primaire: ["1ère année", "2ème année", "3ème année", "4ème année", "5ème année", "6ème année"],
@@ -38,6 +39,8 @@ interface EleveData {
     actif: boolean;
     emailVerified: string | null;
     createdAt: string;
+    updatedAt: string;
+    hasImage?: boolean;
   };
   inscriptions: {
     id: string;
@@ -242,9 +245,7 @@ export default function AdminEleveDetailPage() {
 
       <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6 ">
         <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
-            <User className="h-7 w-7 text-blue-600 dark:text-blue-400" />
-          </div>
+          <UserAvatar userId={e.id} nom={e.nom} prenom={e.prenom} hasImage={e.hasImage} version={e.updatedAt} size="md" />
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-3">
               <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">

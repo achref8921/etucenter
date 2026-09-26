@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { utilisateurSchema } from "@/lib/validations";
 import { generateRandomCode, generateProfCode } from "@/lib/utils";
+import { attachHasImage } from "@/lib/user-images";
 
 export async function GET() {
   try {
@@ -29,7 +30,6 @@ export async function GET() {
         peutGererEleves: true,
         codeEleve: true,
         codeProf: true,
-        image: true,
         niveau: true,
         classe: true,
         filiere: true,
@@ -40,9 +40,11 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
 
+    const withAvatars = await attachHasImage(utilisateurs);
+
     logger.info("Liste des utilisateurs récupérée", { adminId: (session.user as any).id, count: utilisateurs.length });
 
-    return NextResponse.json(utilisateurs);
+    return NextResponse.json(withAvatars);
   } catch (error) {
     logger.error("Erreur lors de la récupération des utilisateurs", { error });
     return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });

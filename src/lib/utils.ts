@@ -85,13 +85,27 @@ export function generateInitialPassword(): string {
   return result;
 }
 
+export const MAX_IMAGE_DATA_URL_LENGTH = 200_000;
+export const MAX_IMAGE_URL_LENGTH = 2_000;
+
 export function sanitizeImageValue(value: string | null | undefined): string | null {
   if (!value) return null;
+  if (typeof value !== "string") return null;
   const trimmed = value.trim();
   if (trimmed.length === 0) return null;
-  if (trimmed.startsWith("https://") || trimmed.startsWith("http://")) return trimmed;
+  if (trimmed.length > MAX_IMAGE_DATA_URL_LENGTH) return null;
+  if (trimmed.startsWith("https://") || trimmed.startsWith("http://")) {
+    return trimmed.length <= MAX_IMAGE_URL_LENGTH ? trimmed : null;
+  }
   if (/^data:image\/(png|jpe?g|webp|gif|avif);base64,[A-Za-z0-9+/=]+$/i.test(trimmed)) {
     return trimmed;
   }
   return null;
+}
+
+export function isValidImageDataUrl(value: string | null | undefined): boolean {
+  if (!value || typeof value !== "string") return false;
+  const trimmed = value.trim();
+  if (trimmed.length > MAX_IMAGE_DATA_URL_LENGTH) return false;
+  return /^data:image\/(png|jpe?g|webp|gif|avif);base64,[A-Za-z0-9+/=]+$/i.test(trimmed);
 }

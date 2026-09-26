@@ -6,6 +6,7 @@ import { User, Loader2, Save, Edit3, Trash2, Phone } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { formatDate } from "@/lib/utils";
 import ConfirmPermanentDelete from "@/components/confirm-permanent-delete";
+import AvatarUpload from "@/components/avatar-upload";
 
 interface Profil {
   id: string;
@@ -231,6 +232,13 @@ export default function EleveProfilPage() {
 
       {profil && (
         <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
+          <div className="mb-6 border-b border-neutral-200 pb-6 dark:border-[#2a2d35]">
+            <AvatarUpload
+              currentImage={profil.image}
+              endpoint="/api/eleve/profil"
+              onUpdated={(image) => setProfil((p) => (p ? { ...p, image } : p))}
+            />
+          </div>
           {editing ? (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

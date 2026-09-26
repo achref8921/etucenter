@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { requireActiveCenter } from "@/lib/auth-helpers";
+import { isValidImageDataUrl, sanitizeImageValue } from "@/lib/utils";
 
 export async function GET() {
   try {
@@ -17,6 +18,7 @@ export async function GET() {
         email: true,
         telephone: true,
         role: true,
+        image: true,
         dateNaissance: true,
         createdAt: true,
       },
@@ -38,7 +40,7 @@ export async function PUT(request: NextRequest) {
     if (error) return error;
 
     const body = await request.json();
-    const { nom, prenom, telephone, email, dateNaissance, motDePasse, ancienMotDePasse } = body;
+    const { nom, prenom, telephone, email, dateNaissance, image, motDePasse, ancienMotDePasse } = body;
 
     const userId = (session.user as any).id;
     const data: Record<string, any> = {};
@@ -47,6 +49,12 @@ export async function PUT(request: NextRequest) {
     if (prenom !== undefined) data.prenom = prenom;
     if (telephone !== undefined) data.telephone = telephone || null;
     if (dateNaissance !== undefined) data.dateNaissance = dateNaissance ? new Date(dateNaissance) : null;
+    if (image !== undefined) {
+      if (image !== null && image !== "" && !isValidImageDataUrl(image) && !/^https?:\/\//i.test(String(image).trim())) {
+        return NextResponse.json({ error: "Image invalide" }, { status: 400 });
+      }
+      data.image = sanitizeImageValue(image);
+    }
 
     if (email !== undefined && email !== (session.user as any).email) {
       const existing = await prisma.utilisateur.findFirst({
@@ -98,6 +106,7 @@ export async function PUT(request: NextRequest) {
         email: true,
         telephone: true,
         role: true,
+        image: true,
         dateNaissance: true,
         createdAt: true,
       },

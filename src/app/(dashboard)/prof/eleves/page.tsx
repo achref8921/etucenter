@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
+import UserAvatar from "@/components/user-avatar";
 import {
   Users,
   Search,
@@ -51,6 +52,7 @@ interface StudentData {
   totalDue: number;
   totalPaid: number;
   impayeTotal: number;
+  hasImage?: boolean;
 }
 
 interface SessionHistory {
@@ -255,16 +257,18 @@ export default function ProfElevesPage() {
                   className="flex w-full items-center justify-between p-4 hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] transition-colors text-left"
                 >
                   <div className="flex items-center gap-4">
-                    <div
-                      className={`flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold text-white ${
+                    <UserAvatar
+                      userId={student.id}
+                      nom={student.nom}
+                      prenom={student.prenom}
+                      hasImage={student.hasImage}
+                      size="sm"
+                      className={
                         student.impayeTotal > 0
-                          ? "bg-gradient-to-br from-red-400 to-red-500"
-                          : "bg-gradient-to-br from-emerald-400 to-emerald-500"
-                      }`}
-                    >
-                      {student.prenom[0]}
-                      {student.nom[0]}
-                    </div>
+                          ? "ring-2 ring-red-400 dark:ring-red-500"
+                          : "ring-2 ring-emerald-400 dark:ring-emerald-500"
+                      }
+                    />
                     <div>
                       <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
                         {student.prenom} {student.nom}

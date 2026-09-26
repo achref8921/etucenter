@@ -5,6 +5,7 @@ import { Plus, Loader2, Users, X, Trash2, GraduationCap, Search, UserPlus, UserX
 import { useToast } from "@/components/ui/toast";
 import { SkeletonPage } from "@/components/ui/skeleton";
 import PasswordInput from "@/components/password-input";
+import UserAvatar from "@/components/user-avatar";
 
 interface Credentials {
   email: string;
@@ -22,6 +23,7 @@ interface Eleve {
   niveau: string | null;
   classe: string | null;
   filiere: string | null;
+  hasImage?: boolean;
 }
 
 interface Inscription {
@@ -319,9 +321,7 @@ export default function ProfGestionElevesPage() {
                     {g.inscriptions.map((ins) => (
                       <li key={ins.id} className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
                         <div className="flex min-w-0 items-center gap-3">
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-400 to-indigo-500 text-xs font-bold text-white">
-                            {ins.eleve.prenom[0]}{ins.eleve.nom[0]}
-                          </div>
+                          <UserAvatar userId={ins.eleve.id} nom={ins.eleve.nom} prenom={ins.eleve.prenom} hasImage={ins.eleve.hasImage} size="xs" />
                           <div className="min-w-0">
                             <p className="truncate text-sm font-medium text-neutral-900 dark:text-neutral-100">
                               {ins.eleve.prenom} {ins.eleve.nom}

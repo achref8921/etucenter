@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireActiveCenter, PROF_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
+import { getImageIdSet } from "@/lib/user-images";
 
 export async function GET(
   _request: NextRequest,
@@ -45,7 +46,18 @@ export async function GET(
       return NextResponse.json({ error: "Groupe non trouvé" }, { status: 404 });
     }
 
-    return NextResponse.json(groupe);
+    const eleveIds = (groupe.inscriptions ?? [])
+      .map((ins) => ins.eleve?.id)
+      .filter(Boolean) as string[];
+    const imageIds = await getImageIdSet(eleveIds);
+
+    return NextResponse.json({
+      ...groupe,
+      inscriptions: (groupe.inscriptions ?? []).map((ins) => ({
+        ...ins,
+        eleve: ins.eleve ? { ...ins.eleve, hasImage: imageIds.has(ins.eleve.id) } : ins.eleve,
+      })),
+    });
   } catch (error) {
     return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });
   }
