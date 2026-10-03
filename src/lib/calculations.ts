@@ -41,9 +41,15 @@ export async function calculateUnpaid(eleveId: string, groupeId: string): Promis
   return Math.max(0, totalDue - totalPaid);
 }
 
-export async function calculateStudentStats(eleveId: string) {
+export async function calculateStudentStats(eleveId: string, groupeIdsFilter?: string[]) {
   const inscriptions = await prisma.inscription.findMany({
-    where: { eleveId, statut: "actif" },
+    where: {
+      eleveId,
+      statut: "actif",
+      ...(groupeIdsFilter && groupeIdsFilter.length > 0
+        ? { groupeId: { in: groupeIdsFilter } }
+        : {}),
+    },
     select: {
       groupeId: true,
       groupe: { select: { nom: true, prixParSeance: true } },

@@ -505,9 +505,14 @@ export default function ProfGroupesPage() {
                   groupe.inscriptions.map((ins) => (
                     <div key={ins.id} className="flex items-center gap-3 py-2.5">
                       <UserAvatar userId={ins.eleve.id} nom={ins.eleve.nom} prenom={ins.eleve.prenom} hasImage={ins.eleve.hasImage} size="xs" />
-                      <div>
-                        <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">{ins.eleve.prenom} {ins.eleve.nom}</p>
-                        <p className="text-[12px] text-neutral-500 dark:text-neutral-400">{ins.eleve.email}</p>
+                      <div className="min-w-0 flex-1">
+                        <Link
+                          href={`/prof/eleves/${ins.eleve.id}`}
+                          className="block truncate text-sm font-medium text-neutral-900 hover:text-blue-600 hover:underline dark:text-neutral-100 dark:hover:text-blue-400"
+                        >
+                          {ins.eleve.prenom} {ins.eleve.nom}
+                        </Link>
+                        <p className="truncate text-[12px] text-neutral-500 dark:text-neutral-400">{ins.eleve.email}</p>
                       </div>
                     </div>
                   ))

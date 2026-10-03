@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import UserAvatar from "@/components/user-avatar";
 import {
   Users,
@@ -252,11 +253,11 @@ export default function ProfElevesPage() {
                 className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] overflow-hidden transition-all"
               >
                 {/* Main Row */}
-                <button
-                  onClick={() => toggleExpand(student)}
-                  className="flex w-full items-center justify-between p-4 hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] transition-colors text-left"
-                >
-                  <div className="flex items-center gap-4">
+                <div className="flex items-center justify-between gap-3 p-4 hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] transition-colors">
+                  <button
+                    onClick={() => toggleExpand(student)}
+                    className="flex min-w-0 flex-1 items-center gap-4 text-left"
+                  >
                     <UserAvatar
                       userId={student.id}
                       nom={student.nom}
@@ -269,8 +270,8 @@ export default function ProfElevesPage() {
                           : "ring-2 ring-emerald-400 dark:ring-emerald-500"
                       }
                     />
-                    <div>
-                      <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">
                         {student.prenom} {student.nom}
                       </p>
                       <div className="flex items-center gap-3 mt-0.5">
@@ -287,11 +288,11 @@ export default function ProfElevesPage() {
                         </span>
                       </div>
                     </div>
-                  </div>
+                  </button>
 
-                  <div className="flex items-center gap-6">
+                  <div className="flex shrink-0 items-center gap-4 sm:gap-6">
                     {/* Presence badge */}
-                    <div className="hidden sm:flex items-center gap-1.5">
+                    <div className="hidden items-center gap-1.5 sm:flex">
                       <div
                         className={`h-2 w-2 rounded-full ${
                           avgPresence >= 80
@@ -307,7 +308,7 @@ export default function ProfElevesPage() {
                     </div>
 
                     {/* Payment status */}
-                    <div className="text-right min-w-[120px]">
+                    <div className="hidden text-right min-w-[120px] sm:block">
                       {student.impayeTotal > 0 ? (
                         <>
                           <p className="text-sm font-bold text-red-600 dark:text-red-400">
@@ -325,13 +326,29 @@ export default function ProfElevesPage() {
                       )}
                     </div>
 
-                    {isExpanded ? (
-                      <ChevronUp className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
-                    )}
+                    <Link
+                      href={`/prof/eleves/${student.id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 px-3 py-1.5 text-xs font-medium text-neutral-700 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:border-[#2a2d35] dark:text-neutral-300 dark:hover:border-blue-700 dark:hover:bg-blue-950/40 dark:hover:text-blue-300"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                      Profil
+                    </Link>
+
+                    <button
+                      type="button"
+                      onClick={() => toggleExpand(student)}
+                      aria-label={isExpanded ? "Réduire" : "Détails"}
+                      className="rounded p-1 hover:bg-neutral-200/60 dark:hover:bg-[#2a2d35]"
+                    >
+                      {isExpanded ? (
+                        <ChevronUp className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
+                      )}
+                    </button>
                   </div>
-                </button>
+                </div>
 
                 {/* Expanded Details */}
                 {isExpanded && (
