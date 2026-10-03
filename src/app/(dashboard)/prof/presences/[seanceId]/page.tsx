@@ -226,8 +226,24 @@ export default function AttendanceRecordingPage() {
                           : "hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]"
                     }`}
                   >
-                    <td className="px-4 py-2.5 font-medium">{presence.eleve.nom}</td>
-                    <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{presence.eleve.prenom}</td>
+                    <td className="px-4 py-2.5 font-medium">
+                      <Link
+                        href={`/prof/eleves/${presence.eleveId}`}
+                        className="hover:text-blue-600 hover:underline dark:hover:text-blue-400"
+                        title="Ouvrir le profil de l'élève"
+                      >
+                        {presence.eleve.nom}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                      <Link
+                        href={`/prof/eleves/${presence.eleveId}`}
+                        className="hover:text-blue-600 hover:underline dark:hover:text-blue-400"
+                        title="Ouvrir le profil de l'élève"
+                      >
+                        {presence.eleve.prenom}
+                      </Link>
+                    </td>
                     <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{presence.eleve.email}</td>
                     <td className="px-4 py-2.5 text-center">
                       <button
@@ -266,9 +282,15 @@ export default function AttendanceRecordingPage() {
               <div key={presence.eleveId} className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-4">
                 <div className="mb-3 flex items-center justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="truncate text-[13px] font-bold text-neutral-900 dark:text-neutral-100">
-                      {presence.eleve.prenom} {presence.eleve.nom}
-                    </p>
+<p className="truncate text-[13px] font-bold text-neutral-900 dark:text-neutral-100">
+                          <Link
+                            href={`/prof/eleves/${presence.eleveId}`}
+                            className="block hover:text-blue-600 hover:underline dark:hover:text-blue-400"
+                            title="Ouvrir le profil de l'élève"
+                          >
+                            {presence.eleve.prenom} {presence.eleve.nom}
+                          </Link>
+                        </p>
                     <p className="truncate text-[12px] text-neutral-500 dark:text-neutral-400">{presence.eleve.email}</p>
                   </div>
                   <span

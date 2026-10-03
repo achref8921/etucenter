@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { Plus, Loader2, Users, X, Trash2, GraduationCap, Search, UserPlus, UserX, KeyRound, Copy, Check } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
 import { SkeletonPage } from "@/components/ui/skeleton";
@@ -323,9 +324,13 @@ export default function ProfGestionElevesPage() {
                         <div className="flex min-w-0 items-center gap-3">
                           <UserAvatar userId={ins.eleve.id} nom={ins.eleve.nom} prenom={ins.eleve.prenom} hasImage={ins.eleve.hasImage} size="xs" />
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                            <Link
+                              href={`/prof/eleves/${ins.eleve.id}`}
+                              className="block truncate text-sm font-medium text-neutral-900 hover:text-blue-600 hover:underline dark:text-neutral-100 dark:hover:text-blue-400"
+                              title="Ouvrir le profil de l'élève"
+                            >
                               {ins.eleve.prenom} {ins.eleve.nom}
-                            </p>
+                            </Link>
                             <p className="truncate text-xs text-neutral-400 dark:text-neutral-500">
                               {ins.eleve.codeEleve && <span className="font-mono">#{ins.eleve.codeEleve}</span>}
                               {ins.eleve.classe ? (
