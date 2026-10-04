@@ -1,5 +1,14 @@
 import { DefaultSession } from "next-auth";
 
+export interface LinkedAccount {
+  id: string;
+  role: string;
+  nom: string;
+  prenom: string;
+  email: string;
+  centerId: string;
+}
+
 declare module "next-auth" {
   interface Session {
     user: {
@@ -10,6 +19,7 @@ declare module "next-auth" {
       centerId: string;
       frozen?: boolean;
     } & DefaultSession["user"];
+    linked?: LinkedAccount[];
   }
 
   interface User {
@@ -27,5 +37,6 @@ declare module "next-auth/jwt" {
     nom?: string;
     prenom?: string;
     centerId?: string;
+    linked?: LinkedAccount[];
   }
 }

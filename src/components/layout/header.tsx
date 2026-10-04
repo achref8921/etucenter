@@ -3,6 +3,7 @@
 import { signOut, useSession } from "next-auth/react";
 import { LogOut, Menu, Sun, Moon } from "lucide-react";
 import NotificationBellDropdown from "@/components/notification-bell-dropdown";
+import AccountSwitcher from "@/components/account-switcher";
 import { useTheme } from "@/components/theme-provider";
 
 const roleLabels: Record<string, string> = {
@@ -67,6 +68,8 @@ export default function Header({ centerLogo, onMenuToggle }: HeaderProps) {
             </span>
           </div>
         </div>
+
+        <AccountSwitcher />
 
         <button
           onClick={() => signOut({ callbackUrl: "/login" })}

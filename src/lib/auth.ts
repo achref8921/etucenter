@@ -268,6 +268,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         (session.user as any).frozen = frozen;
+        session.linked = Array.isArray(token.linked) ? token.linked : [];
       }
       return session;
     },
