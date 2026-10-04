@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { signOut, useSession } from "next-auth/react";
 import { LogOut, Menu, Sun, Moon } from "lucide-react";
@@ -69,7 +69,7 @@ export default function Header({ centerLogo, onMenuToggle }: HeaderProps) {
           </div>
         </div>
 
-        <AccountSwitcher />
+{/* <AccountSwitcher /> */}
 
         <button
           onClick={() => signOut({ callbackUrl: "/login" })}
