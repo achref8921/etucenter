@@ -149,16 +149,18 @@ export default function AccountSwitcher() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-neutral-200 bg-neutral-100 text-[11px] font-semibold uppercase text-neutral-500 shadow-sm transition-colors hover:bg-neutral-50 dark:border-[#2a2d35] dark:bg-[#1a1d23] dark:text-neutral-400 dark:hover:bg-[#141823]"
+        className="flex items-center gap-1 rounded-full border border-neutral-200 bg-white pl-0.5 pr-1.5 py-0.5 text-[11px] font-medium text-neutral-700 shadow-sm transition-colors hover:bg-neutral-50 dark:border-[#2a2d35] dark:bg-[#0f1114] dark:text-neutral-200 dark:hover:bg-[#141823]"
         title="Commutateur de comptes"
       >
-        {user?.image ? (
-          <img src={user.image} alt={user?.name || "Profil"} className="h-full w-full object-cover" />
-        ) : (
-          `${user?.prenom?.[0] || ""}${user?.nom?.[0] || ""}` || "U"
-        )}
+        <div className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border border-neutral-200 bg-neutral-100 text-[10px] font-semibold uppercase text-neutral-500 dark:border-[#2a2d35] dark:bg-[#1a1d23] dark:text-neutral-400">
+          {user?.image ? (
+            <img src={user.image} alt={user?.name || "Profil"} className="h-full w-full object-cover" />
+          ) : (
+            `${user?.prenom?.[0] || ""}${user?.nom?.[0] || ""}` || "U"
+          )}
+        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400"><polyline points="6 9 12 15 18 9"></polyline></svg>
       </button>
-
       {open && (
         <div className="absolute right-0 z-50 mt-2 w-80 origin-top-right rounded-xl border border-neutral-200 bg-white shadow-lg focus:outline-none dark:border-[#2a2d35] dark:bg-[#0f1114]">
           <div className="border-b border-neutral-200 px-4 py-3 dark:border-[#2a2d35]">
