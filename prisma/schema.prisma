@@ -266,6 +266,9 @@ model Groupe {
   seances      Seance[]
   paiements    Paiement[]
 
+  teacherTransactions TeacherTransaction[] @relation("TeacherTransactionGroupe")
+  teacherCenterDebts  TeacherCenterDebt[]  @relation("TeacherCenterDebtGroupe")
+
   @@index([centerId, profId])
   @@index([centerId])
   @@index([matiereId])
@@ -482,6 +485,7 @@ model TeacherTransaction {
   collectionPct  Decimal? @map("collection_pct") @db.Decimal(5, 2)
   studentId      String?  @map("student_id") @db.Uuid
   seanceId       String?  @map("seance_id") @db.Uuid
+  groupeId       String?  @map("groupe_id") @db.Uuid
   direction      String?  @db.VarChar(20)
   linkedDebtId   String?  @map("linked_debt_id") @db.Uuid
 
@@ -489,6 +493,7 @@ model TeacherTransaction {
   teacher    Utilisateur          @relation("TeacherTransactions", fields: [teacherId], references: [id], onDelete: Cascade)
   student    Utilisateur?         @relation("TeacherTransactionStudent", fields: [studentId], references: [id], onDelete: SetNull)
   seance     Seance?              @relation(fields: [seanceId], references: [id], onDelete: SetNull)
+  groupe     Groupe?              @relation("TeacherTransactionGroupe", fields: [groupeId], references: [id], onDelete: SetNull)
   reversalOf TeacherTransaction?  @relation("TransactionReversal", fields: [reversalOfId], references: [id], onDelete: SetNull)
   reversals  TeacherTransaction[] @relation("TransactionReversal")
   debt       TeacherCenterDebt?   @relation("ReverseDebtTransactions", fields: [linkedDebtId], references: [id], onDelete: SetNull)
@@ -499,6 +504,7 @@ model TeacherTransaction {
   @@index([centerId, type])
   @@index([mode, status])
   @@index([seanceId])
+  @@index([groupeId])
   @@map("teacher_transactions")
 }
 
@@ -508,6 +514,7 @@ model TeacherCenterDebt {
   teacherId      String     @map("teacher_id") @db.Uuid
   studentId      String?    @map("student_id") @db.Uuid
   seanceId       String?    @map("seance_id") @db.Uuid
+  groupeId       String?    @map("groupe_id") @db.Uuid
   amountDue      Decimal    @map("amount_due") @db.Decimal(10, 2)
   amountPaid     Decimal    @default(0) @map("amount_paid") @db.Decimal(10, 2)
   balance        Decimal    @db.Decimal(10, 2)
@@ -523,11 +530,13 @@ model TeacherCenterDebt {
   teacher            Utilisateur          @relation("TeacherCenterDebtTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
   student            Utilisateur?         @relation("TeacherCenterDebtStudent", fields: [studentId], references: [id], onDelete: SetNull)
   seance             Seance?              @relation(fields: [seanceId], references: [id], onDelete: SetNull)
+  groupe             Groupe?              @relation("TeacherCenterDebtGroupe", fields: [groupeId], references: [id], onDelete: SetNull)
   linkedTransactions TeacherTransaction[] @relation("ReverseDebtTransactions")
 
   @@index([centerId, status])
   @@index([teacherId, status])
   @@index([teacherId, status, settledAt])
+  @@index([groupeId])
   @@map("teacher_center_debts")
 }
 

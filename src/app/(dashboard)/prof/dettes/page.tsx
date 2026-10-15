@@ -15,7 +15,8 @@ interface DebtRow {
   createdAt: string;
   settledAt: string | null;
   student: { id: string; nom: string; prenom: string };
-  seance: { id: string; date: string; statut: string; groupe: { id: string; nom: string } };
+  groupe?: { id: string; nom: string } | null;
+  seance?: { id: string; date: string; statut: string; groupe: { id: string; nom: string } } | null;
   linkedTransactions?: { id: string; type: string; status: string }[];
 }
 
@@ -288,7 +289,7 @@ export default function ProfDettesPage() {
               <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
                 <tr>
                   <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Élève</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Séance</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
                   <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Part centre</th>
                   <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Reste</th>
                   <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Statut</th>
@@ -309,7 +310,10 @@ export default function ProfDettesPage() {
                         {d.student.prenom} {d.student.nom}
                       </td>
                       <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
-                        {formatDate(d.seance.date)} · {d.seance.groupe.nom}
+                        <div>{d.groupe?.nom ?? d.seance?.groupe.nom ?? "—"}</div>
+                        <div className="text-[12px] text-neutral-400 dark:text-neutral-500">
+                          {formatDate(d.seance?.date ?? d.createdAt)}
+                        </div>
                       </td>
                       <td className="px-4 py-2.5 tabular-nums text-neutral-900 dark:text-neutral-100">
                         {formatCurrency(Number(d.amountDue))}

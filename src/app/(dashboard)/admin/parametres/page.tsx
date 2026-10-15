@@ -220,11 +220,13 @@ export default function AdminParametresPage() {
           <span className="flex items-center gap-1.5"><HandCoins className="h-4 w-4" /> Collecte inverse</span>
         </h2>
         <p className="mb-4 text-sm text-neutral-500 dark:text-neutral-400">
-          Activez la collecte inverse pour chaque professeur depuis la page « Utilisateurs ». La part du centre définie ci-dessous leur est due : elle est tracée dans les « Dettes Centre » et comptabilisée au moment du règlement.
+          Activez la collecte inverse pour chaque professeur depuis la page « Utilisateurs ». La part du centre retenue lors d'un encaissement est celle définie pour chaque professeur dans « Bénéfices » (taux par prof). La valeur ci-dessous n'est plus utilisée.
         </p>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <div className="flex items-center gap-3">
-            <label className="text-sm text-neutral-600 dark:text-neutral-400">Part du centre (%)</label>
+            <label className="text-sm text-neutral-600 dark:text-neutral-400">
+              Part du centre (%) — obsolète
+            </label>
             <input
               type="number"
               min="0"

@@ -6,11 +6,10 @@ import { ArrowLeft, Banknote, Loader2, RotateCcw } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { SkeletonPage } from "@/components/ui/skeleton";
 
-interface SeanceRow {
+interface GroupeRow {
   id: string;
-  date: string;
+  nom: string;
   statut: string;
-  groupe: { id: string; nom: string };
 }
 
 interface EleveRow {
@@ -29,24 +28,18 @@ interface CollectionRow {
   collectionPct: number;
   date: string;
   student: { id: string; nom: string; prenom: string };
-  seance: { date: string; groupe: { nom: string } };
+  groupe?: { id: string; nom: string } | null;
+  seance?: { date: string; groupe: { nom: string } } | null;
   debt: { id: string; status: string; balance: number; amountDue: number };
 }
 
-const STATUT_LABEL: Record<string, string> = {
-  planifiee: "Planifiée",
-  en_cours: "En cours",
-  terminee: "Terminée",
-  annulee: "Annulée",
-};
-
 export default function ProfEncaisserPage() {
-  const [config, setConfig] = useState<{ teacherReverseEnabled: boolean; teacherReversePct: number } | null>(null);
-  const [seances, setSeances] = useState<SeanceRow[]>([]);
+  const [config, setConfig] = useState<{ teacherReverseEnabled: boolean; teacherReversePct: number; hasProfTaux?: boolean } | null>(null);
+  const [groupes, setGroupes] = useState<GroupeRow[]>([]);
   const [eleves, setEleves] = useState<EleveRow[]>([]);
   const [collections, setCollections] = useState<CollectionRow[]>([]);
 
-  const [seanceId, setSeanceId] = useState("");
+  const [groupeId, setGroupeId] = useState("");
   const [studentId, setStudentId] = useState("");
   const [amount, setAmount] = useState("");
   const [notes, setNotes] = useState("");
@@ -59,26 +52,26 @@ export default function ProfEncaisserPage() {
     try {
       setLoading(true);
       setError(null);
-      const [configRes, seancesRes, elevesRes, colsRes] = await Promise.all([
+      const [configRes, groupesRes, elevesRes, colsRes] = await Promise.all([
         fetch("/api/prof/reverse/config"),
-        fetch("/api/prof/seances"),
+        fetch("/api/prof/groupes"),
         fetch("/api/prof/eleves"),
         fetch("/api/prof/reverse/collections"),
       ]);
 
-      if (!configRes.ok || !seancesRes.ok || !elevesRes.ok || !colsRes.ok) {
+      if (!configRes.ok || !groupesRes.ok || !elevesRes.ok || !colsRes.ok) {
         throw new Error("Erreur lors du chargement des données");
       }
 
-      const [cfg, sces, elevs, cols] = await Promise.all([
+      const [cfg, grps, elevs, cols] = await Promise.all([
         configRes.json(),
-        seancesRes.json(),
+        groupesRes.json(),
         elevesRes.json(),
         colsRes.json(),
       ]);
 
       setConfig(cfg);
-      setSeances(Array.isArray(sces) ? sces : []);
+      setGroupes(Array.isArray(grps) ? grps : []);
       setEleves(Array.isArray(elevs) ? elevs : []);
       setCollections(cols.collections ?? []);
     } catch (err) {
@@ -92,18 +85,23 @@ export default function ProfEncaisserPage() {
     fetchAll();
   }, [fetchAll]);
 
-  const selectedSeance = useMemo(
-    () => seances.find((s) => s.id === seanceId),
-    [seances, seanceId]
+  const eligibleGroupes = useMemo(
+    () => groupes.filter((g) => g.statut !== "archive"),
+    [groupes]
+  );
+
+  const selectedGroupe = useMemo(
+    () => eligibleGroupes.find((g) => g.id === groupeId),
+    [eligibleGroupes, groupeId]
   );
 
   const eligibleStudents = useMemo(() => {
-    if (!selectedSeance) return [];
-    return eleves.filter((e) => e.groupes.some((g) => g.id === selectedSeance.groupe.id));
-  }, [eleves, selectedSeance]);
+    if (!selectedGroupe) return [];
+    return eleves.filter((e) => e.groupes.some((g) => g.id === selectedGroupe.id));
+  }, [eleves, selectedGroupe]);
 
   useEffect(() => {
-    if (!selectedSeance) {
+    if (!selectedGroupe) {
       setStudentId("");
       return;
     }
@@ -112,18 +110,16 @@ export default function ProfEncaisserPage() {
     } else if (eligibleStudents.length === 0) {
       setStudentId("");
     }
-  }, [selectedSeance, eligibleStudents, studentId]);
+  }, [selectedGroupe, eligibleStudents, studentId]);
 
   const amountNum = Math.max(0, Number(amount) || 0);
   const pct = config?.teacherReversePct ?? 20;
   const centerFee = Math.round((amountNum * pct) / 100 * 100) / 100;
   const netAmount = Math.round((amountNum - centerFee) * 100) / 100;
 
-  const eligibleSeances = seances.filter((s) => s.statut !== "annulee");
-
   const handleSubmit = async () => {
-    if (!seanceId || !studentId) {
-      setError("Sélectionnez une séance et un élève");
+    if (!groupeId || !studentId) {
+      setError("Sélectionnez un groupe et un élève");
       return;
     }
     if (amountNum <= 0) {
@@ -141,7 +137,7 @@ export default function ProfEncaisserPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           studentId,
-          seanceId,
+          groupeId,
           amount: amountNum,
           notes: notes || undefined,
         }),
@@ -212,6 +208,12 @@ export default function ProfEncaisserPage() {
         </div>
       )}
 
+      {config && config.teacherReverseEnabled && config.hasProfTaux === false && (
+        <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 p-4 text-[13px] text-amber-700 dark:text-amber-400">
+          Aucun taux ne vous a été attribué. La part centre par défaut ({config.teacherReversePct}%) est utilisée. Demandez à l'administrateur de définir votre taux dans « Bénéfices ».
+        </div>
+      )}
+
       {config && config.teacherReverseEnabled && (
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white p-5 dark:bg-[#181b22]">
@@ -219,23 +221,23 @@ export default function ProfEncaisserPage() {
               Nouvel encaissement
             </h2>
             <p className="mt-1 text-[12px] text-neutral-500 dark:text-neutral-400">
-              L'élève vous paie en mains propres pour une séance donnée. La part du centre vous est due : réglez-la depuis la page « Dettes Centre ».
+              L'élève vous paie en mains propres pour un groupe donné. La part du centre vous est due : réglez-la depuis la page « Dettes Centre ».
             </p>
 
             <div className="mt-4 space-y-4">
               <div>
                 <label className="mb-1 block text-[12px] font-medium text-neutral-600 dark:text-neutral-400">
-                  Séance
+                  Groupe
                 </label>
                 <select
-                  value={seanceId}
-                  onChange={(e) => setSeanceId(e.target.value)}
+                  value={groupeId}
+                  onChange={(e) => setGroupeId(e.target.value)}
                   className="w-full rounded-md border border-neutral-300 dark:border-[#2a2d35] bg-white px-3 py-2 text-[13px] text-neutral-900 dark:bg-[#1e2128] dark:text-neutral-100"
                 >
                   <option value="">— Sélectionner —</option>
-                  {eligibleSeances.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {formatDate(s.date)} · {s.groupe.nom} · {STATUT_LABEL[s.statut] ?? s.statut}
+                  {eligibleGroupes.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.nom}
                     </option>
                   ))}
                 </select>
@@ -248,10 +250,10 @@ export default function ProfEncaisserPage() {
                 <select
                   value={studentId}
                   onChange={(e) => setStudentId(e.target.value)}
-                  disabled={!selectedSeance}
+                  disabled={!selectedGroupe}
                   className="w-full rounded-md border border-neutral-300 dark:border-[#2a2d35] bg-white px-3 py-2 text-[13px] text-neutral-900 dark:bg-[#1e2128] dark:text-neutral-100 disabled:opacity-50"
                 >
-                  <option value="">{selectedSeance ? "— Sélectionner —" : "Choisissez d'abord une séance"}</option>
+                  <option value="">{selectedGroupe ? "— Sélectionner —" : "Choisissez d'abord un groupe"}</option>
                   {eligibleStudents.map((e) => (
                     <option key={e.id} value={e.id}>
                       {e.prenom} {e.nom}
@@ -309,7 +311,7 @@ export default function ProfEncaisserPage() {
 
               <button
                 onClick={handleSubmit}
-                disabled={submitting || !seanceId || !studentId || amountNum <= 0}
+                disabled={submitting || !groupeId || !studentId || amountNum <= 0}
                 className="flex w-full items-center justify-center gap-2 rounded-md bg-indigo-600 px-4 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Banknote className="h-4 w-4" />}
@@ -343,7 +345,7 @@ export default function ProfEncaisserPage() {
                         {c.student.prenom} {c.student.nom}
                       </p>
                       <p className="text-[12px] text-neutral-500 dark:text-neutral-400">
-                        {formatDate(c.date)} · {c.seance.groupe.nom}
+                        {formatDate(c.date)} · {c.groupe?.nom ?? c.seance?.groupe.nom ?? "—"}
                       </p>
                     </div>
                     <div className="text-right">

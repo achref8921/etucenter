@@ -13,6 +13,7 @@ export async function GET() {
       select: {
         id: true,
         nom: true,
+        statut: true,
         prixParSeance: true,
         forfaitMontant: true,
         forfaitSeances: true,
@@ -29,6 +30,7 @@ export async function GET() {
     const result = groupes.map((g) => ({
       id: g.id,
       nom: g.nom,
+      statut: g.statut,
       prixParSeance: Number(g.prixParSeance),
       forfaitMontant: g.forfaitMontant !== null ? Number(g.forfaitMontant) : null,
       forfaitSeances: g.forfaitSeances,

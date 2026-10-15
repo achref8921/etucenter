@@ -177,7 +177,7 @@ const optionalDateString = z
 
 export const reverseCollectSchema = z.object({
   studentId: z.string().uuid("Identifiant élève invalide"),
-  seanceId: z.string().uuid("Identifiant de séance invalide"),
+  groupeId: z.string().uuid("Identifiant de groupe invalide"),
   amount: z.number().positive("Le montant doit être positif"),
   date: optionalDateString,
   notes: z.string().optional(),

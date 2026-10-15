@@ -66,13 +66,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { studentId, seanceId, amount, date, notes } = parsed.data;
+    const { studentId, groupeId, amount, date, notes } = parsed.data;
 
     const result = await collectReversePayment({
       centerId,
       profId,
       studentId,
-      seanceId,
+      groupeId,
       amount,
       date: date ? new Date(date) : new Date(),
       notes,
@@ -111,9 +111,9 @@ export async function POST(request: NextRequest) {
         "PROFESSEUR_INTROUVABLE",
         "MODE_REVERSE_DESACTIVE",
         "REVERSE_NON_AUTORISE",
-        "SEANCE_INTROUVABLE",
-        "SEANCE_PAS_DE_CE_PROF",
-        "SEANCE_ANNULEE",
+        "GROUPE_INTROUVABLE",
+        "GROUPE_PAS_DE_CE_PROF",
+        "GROUPE_ARCHIVE",
         "ELEVE_INTROUVABLE",
         "ELEVE_PAS_INS_GROUPE",
         "MONTANT_INVALIDE",
@@ -123,13 +123,13 @@ export async function POST(request: NextRequest) {
       const statusMap: Record<string, number> = {
         MODE_REVERSE_DESACTIVE: 403,
         REVERSE_NON_AUTORISE: 403,
-        SEANCE_INTROUVABLE: 404,
+        GROUPE_INTROUVABLE: 404,
         ELEVE_INTROUVABLE: 404,
         ELEVE_PAS_INS_GROUPE: 400,
         PART_CENTRE_NULLE: 400,
         MONTANT_INVALIDE: 400,
-        SEANCE_PAS_DE_CE_PROF: 403,
-        SEANCE_ANNULEE: 400,
+        GROUPE_PAS_DE_CE_PROF: 403,
+        GROUPE_ARCHIVE: 400,
       };
       return NextResponse.json({ error: message }, { status: statusMap[message] ?? 400 });
     }

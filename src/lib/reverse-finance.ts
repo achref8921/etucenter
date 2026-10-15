@@ -16,34 +16,27 @@ export const DEFAULT_REVERSE_PCT = new Prisma.Decimal(20.0);
 export async function getProfReverseSettings(
   centerId: string,
   profId: string
-): Promise<{ teacherReverseEnabled: boolean; teacherReversePct: number }> {
-  const [center, prof] = await Promise.all([
-    prisma.center.findUnique({
-      where: { id: centerId },
-      select: { teacherReversePct: true },
-    }),
-    prisma.utilisateur.findUnique({
-      where: { id: profId },
-      select: {
-        role: true,
-        centerId: true,
-        peutEncaisserReverse: true,
-        tauxBenefice: { select: { tauxPourcentage: true } },
-      },
-    }),
-  ]);
+): Promise<{ teacherReverseEnabled: boolean; teacherReversePct: number; hasProfTaux: boolean }> {
+  const prof = await prisma.utilisateur.findUnique({
+    where: { id: profId },
+    select: {
+      role: true,
+      centerId: true,
+      peutEncaisserReverse: true,
+      tauxBenefice: { select: { tauxPourcentage: true } },
+    },
+  });
 
-  // Le taux effectif est celui défini par l'admin pour ce professeur
-  // (section bénéfices) ; le taux global du centre sert de repli.
-  const effectivePct =
-    prof?.tauxBenefice?.tauxPourcentage != null
-      ? Number(prof.tauxBenefice.tauxPourcentage)
-      : Number(center?.teacherReversePct ?? DEFAULT_REVERSE_PCT);
+  // La part centre est TOUJOURS le taux défini pour ce professeur dans les
+  // bénéfices. Le réglage global du centre n'est plus utilisé comme repli.
+  const profTaux = prof?.tauxBenefice?.tauxPourcentage;
+  const hasProfTaux = profTaux != null;
+  const effectivePct = hasProfTaux ? Number(profTaux) : Number(DEFAULT_REVERSE_PCT);
 
   const teacherReverseEnabled =
     !!prof && prof.role === "prof" && prof.centerId === centerId && prof.peutEncaisserReverse === true;
 
-  return { teacherReverseEnabled, teacherReversePct: effectivePct };
+  return { teacherReverseEnabled, teacherReversePct: effectivePct, hasProfTaux };
 }
 
 export function computeReverseBreakdown(amount: number, pct: number) {
@@ -69,7 +62,7 @@ export interface CollectReversePaymentInput {
   centerId: string;
   profId: string;
   studentId: string;
-  seanceId: string;
+  groupeId: string;
   amount: number;
   date?: Date;
   notes?: string;
@@ -77,9 +70,9 @@ export interface CollectReversePaymentInput {
 }
 
 export async function collectReversePayment(input: CollectReversePaymentInput) {
-  const { centerId, profId, studentId, seanceId, amount, date = new Date(), notes, createdBy } = input;
+  const { centerId, profId, studentId, groupeId, amount, date = new Date(), notes, createdBy } = input;
 
-  const [prof, seance, center] = await Promise.all([
+  const [prof, groupe] = await Promise.all([
     prisma.utilisateur.findUnique({
       where: { id: profId },
       select: {
@@ -92,18 +85,15 @@ export async function collectReversePayment(input: CollectReversePaymentInput) {
         tauxBenefice: { select: { tauxPourcentage: true } },
       },
     }),
-    prisma.seance.findUnique({
-      where: { id: seanceId },
+    prisma.groupe.findUnique({
+      where: { id: groupeId },
       select: {
         id: true,
         statut: true,
-        date: true,
-        groupe: { select: { id: true, profId: true, centerId: true, nom: true } },
+        profId: true,
+        centerId: true,
+        nom: true,
       },
-    }),
-    prisma.center.findUnique({
-      where: { id: centerId },
-      select: { teacherReversePct: true },
     }),
   ]);
 
@@ -111,20 +101,20 @@ export async function collectReversePayment(input: CollectReversePaymentInput) {
     throw new Error("PROFESSEUR_INTROUVABLE");
   }
 
-  if (!center || prof.peutEncaisserReverse !== true) {
+  if (prof.peutEncaisserReverse !== true) {
     throw new Error("REVERSE_NON_AUTORISE");
   }
 
-  if (!seance || seance.groupe.centerId !== centerId) {
-    throw new Error("SEANCE_INTROUVABLE");
+  if (!groupe || groupe.centerId !== centerId) {
+    throw new Error("GROUPE_INTROUVABLE");
   }
 
-  if (seance.groupe.profId !== profId) {
-    throw new Error("SEANCE_PAS_DE_CE_PROF");
+  if (groupe.profId !== profId) {
+    throw new Error("GROUPE_PAS_DE_CE_PROF");
   }
 
-  if (seance.statut === "annulee") {
-    throw new Error("SEANCE_ANNULEE");
+  if (groupe.statut !== "actif") {
+    throw new Error("GROUPE_ARCHIVE");
   }
 
   const student = await prisma.utilisateur.findFirst({
@@ -137,7 +127,7 @@ export async function collectReversePayment(input: CollectReversePaymentInput) {
   }
 
   const inscription = await prisma.inscription.findFirst({
-    where: { eleveId: studentId, groupeId: seance.groupe.id, statut: "actif" },
+    where: { eleveId: studentId, groupeId: groupe.id, statut: "actif" },
     select: { id: true },
   });
 
@@ -150,13 +140,13 @@ export async function collectReversePayment(input: CollectReversePaymentInput) {
     throw new Error("MONTANT_INVALIDE");
   }
 
-  // Le taux de répartition est celui que l'admin a défini pour ce professeur
-  // dans la section bénéfices (même mécanique qu'un paiement classique) ;
-  // le taux global du centre ne sert que de repli.
+  // La part centre provient TOUJOURS du taux défini pour ce professeur dans
+  // les bénéfices. Si aucun taux n'est défini, on retombe sur le taux par
+  // défaut du système (20%) et non sur le réglage global du centre.
   const effectivePct =
     prof.tauxBenefice?.tauxPourcentage != null
       ? Number(prof.tauxBenefice.tauxPourcentage)
-      : Number(center?.teacherReversePct ?? DEFAULT_REVERSE_PCT);
+      : Number(DEFAULT_REVERSE_PCT);
 
   const { partCentre: centerFee, partProf: netAmount, tauxApplique } = computePaymentSplit(gross, effectivePct);
 
@@ -172,7 +162,8 @@ export async function collectReversePayment(input: CollectReversePaymentInput) {
         centerId,
         teacherId: profId,
         studentId,
-        seanceId,
+        seanceId: null,
+        groupeId: groupe.id,
         amountDue: new Prisma.Decimal(centerFee),
         amountPaid: new Prisma.Decimal(0),
         balance: new Prisma.Decimal(centerFee),
@@ -186,7 +177,7 @@ export async function collectReversePayment(input: CollectReversePaymentInput) {
     const paiement = await tx.paiement.create({
       data: {
         eleveId: studentId,
-        groupeId: seance.groupe.id,
+        groupeId: groupe.id,
         montant: new Prisma.Decimal(gross),
         datePaiement: date,
         methodePaiement: "especes",
@@ -207,7 +198,7 @@ export async function collectReversePayment(input: CollectReversePaymentInput) {
         eleveId: studentId,
         type: "PREPAYMENT",
         amount: gross,
-        description: `Paiement reçu pour le groupe "${seance.groupe.nom}" (encaissé par le professeur)`,
+        description: `Paiement reçu pour le groupe "${groupe.nom}" (encaissé par le professeur)`,
         paymentMethod: "especes",
         reference: `paiement:${paiement.id}`,
         notes: notes?.trim().slice(0, 500) ?? null,
@@ -229,13 +220,14 @@ export async function collectReversePayment(input: CollectReversePaymentInput) {
         status: "active",
         amount: new Prisma.Decimal(netAmount),
         signedAmount: new Prisma.Decimal(netAmount),
-        description: `Part du prof — encaissement de ${student.prenom} ${student.nom} pour le groupe "${seance.groupe.nom}"`,
+        description: `Part du prof — encaissement de ${student.prenom} ${student.nom} pour le groupe "${groupe.nom}"`,
         date,
         time: date,
         reference: `paiement:${paiement.id}`,
         notes: notes?.trim().slice(0, 500) ?? null,
         createdBy: createdBy ?? null,
         mode: "REVERSE",
+        groupeId: groupe.id,
       },
     });
 
@@ -255,6 +247,7 @@ export async function collectReversePayment(input: CollectReversePaymentInput) {
         notes: notes?.trim().slice(0, 500) ?? null,
         createdBy: createdBy ?? null,
         mode: "REVERSE",
+        groupeId: groupe.id,
       },
     });
 
@@ -278,7 +271,8 @@ export async function collectReversePayment(input: CollectReversePaymentInput) {
         netAmount: new Prisma.Decimal(netAmount),
         collectionPct: new Prisma.Decimal(collectionPct),
         studentId,
-        seanceId,
+        seanceId: null,
+        groupeId: groupe.id,
         direction: DEBIT_TO_CENTER,
         linkedDebtId: debt.id,
       },
@@ -300,7 +294,7 @@ export async function collectReversePayment(input: CollectReversePaymentInput) {
           paiementId: paiement.id,
           studentTransactionId: studentTransaction.id,
           studentId,
-          seanceId,
+          groupeId: groupe.id,
           amount: gross,
           centerFee,
           netAmount,
@@ -315,7 +309,7 @@ export async function collectReversePayment(input: CollectReversePaymentInput) {
         centerId,
         destinataireId: studentId,
         titre: "Paiement enregistré",
-        message: `Votre paiement de ${gross} DT pour le groupe "${seance.groupe.nom}" a été enregistré avec succès.`,
+        message: `Votre paiement de ${gross} DT pour le groupe "${groupe.nom}" a été enregistré avec succès.`,
         type: "paiement_eleve",
       },
     });
@@ -465,6 +459,7 @@ export async function settleReverseDebt(input: SettleReverseDebtInput) {
         direction: DEBIT_SETTLED,
         studentId: current.studentId,
         seanceId: current.seanceId,
+        groupeId: current.groupeId,
       },
     });
 
@@ -832,6 +827,7 @@ export async function listProfDebts(filters: ListProfDebtsFilters) {
     orderBy: [{ createdAt: "desc" }],
     include: {
       student: { select: { id: true, nom: true, prenom: true } },
+      groupe: { select: { id: true, nom: true } },
       seance: {
         select: {
           id: true,
@@ -876,6 +872,7 @@ export async function listProfCollections(filters: ListProfCollectionsFilters) {
     orderBy: [{ date: "desc" }, { createdAt: "desc" }],
     include: {
       student: { select: { id: true, nom: true, prenom: true } },
+      groupe: { select: { id: true, nom: true } },
       seance: {
         select: {
           id: true,
