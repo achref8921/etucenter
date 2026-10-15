@@ -16,8 +16,10 @@ import {
   XCircle,
   Clock,
   ChevronRight,
+  Paperclip,
 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import SeanceDocumentsModal from "@/components/seance-documents-modal";
 
 interface GroupeData {
   inscription: {
@@ -40,7 +42,11 @@ interface GroupeData {
     remainingCredit: number;
     unpaid: number;
   };
-  seances: { total: number; aVenir: number };
+  seances: {
+    total: number;
+    aVenir: number;
+    liste?: { id: string; date: string; statut: string }[];
+  };
   presences: { present: number; absent: number };
 }
 
@@ -49,6 +55,7 @@ export default function EleveGroupesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [documentsSeanceId, setDocumentsSeanceId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -195,6 +202,49 @@ export default function EleveGroupesPage() {
                       </div>
                     </div>
 
+                    {(g.seances.liste?.length ?? 0) > 0 && (
+                      <div className="mb-4 rounded-xl border border-neutral-200 bg-white p-3 dark:border-[#2a2d35] dark:bg-[#181b22]">
+                        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                          Mes séances et leurs supports
+                        </p>
+                        <div className="max-h-56 divide-y divide-neutral-100 overflow-y-auto dark:divide-slate-700">
+                          {g.seances.liste!.map((s) => (
+                            <div key={s.id} className="flex items-center justify-between gap-2 py-2">
+                              <span className="truncate text-[13px] text-neutral-700 dark:text-neutral-300">
+                                {formatDate(s.date)}
+                              </span>
+                              <div className="flex shrink-0 items-center gap-1.5">
+                                <span
+                                  className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                                    s.statut === "terminee"
+                                      ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                                      : s.statut === "planifiee"
+                                      ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                                      : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
+                                  }`}
+                                >
+                                  {s.statut === "terminee"
+                                    ? "Terminée"
+                                    : s.statut === "planifiee"
+                                    ? "Planifiée"
+                                    : "En cours"}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => setDocumentsSeanceId(s.id)}
+                                  title="Supports de la séance"
+                                  aria-label={`Supports de la séance du ${formatDate(s.date)}`}
+                                  className="rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-slate-700 dark:hover:text-blue-400"
+                                >
+                                  <Paperclip className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {g.groupe.prof && (
                       <div className="mb-4 rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-3">
                         <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
@@ -247,6 +297,25 @@ export default function EleveGroupesPage() {
             );
           })}
         </div>
+      )}
+
+      {documentsSeanceId && (
+        <SeanceDocumentsModal
+          seanceId={documentsSeanceId}
+          seanceLabel={
+            groupes
+              .flatMap((g) => g.seances.liste ?? [])
+              .find((s) => s.id === documentsSeanceId)?.date
+              ? formatDate(
+                  groupes
+                    .flatMap((g) => g.seances.liste ?? [])
+                    .find((s) => s.id === documentsSeanceId)!.date
+                )
+              : ""
+          }
+          role="eleve"
+          onClose={() => setDocumentsSeanceId(null)}
+        />
       )}
     </div>
   );

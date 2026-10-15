@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
+import { DocumentCleanupError, purgeSeanceDocuments } from "@/lib/seance-documents-cleanup";
 
 export async function DELETE(
   _request: NextRequest,
@@ -29,6 +30,20 @@ export async function DELETE(
         { error: "Impossible de supprimer une séance qui contient des présences enregistrées" },
         { status: 400 }
       );
+    }
+
+    // Les supports associés sont supprimés du stockage AVANT la séance : si un
+    // fichier résiste, la séance est conservée (pas de fichier orphelin).
+    try {
+      await purgeSeanceDocuments(id);
+    } catch (cleanupError) {
+      if (cleanupError instanceof DocumentCleanupError) {
+        return NextResponse.json(
+          { error: "Suppression impossible : les fichiers de supports n'ont pas pu être supprimés du stockage." },
+          { status: 502 }
+        );
+      }
+      throw cleanupError;
     }
 
     await prisma.seance.delete({ where: { id } });

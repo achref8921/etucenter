@@ -3,7 +3,12 @@ import { trackEventSafe } from "@/lib/analytics";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { createStudentTransaction, deleteStudentPaiement } from "@/lib/student-finance";
-import { creditTeacherForPayment, reverseTeacherEarningsForReference } from "@/lib/teacher-finance";
+import {
+  centerSharePercent,
+  computePaymentSplit,
+  creditTeacherForPayment,
+  reverseTeacherEarningsForReference,
+} from "@/lib/teacher-finance";
 import { sendPushToUser } from "@/lib/push";
 
 export async function PATCH(
@@ -40,13 +45,36 @@ export async function PATCH(
       return NextResponse.json({ error: "Paiement non trouvé" }, { status: 404 });
     }
 
+    if (paiement.collecteParProf) {
+      return NextResponse.json(
+        {
+          error:
+            "Ce paiement a été encaissé par le professeur : il ne peut pas être modifié ici. Supprimez-le puis ré-encaissez auprès du professeur.",
+        },
+        { status: 400 }
+      );
+    }
+
     const ancienMontant = Number(paiement.montant);
     const diff = montant - ancienMontant;
+
+    let split: ReturnType<typeof computePaymentSplit> | null = null;
+    if (paiement.groupe.profId) {
+      const profTaux = await prisma.utilisateur.findUnique({
+        where: { id: paiement.groupe.profId },
+        select: { tauxBenefice: { select: { tauxPourcentage: true } } },
+      });
+      split = computePaymentSplit(montant, centerSharePercent(profTaux?.tauxBenefice));
+    }
 
     const updated = await prisma.$transaction(async (tx) => {
       const updated = await tx.paiement.update({
         where: { id },
-        data: { montant },
+        data: {
+          montant,
+          tauxApplique: split?.tauxApplique ?? null,
+          partCentre: split?.partCentre ?? null,
+        },
         include: {
           eleve: { select: { id: true, nom: true, prenom: true } },
           groupe: { select: { id: true, nom: true, profId: true } },
@@ -92,6 +120,7 @@ export async function PATCH(
           reference: `paiement:${id}`,
           notes: raison.trim(),
           createdBy: adminId,
+          centerSharePct: split?.tauxApplique,
           db: tx,
         });
       }

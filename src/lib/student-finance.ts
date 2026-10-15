@@ -554,7 +554,24 @@ export async function reverseStudentTransaction(input: ReverseStudentTransaction
       });
 
       if (linkedPaiement) {
-        if (linkedPaiement.groupe.profId) {
+        if (linkedPaiement.collecteParProf) {
+          // Encaissement par le professeur : on purge toute la chaîne
+          // (dette centre, REVERSE_COLLECTION, gain + espèces perçues).
+          if (linkedPaiement.reverseDebtId) {
+            await tx.teacherTransaction.deleteMany({
+              where: {
+                centerId: input.centerId,
+                OR: [
+                  { linkedDebtId: linkedPaiement.reverseDebtId },
+                  { reference: `paiement:${paiementId}`, mode: "REVERSE" },
+                ],
+              },
+            });
+            await tx.teacherCenterDebt.deleteMany({
+              where: { id: linkedPaiement.reverseDebtId, centerId: input.centerId },
+            });
+          }
+        } else if (linkedPaiement.groupe.profId) {
           await reverseTeacherEarningsForReference(
             {
               centerId: input.centerId,
@@ -586,7 +603,7 @@ export async function reverseStudentTransaction(input: ReverseStudentTransaction
     });
 
     return reversal;
-  });
+  }, { timeout: 30_000 });
 }
 
 export interface StudentLedgerFilters {
@@ -834,6 +851,17 @@ export async function deleteStudentPaiement(input: DeleteStudentPaiementInput) {
       });
     }
 
+    // Encaissement par le professeur : purge aussi la dette centre et l'écriture
+    // REVERSE_COLLECTION (non liées par reference mais par reverse_debt_id).
+    if (paiement.collecteParProf && paiement.reverseDebtId) {
+      await tx.teacherTransaction.deleteMany({
+        where: { centerId: input.centerId, linkedDebtId: paiement.reverseDebtId },
+      });
+      await tx.teacherCenterDebt.deleteMany({
+        where: { id: paiement.reverseDebtId, centerId: input.centerId },
+      });
+    }
+
     // 3) Ligne du paiement elle-même (DELETE provoque les cascades vers :
     //    eleve/notification éventuelles, en fonction du schéma).
     await tx.paiement.delete({ where: { id: paiement.id } });
@@ -885,5 +913,5 @@ export async function deleteStudentPaiement(input: DeleteStudentPaiementInput) {
       studentTransactionsDeleted: [...studentTxIds].length,
       teacherTransactionsDeleted: [...teacherTxIds].length,
     };
-  });
+  }, { timeout: 30_000 });
 }

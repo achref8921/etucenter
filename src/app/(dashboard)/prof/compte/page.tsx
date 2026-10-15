@@ -1,10 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Wallet, FileText, ArrowLeft } from "lucide-react";
+import { Wallet, FileText, ArrowLeft, ChevronLeft, ChevronRight, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { SkeletonPage } from "@/components/ui/skeleton";
+
+interface ProfitData {
+  total: number;
+  studentShare: number;
+  reverseNet: number;
+  adjustments: number;
+}
+
+const MONTH_NAMES = [
+  "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+  "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre",
+];
 
 interface TransactionRow {
   id: string;
@@ -44,6 +56,27 @@ export default function ProfComptePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [displayBalance, setDisplayBalance] = useState(0);
+  const now = new Date();
+  const [month, setMonth] = useState(
+    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
+  );
+  const [profit, setProfit] = useState<ProfitData>({
+    total: 0,
+    studentShare: 0,
+    reverseNet: 0,
+    adjustments: 0,
+  });
+
+  const shiftMonth = (delta: number) => {
+    const [y, m] = month.split("-").map(Number);
+    const d = new Date(y, m - 1 + delta, 1);
+    setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+  };
+
+  const monthLabel = () => {
+    const [y, m] = month.split("-").map(Number);
+    return `${MONTH_NAMES[m - 1]} ${y}`;
+  };
 
   useEffect(() => {
     if (claimable === 0) {
@@ -68,11 +101,14 @@ export default function ProfComptePage() {
       try {
         setLoading(true);
         setError(null);
-        const res = await fetch("/api/prof/teacher-finance");
+        const res = await fetch(`/api/prof/teacher-finance?month=${month}`);
         if (!res.ok) throw new Error("Erreur lors du chargement");
         const data = await res.json();
         setTransactions(data.transactions);
         setClaimable(data.claimable ?? data.balance ?? 0);
+        setProfit(
+          data.profit ?? { total: 0, studentShare: 0, reverseNet: 0, adjustments: 0 }
+        );
       } catch (err) {
         setError(err instanceof Error ? err.message : "Erreur inconnue");
       } finally {
@@ -80,7 +116,7 @@ export default function ProfComptePage() {
       }
     };
     fetchData();
-  }, []);
+  }, [month]);
 
   if (loading) {
     return <SkeletonPage />;
@@ -147,6 +183,55 @@ export default function ProfComptePage() {
           </div>
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white dark:bg-[#181b22]">
             <Wallet className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
+          </div>
+        </div>
+      </div>
+
+      <div className="relative overflow-hidden rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/50 p-5 dark:border-emerald-800/40 dark:from-emerald-500/5 dark:via-[#181b22] dark:to-emerald-500/5">
+        <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-emerald-100/50 dark:bg-emerald-500/5" />
+        <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => shiftMonth(-1)}
+                  className="flex h-7 w-7 items-center justify-center rounded-md border border-neutral-200 dark:border-[#2a2d35] text-neutral-500 dark:text-neutral-400 hover:bg-white dark:hover:bg-[#1e2128]"
+                  aria-label="Mois précédent"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => shiftMonth(1)}
+                  className="flex h-7 w-7 items-center justify-center rounded-md border border-neutral-200 dark:border-[#2a2d35] text-neutral-500 dark:text-neutral-400 hover:bg-white dark:hover:bg-[#1e2128]"
+                  aria-label="Mois suivant"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                Profit net · {monthLabel()}
+              </p>
+            </div>
+            <p className="mt-2 text-3xl font-bold tabular-nums tracking-tight text-emerald-600 dark:text-emerald-400">
+              {formatCurrency(profit.total)}
+            </p>
+            <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-neutral-500 dark:text-neutral-400">
+              <span>
+                Gains élèves :{" "}
+                <b className="tabular-nums text-neutral-900 dark:text-neutral-100">{formatCurrency(profit.studentShare)}</b>
+              </span>
+              <span>
+                Encaissements directs :{" "}
+                <b className="tabular-nums text-neutral-900 dark:text-neutral-100">{formatCurrency(profit.reverseNet)}</b>
+              </span>
+              <span>
+                Ajustements :{" "}
+                <b className="tabular-nums text-neutral-900 dark:text-neutral-100">{formatCurrency(profit.adjustments)}</b>
+              </span>
+            </div>
+          </div>
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white dark:bg-[#181b22]">
+            <TrendingUp className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
           </div>
         </div>
       </div>

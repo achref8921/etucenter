@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { rateLimit, getRateLimitKey } from "@/lib/rate-limit";
 import { restoreCenterBackup, validateCenterBackup, BACKUP_KIND } from "@/lib/admin-backup-full";
+import { deleteDocumentBlobsOrThrow } from "@/lib/seance-documents-cleanup";
+import { isBlobStoreConfigured } from "@/lib/seance-documents-storage";
 
 const MAX_FILE_BYTES = 100 * 1024 * 1024; // limite de 100 Mo pour l'import
 const RESTORE_RATE_LIMIT = { windowMs: 60 * 60 * 1000, max: 5 };
@@ -65,6 +67,38 @@ export async function POST(request: Request) {
     logs.push(`Contenu du backup : ${JSON.stringify(dump.counts || {})}.`);
     if (dump.centerId && dump.centerId !== centerId) {
       logs.push(`Attention : ce backup provient du centre « ${dump.centre || ""} » (un autre centre). L'import se fera dans le centre actuel.`);
+    }
+
+    // Restauration complète : les fichiers de supports actuels sont supprimés du
+    // stockage AVANT l'effacement des lignes, sinon ils deviendraient des
+    // orphelins impossibles à nettoyer (et le quota Vercel fuiterait).
+    if (mode === "full") {
+      const existingDocs = await prisma.seanceDocument.findMany({
+        where: { centerId },
+        select: { id: true, pathname: true },
+      });
+      if (existingDocs.length > 0) {
+        if (!isBlobStoreConfigured()) {
+          return NextResponse.json(
+            { error: "Stockage de fichiers non configuré : restauration complète refusée pour ne pas laisser de fichiers orphelins." },
+            { status: 503 }
+          );
+        }
+        try {
+          await deleteDocumentBlobsOrThrow(existingDocs.map((d) => d.pathname));
+          logger.info("Supports supprimés avant restauration complète", {
+            centerId,
+            count: existingDocs.length,
+          });
+          logs.push(`${existingDocs.length} fichier(s) de support supprimé(s) du stockage avant restauration.`);
+        } catch (cleanupError) {
+          logger.error("Echec de la purge des supports avant restauration", { centerId, error: cleanupError });
+          return NextResponse.json(
+            { error: "Restauration annulée : les fichiers de supports existants n'ont pas pu être supprimés du stockage." },
+            { status: 502 }
+          );
+        }
+      }
     }
 
     const result = await prisma.$transaction(

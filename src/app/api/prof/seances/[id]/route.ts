@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { sendPushToUsers } from "@/lib/push";
 import { clientNowFromOffset } from "@/lib/utils";
 import { reverseCourseAttendance, consumeCourseAttendance } from "@/lib/student-finance";
+import { DocumentCleanupError, purgeSeanceDocuments } from "@/lib/seance-documents-cleanup";
 
 const VALID_SEANCE_STATUTS = ["planifiee", "en_cours", "terminee", "annulee"];
 
@@ -226,6 +227,20 @@ export async function DELETE(
     if (result.error) return NextResponse.json({ error: result.error }, { status: result.status });
 
     const seance = result.seance!;
+
+    // Fichiers de supports supprimés AVANT la séance (ordre inverse de celui
+    // du stockage) : aucun fichier ne doit survivre à sa ligne en base.
+    try {
+      await purgeSeanceDocuments(id);
+    } catch (cleanupError) {
+      if (cleanupError instanceof DocumentCleanupError) {
+        return NextResponse.json(
+          { error: "Suppression impossible : les fichiers de supports n'ont pas pu être supprimés du stockage." },
+          { status: 502 }
+        );
+      }
+      throw cleanupError;
+    }
 
     await prisma.$transaction(async (tx) => {
       const presences = await tx.presence.findMany({

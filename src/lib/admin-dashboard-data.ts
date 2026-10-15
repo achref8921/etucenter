@@ -1,18 +1,22 @@
 import { prisma } from "./prisma";
-import { DEFAULT_CENTER_SHARE, getTeacherDashboardFinance } from "./teacher-finance";
+import { DEFAULT_CENTER_SHARE, getTeacherDashboardFinance, round2 } from "./teacher-finance";
 
 export interface DashboardMonthData {
   selectedMonth: string;
   netCenterEarnings: number;
+  totalCenterBenefit: number;
   netPaidSessionsRevenue: number;
   totalUnpaid: number;
   totalStudents: number;
   totalTeachers: number;
+  reverseSettledRevenue: number;
+  reversePendingBalance: number;
   profs: {
     prof: { id: string; nom: string; prenom: string };
     taux: number;
     netRevenue: number;
     beneficeCentre: number;
+    reverseSettledRevenue: number;
     salaireProf: number;
     claimable: number;
     nombreEleves: number;
@@ -50,14 +54,20 @@ export async function getAdminDashboardMonthData(
 
   const [netRevenueByProf, eleveCounts] = await Promise.all([
     profIds.length
-      ? prisma.$queryRawUnsafe<{ prof_id: string | null; net_revenue: number }[]>(
+      ? prisma.$queryRawUnsafe<
+          { prof_id: string | null; net_revenue: number; benefice_centre: number }[]
+        >(
           `
-          SELECT g.prof_id, COALESCE(SUM(pa.montant), 0)::float AS net_revenue
+          SELECT g.prof_id,
+                 COALESCE(SUM(pa.montant), 0)::float AS net_revenue,
+                 COALESCE(SUM(COALESCE(pa.part_centre, (pa.montant * COALESCE(tb.taux_pourcentage, 20)) / 100)), 0)::float AS benefice_centre
           FROM paiements pa
           JOIN groupes g ON pa.groupe_id = g.id
+          LEFT JOIN taux_benefices tb ON tb.prof_id = g.prof_id
           WHERE g.center_id = $1::uuid
             AND pa.date_paiement >= $2::timestamptz
             AND pa.date_paiement <= $3::timestamptz
+            AND pa.collecte_par_prof = false
           GROUP BY g.prof_id
           `,
           centerId,
@@ -79,7 +89,11 @@ export async function getAdminDashboardMonthData(
   ]);
 
   const revenueMap = new Map<string, number>();
-  for (const r of netRevenueByProf) revenueMap.set(r.prof_id ?? "", Number(r.net_revenue || 0));
+  const centreMap = new Map<string, number>();
+  for (const r of netRevenueByProf) {
+    revenueMap.set(r.prof_id ?? "", Number(r.net_revenue || 0));
+    centreMap.set(r.prof_id ?? "", Number(r.benefice_centre || 0));
+  }
   const countMap = new Map<string, number>();
   for (const r of eleveCounts) countMap.set(r.prof_id ?? "", Number(r.nb || 0));
 
@@ -89,8 +103,8 @@ export async function getAdminDashboardMonthData(
   const profsData = profs.map((e) => {
     const taux = tauxMap.get(e.id) ?? DEFAULT_CENTER_SHARE;
     const netRevenue = revenueMap.get(e.id) || 0;
-    const beneficeCentre = (netRevenue * taux) / 100;
-    const salaireProf = netRevenue - beneficeCentre;
+    const beneficeCentre = round2(centreMap.get(e.id) || 0);
+    const salaireProf = round2(netRevenue - beneficeCentre);
     totalNetRevenue += netRevenue;
     totalCenterEarnings += beneficeCentre;
     return {
@@ -98,6 +112,7 @@ export async function getAdminDashboardMonthData(
       taux,
       netRevenue,
       beneficeCentre,
+      reverseSettledRevenue: 0,
       salaireProf,
       claimable: 0,
       nombreEleves: countMap.get(e.id) || 0,
@@ -150,18 +165,51 @@ export async function getAdminDashboardMonthData(
     centerId
   );
 
-  const [totalStudents, totalTeachers] = await Promise.all([
+  const [totalStudents, totalTeachers, reverseSettledRows, reversePending] = await Promise.all([
     prisma.utilisateur.count({ where: { role: "eleve", centerId, deletedAt: null, ghost: false } }),
     prisma.utilisateur.count({ where: { role: "prof", centerId, deletedAt: null, ghost: false } }),
+    prisma.teacherTransaction.groupBy({
+      by: ["teacherId"],
+      where: {
+        centerId,
+        mode: "REVERSE",
+        type: "CENTER_SETTLEMENT",
+        status: "active",
+        date: { gte: startDate, lte: endDate },
+      },
+      _sum: { amount: true },
+    }),
+    prisma.teacherCenterDebt.aggregate({
+      _sum: { balance: true },
+      where: {
+        centerId,
+        status: { in: ["OPEN", "PARTIAL"] },
+      },
+    }),
   ]);
+
+  const reverseSettledMap = new Map<string, number>();
+  for (const row of reverseSettledRows) {
+    reverseSettledMap.set(row.teacherId, round2(Number(row._sum.amount ?? 0)));
+  }
+
+  let totalReverseSettled = 0;
+  for (const pd of profsData) {
+    const rev = reverseSettledMap.get(pd.prof.id) ?? 0;
+    pd.reverseSettledRevenue = rev;
+    totalReverseSettled += rev;
+  }
 
   return {
     selectedMonth: month,
     netCenterEarnings: totalCenterEarnings,
+    totalCenterBenefit: round2(totalCenterEarnings + totalReverseSettled),
     netPaidSessionsRevenue: totalNetRevenue,
     totalUnpaid: Number(unpaidResult[0]?.total || 0),
     totalStudents,
     totalTeachers,
+    reverseSettledRevenue: round2(totalReverseSettled),
+    reversePendingBalance: round2(Number(reversePending._sum.balance ?? 0)),
     profs: profsData,
   };
 }

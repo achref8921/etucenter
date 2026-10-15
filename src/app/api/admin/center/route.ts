@@ -27,13 +27,27 @@ export async function PATCH(request: NextRequest) {
     const centerId = (session.user as any).centerId;
 
     const body = await request.json();
-    const { name, logo, phone, address } = body;
+    const { name, logo, phone, address, teacherReverseEnabled, teacherReversePct } = body;
 
     const data: Record<string, unknown> = {};
     if (name !== undefined && name.trim() !== "") data.name = name.trim();
     if (logo !== undefined) data.logo = sanitizeImageValue(logo);
     if (phone !== undefined) data.phone = phone || null;
     if (address !== undefined) data.address = address || null;
+
+    if (teacherReverseEnabled !== undefined) {
+      data.teacherReverseEnabled = Boolean(teacherReverseEnabled);
+    }
+    if (teacherReversePct !== undefined) {
+      const pct = Number(teacherReversePct);
+      if (!Number.isFinite(pct) || pct < 0 || pct > 100) {
+        return NextResponse.json(
+          { error: "Le pourcentage doit être compris entre 0 et 100" },
+          { status: 400 }
+        );
+      }
+      data.teacherReversePct = pct;
+    }
 
     if (Object.keys(data).length === 0) {
       return NextResponse.json({ error: "Aucune donnée à modifier" }, { status: 400 });

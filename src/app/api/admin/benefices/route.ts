@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
-import { DEFAULT_CENTER_SHARE } from "@/lib/teacher-finance";
+import { round2 } from "@/lib/teacher-finance";
 import { getAdminDashboardMonthData } from "@/lib/admin-dashboard-data";
 
 export async function GET(request: NextRequest) {
@@ -37,18 +37,73 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    const reversePendingDebts = await prisma.teacherCenterDebt.findMany({
+      where: {
+        centerId: centreId,
+        status: { in: ["OPEN", "PARTIAL"] },
+      },
+      orderBy: [{ createdAt: "asc" }],
+      select: {
+        id: true,
+        createdAt: true,
+        amountDue: true,
+        amountPaid: true,
+        balance: true,
+        status: true,
+        teacher: { select: { id: true, nom: true, prenom: true } },
+        student: { select: { id: true, nom: true, prenom: true } },
+      },
+    });
+
+    interface PendingDebtEntry {
+      id: string;
+      date: Date;
+      amountDue: number;
+      amountPaid: number;
+      balance: number;
+      status: string;
+      student: { id: string; nom: string; prenom: string } | null;
+    }
+
+    const pendingProfMap = new Map<
+      string,
+      { prof: { id: string; nom: string; prenom: string }; balance: number; debts: PendingDebtEntry[] }
+    >();
+
+    for (const d of reversePendingDebts) {
+      const balance = round2(Number(d.balance));
+      if (balance <= 0) continue;
+      const entry =
+        pendingProfMap.get(d.teacher.id) ?? { prof: d.teacher, balance: 0, debts: [] };
+      entry.balance = round2(entry.balance + balance);
+      entry.debts.push({
+        id: d.id,
+        date: d.createdAt,
+        amountDue: Number(d.amountDue),
+        amountPaid: Number(d.amountPaid),
+        balance,
+        status: d.status,
+        student: d.student,
+      });
+      pendingProfMap.set(d.teacher.id, entry);
+    }
+
+    const reversePendingProfs = Array.from(pendingProfMap.values()).sort(
+      (a, b) => b.balance - a.balance
+    );
+
     const profsData = dashboardData.profs.map((p) => ({
       prof: p.prof,
       tauxPourcentage: p.taux,
       totalRecu: p.netRevenue,
-      beneficeCentre: p.beneficeCentre,
+      beneficeCentre: round2(p.beneficeCentre + (p.reverseSettledRevenue ?? 0)),
       salaireProf: p.salaireProf,
       nombreEleves: p.nombreEleves,
     }));
 
     const totalRecu = dashboardData.netPaidSessionsRevenue;
-    const totalBenefice = dashboardData.netCenterEarnings;
-    const totalSalaire = totalRecu - totalBenefice;
+    const totalBenefice = dashboardData.totalCenterBenefit;
+    const totalSalaire = totalRecu - dashboardData.netCenterEarnings;
 
     const monthlyHistory = await computeMonthlyHistory(centreId, now);
 
@@ -58,6 +113,9 @@ export async function GET(request: NextRequest) {
       totalRecu,
       totalBenefice,
       totalSalaire,
+      reverseSettledRevenue: dashboardData.reverseSettledRevenue,
+      reversePendingBalance: dashboardData.reversePendingBalance,
+      reversePendingProfs,
       monthlyHistory,
       monthPaiements,
     });
@@ -72,40 +130,47 @@ async function computeMonthlyHistory(
 ): Promise<{ month: string; totalBenefice: number; totalRecu: number; totalSalaire: number }[]> {
   const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
 
-  const [paymentRows, profTauxMap] = await Promise.all([
-    prisma.$queryRawUnsafe<{ month: string; prof_id: string | null; recu: number }[]>(
+  const [paymentRows, reverseRows] = await Promise.all([
+    prisma.$queryRawUnsafe<
+      { month: string; prof_id: string | null; recu: number; benefice: number }[]
+    >(
       `
-      SELECT TO_CHAR(pa.date_paiement, 'YYYY-MM') AS month, g.prof_id, SUM(pa.montant)::float AS recu
-      FROM paiements pa JOIN groupes g ON pa.groupe_id = g.id
+      SELECT TO_CHAR(pa.date_paiement, 'YYYY-MM') AS month, g.prof_id,
+             SUM(pa.montant)::float AS recu,
+             SUM(COALESCE(pa.part_centre, (pa.montant * COALESCE(tb.taux_pourcentage, 20)) / 100))::float AS benefice
+      FROM paiements pa
+      JOIN groupes g ON pa.groupe_id = g.id
+      LEFT JOIN taux_benefices tb ON tb.prof_id = g.prof_id
       WHERE g.center_id = $1::uuid AND pa.date_paiement >= $2::timestamptz
+        AND pa.collecte_par_prof = false
       GROUP BY TO_CHAR(pa.date_paiement, 'YYYY-MM'), g.prof_id
       `,
       centreId,
       twelveMonthsAgo
     ),
-    prisma.utilisateur.findMany({
-      where: { role: "prof", centerId: centreId, deletedAt: null, ghost: false },
-      select: {
-        id: true,
-        tauxBenefice: { select: { tauxPourcentage: true } },
-      },
-    }),
+    prisma.$queryRawUnsafe<{ month: string; settled: number }[]>(
+      `
+      SELECT TO_CHAR(tt.date, 'YYYY-MM') AS month, COALESCE(SUM(tt.amount), 0)::float AS settled
+      FROM teacher_transactions tt
+      WHERE tt.center_id = $1::uuid AND tt.mode = 'REVERSE' AND tt.type = 'CENTER_SETTLEMENT' AND tt.status = 'active'
+        AND tt.date >= $2::timestamptz
+      GROUP BY TO_CHAR(tt.date, 'YYYY-MM')
+      `,
+      centreId,
+      twelveMonthsAgo
+    ),
   ]);
 
-  const tauxMap = new Map<string, number>(
-    profTauxMap.map((p) => [
-      p.id,
-      p.tauxBenefice ? Number(p.tauxBenefice.tauxPourcentage) : DEFAULT_CENTER_SHARE,
-    ])
-  );
-
-  const monthAgg = new Map<string, { recu: number; benefice: number }>();
+  const monthAgg = new Map<string, { recu: number; benefice: number; settled: number }>();
   for (const r of paymentRows) {
-    const agg = monthAgg.get(r.month) ?? { recu: 0, benefice: 0 };
-    const recu = Number(r.recu || 0);
-    agg.recu += recu;
-    const taux = r.prof_id ? (tauxMap.get(r.prof_id) ?? DEFAULT_CENTER_SHARE) : 0;
-    agg.benefice += (recu * taux) / 100;
+    const agg = monthAgg.get(r.month) ?? { recu: 0, benefice: 0, settled: 0 };
+    agg.recu += Number(r.recu || 0);
+    agg.benefice += Number(r.benefice || 0);
+    monthAgg.set(r.month, agg);
+  }
+  for (const r of reverseRows) {
+    const agg = monthAgg.get(r.month) ?? { recu: 0, benefice: 0, settled: 0 };
+    agg.settled += Number(r.settled || 0);
     monthAgg.set(r.month, agg);
   }
 
@@ -113,12 +178,12 @@ async function computeMonthlyHistory(
   for (let i = 11; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const mLabel = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-    const agg = monthAgg.get(mLabel) ?? { recu: 0, benefice: 0 };
+    const agg = monthAgg.get(mLabel) ?? { recu: 0, benefice: 0, settled: 0 };
     monthlyHistory.push({
       month: mLabel,
-      totalBenefice: agg.benefice,
+      totalBenefice: round2(agg.benefice + agg.settled),
       totalRecu: agg.recu,
-      totalSalaire: agg.recu - agg.benefice,
+      totalSalaire: round2(agg.recu - agg.benefice),
     });
   }
 

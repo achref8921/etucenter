@@ -168,6 +168,27 @@ export const reverseTransactionSchema = z.object({
   reason: z.string().min(3, "La raison doit contenir au moins 3 caractères"),
 });
 
+const optionalDateString = z
+  .string()
+  .optional()
+  .refine((v) => v === undefined || !Number.isNaN(new Date(v).getTime()), {
+    message: "Date invalide",
+  });
+
+export const reverseCollectSchema = z.object({
+  studentId: z.string().uuid("Identifiant élève invalide"),
+  seanceId: z.string().uuid("Identifiant de séance invalide"),
+  amount: z.number().positive("Le montant doit être positif"),
+  date: optionalDateString,
+  notes: z.string().optional(),
+});
+
+export const reverseSettleSchema = z.object({
+  amount: z.number().positive("Le montant doit être positif"),
+  date: optionalDateString,
+  notes: z.string().optional(),
+});
+
 export const studentTransactionSchema = z.object({
   studentId: z.string().uuid(),
   type: z.enum(["PREPAYMENT", "ADJUSTMENT"]),
@@ -212,6 +233,8 @@ export type RattrapageInput = z.infer<typeof rattrapageSchema>;
 export type PaiementInput = z.infer<typeof paiementSchema>;
 export type TeacherTransactionInput = z.infer<typeof teacherTransactionSchema>;
 export type ReverseTransactionInput = z.infer<typeof reverseTransactionSchema>;
+export type ReverseCollectInput = z.infer<typeof reverseCollectSchema>;
+export type ReverseSettleInput = z.infer<typeof reverseSettleSchema>;
 export type StudentTransactionInput = z.infer<typeof studentTransactionSchema>;
 export type NotificationSendInput = z.infer<typeof notificationSendSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;

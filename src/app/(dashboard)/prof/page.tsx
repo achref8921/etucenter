@@ -31,6 +31,7 @@ interface Stats {
   tauxPourcentage: number;
   impayeNet: number;
   claimable: number;
+  profit: { total: number; studentShare: number; reverseNet: number; adjustments: number };
   totalEleves: number;
   totalSeances: number;
   totalSeancesTerminees: number;
@@ -59,6 +60,16 @@ const statusLabel = (s: string) => {
   if (s === "en_cours") return "En cours";
   if (s === "terminee") return "Terminee";
   return "Annulee";
+};
+
+const MONTH_NAMES = [
+  "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+  "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre",
+];
+
+const monthLabel = () => {
+  const d = new Date();
+  return `${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
 };
 
 export default function ProfDashboardPage() {
@@ -217,6 +228,41 @@ export default function ProfDashboardPage() {
                 Voir la liste <ChevronRight className="h-3 w-3" />
               </div>
             </Link>
+          </div>
+
+          {/* Profit net du mois */}
+          <div className="relative overflow-hidden rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/50 p-6 dark:border-emerald-800/40 dark:from-emerald-500/5 dark:via-[#181b22] dark:to-emerald-500/5">
+            <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-emerald-100/50 dark:bg-emerald-500/5" />
+            <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                  Profit net · {monthLabel()}
+                </p>
+                <p className="mt-2 text-3xl font-bold tabular-nums tracking-tight text-emerald-600 dark:text-emerald-400">
+                  {formatCurrency(stats.profit.total)}
+                </p>
+                <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-neutral-500 dark:text-neutral-400">
+                  <span>
+                    Gains élèves :{" "}
+                    <b className="tabular-nums text-neutral-900 dark:text-neutral-100">{formatCurrency(stats.profit.studentShare)}</b>
+                  </span>
+                  <span>
+                    Encaissements directs :{" "}
+                    <b className="tabular-nums text-neutral-900 dark:text-neutral-100">{formatCurrency(stats.profit.reverseNet)}</b>
+                  </span>
+                  <span>
+                    Ajustements :{" "}
+                    <b className="tabular-nums text-neutral-900 dark:text-neutral-100">{formatCurrency(stats.profit.adjustments)}</b>
+                  </span>
+                </div>
+              </div>
+              <Link
+                href="/prof/compte"
+                className="flex shrink-0 items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-[12px] font-semibold text-white transition-colors hover:bg-emerald-700"
+              >
+                Voir le detail <ChevronRight className="h-3 w-3" />
+              </Link>
+            </div>
           </div>
 
           {/* Compact stats row */}

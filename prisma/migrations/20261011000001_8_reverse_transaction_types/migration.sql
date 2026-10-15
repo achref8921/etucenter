@@ -1,0 +1,3 @@
+-- AlterEnum
+ALTER TYPE "TeacherTransactionType" ADD VALUE 'REVERSE_COLLECTION';
+ALTER TYPE "TeacherTransactionType" ADD VALUE 'CENTER_SETTLEMENT';

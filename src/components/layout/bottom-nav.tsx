@@ -19,6 +19,8 @@ import {
   Settings,
   BarChart3,
   UserPlus,
+  Banknote,
+  Scale,
 } from "lucide-react";
 
 interface NavItem {
@@ -60,13 +62,24 @@ const bottomNavItems: Record<Role, NavItem[]> = {
   ],
 };
 
-export default function BottomNav({ role, variant = "indigo", peutGererEleves }: { role: Role; variant?: "indigo" | "violet"; peutGererEleves?: boolean }) {
+export default function BottomNav({ role, variant = "indigo", peutGererEleves, peutEncaisserReverse }: { role: Role; variant?: "indigo" | "violet"; peutGererEleves?: boolean; peutEncaisserReverse?: boolean }) {
   const pathname = usePathname();
   const baseItems = bottomNavItems[role] || [];
-  const items =
-    role === "prof" && peutGererEleves
-      ? [{ label: "Gestion Élèves", href: "/prof/gestion-eleves", icon: UserPlus }, ...baseItems]
-      : baseItems;
+  let items = baseItems;
+
+  if (role === "prof") {
+    const next = [...baseItems];
+    if (peutGererEleves) {
+      next.unshift({ label: "Gestion Élèves", href: "/prof/gestion-eleves", icon: UserPlus });
+    }
+    if (peutEncaisserReverse) {
+      next.push(
+        { label: "Encaisser", href: "/prof/encaisser", icon: Banknote },
+        { label: "Dettes", href: "/prof/dettes", icon: Scale },
+      );
+    }
+    items = next;
+  }
   const isActiveFn = (href: string) =>
     pathname === href ||
     (href !== `/${role}` && href !== "/super-admin" && pathname.startsWith(href));

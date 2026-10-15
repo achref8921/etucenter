@@ -10,6 +10,7 @@ export interface SessionUser {
   image?: string | null;
   frozen?: boolean;
   peutGererEleves?: boolean;
+  peutEncaisserReverse?: boolean;
 }
 
 export interface DashboardStats {

@@ -28,6 +28,7 @@ export async function GET() {
         actif: true,
         ghost: true,
         peutGererEleves: true,
+        peutEncaisserReverse: true,
         codeEleve: true,
         codeProf: true,
         niveau: true,
@@ -146,14 +147,19 @@ export async function PATCH(request: NextRequest) {
     if (error) return error;
 
     const body = await request.json();
-    const { id, actif, motDePasse, peutGererEleves } = body;
+    const { id, actif, motDePasse, peutGererEleves, peutEncaisserReverse } = body;
 
     if (!id) {
       return NextResponse.json({ error: "id est requis" }, { status: 400 });
     }
 
-    if (actif === undefined && motDePasse === undefined && peutGererEleves === undefined) {
-      return NextResponse.json({ error: "actif, motDePasse ou peutGererEleves requis" }, { status: 400 });
+    if (
+      actif === undefined &&
+      motDePasse === undefined &&
+      peutGererEleves === undefined &&
+      peutEncaisserReverse === undefined
+    ) {
+      return NextResponse.json({ error: "actif, motDePasse, peutGererEleves ou peutEncaisserReverse requis" }, { status: 400 });
     }
 
     if (motDePasse !== undefined && (typeof motDePasse !== "string" || motDePasse.length < 8)) {
@@ -192,6 +198,18 @@ export async function PATCH(request: NextRequest) {
       }
       data.peutGererEleves = peutGererEleves;
     }
+    if (peutEncaisserReverse !== undefined) {
+      if (user.role !== "prof") {
+        return NextResponse.json(
+          { error: "Seuls les professeurs peuvent encaisser la collecte inverse" },
+          { status: 400 }
+        );
+      }
+      if (typeof peutEncaisserReverse !== "boolean") {
+        return NextResponse.json({ error: "peutEncaisserReverse doit être un booléen" }, { status: 400 });
+      }
+      data.peutEncaisserReverse = peutEncaisserReverse;
+    }
     if (motDePasse) {
       data.motDePasse = await bcrypt.hash(motDePasse, 12);
       data.passwordResetToken = null;
@@ -201,7 +219,7 @@ export async function PATCH(request: NextRequest) {
     const updated = await prisma.utilisateur.update({
       where: { id },
       data,
-      select: { id: true, nom: true, prenom: true, email: true, role: true, actif: true, peutGererEleves: true },
+      select: { id: true, nom: true, prenom: true, email: true, role: true, actif: true, peutGererEleves: true, peutEncaisserReverse: true },
     });
 
     if (peutGererEleves !== undefined) {
@@ -209,6 +227,14 @@ export async function PATCH(request: NextRequest) {
         adminId: (session.user as any).id,
         userId: id,
         peutGererEleves,
+      });
+    }
+
+    if (peutEncaisserReverse !== undefined) {
+      logger.info("Permission d'encaissement inverse mise à jour", {
+        adminId: (session.user as any).id,
+        userId: id,
+        peutEncaisserReverse,
       });
     }
 

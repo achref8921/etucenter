@@ -33,6 +33,33 @@ enum InscriptionStatut {
   inactif
 }
 
+// ─── Archivage de groupe (Ajout 2026-09) ────────────────────────────────────
+// Un groupe n'est jamais supprimé s'il porte un historique : il passe en
+// 'archive'. 'actif' reste la valeur par défaut, donc tout code existant qui
+// filtre les groupes continue de fonctionner sans modification.
+
+enum GroupeStatut {
+  actif
+  archive
+}
+
+// ─── Provenance des bornes de période d'inscription (Ajout 2026-09) ──────────
+// Une inscription est désormais une PÉRIODE [dateDebut, dateFin] et non plus un
+// simple drapeau. Ces deux champs documentent d'où vient chaque borne, ce qui
+// permet de distinguer une date réellement connue d'une date jamais enregistrée.
+
+enum InscriptionDateDebutSource {
+  inscription // dateDebut = dateInscription (date de saisie d'origine)
+  presence // dateDebut = 1re date de séance avec présence (PREUVE materialize)
+  saisie // dateDebut saisie manuellement
+}
+
+enum InscriptionDateFinSource {
+  saisie // date de sortie réellement connue et saisie
+  deduit // déduite d'un événement métier explicite et justifiable
+  inconnu // legacy : la sortie n'a jamais été enregistrée, elle n'est PAS déductible
+}
+
 enum MethodePaiement {
   especes
   virement
@@ -45,11 +72,14 @@ enum TeacherTransactionType {
   PAYMENT
   ADJUSTMENT
   REVERSAL
+  REVERSE_COLLECTION
+  CENTER_SETTLEMENT
 }
 
 enum TeacherTransactionStatus {
   active
   reversed
+  pending
 }
 
 enum StudentTransactionType {
@@ -90,6 +120,8 @@ model Center {
   phone     String?  @db.VarChar(20)
   address   String?  @db.Text
   active    Boolean  @default(true)
+  teacherReverseEnabled Boolean @default(false) @map("teacher_reverse_enabled")
+  teacherReversePct     Decimal @default(20.00) @map("teacher_reverse_pct") @db.Decimal(5, 2)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -103,58 +135,80 @@ model Center {
   pushSubscriptions   PushSubscription[]
   analyticsEvents     AnalyticsEvent[]
   userSessions        UserSession[]
+  seanceDocuments     SeanceDocument[]
+  teacherCenterDebts  TeacherCenterDebt[]  @relation("TeacherCenterDebtCenter")
+
   @@map("centers")
 }
 
 // ─── Utilisateur ─────────────────────────────────────────────────────────────
 
+enum Mode {
+  FORWARD
+  REVERSE
+}
+
+enum DebtStatus {
+  OPEN
+  PARTIAL
+  PAID
+}
+
 model Utilisateur {
-  id             String    @id @default(uuid()) @db.Uuid
-  centerId       String    @map("center_id") @db.Uuid
-  nom            String    @db.VarChar(255)
-  prenom         String    @db.VarChar(255)
-  email          String    @unique @db.VarChar(255)
-  motDePasse     String?   @map("mot_de_passe") @db.VarChar(255)
-  telephone      String?   @db.VarChar(20)
-  role           Role
-  image          String?
-  dateNaissance  DateTime? @map("date_naissance") @db.Date
-  actif          Boolean   @default(false)
-  peutGererEleves Boolean  @default(false) @map("peut_gerer_eleves")
-  codeEleve      String?   @map("code_eleve") @db.VarChar(4)
-  codeProf       String?   @map("code_prof") @db.VarChar(5)
-  niveau         NiveauScolaire?
-  classe         String?   @db.VarChar(50)
-  filiere        Filiere?
-  deletedAt      DateTime? @map("deleted_at")
-  ghost          Boolean   @default(false) @map("ghost")
-  lastSeenAt     DateTime? @map("last_seen_at")
+  id              String          @id @default(uuid()) @db.Uuid
+  centerId        String          @map("center_id") @db.Uuid
+  nom             String          @db.VarChar(255)
+  prenom          String          @db.VarChar(255)
+  email           String          @unique @db.VarChar(255)
+  motDePasse      String?         @map("mot_de_passe") @db.VarChar(255)
+  telephone       String?         @db.VarChar(20)
+  role            Role
+  image           String?
+  dateNaissance   DateTime?       @map("date_naissance") @db.Date
+  actif           Boolean         @default(false)
+  peutGererEleves Boolean         @default(false) @map("peut_gerer_eleves")
+  peutEncaisserReverse Boolean    @default(false) @map("peut_encaisser_reverse")
+  codeEleve       String?         @map("code_eleve") @db.VarChar(4)
+  codeProf        String?         @map("code_prof") @db.VarChar(5)
+  niveau          NiveauScolaire?
+  classe          String?         @db.VarChar(50)
+  filiere         Filiere?
+  deletedAt       DateTime?       @map("deleted_at")
+  ghost           Boolean         @default(false) @map("ghost")
+  lastSeenAt      DateTime?       @map("last_seen_at")
 
-  provider              String?   @default("credentials") @db.VarChar(50)
-  providerId            String?   @map("provider_id") @db.VarChar(255)
-  emailVerified         DateTime? @map("email_verified")
-  emailVerificationToken String?  @map("email_verification_token") @db.VarChar(255)
+  provider                String?   @default("credentials") @db.VarChar(50)
+  providerId              String?   @map("provider_id") @db.VarChar(255)
+  emailVerified           DateTime? @map("email_verified")
+  emailVerificationToken  String?   @map("email_verification_token") @db.VarChar(255)
   emailVerificationExpiry DateTime? @map("email_verification_expiry")
-  passwordResetToken    String?   @map("password_reset_token") @db.VarChar(255)
-  passwordResetExpiry   DateTime? @map("password_reset_expiry")
+  passwordResetToken      String?   @map("password_reset_token") @db.VarChar(255)
+  passwordResetExpiry     DateTime? @map("password_reset_expiry")
 
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  center           Center          @relation(fields: [centerId], references: [id], onDelete: Cascade)
-  groupesEnseigne  Groupe[]        @relation("ProfGroupes")
-  inscriptions     Inscription[]
-  presencesAsEleve Presence[]      @relation("PresenceEleve")
-  presencesByAdmin Presence[]      @relation("PresenceEnregistrePar")
-  paiements        Paiement[]
-  tauxBenefice     TauxBenefice?
-  notifications    Notification[]
-  teacherTransactions TeacherTransaction[] @relation("TeacherTransactions")
-  studentTransactions StudentTransaction[] @relation("StudentTransactions")
-  pushSubscriptions   PushSubscription[]
-  analyticsEvents     AnalyticsEvent[]
-  userSessions        UserSession[]
+  center                    Center               @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  groupesEnseigne           Groupe[]             @relation("ProfGroupes")
+  inscriptions              Inscription[]
+  presencesAsEleve          Presence[]           @relation("PresenceEleve")
+  presencesByAdmin          Presence[]           @relation("PresenceEnregistrePar")
+  paiements                 Paiement[]
+  tauxBenefice              TauxBenefice?
+  notifications             Notification[]
+  teacherTransactions       TeacherTransaction[] @relation("TeacherTransactions")
+  studentTransactions       StudentTransaction[] @relation("StudentTransactions")
+  pushSubscriptions         PushSubscription[]
+  analyticsEvents           AnalyticsEvent[]
+  userSessions              UserSession[]
+  documentsUploaded         SeanceDocument[]     @relation("SeanceDocuments")
+  groupesArchives           Groupe[]             @relation("GroupeArchivedBy")
+  reverseCollections        TeacherTransaction[] @relation("TeacherTransactionStudent")
+  teacherCenterDebts        TeacherCenterDebt[]  @relation("TeacherCenterDebtTeacher")
+  teacherCenterDebtStudents TeacherCenterDebt[]  @relation("TeacherCenterDebtStudent")
 
+  @@unique([centerId, codeEleve])
+  @@unique([centerId, codeProf])
   @@index([centerId, role])
   @@index([lastSeenAt])
   @@index([centerId, email])
@@ -162,8 +216,6 @@ model Utilisateur {
   @@index([role])
   @@index([codeEleve])
   @@index([codeProf])
-  @@unique([centerId, codeEleve])
-  @@unique([centerId, codeProf])
   @@map("utilisateurs")
 }
 
@@ -176,11 +228,11 @@ model Matiere {
   description String?
   createdAt   DateTime @default(now()) @map("created_at")
 
-  center  Center  @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  center  Center   @relation(fields: [centerId], references: [id], onDelete: Cascade)
   groupes Groupe[]
 
-  @@index([centerId])
   @@unique([centerId, nom])
+  @@index([centerId])
   @@map("matieres")
 }
 
@@ -191,7 +243,7 @@ model Groupe {
   centerId       String   @map("center_id") @db.Uuid
   nom            String   @db.VarChar(255)
   description    String?
-  profId        String?  @map("prof_id") @db.Uuid
+  profId         String?  @map("prof_id") @db.Uuid
   matiereId      String?  @map("matiere_id") @db.Uuid
   prixParSeance  Decimal  @map("prix_par_seance") @db.Decimal(10, 2)
   forfaitMontant Decimal? @map("forfait_montant") @db.Decimal(10, 2)
@@ -200,9 +252,16 @@ model Groupe {
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
-  center       Center       @relation(fields: [centerId], references: [id], onDelete: Cascade)
-  prof         Utilisateur? @relation("ProfGroupes", fields: [profId], references: [id], onDelete: SetNull)
-  matiere      Matiere?     @relation(fields: [matiereId], references: [id], onDelete: SetNull)
+  // Archivage : 'actif' par défaut, donc aucun filtre existant n'est cassé.
+  statut       GroupeStatut @default(actif)
+  archivedAt   DateTime?    @map("archived_at")
+  archivedById String?      @map("archived_by_id") @db.Uuid
+  archiveMotif String?      @map("archive_motif")
+
+  center       Center        @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  prof         Utilisateur?  @relation("ProfGroupes", fields: [profId], references: [id], onDelete: SetNull)
+  matiere      Matiere?      @relation(fields: [matiereId], references: [id], onDelete: SetNull)
+  archivedBy   Utilisateur?  @relation("GroupeArchivedBy", fields: [archivedById], references: [id], onDelete: SetNull)
   inscriptions Inscription[]
   seances      Seance[]
   paiements    Paiement[]
@@ -210,6 +269,8 @@ model Groupe {
   @@index([centerId, profId])
   @@index([centerId])
   @@index([matiereId])
+  @@index([centerId, statut])
+  @@index([statut, archivedAt])
   @@map("groupes")
 }
 
@@ -225,35 +286,106 @@ model Inscription {
   forfaitSeances  Int?              @map("forfait_seances")
   forfaitSetAt    DateTime?         @map("forfait_set_at")
 
+  // ─── Période d'appartenance (Ajout 2026-09) ───────────────────────────────
+  // Une inscription devient une PÉRIODE [dateDebut, dateFin] par groupe.
+  //   - dateDebut / dateFin sont des DATES (@db.Date), pas des timestamps :
+  //     une séance est un jour entier, et dateInscription porte une heure
+  //     (mesuré : 187/187 lignes ont une composante horaire). Comparer une
+  //     présence à un timestamp rendrait la frontière du jour ambiguë.
+  //   - dateDebut est TOUJOURS renseignée. dateFin est NULL = période ouverte.
+  //   - dateFinSource = 'inconnu' signifie "sortie jamais enregistrée" : la
+  //     période est fermée mais sa borne haute reste INCONNUE. Cela ne doit
+  //     jamais être interprété comme "membre jusqu'à aujourd'hui".
+  //   - statut est désormais par PÉRIODE : 'actif' = période courante.
+  dateDebut       DateTime                   @default(now()) @map("date_debut") @db.Date
+  dateDebutSource InscriptionDateDebutSource @default(inscription) @map("date_debut_source")
+  dateFin         DateTime?                  @map("date_fin") @db.Date
+  dateFinSource   InscriptionDateFinSource?  @map("date_fin_source")
+
+  // Horodatage technique (distinct des dates métier ci-dessus).
+  updatedAt DateTime @updatedAt @map("updated_at")
+
   eleve  Utilisateur @relation(fields: [eleveId], references: [id], onDelete: Cascade)
   groupe Groupe      @relation(fields: [groupeId], references: [id], onDelete: Cascade)
 
-  @@unique([eleveId, groupeId])
+  // ⚠️ Le @@unique([eleveId, groupeId]) a été RETIRÉ : un élève peut être
+  // inscrit plusieurs fois dans le même groupe (A -> B -> A), et surtout dans
+  // PLUSIEURS groupes simultanément (max observé en prod : 4).
+  // La garantie "une seule période ouverte par couple" est portée par un index
+  // PARTIEL au niveau SQL (voir migration 5, "inscriptions_eleve_groupe_ouverte_key"),
+  // qu'aucune inscription active ne viole : l'index unique existant sur
+  // (eleve_id, groupe_id) garantit qu'il ne peut pas y avoir deux lignes 'actif'
+  // pour un même couple.
+  // ⚠️ Un index PARTIEL n'est pas exprimable en Prisma : `migrate diff` ne le voit
+  // pas. S'il était un jour régénéré depuis ce schéma, la garantie disparaît
+  // silencieusement. Un test de garde doit interroger pg_indexes.
+  // Conséquence : findUnique({ eleveId_groupeId }) n'existe plus (3 sites).
   @@index([groupeId])
   @@index([groupeId, statut])
   @@index([eleveId, statut])
+  @@index([eleveId, groupeId, dateDebut, dateFin])
+  @@index([eleveId, dateDebut])
   @@map("inscriptions")
 }
 
 // ─── Seance ──────────────────────────────────────────────────────────────────
 
 model Seance {
-  id            String        @id @default(uuid()) @db.Uuid
-  groupeId      String        @map("groupe_id") @db.Uuid
-  date          DateTime      @db.Date
-  heureDebut    DateTime?     @map("heure_debut") @db.Time
-  heureFin      DateTime?     @map("heure_fin") @db.Time
-  statut        SeanceStatut  @default(planifiee)
+  id            String       @id @default(uuid()) @db.Uuid
+  groupeId      String       @map("groupe_id") @db.Uuid
+  date          DateTime     @db.Date
+  heureDebut    DateTime?    @map("heure_debut") @db.Time
+  heureFin      DateTime?    @map("heure_fin") @db.Time
+  statut        SeanceStatut @default(planifiee)
   notes         String?
-  prixParSeance Decimal?      @map("prix_par_seance") @db.Decimal(10, 2)
-  createdAt     DateTime      @default(now()) @map("created_at")
+  prixParSeance Decimal?     @map("prix_par_seance") @db.Decimal(10, 2)
+  createdAt     DateTime     @default(now()) @map("created_at")
 
-  groupe    Groupe       @relation(fields: [groupeId], references: [id], onDelete: Cascade)
-  presences Presence[]
+  groupe              Groupe               @relation(fields: [groupeId], references: [id], onDelete: Cascade)
+  presences           Presence[]
+  documents           SeanceDocument[]
+  teacherTransactions TeacherTransaction[]
+  teacherCenterDebts  TeacherCenterDebt[]
 
   @@index([groupeId, date])
   @@index([date])
   @@map("seances")
+}
+
+// ─── SeanceDocument (Supports / fichiers pédagogiques d'une séance) ────────
+// Fichiers stockés dans Vercel Blob (store Private) ; uniquement les
+// métadonnées en base. centerId est dénormalisé (comme TeacherTransaction /
+// StudentTransaction) pour garantir l'isolation multi-tenant et l'indexation.
+
+model SeanceDocument {
+  id           String    @id @default(uuid()) @db.Uuid
+  centerId     String    @map("center_id") @db.Uuid
+  seanceId     String    @map("seance_id") @db.Uuid
+  uploadedById String?   @map("uploaded_by_id") @db.Uuid
+  pathname     String    @db.VarChar(450)
+  fileName     String    @map("file_name") @db.VarChar(255)
+  mimeType     String    @map("mime_type") @db.VarChar(100)
+  sizeBytes    Int       @map("size_bytes")
+  description  String?   @db.VarChar(500)
+  // Cycle de vie du dépôt : la ligne est créée AVANT l'upload navigateur
+  // ("en_attente") puis confirmée par le callback serveur onUploadCompleted
+  // après contrôle réel du blob ("pret"). Une ligne "en_attente" jamais
+  // confirmée est un dépôt échoué, nettoyé par le cron.
+  statut       String    @default("en_attente") @db.VarChar(20)
+  verifiedAt   DateTime? @map("verified_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  center     Center       @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  seance     Seance       @relation(fields: [seanceId], references: [id], onDelete: Cascade)
+  uploadedBy Utilisateur? @relation("SeanceDocuments", fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  @@index([seanceId, createdAt])
+  @@index([centerId, seanceId])
+  @@index([centerId, createdAt])
+  @@index([uploadedById])
+  @@index([centerId, statut, createdAt])
+  @@map("seance_documents")
 }
 
 // ─── Presence ────────────────────────────────────────────────────────────────
@@ -267,9 +399,9 @@ model Presence {
   dateCreation     DateTime       @default(now()) @map("date_creation")
   dateModification DateTime       @default(now()) @map("date_modification")
 
-  seance       Seance       @relation(fields: [seanceId], references: [id], onDelete: Cascade)
-  eleve        Utilisateur  @relation("PresenceEleve", fields: [eleveId], references: [id], onDelete: Cascade)
-  enregistreur Utilisateur? @relation("PresenceEnregistrePar", fields: [enregistrePar], references: [id], onDelete: SetNull)
+  seance              Seance               @relation(fields: [seanceId], references: [id], onDelete: Cascade)
+  eleve               Utilisateur          @relation("PresenceEleve", fields: [eleveId], references: [id], onDelete: Cascade)
+  enregistreur        Utilisateur?         @relation("PresenceEnregistrePar", fields: [enregistrePar], references: [id], onDelete: SetNull)
   studentTransactions StudentTransaction[] @relation("StudentTransactionAttendance")
 
   @@unique([seanceId, eleveId])
@@ -290,6 +422,10 @@ model Paiement {
   reference       String?
   notes           String?
   createdAt       DateTime        @default(now()) @map("created_at")
+  tauxApplique    Decimal?        @map("taux_applique") @db.Decimal(5, 2)
+  partCentre      Decimal?        @map("part_centre") @db.Decimal(10, 2)
+  collecteParProf Boolean         @default(false) @map("collecte_par_prof")
+  reverseDebtId   String?         @map("reverse_debt_id") @db.Uuid
 
   eleve  Utilisateur @relation(fields: [eleveId], references: [id], onDelete: Cascade)
   groupe Groupe      @relation(fields: [groupeId], references: [id], onDelete: Cascade)
@@ -298,6 +434,7 @@ model Paiement {
   @@index([eleveId])
   @@index([groupeId, datePaiement])
   @@index([datePaiement])
+  @@index([collecteParProf])
   @@map("paiements")
 }
 
@@ -338,47 +475,91 @@ model TeacherTransaction {
   reversedAt    DateTime?                @map("reversed_at")
   createdAt     DateTime                 @default(now()) @map("created_at")
 
-  center     Center                 @relation(fields: [centerId], references: [id], onDelete: Cascade)
-  teacher    Utilisateur            @relation("TeacherTransactions", fields: [teacherId], references: [id], onDelete: Cascade)
-  reversalOf TeacherTransaction?    @relation("TransactionReversal", fields: [reversalOfId], references: [id], onDelete: SetNull)
-  reversals  TeacherTransaction[]   @relation("TransactionReversal")
+  mode           Mode     @default(FORWARD)
+  amountReceived Decimal? @map("amount_received") @db.Decimal(10, 2)
+  centerFee      Decimal? @map("center_fee") @db.Decimal(10, 2)
+  netAmount      Decimal? @map("net_amount") @db.Decimal(10, 2)
+  collectionPct  Decimal? @map("collection_pct") @db.Decimal(5, 2)
+  studentId      String?  @map("student_id") @db.Uuid
+  seanceId       String?  @map("seance_id") @db.Uuid
+  direction      String?  @db.VarChar(20)
+  linkedDebtId   String?  @map("linked_debt_id") @db.Uuid
+
+  center     Center               @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  teacher    Utilisateur          @relation("TeacherTransactions", fields: [teacherId], references: [id], onDelete: Cascade)
+  student    Utilisateur?         @relation("TeacherTransactionStudent", fields: [studentId], references: [id], onDelete: SetNull)
+  seance     Seance?              @relation(fields: [seanceId], references: [id], onDelete: SetNull)
+  reversalOf TeacherTransaction?  @relation("TransactionReversal", fields: [reversalOfId], references: [id], onDelete: SetNull)
+  reversals  TeacherTransaction[] @relation("TransactionReversal")
+  debt       TeacherCenterDebt?   @relation("ReverseDebtTransactions", fields: [linkedDebtId], references: [id], onDelete: SetNull)
 
   @@index([centerId, teacherId, date])
   @@index([teacherId, date])
   @@index([type, status])
   @@index([centerId, type])
+  @@index([mode, status])
+  @@index([seanceId])
   @@map("teacher_transactions")
+}
+
+model TeacherCenterDebt {
+  id             String     @id @default(uuid()) @db.Uuid
+  centerId       String     @map("center_id") @db.Uuid
+  teacherId      String     @map("teacher_id") @db.Uuid
+  studentId      String?    @map("student_id") @db.Uuid
+  seanceId       String?    @map("seance_id") @db.Uuid
+  amountDue      Decimal    @map("amount_due") @db.Decimal(10, 2)
+  amountPaid     Decimal    @default(0) @map("amount_paid") @db.Decimal(10, 2)
+  balance        Decimal    @db.Decimal(10, 2)
+  status         DebtStatus @default(OPEN)
+  reverseTxId    String?    @map("reverse_tx_id") @db.Uuid
+  settlementTxId String?    @map("settlement_tx_id") @db.Uuid
+  notes          String?    @db.Text
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+  settledAt      DateTime?  @map("settled_at")
+
+  center             Center               @relation("TeacherCenterDebtCenter", fields: [centerId], references: [id], onDelete: Cascade)
+  teacher            Utilisateur          @relation("TeacherCenterDebtTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
+  student            Utilisateur?         @relation("TeacherCenterDebtStudent", fields: [studentId], references: [id], onDelete: SetNull)
+  seance             Seance?              @relation(fields: [seanceId], references: [id], onDelete: SetNull)
+  linkedTransactions TeacherTransaction[] @relation("ReverseDebtTransactions")
+
+  @@index([centerId, status])
+  @@index([teacherId, status])
+  @@index([teacherId, status, settledAt])
+  @@map("teacher_center_debts")
 }
 
 // ─── StudentTransaction (Crédit / Solde prépayé des élèves) ──────────────────
 
 model StudentTransaction {
-  id            String                  @id @default(uuid()) @db.Uuid
-  centerId      String                  @map("center_id") @db.Uuid
-  eleveId       String                  @map("eleve_id") @db.Uuid
-  type          StudentTransactionType
-  status        StudentTransactionStatus @default(active)
-  amount        Decimal                 @db.Decimal(10, 2)
-  signedAmount  Decimal                 @map("signed_amount") @db.Decimal(10, 2)
-  description   String                  @db.Text
-  paymentMethod MethodePaiement?        @map("payment_method")
-  date          DateTime                @db.Date
-  time          DateTime?               @db.Time
-  receiptNumber String?                 @map("receipt_number") @db.VarChar(50)
-  reference     String?                 @db.VarChar(100)
-  attendanceId  String?                 @map("attendance_id") @db.Uuid
-  idempotencyKey String?                @map("idempotency_key") @db.VarChar(64)
-  notes         String?                 @db.Text
-  createdBy     String?                 @map("created_by") @db.Uuid
-  reversalOfId  String?                 @map("reversal_of_id") @db.Uuid
-  reversedById  String?                 @map("reversed_by_id") @db.Uuid
-  reversedAt    DateTime?               @map("reversed_at")
-  createdAt     DateTime                @default(now()) @map("created_at")
+  id             String                   @id @default(uuid()) @db.Uuid
+  centerId       String                   @map("center_id") @db.Uuid
+  eleveId        String                   @map("eleve_id") @db.Uuid
+  type           StudentTransactionType
+  status         StudentTransactionStatus @default(active)
+  amount         Decimal                  @db.Decimal(10, 2)
+  signedAmount   Decimal                  @map("signed_amount") @db.Decimal(10, 2)
+  description    String                   @db.Text
+  paymentMethod  MethodePaiement?         @map("payment_method")
+  date           DateTime                 @db.Date
+  time           DateTime?                @db.Time
+  receiptNumber  String?                  @map("receipt_number") @db.VarChar(50)
+  reference      String?                  @db.VarChar(100)
+  attendanceId   String?                  @map("attendance_id") @db.Uuid
+  idempotencyKey String?                  @map("idempotency_key") @db.VarChar(64)
+  notes          String?                  @db.Text
+  createdBy      String?                  @map("created_by") @db.Uuid
+  reversalOfId   String?                  @map("reversal_of_id") @db.Uuid
+  reversedById   String?                  @map("reversed_by_id") @db.Uuid
+  reversedAt     DateTime?                @map("reversed_at")
+  createdAt      DateTime                 @default(now()) @map("created_at")
 
-  center     Center              @relation(fields: [centerId], references: [id], onDelete: Cascade)
-  eleve      Utilisateur         @relation("StudentTransactions", fields: [eleveId], references: [id], onDelete: Cascade)
-  attendance Presence?           @relation("StudentTransactionAttendance", fields: [attendanceId], references: [id], onDelete: SetNull)
-  reversalOf StudentTransaction? @relation("StudentTransactionReversal", fields: [reversalOfId], references: [id], onDelete: SetNull)
+  center     Center               @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  eleve      Utilisateur          @relation("StudentTransactions", fields: [eleveId], references: [id], onDelete: Cascade)
+  attendance Presence?            @relation("StudentTransactionAttendance", fields: [attendanceId], references: [id], onDelete: SetNull)
+  reversalOf StudentTransaction?  @relation("StudentTransactionReversal", fields: [reversalOfId], references: [id], onDelete: SetNull)
   reversals  StudentTransaction[] @relation("StudentTransactionReversal")
 
   @@unique([eleveId, attendanceId])
@@ -394,17 +575,17 @@ model StudentTransaction {
 // ─── Notification ────────────────────────────────────────────────────────────
 
 model Notification {
-  id              String    @id @default(uuid()) @db.Uuid
-  centerId        String    @map("center_id") @db.Uuid
-  destinataireId  String    @map("destinataire_id") @db.Uuid
-  titre           String    @db.VarChar(255)
-  message         String    @db.Text
-  type            String    @db.VarChar(50)
-  lu              Boolean   @default(false)
-  createdAt       DateTime  @default(now()) @map("created_at")
+  id             String   @id @default(uuid()) @db.Uuid
+  centerId       String   @map("center_id") @db.Uuid
+  destinataireId String   @map("destinataire_id") @db.Uuid
+  titre          String   @db.VarChar(255)
+  message        String   @db.Text
+  type           String   @db.VarChar(50)
+  lu             Boolean  @default(false)
+  createdAt      DateTime @default(now()) @map("created_at")
 
-  center        Center      @relation(fields: [centerId], references: [id], onDelete: Cascade)
-  destinataire  Utilisateur @relation(fields: [destinataireId], references: [id], onDelete: Cascade)
+  center       Center      @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  destinataire Utilisateur @relation(fields: [destinataireId], references: [id], onDelete: Cascade)
 
   @@index([centerId, destinataireId])
   @@index([destinataireId, lu])
@@ -427,8 +608,8 @@ model PushSubscription {
   center Center      @relation(fields: [centerId], references: [id], onDelete: Cascade)
   user   Utilisateur @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
   @@unique([userId, endpoint])
+  @@index([userId])
   @@map("push_subscriptions")
 }
 
@@ -492,15 +673,15 @@ enum SubscriptionStatus {
 }
 
 model CenterSubscription {
-  id            String             @id @default(uuid()) @db.Uuid
-  centerId      String             @map("center_id") @db.Uuid
-  montant       Decimal            @db.Decimal(10, 2)
-  dateDebut     DateTime           @map("date_debut")
-  dateFin       DateTime           @map("date_fin")
-  statut        SubscriptionStatus @default(active)
-  notes         String?
-  createdAt     DateTime           @default(now()) @map("created_at")
-  updatedAt     DateTime           @updatedAt @map("updated_at")
+  id        String             @id @default(uuid()) @db.Uuid
+  centerId  String             @map("center_id") @db.Uuid
+  montant   Decimal            @db.Decimal(10, 2)
+  dateDebut DateTime           @map("date_debut")
+  dateFin   DateTime           @map("date_fin")
+  statut    SubscriptionStatus @default(active)
+  notes     String?
+  createdAt DateTime           @default(now()) @map("created_at")
+  updatedAt DateTime           @updatedAt @map("updated_at")
 
   center Center @relation(fields: [centerId], references: [id], onDelete: Cascade)
 
@@ -535,12 +716,12 @@ enum MonitorStatus {
 }
 
 model MonitorCheck {
-  id             String            @id @default(uuid()) @db.Uuid
+  id             String           @id @default(uuid()) @db.Uuid
   type           MonitorCheckType
   status         MonitorStatus
-  responseTimeMs Int?              @map("response_time_ms")
+  responseTimeMs Int?             @map("response_time_ms")
   details        Json?
-  checkedAt      DateTime          @default(now()) @map("checked_at")
+  checkedAt      DateTime         @default(now()) @map("checked_at")
 
   @@index([type, checkedAt])
   @@index([status, checkedAt])
@@ -582,8 +763,8 @@ model AnalyticsEvent {
   userAgent String?            @map("user_agent") @db.VarChar(255)
   createdAt DateTime           @default(now()) @map("created_at")
 
-  user    Utilisateur @relation(fields: [userId], references: [id], onDelete: Cascade)
-  center  Center      @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  user    Utilisateur  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  center  Center       @relation(fields: [centerId], references: [id], onDelete: Cascade)
   session UserSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
 
   @@index([userId])
@@ -606,9 +787,9 @@ model UserSession {
   durationSeconds Int?      @map("duration_seconds")
   endReason       String?   @map("end_reason") @db.VarChar(40)
 
-  user    Utilisateur     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  center  Center          @relation(fields: [centerId], references: [id], onDelete: Cascade)
-  events  AnalyticsEvent[]
+  user   Utilisateur      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  center Center           @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  events AnalyticsEvent[]
 
   @@index([userId])
   @@index([centerId])
@@ -617,6 +798,3 @@ model UserSession {
   @@index([centerId, startedAt])
   @@map("user_sessions")
 }
-
-
-

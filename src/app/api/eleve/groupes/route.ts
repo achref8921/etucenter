@@ -96,6 +96,15 @@ export async function GET() {
           seances: {
             total: groupeSeances.length,
             aVenir: groupeSeances.filter((s: any) => new Date(s.date) >= today && s.statut !== "annulee").length,
+            // Liste des séances du groupe (hors annulées) : utilisée par
+            // l'écran « Mes groupes » pour ouvrir les supports de la séance.
+            // Ce champ est purely additif, les compteurs ci-dessus sont
+            // inchangés. L'accès aux supports reste revérifié côté serveur via
+            // l'inscription active.
+            liste: groupeSeances
+              .filter((s: any) => s.statut !== "annulee")
+              .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
+              .map((s: any) => ({ id: s.id, date: s.date, statut: s.statut })),
           },
           presences: {
             present: groupePresences.filter((p: any) => p.statut === "present").length,

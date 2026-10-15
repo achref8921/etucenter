@@ -19,6 +19,7 @@ interface Utilisateur {
   actif: boolean;
   ghost?: boolean;
   peutGererEleves: boolean;
+  peutEncaisserReverse: boolean;
   codeEleve: string | null;
   codeProf: string | null;
   niveau: string | null;
@@ -319,8 +320,30 @@ export default function UtilisateursPage() {
     }
   };
 
-  const niveauLabels: Record<string, string> = { primaire: "Primaire", college: "Collège", lycee: "Lycée" };
-  const filiereLabels: Record<string, string> = { lettres: "Lettres", economique: "Économique", informatique: "Informatique", technique: "Technique", sciences: "Sciences", math: "Mathématiques" };
+  const [reverseTogglingId, setReverseTogglingId] = useState<string | null>(null);
+
+  const handleToggleEncaisserReverse = async (id: string, current: boolean) => {
+    try {
+      setReverseTogglingId(id);
+      setError(null);
+      const res = await fetch("/api/admin/utilisateurs", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, peutEncaisserReverse: !current }),
+      });
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || "Erreur");
+      }
+      fetchUsers();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setReverseTogglingId(null);
+    }
+  };
+
+  const niveauLabels: Record<string, string> = { primaire: "Primaire", college: "Collège", lycee: "Lycée" };  const filiereLabels: Record<string, string> = { lettres: "Lettres", economique: "Économique", informatique: "Informatique", technique: "Technique", sciences: "Sciences", math: "Mathématiques" };
 
   const handleDownloadExcel = () => {
     const headers = ["Code", "Nom", "Prénom", "Email", "Téléphone", "Niveau", "Classe", "Filière", "État"];
@@ -511,12 +534,13 @@ export default function UtilisateursPage() {
                 <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Classe</th>
                 <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">État</th>
                 <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Gestion élèves</th>
+                <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Encaisser</th>
                 <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
               {filteredUsers.length === 0 ? (
-                <tr><td colSpan={8} className="px-4 py-2.5 text-center text-neutral-500 dark:text-neutral-400">Aucun utilisateur trouvé</td></tr>
+                <tr><td colSpan={9} className="px-4 py-2.5 text-center text-neutral-500 dark:text-neutral-400">Aucun utilisateur trouvé</td></tr>
               ) : (
                 filteredUsers.map((user) => (
                   <tr key={user.id} className="cursor-pointer hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]" onClick={() => router.push(roleNav(user))}>
@@ -560,6 +584,16 @@ export default function UtilisateursPage() {
                         <button onClick={(e) => { e.stopPropagation(); handleToggleGestionEleves(user.id, user.peutGererEleves); }} disabled={gestionTogglingId === user.id} className="flex items-center gap-1 disabled:opacity-50" title={user.peutGererEleves ? "Retirer la permission de gérer des élèves" : "Autoriser la gestion des élèves"}>
                           {gestionTogglingId === user.id ? <Loader2 className="h-4 w-4 animate-spin text-neutral-400 dark:text-neutral-500" /> : user.peutGererEleves ? <ToggleRight className="h-6 w-6 text-indigo-500 dark:text-indigo-400" /> : <ToggleLeft className="h-6 w-6 text-neutral-300 dark:text-[#2a2d35]" />}
                           <span className={`text-[11px] font-medium ${user.peutGererEleves ? "text-indigo-600 dark:text-indigo-400" : "text-neutral-400 dark:text-neutral-500"}`}>{user.peutGererEleves ? "Oui" : "Non"}</span>
+                        </button>
+                      ) : (
+                        <span className="text-[11px] text-neutral-300 dark:text-neutral-600">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-2.5">
+                      {user.role === "prof" || user.role === "PROF" ? (
+                        <button onClick={(e) => { e.stopPropagation(); handleToggleEncaisserReverse(user.id, user.peutEncaisserReverse); }} disabled={reverseTogglingId === user.id} className="flex items-center gap-1 disabled:opacity-50" title={user.peutEncaisserReverse ? "Désactiver la collecte inverse" : "Autoriser la collecte inverse"}>
+                          {reverseTogglingId === user.id ? <Loader2 className="h-4 w-4 animate-spin text-neutral-400 dark:text-neutral-500" /> : user.peutEncaisserReverse ? <ToggleRight className="h-6 w-6 text-emerald-500 dark:text-emerald-400" /> : <ToggleLeft className="h-6 w-6 text-neutral-300 dark:text-[#2a2d35]" />}
+                          <span className={`text-[11px] font-medium ${user.peutEncaisserReverse ? "text-emerald-600 dark:text-emerald-400" : "text-neutral-400 dark:text-neutral-500"}`}>{user.peutEncaisserReverse ? "Oui" : "Non"}</span>
                         </button>
                       ) : (
                         <span className="text-[11px] text-neutral-300 dark:text-neutral-600">—</span>

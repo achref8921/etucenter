@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Upload, Save, Building2, Phone, MapPin, Loader2, PanelLeft, Rows3, Smartphone } from "lucide-react";
+import { Upload, Save, Building2, Phone, MapPin, Loader2, PanelLeft, Rows3, Smartphone, HandCoins } from "lucide-react";
 import { useNavMode } from "@/components/nav-mode-provider";
 
 interface CenterData {
@@ -11,6 +11,7 @@ interface CenterData {
   logo: string | null;
   phone: string | null;
   address: string | null;
+  teacherReversePct?: number;
 }
 
 export default function AdminParametresPage() {
@@ -26,6 +27,7 @@ export default function AdminParametresPage() {
   const [address, setAddress] = useState("");
   const [logo, setLogo] = useState<string | null>(null);
   const [centerCode, setCenterCode] = useState("");
+  const [reversePct, setReversePct] = useState("20");
   const { navMode, setNavMode } = useNavMode();
 
   useEffect(() => {
@@ -38,6 +40,7 @@ export default function AdminParametresPage() {
         setAddress(data.address || "");
         setLogo(data.logo || null);
         setCenterCode(data.code || "");
+        setReversePct(data.teacherReversePct != null ? String(data.teacherReversePct) : "20");
         setLoading(false);
       });
   }, []);
@@ -77,7 +80,13 @@ export default function AdminParametresPage() {
     const res = await fetch("/api/admin/center", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, phone, address, logo }),
+      body: JSON.stringify({
+        name,
+        phone,
+        address,
+        logo,
+        teacherReversePct: Number(reversePct) || 0,
+      }),
     });
     const data = await res.json();
     if (!res.ok) {
@@ -202,6 +211,38 @@ export default function AdminParametresPage() {
               {saving ? "Saving..." : "Save Changes"}
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Navigation sur mobile */}
+      <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6 ">
+        <h2 className="mb-1 text-sm font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+          <span className="flex items-center gap-1.5"><HandCoins className="h-4 w-4" /> Collecte inverse</span>
+        </h2>
+        <p className="mb-4 text-sm text-neutral-500 dark:text-neutral-400">
+          Activez la collecte inverse pour chaque professeur depuis la page « Utilisateurs ». La part du centre définie ci-dessous leur est due : elle est tracée dans les « Dettes Centre » et comptabilisée au moment du règlement.
+        </p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-3">
+            <label className="text-sm text-neutral-600 dark:text-neutral-400">Part du centre (%)</label>
+            <input
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              value={reversePct}
+              onChange={(e) => setReversePct(e.target.value)}
+              className="w-24 rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-[13px] text-neutral-900 dark:text-neutral-100"
+            />
+          </div>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="ml-auto flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+          >
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            {saving ? "Enregistrement..." : "Enregistrer"}
+          </button>
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { generateTemporaryPassword } from "@/lib/passwords";
+import { headDocument } from "@/lib/seance-documents-storage";
 
 export const BACKUP_KIND = "educenter-center-backup";
 export const BACKUP_SCHEMA_VERSION = "1.0";
@@ -37,11 +38,17 @@ export interface CenterBackupDump {
     inscriptions: any[];
     seances: any[];
     presences: any[];
+    // Métadonnées des supports de séance. Les FICHIERS eux-mêmes vivent dans
+    // Vercel Blob et ne sont pas contenus dans ce JSON : à la restauration,
+    // chaque ligne n'est réimportée que si le fichier existe réellement dans le
+    // store cible (sinon elle est ignorée et comptabilisée).
+    seanceDocuments: any[];
     paiements: any[];
     tauxBenefices: any[];
     notifications: any[];
     studentTransactions: any[];
     teacherTransactions: any[];
+    teacherDebts?: any[];
     pushSubscriptions: any[];
   };
 }
@@ -61,11 +68,13 @@ export async function gatherCenterBackup(
     inscriptions,
     seances,
     presences,
+    seanceDocuments,
     paiements,
     tauxBenefices,
     notifications,
     studentTransactions,
     teacherTransactions,
+    teacherDebts,
     pushSubscriptions,
   ] = await Promise.all([
     prisma.utilisateur.findMany({ where: { centerId } }),
@@ -74,11 +83,13 @@ export async function gatherCenterBackup(
     prisma.inscription.findMany({ where: { groupe: { centerId } } }),
     prisma.seance.findMany({ where: { groupe: { centerId } } }),
     prisma.presence.findMany({ where: { seance: { groupe: { centerId } } } }),
+    prisma.seanceDocument.findMany({ where: { centerId } }),
     prisma.paiement.findMany({ where: { groupe: { centerId } } }),
     prisma.tauxBenefice.findMany({ where: { prof: { centerId } } }),
     prisma.notification.findMany({ where: { centerId } }),
     prisma.studentTransaction.findMany({ where: { centerId } }),
     prisma.teacherTransaction.findMany({ where: { centerId } }),
+    prisma.teacherCenterDebt.findMany({ where: { centerId } }),
     prisma.pushSubscription.findMany({ where: { centerId } }),
   ]);
 
@@ -86,7 +97,7 @@ export async function gatherCenterBackup(
     id: u.id, centerId: u.centerId, nom: u.nom, prenom: u.prenom, email: u.email,
     motDePasse: str(u.motDePasse), telephone: str(u.telephone), role: u.role,
     image: str(u.image), dateNaissance: toIso(u.dateNaissance), actif: u.actif,
-    peutGererEleves: u.peutGererEleves, codeEleve: str(u.codeEleve), codeProf: str(u.codeProf),
+    peutGererEleves: u.peutGererEleves, peutEncaisserReverse: u.peutEncaisserReverse, codeEleve: str(u.codeEleve), codeProf: str(u.codeProf),
     niveau: str(u.niveau), classe: str(u.classe), filiere: str(u.filiere),
     deletedAt: toIso(u.deletedAt), provider: u.provider ?? "credentials",
     createdAt: toIso(u.createdAt), updatedAt: toIso(u.updatedAt),
@@ -118,8 +129,15 @@ export async function gatherCenterBackup(
       createdAt: toIso(s.createdAt),
     })),
     presences: presences.map((p) => ({
-      id: p.id, seanceId: p.seanceId, eleveId: p.eleveId, statut: p.statut,
+      id: p.id, seanceId: p.seanceId, eleveId: p.eleveId,       statut: p.statut,
       enregistrePar: str(p.enregistrePar), dateCreation: toIso(p.dateCreation), dateModification: toIso(p.dateModification),
+    })),
+    seanceDocuments: seanceDocuments.map((d) => ({
+      id: d.id, centerId: d.centerId, seanceId: d.seanceId,
+      pathname: d.pathname, fileName: d.fileName, mimeType: d.mimeType,
+      sizeBytes: d.sizeBytes, description: str(d.description),
+      uploadedById: str(d.uploadedById), statut: d.statut,
+      verifiedAt: toIso(d.verifiedAt), createdAt: toIso(d.createdAt),
     })),
     paiements: paiements.map((p) => ({
       id: p.id, eleveId: p.eleveId, groupeId: p.groupeId, montant: num(p.montant),
@@ -145,11 +163,20 @@ export async function gatherCenterBackup(
     })),
     teacherTransactions: teacherTransactions.map((t) => ({
       id: t.id, centerId: t.centerId, teacherId: t.teacherId, type: t.type, status: t.status,
-      amount: num(t.amount), signedAmount: num(t.signedAmount), description: t.description,
+      mode: t.mode, amount: num(t.amount), signedAmount: num(t.signedAmount), description: t.description,
       paymentMethod: str(t.paymentMethod), date: toIso(t.date), time: toIso(t.time),
       receiptNumber: str(t.receiptNumber), reference: str(t.reference), notes: str(t.notes),
       createdBy: str(t.createdBy), reversalOfId: str(t.reversalOfId), reversedById: str(t.reversedById),
       reversedAt: toIso(t.reversedAt), createdAt: toIso(t.createdAt),
+      amountReceived: num(t.amountReceived), centerFee: num(t.centerFee), netAmount: num(t.netAmount),
+      collectionPct: num(t.collectionPct), studentId: str(t.studentId), seanceId: str(t.seanceId),
+      direction: str(t.direction), linkedDebtId: str(t.linkedDebtId),
+    })),
+    teacherDebts: teacherDebts.map((d) => ({
+      id: d.id, centerId: d.centerId, teacherId: d.teacherId, studentId: str(d.studentId), seanceId: str(d.seanceId),
+      amountDue: num(d.amountDue), amountPaid: num(d.amountPaid), balance: num(d.balance), status: d.status,
+      reverseTxId: str(d.reverseTxId), settlementTxId: str(d.settlementTxId), notes: str(d.notes),
+      createdAt: toIso(d.createdAt), updatedAt: toIso(d.updatedAt), settledAt: toIso(d.settledAt),
     })),
     pushSubscriptions: pushSubscriptions.map((s) => ({
       id: s.id, centerId: s.centerId, userId: s.userId, endpoint: s.endpoint,
@@ -184,10 +211,13 @@ const ALLOWED_PRESENCE_STATUTS = ["present", "absent"] as const;
 const ALLOWED_SEANCE_STATUTS = ["planifiee", "en_cours", "terminee", "annulee"] as const;
 const ALLOWED_STUDENT_TX_TYPES = ["PREPAYMENT", "COURSE_CONSUMPTION", "ADJUSTMENT", "REVERSAL"] as const;
 const ALLOWED_STUDENT_TX_STATUTS = ["active", "reversed"] as const;
-const ALLOWED_TEACHER_TX_TYPES = ["EARNING", "PAYMENT", "ADJUSTMENT", "REVERSAL"] as const;
-const ALLOWED_TEACHER_TX_STATUTS = ["active", "reversed"] as const;
+const ALLOWED_TEACHER_TX_TYPES = ["EARNING", "PAYMENT", "ADJUSTMENT", "REVERSAL", "REVERSE_COLLECTION", "CENTER_SETTLEMENT"] as const;
+const ALLOWED_TEACHER_TX_STATUTS = ["active", "reversed", "pending"] as const;
+const ALLOWED_MODES = ["FORWARD", "REVERSE"] as const;
+const ALLOWED_DEBT_STATUS = ["OPEN", "PARTIAL", "PAID"] as const;
 const ALLOWED_NIVEAU = ["primaire", "college", "lycee"] as const;
 const ALLOWED_FILIERE = ["lettres", "economique", "informatique", "technique", "sciences", "math"] as const;
+const ALLOWED_DOCUMENT_MIMES = ["application/pdf", "image/jpeg", "image/png", "image/webp"] as const;
 
 function pick<T extends readonly string[]>(value: unknown, allowed: T, fallback: T[number]): T[number] {
   return allowed.includes(value as T[number]) ? (value as T[number]) : fallback;
@@ -220,9 +250,11 @@ export async function restoreCenterBackup(
 
   if (mode === "full") {
     await tx.teacherTransaction.deleteMany({ where: { centerId } });
+    await tx.teacherCenterDebt.deleteMany({ where: { centerId } });
     await tx.studentTransaction.deleteMany({ where: { centerId } });
     await tx.pushSubscription.deleteMany({ where: { centerId } });
     await tx.presence.deleteMany({ where: { seance: { groupe: { centerId } } } });
+    await tx.seanceDocument.deleteMany({ where: { centerId } });
     await tx.paiement.deleteMany({ where: { groupe: { centerId } } });
     await tx.seance.deleteMany({ where: { groupe: { centerId } } });
     await tx.inscription.deleteMany({ where: { groupe: { centerId } } });
@@ -273,6 +305,7 @@ export async function restoreCenterBackup(
         dateNaissance: u.dateNaissance ? date(u.dateNaissance) : null,
         actif: u.actif ?? false,
         peutGererEleves: u.peutGererEleves ?? false,
+        peutEncaisserReverse: u.peutEncaisserReverse ?? false,
         codeEleve: str(u.codeEleve), codeProf: str(u.codeProf),
         niveau: pick(u.niveau, ALLOWED_NIVEAU, "college"),
         classe: str(u.classe), filiere: pick(u.filiere, ALLOWED_FILIERE, "sciences"),
@@ -381,6 +414,45 @@ export async function restoreCenterBackup(
   }
   if (D.presences?.length) logs.push(`Présences : ${D.presences.length} traitées`);
 
+  // Supports de séance.
+  // Le JSON ne contient que les métadonnées : une ligne n'est réimportée que si
+  // le fichier est réellement présent dans le store cible. On ne crée donc
+  // JAMAIS une ligne pointant vers un fichier absent (sinon l'élève verrait un
+  // support introuvable), et chaque fichier sauté est signalé dans le rapport.
+  let docsSkipped = 0;
+  for (const d of D.seanceDocuments || []) {
+    const newSeanceId = idMap[d.seanceId];
+    if (!newSeanceId || typeof d.pathname !== "string" || typeof d.fileName !== "string") {
+      skipped++; docsSkipped++; continue;
+    }
+    // Vérifie l'existence réelle du fichier avant de créer la ligne.
+    const head = await headDocument(d.pathname);
+    if (!head) { skipped++; docsSkipped++; continue; }
+    await tx.seanceDocument.create({
+      data: {
+        centerId,
+        seanceId: newSeanceId,
+        pathname: d.pathname,
+        fileName: d.fileName.slice(0, 255),
+        mimeType: pick(d.mimeType, ALLOWED_DOCUMENT_MIMES, "application/pdf"),
+        sizeBytes: Number(d.sizeBytes) || 0,
+        description: str(d.description),
+        uploadedById: d.uploadedById ? idMap[d.uploadedById] || null : null,
+        statut: "pret",
+        verifiedAt: date(d.verifiedAt) ?? new Date(),
+        createdAt: (d.createdAt && date(d.createdAt)) ?? new Date(),
+      },
+    });
+    created++;
+  }
+  if (D.seanceDocuments?.length) {
+    logs.push(
+      docsSkipped === 0
+        ? `Supports de séance : ${D.seanceDocuments.length} réimportés (fichiers vérifiés dans le stockage)`
+        : `Supports de séance : ${D.seanceDocuments.length - docsSkipped} réimportés, ${docsSkipped} ignorés (séance introuvable ou fichier absent du stockage)`
+    );
+  }
+
   // Paiements
   for (const pay of D.paiements || []) {
     const newEleveId = idMap[pay.eleveId];
@@ -469,6 +541,35 @@ export async function restoreCenterBackup(
   }
   if (D.studentTransactions?.length) logs.push(`Transactions élèves : ${D.studentTransactions.length} traitées`);
 
+  // Dettes professeur → centre (mode REVERSE)
+  for (const d of D.teacherDebts || []) {
+    const newTeacherId = idMap[d.teacherId];
+    if (!newTeacherId) { skipped++; continue; }
+    const newStudentId = d.studentId ? idMap[d.studentId] || null : null;
+    const newSeanceId = d.seanceId ? idMap[d.seanceId] || null : null;
+    const createdAt = (d.createdAt && date(d.createdAt)) ?? new Date();
+    const existing = await tx.teacherCenterDebt.findFirst({
+      where: { centerId, teacherId: newTeacherId, amountDue: d.amountDue != null ? Number(d.amountDue) : 0, createdAt },
+    });
+    if (existing) { idMap[d.id] = existing.id; skipped++; continue; }
+    const createdD = await tx.teacherCenterDebt.create({
+      data: {
+        centerId, teacherId: newTeacherId,
+        studentId: newStudentId, seanceId: newSeanceId,
+        amountDue: d.amountDue != null ? Number(d.amountDue) : 0,
+        amountPaid: d.amountPaid != null ? Number(d.amountPaid) : 0,
+        balance: d.balance != null ? Number(d.balance) : 0,
+        status: pick(d.status, ALLOWED_DEBT_STATUS, "OPEN"),
+        notes: str(d.notes),
+        settledAt: d.settledAt ? date(d.settledAt) : null,
+        createdAt,
+      },
+    });
+    idMap[d.id] = createdD.id;
+    created++;
+  }
+  if (D.teacherDebts?.length) logs.push(`Dettes professeur : ${D.teacherDebts.length} traitées`);
+
   // Transactions professeurs
   for (const t of D.teacherTransactions || []) {
     const newTeacherId = idMap[t.teacherId];
@@ -481,12 +582,13 @@ export async function restoreCenterBackup(
         date: date(t.date) ?? new Date(),
       },
     });
-    if (existing) { skipped++; continue; }
-    await tx.teacherTransaction.create({
+    if (existing) { idMap[t.id] = existing.id; skipped++; continue; }
+    const createdT = await tx.teacherTransaction.create({
       data: {
         centerId, teacherId: newTeacherId,
         type: pick(t.type, ALLOWED_TEACHER_TX_TYPES, "EARNING"),
         status: pick(t.status, ALLOWED_TEACHER_TX_STATUTS, "active"),
+        mode: pick(t.mode, ALLOWED_MODES, "FORWARD"),
         amount: t.amount != null ? Number(t.amount) : 0,
         signedAmount: t.signedAmount != null ? Number(t.signedAmount) : 0,
         description: t.description || "",
@@ -498,11 +600,30 @@ export async function restoreCenterBackup(
         reversalOfId: t.reversalOfId ? idMap[t.reversalOfId] || null : null,
         reversedById: t.reversedById ? idMap[t.reversedById] || null : null,
         reversedAt: t.reversedAt ? date(t.reversedAt) : null,
+        amountReceived: t.amountReceived != null ? Number(t.amountReceived) : null,
+        centerFee: t.centerFee != null ? Number(t.centerFee) : null,
+        netAmount: t.netAmount != null ? Number(t.netAmount) : null,
+        collectionPct: t.collectionPct != null ? Number(t.collectionPct) : null,
+        studentId: t.studentId ? idMap[t.studentId] || null : null,
+        seanceId: t.seanceId ? idMap[t.seanceId] || null : null,
+        direction: str(t.direction),
+        linkedDebtId: t.linkedDebtId ? idMap[t.linkedDebtId] || null : null,
       },
     });
+    idMap[t.id] = createdT.id;
     created++;
   }
   if (D.teacherTransactions?.length) logs.push(`Transactions professeurs : ${D.teacherTransactions.length} traitées`);
+
+  // Relie chaque dette à ses transactions de collecte / règlement
+  for (const d of D.teacherDebts || []) {
+    const newDebtId = idMap[d.id];
+    if (!newDebtId) continue;
+    const reverseTxId = d.reverseTxId ? idMap[d.reverseTxId] || null : null;
+    const settlementTxId = d.settlementTxId ? idMap[d.settlementTxId] || null : null;
+    if (!reverseTxId && !settlementTxId) continue;
+    await tx.teacherCenterDebt.update({ where: { id: newDebtId }, data: { reverseTxId, settlementTxId } });
+  }
 
   // Push subscriptions (facultatif — nécessite des utilisateurs existants)
   let pushSkipped = 0;

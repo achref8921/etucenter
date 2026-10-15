@@ -2,7 +2,11 @@ import type { MethodePaiement } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 import { createStudentTransaction } from "@/lib/student-finance";
-import { creditTeacherForPayment } from "@/lib/teacher-finance";
+import {
+  centerSharePercent,
+  computePaymentSplit,
+  creditTeacherForPayment,
+} from "@/lib/teacher-finance";
 
 export interface ProcessStudentPaymentInput {
   centerId: string;
@@ -42,6 +46,20 @@ export async function processStudentPayment(input: ProcessStudentPaymentInput) {
       }
     }
 
+    const groupeInfo = await tx.groupe.findUnique({
+      where: { id: groupeId },
+      select: { profId: true },
+    });
+
+    let split: ReturnType<typeof computePaymentSplit> | null = null;
+    if (groupeInfo?.profId) {
+      const profTaux = await tx.utilisateur.findUnique({
+        where: { id: groupeInfo.profId },
+        select: { tauxBenefice: { select: { tauxPourcentage: true } } },
+      });
+      split = computePaymentSplit(Number(montant), centerSharePercent(profTaux?.tauxBenefice));
+    }
+
     const created = await tx.paiement.create({
       data: {
         eleveId,
@@ -51,6 +69,8 @@ export async function processStudentPayment(input: ProcessStudentPaymentInput) {
         reference: reference ?? null,
         notes: notes ?? null,
         datePaiement: date ?? undefined,
+        tauxApplique: split?.tauxApplique ?? null,
+        partCentre: split?.partCentre ?? null,
       },
       include: {
         eleve: { select: { id: true, nom: true, prenom: true } },
@@ -86,6 +106,7 @@ export async function processStudentPayment(input: ProcessStudentPaymentInput) {
           reference: `paiement:${created.id}`,
           notes: notes ?? null,
           createdBy: createdBy ?? null,
+          centerSharePct: split?.tauxApplique,
           db: tx,
         })
       : null;

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireActiveCenter, PROF_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
-import { DEFAULT_CENTER_SHARE, centerSharePercent, getTeacherDashboardFinance } from "@/lib/teacher-finance";
+import { DEFAULT_CENTER_SHARE, centerSharePercent, getTeacherDashboardFinance, getTeacherProfit, monthRange } from "@/lib/teacher-finance";
 
 export async function GET() {
   try {
@@ -12,7 +12,7 @@ export async function GET() {
     const userId = user.id;
     const centerId = user.centerId;
 
-    const [tauxBenefice, groupes, presencesTerminees, dashboardFinance] =
+    const [tauxBenefice, groupes, presencesTerminees, dashboardFinance, profit] =
       await Promise.all([
         prisma.tauxBenefice.findUnique({ where: { profId: userId } }),
         prisma.groupe.findMany({
@@ -39,6 +39,10 @@ export async function GET() {
           },
         }),
         getTeacherDashboardFinance(centerId, userId),
+        (() => {
+          const { from, to } = monthRange();
+          return getTeacherProfit({ centerId, teacherId: userId, from, to });
+        })(),
       ]);
 
     const centreShare = centerSharePercent(tauxBenefice);
@@ -57,6 +61,7 @@ export async function GET() {
       tauxPourcentage: profShare,
       impayeNet: dashboardFinance.impayeNet,
       claimable: dashboardFinance.claimable,
+      profit,
       totalEleves,
       totalSeances,
       totalSeancesTerminees: presencesTerminees,

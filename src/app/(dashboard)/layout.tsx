@@ -52,6 +52,7 @@ export default async function DashboardRootLayout({
     centerId: session.user.centerId,
     frozen,
     peutGererEleves: (session.user as any).peutGererEleves === true,
+    peutEncaisserReverse: (session.user as any).peutEncaisserReverse === true,
   };
 
   return (

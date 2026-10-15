@@ -21,6 +21,8 @@ import {
   BarChart3,
   Database,
   UserPlus,
+  Banknote,
+  Scale,
 } from "lucide-react";
 
 interface NavItem {
@@ -81,21 +83,30 @@ interface SidebarProps {
   centerName?: string;
   centerLogo?: string | null;
   peutGererEleves?: boolean;
+  peutEncaisserReverse?: boolean;
   open: boolean;
   onClose: () => void;
 }
 
-export default function Sidebar({ role, centerName, centerLogo, peutGererEleves, open, onClose }: SidebarProps) {
+export default function Sidebar({ role, centerName, centerLogo, peutGererEleves, peutEncaisserReverse, open, onClose }: SidebarProps) {
   const pathname = usePathname();
   const baseItems = navItemsByRole[role];
-  const navItems =
-    role === "prof" && peutGererEleves
-      ? [
-          ...baseItems.slice(0, 1),
-          { label: "Gestion Élèves", href: "/prof/gestion-eleves", icon: UserPlus },
-          ...baseItems.slice(1),
-        ]
-      : baseItems;
+  let navItems = baseItems;
+
+  if (role === "prof") {
+    const items = [...baseItems];
+    if (peutEncaisserReverse) {
+      const idx = items.findIndex((i) => i.href === "/prof/presences");
+      items.splice(idx + 1, 0,
+        { label: "Encaisser", href: "/prof/encaisser", icon: Banknote },
+        { label: "Dettes Centre", href: "/prof/dettes", icon: Scale },
+      );
+    }
+    if (peutGererEleves) {
+      items.splice(1, 0, { label: "Gestion Élèves", href: "/prof/gestion-eleves", icon: UserPlus });
+    }
+    navItems = items;
+  }
 
   return (
     <>

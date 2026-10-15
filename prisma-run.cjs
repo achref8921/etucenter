@@ -5,8 +5,27 @@ const fs = require('fs');
 const root = __dirname;
 const version = '605197351a3c8bdd595af2d2a9bc3025bca48ea2';
 const cacheDir = path.join(root, 'node_modules', '.cache', 'prisma', 'master', version, 'windows');
-const queryEngine = path.join(cacheDir, 'query_engine-windows.dll.node');
-const schemaEngine = path.join(cacheDir, 'schema-engine-windows.exe');
+const enginesDir = path.join(root, 'node_modules', '@prisma', 'engines');
+
+// Résolution d'un engine : cache local d'abord, puis le paquet @prisma/engines.
+// Sur cette machine le cache ne contient que le query engine ; le schema engine
+// n'existe que dans @prisma/engines. Sans ce repli, `prisma migrate` échoue.
+function resolveEngine(fileName) {
+  const candidates = [
+    path.join(cacheDir, fileName),
+    path.join(enginesDir, fileName),
+  ];
+  const found = candidates.find((p) => fs.existsSync(p));
+  if (!found) {
+    throw new Error(
+      `Engine Prisma introuvable : ${fileName}\nCherché dans :\n  ${candidates.join('\n  ')}`,
+    );
+  }
+  return found;
+}
+
+const queryEngine = resolveEngine('query_engine-windows.dll.node');
+const schemaEngine = resolveEngine('schema-engine-windows.exe');
 
 const env = {
   ...process.env,

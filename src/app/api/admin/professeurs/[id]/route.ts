@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
-import { DEFAULT_CENTER_SHARE } from "@/lib/teacher-finance";
+import { DEFAULT_CENTER_SHARE, round2 } from "@/lib/teacher-finance";
 
 export async function GET(
   request: NextRequest,
@@ -61,7 +61,7 @@ export async function GET(
 
     const [netRevenueResult, eleveCounts] = await Promise.all([
       groupeIds.length
-        ? prisma.$queryRawUnsafe<{ net_revenue: number }[]>(
+        ? prisma.$queryRawUnsafe<{ net_revenue: number; benefice_centre: number }[]>(
             `
             WITH all_sessions AS (
               SELECT
@@ -91,41 +91,49 @@ export async function GET(
               FROM all_sessions
               GROUP BY eleve_id, groupe_id
             ),
-            student_payments AS (
+            payment_roll AS (
               SELECT
                 pai.eleve_id,
                 pai.groupe_id,
-                SUM(pai.montant) as total_paid
+                pai.montant,
+                COALESCE(pai.part_centre, (pai.montant * COALESCE(tb.taux_pourcentage, 20)) / 100) AS part_centre,
+                SUM(pai.montant) OVER (
+                  PARTITION BY pai.eleve_id, pai.groupe_id
+                  ORDER BY pai.date_paiement, pai.created_at, pai.id
+                ) AS run_paid
               FROM paiements pai
               JOIN groupes g ON pai.groupe_id = g.id
-              WHERE g.prof_id = $1::uuid
+              LEFT JOIN taux_benefices tb ON tb.prof_id = g.prof_id
+WHERE g.prof_id = $1::uuid
                 AND g.center_id = $2::uuid
                 AND pai.date_paiement <= $3::timestamptz
-              GROUP BY pai.eleve_id, pai.groupe_id
-            ),
-            paid_this_month AS (
+                AND pai.collecte_par_prof = false
+              ),
+            counted AS (
               SELECT
-                sd.eleve_id,
-                sd.groupe_id,
+                pr.montant,
+                pr.part_centre,
                 GREATEST(0,
-                  LEAST(sd.due_this_month,
-                    GREATEST(0, COALESCE(sp.total_paid, 0) - (sd.total_due - sd.due_this_month))
-                  )
-                ) as paid_amount
-              FROM student_dues sd
-              LEFT JOIN student_payments sp
-                ON sd.eleve_id = sp.eleve_id AND sd.groupe_id = sp.groupe_id
-              WHERE sd.due_this_month > 0
+                  LEAST(pr.run_paid, sd.total_due)
+                    - LEAST(pr.run_paid - pr.montant, sd.total_due)
+                    - (LEAST(pr.run_paid, sd.total_due - sd.due_this_month)
+                       - LEAST(pr.run_paid - pr.montant, sd.total_due - sd.due_this_month))
+                ) AS amt
+              FROM payment_roll pr
+              JOIN student_dues sd
+                ON sd.eleve_id = pr.eleve_id AND sd.groupe_id = pr.groupe_id
             )
-            SELECT COALESCE(SUM(pm.paid_amount), 0)::float as net_revenue
-            FROM paid_this_month pm
+            SELECT
+              COALESCE(SUM(amt), 0)::float as net_revenue,
+              COALESCE(SUM(amt * part_centre / NULLIF(montant, 0)), 0)::float as benefice_centre
+            FROM counted
             `,
             id,
             centreId,
             endDate,
             startDate
           )
-        : [{ net_revenue: 0 }],
+        : [{ net_revenue: 0, benefice_centre: 0 }],
       groupeIds.length
         ? prisma.$queryRawUnsafe<{ groupe_id: string; eleve_id: string; nb: number }[]>(
             `
@@ -141,8 +149,8 @@ export async function GET(
     ]);
 
     const netRevenue = Number(netRevenueResult[0]?.net_revenue || 0);
-    const beneficeCentre = (netRevenue * taux) / 100;
-    const salaireProf = netRevenue - beneficeCentre;
+    const beneficeCentre = round2(Number(netRevenueResult[0]?.benefice_centre || 0));
+    const salaireProf = round2(netRevenue - beneficeCentre);
 
     const uniqueStudentIds = new Set(eleveCounts.map((r) => r.eleve_id));
     const nombreEleves = uniqueStudentIds.size;

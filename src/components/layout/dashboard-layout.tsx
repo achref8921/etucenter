@@ -24,6 +24,7 @@ interface DashboardLayoutProps {
     centerId?: string;
     frozen?: boolean;
     peutGererEleves?: boolean;
+    peutEncaisserReverse?: boolean;
   };
   centerName?: string;
   centerLogo?: string | null;
@@ -80,6 +81,7 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
         centerName={centerName}
         centerLogo={centerLogo}
         peutGererEleves={user.peutGererEleves}
+        peutEncaisserReverse={user.peutEncaisserReverse}
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
@@ -105,7 +107,7 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
         </main>
       </div>
 
-      <BottomNav role={user.role} peutGererEleves={user.peutGererEleves} />
+      <BottomNav role={user.role} peutGererEleves={user.peutGererEleves} peutEncaisserReverse={user.peutEncaisserReverse} />
       {(user.role === "admin" || user.role === "prof") && (
         <AssistantWidget isProf={user.role === "prof"} />
       )}

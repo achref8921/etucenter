@@ -63,7 +63,7 @@ async function DashboardContent({ month }: { month: string }) {
               Bénéfice Net du Centre
             </p>
             <p className="mt-2 text-2xl font-bold tabular-nums text-indigo-600 dark:text-indigo-400 sm:text-3xl">
-              {formatCurrency(data.netCenterEarnings)}
+              {formatCurrency(data.totalCenterBenefit)}
             </p>
             <p className="mt-1 text-[12px] text-neutral-400 dark:text-neutral-500">
               20% de {formatCurrency(data.netPaidSessionsRevenue)} — Revenu brut
@@ -89,7 +89,7 @@ async function DashboardContent({ month }: { month: string }) {
           <div>
             <p className="text-[12px] text-neutral-400 dark:text-neutral-500">Bénéfice Centre</p>
             <p className="text-[13px] font-semibold tabular-nums text-indigo-600 dark:text-indigo-400">
-              {formatCurrency(data.netCenterEarnings)}
+              {formatCurrency(data.totalCenterBenefit)}
             </p>
           </div>
         </div>
@@ -283,7 +283,7 @@ async function DashboardContent({ month }: { month: string }) {
                       {formatCurrency(p.netRevenue)}
                     </td>
                     <td className="px-4 py-2.5 tabular-nums font-medium text-indigo-600 dark:text-indigo-400">
-                      {formatCurrency(p.beneficeCentre)}
+                      {formatCurrency(p.beneficeCentre + (p.reverseSettledRevenue ?? 0))}
                     </td>
                     <td className="px-4 py-2.5 tabular-nums font-medium text-purple-600 dark:text-purple-400">
                       {formatCurrency(p.salaireProf)}
@@ -300,7 +300,7 @@ async function DashboardContent({ month }: { month: string }) {
                     {formatCurrency(data.netPaidSessionsRevenue)}
                   </td>
                   <td className="px-4 py-2.5 tabular-nums text-indigo-600 dark:text-indigo-400">
-                    {formatCurrency(data.netCenterEarnings)}
+                    {formatCurrency(data.totalCenterBenefit)}
                   </td>
                   <td className="px-4 py-2.5 tabular-nums text-purple-600 dark:text-purple-400">
                     {formatCurrency(data.netPaidSessionsRevenue - data.netCenterEarnings)}

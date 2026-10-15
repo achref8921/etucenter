@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
+import { applyRateToExistingCalculations } from "@/lib/teacher-finance";
 
 export async function GET() {
   try {
@@ -65,7 +66,7 @@ export async function POST(request: NextRequest) {
     if (error) return error;
 
     const body = await request.json();
-    const { profId, tauxPourcentage } = body;
+    const { profId, tauxPourcentage, applyToExisting } = body;
 
     if (!profId || tauxPourcentage === undefined) {
       return NextResponse.json({ error: "profId et tauxPourcentage sont requis" }, { status: 400 });
@@ -75,24 +76,44 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Le taux doit être entre 0 et 100" }, { status: 400 });
     }
 
+    const centerId = (session.user as any).centerId;
+
     const prof = await prisma.utilisateur.findUnique({
-      where: { id: profId, centerId: (session.user as any).centerId },
+      where: { id: profId, centerId },
     });
 
     if (!prof || prof.role !== "prof") {
       return NextResponse.json({ error: "Prof non trouvé" }, { status: 404 });
     }
 
-    const taux = await prisma.tauxBenefice.upsert({
-      where: { profId },
-      update: { tauxPourcentage },
-      create: { profId, tauxPourcentage },
+    const { taux, applied } = await prisma.$transaction(async (tx) => {
+      const previous = await tx.tauxBenefice.findUnique({ where: { profId } });
+      const updated = await tx.tauxBenefice.upsert({
+        where: { profId },
+        update: { tauxPourcentage },
+        create: { profId, tauxPourcentage },
+      });
+
+      const changed = !previous || Number(previous.tauxPourcentage) !== Number(tauxPourcentage);
+
+      let appliedCounts = { paiements: 0, earnings: 0, reversePayments: 0, reverseCollections: 0, debts: 0 };
+      if (applyToExisting === true && changed) {
+        appliedCounts = await applyRateToExistingCalculations({
+          centerId,
+          teacherId: profId,
+          tauxPourcentage,
+          db: tx,
+        });
+      }
+
+      return { taux: updated, applied: appliedCounts };
     });
 
     return NextResponse.json({
       id: taux.id,
       profId: taux.profId,
       tauxPourcentage: Number(taux.tauxPourcentage),
+      applied,
     });
   } catch (error) {
     return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });

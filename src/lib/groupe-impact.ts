@@ -1,5 +1,6 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { purgeGroupeDocuments } from "@/lib/seance-documents-cleanup";
 
 type Db = Prisma.TransactionClient | PrismaClient;
 
@@ -102,6 +103,11 @@ export async function deleteGroupeWithFinancialControl(
   centerId: string,
   actorId: string
 ) {
+  // Les fichiers de supports vivent hors base : ils sont supprimés AVANT le
+  // groupe. Si un fichier résiste, la suppression est annulée (une exception
+  // est levée par purgeGroupeDocuments) pour ne pas laisser d'orphelin.
+  await purgeGroupeDocuments(groupeId);
+
   return prisma.$transaction(async (tx) => {
     const presenceRows = await tx.presence.findMany({
       where: { seance: { groupeId } },
