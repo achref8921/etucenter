@@ -23,12 +23,37 @@ export async function GET() {
           select: { id: true, nom: true, prenom: true },
         },
         groupe: {
-          select: { id: true, nom: true },
+          select: {
+            id: true,
+            nom: true,
+            prof: { select: { id: true, nom: true, prenom: true } },
+          },
         },
       },
     });
 
-    logger.info("Liste des paiements récupérée", { adminId: (session.user as any).id, count: paiements.length });
+    // Pour les encaissements réalisés par le professeur, on identifie le
+    // professeur qui a réellement encaissé (via la dette centre liée), afin de
+    // pouvoir le distinguer visuellement d'un paiement reçu par le centre.
+    const debtIds = paiements
+      .filter((p) => p.collecteParProf && p.reverseDebtId)
+      .map((p) => p.reverseDebtId as string);
+    const reverseDebts = debtIds.length
+      ? await prisma.teacherCenterDebt.findMany({
+          where: { id: { in: debtIds } },
+          select: { id: true, teacher: { select: { id: true, nom: true, prenom: true } } },
+        })
+      : [];
+    const collectorByDebt = new Map(reverseDebts.map((d) => [d.id, d.teacher]));
+
+    const result = paiements.map((p) => ({
+      ...p,
+      collectedBy: p.collecteParProf
+        ? collectorByDebt.get(p.reverseDebtId ?? "") ?? p.groupe.prof ?? null
+        : null,
+    }));
+
+    logger.info("Liste des paiements récupérée", { adminId: (session.user as any).id, count: result.length });
 
     void trackEventSafe({
       userId: (session.user as any).id,
@@ -36,10 +61,10 @@ export async function GET() {
       event: "PAYMENT_VIEWED",
       path: "/admin/paiements",
       feature: "Paiements",
-      metadata: { count: paiements.length },
+      metadata: { count: result.length },
     });
 
-    return NextResponse.json(paiements);
+    return NextResponse.json(result);
   } catch (error) {
     logger.error("Erreur lors de la récupération des paiements", { error });
     return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });

@@ -20,6 +20,8 @@ import {
   Search,
   Eye,
   Coins,
+  UserCheck,
+  Building2,
 } from "lucide-react";
 import { formatCurrency, formatDateTime, formatDate } from "@/lib/utils";
 import TimeInput from "@/components/time-input";
@@ -36,7 +38,9 @@ interface Paiement {
   datePaiement: string;
   methodePaiement: string;
   notes: string | null;
-  groupe: { id: string; nom: string };
+  collecteParProf: boolean;
+  collectedBy: { id: string; nom: string; prenom: string } | null;
+  groupe: { id: string; nom: string; prof: { id: string; nom: string; prenom: string } | null };
   eleve: { id: string; nom: string; prenom: string };
 }
 
@@ -813,7 +817,8 @@ export default function FinancesPage() {
                         <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Date</th>
                         <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Type</th>
                         <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Description</th>
-                        <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Méthode</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Méthode</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Encaissé par</th>
                         <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Montant</th>
                         <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Reçu</th>
                         <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500"></th>
@@ -977,13 +982,20 @@ export default function FinancesPage() {
           <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
             {paiements.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                <td colSpan={7} className="px-6 py-8 text-center text-neutral-500 dark:text-neutral-400">
                   Aucune transaction trouvée
                 </td>
               </tr>
             ) : (
               paiements.map((paiement) => (
-                <tr key={paiement.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
+                <tr
+                  key={paiement.id}
+                  className={
+                    paiement.collecteParProf
+                      ? "border-l-2 border-l-indigo-400 bg-indigo-50/50 hover:bg-indigo-50 dark:border-l-indigo-500 dark:bg-indigo-500/[0.06] dark:hover:bg-indigo-500/10"
+                      : "hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]"
+                  }
+                >
                   <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
                     {formatDateTime(paiement.datePaiement)}
                   </td>
@@ -1001,6 +1013,21 @@ export default function FinancesPage() {
                     <span className="inline-block rounded-full bg-neutral-100 dark:bg-[#1e2128] px-2.5 py-0.5 text-xs font-medium text-neutral-800 dark:text-neutral-200">
                       {paiement.methodePaiement}
                     </span>
+                  </td>
+                  <td className="px-4 py-2.5">
+                    {paiement.collecteParProf ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
+                        <UserCheck className="h-3 w-3" />
+                        {paiement.collectedBy
+                          ? `Prof ${paiement.collectedBy.prenom} ${paiement.collectedBy.nom}`
+                          : "Encaissé par le prof"}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-medium text-neutral-600 dark:bg-[#1e2128] dark:text-neutral-400">
+                        <Building2 className="h-3 w-3" />
+                        Centre
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-2.5">
                     <div className="flex items-center gap-1">
