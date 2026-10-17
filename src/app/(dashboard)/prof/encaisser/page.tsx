@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Banknote, Loader2, RotateCcw, Trash2, X } from "lucide-react";
+import { ArrowLeft, Banknote, Loader2, RotateCcw, Trash2, Users, X } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { SkeletonPage } from "@/components/ui/skeleton";
 
@@ -17,6 +17,7 @@ interface EleveRow {
   nom: string;
   prenom: string;
   email?: string | null;
+  solde?: number;
   groupes: { id: string; nom: string }[];
 }
 
@@ -116,6 +117,19 @@ export default function ProfEncaisserPage() {
       setStudentId("");
     }
   }, [selectedGroupe, eligibleStudents, studentId]);
+
+  const studentsWithSolde = useMemo(
+    () => [...eleves].sort((a, b) => (a.solde ?? 0) - (b.solde ?? 0)),
+    [eleves]
+  );
+
+  const selectStudent = (e: EleveRow) => {
+    const grp =
+      eligibleGroupes.find((g) => g.id === groupeId && e.groupes.some((x) => x.id === g.id)) ??
+      eligibleGroupes.find((g) => e.groupes.some((x) => x.id === g.id));
+    if (grp) setGroupeId(grp.id);
+    setStudentId(e.id);
+  };
 
   const amountNum = Math.max(0, Number(amount) || 0);
   const pct = config?.teacherReversePct ?? 20;
@@ -254,6 +268,7 @@ export default function ProfEncaisserPage() {
       )}
 
       {config && config.teacherReverseEnabled && (
+        <>
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white p-5 dark:bg-[#181b22]">
             <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
@@ -412,6 +427,59 @@ export default function ProfEncaisserPage() {
             </div>
           </div>
         </div>
+
+        <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+          <div className="flex items-center justify-between border-b border-neutral-200 dark:border-[#2a2d35] px-5 py-3">
+            <h2 className="flex items-center gap-2 text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+              <Users className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
+              Mes élèves ({studentsWithSolde.length})
+            </h2>
+            <span className="text-[12px] text-neutral-500 dark:text-neutral-400">Solde du compte</span>
+          </div>
+          <div className="max-h-[420px] divide-y divide-neutral-100 overflow-y-auto dark:divide-[#2a2d35]">
+            {studentsWithSolde.length === 0 ? (
+              <p className="px-5 py-8 text-center text-[13px] text-neutral-500 dark:text-neutral-400">
+                Aucun élève pour le moment
+              </p>
+            ) : (
+              studentsWithSolde.map((e) => {
+                const solde = e.solde ?? 0;
+                return (
+                  <button
+                    key={e.id}
+                    type="button"
+                    onClick={() => selectStudent(e)}
+                    className={`flex w-full items-center justify-between gap-3 px-5 py-3 text-left transition-colors hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] ${
+                      studentId === e.id ? "bg-indigo-50 dark:bg-indigo-500/10" : ""
+                    }`}
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-[13px] font-medium text-neutral-900 dark:text-neutral-100">
+                        {e.prenom} {e.nom}
+                      </p>
+                      <p className="truncate text-[12px] text-neutral-500 dark:text-neutral-400">
+                        {e.groupes.map((g) => g.nom).join(" · ") || "—"}
+                      </p>
+                    </div>
+                    <span
+                      className={`inline-flex shrink-0 items-center gap-1 rounded-lg px-2.5 py-0.5 text-[12px] font-semibold tabular-nums ${
+                        solde > 0
+                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                          : solde < 0
+                            ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                            : "bg-neutral-100 text-neutral-700 dark:bg-[#2a2d35] dark:text-neutral-200"
+                      }`}
+                    >
+                      {solde > 0 ? "+" : ""}
+                      {formatCurrency(solde)}
+                    </span>
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </div>
+        </>
       )}
 
       {cancelTarget && (

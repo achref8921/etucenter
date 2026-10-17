@@ -91,6 +91,18 @@ export async function GET(request: Request) {
 
     const centerId = (session.user as any).centerId;
 
+    // Solde du compte (net) par élève — même métrique que la liste admin
+    const balanceRows = await prisma.studentTransaction.groupBy({
+      by: ["eleveId"],
+      where: { centerId, eleveId: { in: studentIds }, status: "active" },
+      _sum: { signedAmount: true },
+    });
+
+    const balanceMap = new Map<string, number>();
+    for (const b of balanceRows) {
+      balanceMap.set(b.eleveId, Math.round((Number(b._sum.signedAmount ?? 0) + Number.EPSILON) * 100) / 100);
+    }
+
     // Get payment totals per student per group
     const paiements = await prisma.paiement.groupBy({
       by: ["eleveId", "groupeId"],
@@ -196,6 +208,7 @@ export async function GET(request: Request) {
         totalDue,
         totalPaid: Math.max(0, totalGrossPaid - totalDue),
         impayeTotal: Math.max(0, totalDue - totalGrossPaid),
+        solde: balanceMap.get(stId) ?? 0,
       });
     }
 
