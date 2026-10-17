@@ -184,6 +184,20 @@ export default function AdminBeneficesPage() {
     load();
   }, [fetchTaux, fetchBenefices, fetchPendingSettlements, selectedMonth]);
 
+  // Rafraîchit les versements en attente quand l'admin revient sur l'onglet,
+  // afin qu'une déclaration de professeur apparaisse sans recharger la page.
+  useEffect(() => {
+    const refresh = () => {
+      if (document.visibilityState === "visible") void fetchPendingSettlements();
+    };
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [fetchPendingSettlements]);
+
   const confirmSettlement = async (id: string) => {
     if (
       !window.confirm(
@@ -505,17 +519,34 @@ export default function AdminBeneficesPage() {
         </div>
       )}
 
-      {pendingSettlements.length > 0 && (
-        <div className="rounded-lg border border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20">
-          <div className="flex items-center gap-2 border-b border-amber-200 px-5 py-3 dark:border-amber-800">
-            <CheckCircle2 className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-            <h2 className="text-[13px] font-semibold text-amber-900 dark:text-amber-100">
-              Règlements en attente de confirmation
-            </h2>
-            <span className="rounded-full bg-amber-200 px-2 py-0.5 text-[11px] font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
-              {pendingSettlements.length}
-            </span>
-          </div>
+      <div
+        className={`rounded-lg border ${
+          pendingSettlements.length > 0
+            ? "border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20"
+            : "border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]"
+        }`}
+      >
+        <div
+          className={`flex items-center gap-2 border-b px-5 py-3 ${
+            pendingSettlements.length > 0
+              ? "border-amber-200 dark:border-amber-800"
+              : "border-neutral-200 dark:border-[#2a2d35]"
+          }`}
+        >
+          <CheckCircle2 className={`h-4 w-4 ${pendingSettlements.length > 0 ? "text-amber-600 dark:text-amber-400" : "text-neutral-400 dark:text-neutral-500"}`} />
+          <h2 className={`text-[13px] font-semibold ${pendingSettlements.length > 0 ? "text-amber-900 dark:text-amber-100" : "text-neutral-900 dark:text-neutral-100"}`}>
+            Règlements en attente de confirmation
+          </h2>
+          <span
+            className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
+              pendingSettlements.length > 0
+                ? "bg-amber-200 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
+                : "bg-neutral-100 text-neutral-500 dark:bg-[#1e2128] dark:text-neutral-400"
+            }`}
+          >
+            {pendingSettlements.length}
+          </span>
+        </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-[13px]">
               <thead>
@@ -528,6 +559,13 @@ export default function AdminBeneficesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-amber-100 dark:divide-amber-900/40">
+                {pendingSettlements.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-6 text-center text-[13px] text-neutral-500 dark:text-neutral-400">
+                      Aucun versement en attente de confirmation. Les versements déclarés par les professeurs apparaîtront ici.
+                    </td>
+                  </tr>
+                )}
                 {pendingSettlements.map((s) => (
                   <tr key={s.id}>
                     <td className="px-4 py-2.5 font-medium text-neutral-900 dark:text-neutral-100">
@@ -562,7 +600,6 @@ export default function AdminBeneficesPage() {
             </table>
           </div>
         </div>
-      )}
 
       {beneficesData && beneficesData.profs.length > 0 && (
         <div className="rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
