@@ -885,5 +885,23 @@ export async function listProfCollections(filters: ListProfCollectionsFilters) {
     },
   });
 
-  return collections;
+  // On rattache l'identifiant du paiement élève généré par chaque encaissement,
+  // afin que le professeur puisse annuler l'encaissement (le paiement est la
+  // porte d'entrée de l'annulation).
+  const debtIds = collections.map((c) => c.debt?.id).filter((id): id is string => !!id);
+  let paiementByDebt = new Map<string, string>();
+  if (debtIds.length > 0) {
+    const paiements = await prisma.paiement.findMany({
+      where: { reverseDebtId: { in: debtIds } },
+      select: { id: true, reverseDebtId: true },
+    });
+    paiementByDebt = new Map(
+      paiements.filter((p) => !!p.reverseDebtId).map((p) => [p.reverseDebtId as string, p.id])
+    );
+  }
+
+  return collections.map((c) => ({
+    ...c,
+    paiementId: c.debt ? paiementByDebt.get(c.debt.id) ?? null : null,
+  }));
 }

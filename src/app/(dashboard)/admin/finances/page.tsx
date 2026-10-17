@@ -44,6 +44,23 @@ interface Paiement {
   eleve: { id: string; nom: string; prenom: string };
 }
 
+interface PaiementAnnuleRow {
+  id: string;
+  paiementId: string;
+  eleveId: string;
+  eleveNom: string;
+  groupeNom: string;
+  montant: number;
+  methodePaiement: string;
+  datePaiement: string;
+  collecteParProf: boolean;
+  collecteurNom: string | null;
+  motif: string;
+  annuleParNom: string | null;
+  annuleParRole: string | null;
+  annuleLe: string;
+}
+
 interface EleveOption {
   id: string;
   nom: string;
@@ -164,6 +181,8 @@ export default function FinancesPage() {
 
   const [deleteTarget, setDeleteTarget] = useState<Paiement | null>(null);
   const [deleteSubmitting, setDeleteSubmitting] = useState(false);
+  const [deleteMotif, setDeleteMotif] = useState("");
+  const [annules, setAnnules] = useState<PaiementAnnuleRow[]>([]);
 
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [loadingStudents, setLoadingStudents] = useState(true);
@@ -214,9 +233,10 @@ export default function FinancesPage() {
   const fetchData = async () => {
     try {
       setError(null);
-      const [statsRes, paiementsRes] = await Promise.all([
+      const [statsRes, paiementsRes, annulesRes] = await Promise.all([
         fetch("/api/admin/stats"),
         fetch("/api/admin/paiements"),
+        fetch("/api/admin/paiements/annules"),
       ]);
       if (!statsRes.ok) throw new Error("Erreur lors du chargement des stats");
       const statsData = await statsRes.json();
@@ -224,6 +244,10 @@ export default function FinancesPage() {
       if (paiementsRes.ok) {
         const paiementsData = await paiementsRes.json();
         setPaiements(paiementsData);
+      }
+      if (annulesRes.ok) {
+        const annulesData = await annulesRes.json();
+        setAnnules(Array.isArray(annulesData) ? annulesData : []);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur inconnue");
@@ -394,19 +418,27 @@ export default function FinancesPage() {
     }
   };
 
+  const openDeleteModal = (p: Paiement) => {
+    setDeleteTarget(p);
+    setDeleteMotif("");
+  };
+
   const handleDelete = async () => {
-    if (!deleteTarget) return;
+    if (!deleteTarget || deleteMotif.trim().length < 3) return;
     try {
       setDeleteSubmitting(true);
       setError(null);
       const res = await fetch(`/api/admin/paiements/${deleteTarget.id}`, {
         method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ motif: deleteMotif.trim() }),
       });
       if (!res.ok) {
         const body = await res.json();
-        throw new Error(body.error || "Erreur lors de la suppression");
+        throw new Error(body.error || "Erreur lors de l'annulation");
       }
       setDeleteTarget(null);
+      setDeleteMotif("");
       await refreshAll();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur inconnue");
@@ -1045,6 +1077,13 @@ export default function FinancesPage() {
                       >
                         <Pencil className="h-4 w-4" />
                       </button>
+                      <button
+                        onClick={() => openDeleteModal(paiement)}
+                        className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] hover:text-red-600 dark:hover:text-red-400"
+                        title="Annuler le paiement"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -1054,6 +1093,45 @@ export default function FinancesPage() {
         </table>
         </div>
       </div>
+
+      {annules.length > 0 && (
+        <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+          <div className="border-b border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
+            <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+              Paiements annulés
+              <span className="ml-2 text-xs font-normal text-neutral-500 dark:text-neutral-400">({annules.length})</span>
+            </h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
+                <tr>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Annulé le</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Élève</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Montant</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Motif</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Annulé par</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+                {annules.map((a) => (
+                  <tr key={a.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
+                    <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{formatDateTime(a.annuleLe)}</td>
+                    <td className="px-4 py-2.5 text-neutral-900 dark:text-neutral-100">{a.eleveNom}</td>
+                    <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{a.groupeNom}</td>
+                    <td className="px-4 py-2.5 font-medium text-neutral-400 line-through dark:text-neutral-500">{formatCurrency(a.montant)}</td>
+                    <td className="max-w-xs truncate px-4 py-2.5 text-neutral-600 dark:text-neutral-400" title={a.motif}>{a.motif}</td>
+                    <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                      {a.annuleParNom || (a.annuleParRole === "prof" ? "Professeur" : a.annuleParRole === "admin" ? "Administration" : "—")}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -1678,6 +1756,63 @@ export default function FinancesPage() {
               >
                 <FileText className="h-4 w-4" />
                 Reçu
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-0 shadow-xl">
+            <div className="flex shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
+              <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+                Annuler le paiement
+              </h2>
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
+              <div className="rounded-lg border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-900/20 p-3 text-sm">
+                <p className="font-medium text-neutral-900 dark:text-neutral-100">
+                  {deleteTarget.eleve.prenom} {deleteTarget.eleve.nom} — {formatCurrency(deleteTarget.montant)} — {deleteTarget.groupe.nom}
+                </p>
+                <p className="mt-1 text-red-600 dark:text-red-400">
+                  Action définitive : le paiement et toutes ses écritures comptables (crédit élève, part du professeur, dette centre) seront effacés. L&apos;élève recevra une notification avec le motif.
+                </p>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                  Motif de l&apos;annulation <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={deleteMotif}
+                  onChange={(e) => setDeleteMotif(e.target.value)}
+                  rows={3}
+                  required
+                  placeholder="Ex : Paiement enregistré par erreur, mauvais élève, mauvais groupe..."
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
+                />
+              </div>
+            </div>
+            <div className="flex shrink-0 items-center justify-end gap-3 border-t border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+              >
+                Retour
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleteSubmitting || deleteMotif.trim().length < 3}
+                className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                {deleteSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                Confirmer l&apos;annulation
               </button>
             </div>
           </div>

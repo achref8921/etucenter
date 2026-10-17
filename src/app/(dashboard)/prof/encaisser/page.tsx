@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Banknote, Loader2, RotateCcw } from "lucide-react";
+import { ArrowLeft, Banknote, Loader2, RotateCcw, Trash2, X } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { SkeletonPage } from "@/components/ui/skeleton";
 
@@ -31,6 +31,7 @@ interface CollectionRow {
   groupe?: { id: string; nom: string } | null;
   seance?: { date: string; groupe: { nom: string } } | null;
   debt: { id: string; status: string; balance: number; amountDue: number };
+  paiementId?: string | null;
 }
 
 export default function ProfEncaisserPage() {
@@ -47,6 +48,10 @@ export default function ProfEncaisserPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  const [cancelTarget, setCancelTarget] = useState<CollectionRow | null>(null);
+  const [cancelMotif, setCancelMotif] = useState("");
+  const [cancelSubmitting, setCancelSubmitting] = useState(false);
 
   const fetchAll = useCallback(async () => {
     try {
@@ -173,10 +178,44 @@ export default function ProfEncaisserPage() {
     }
   };
 
+  const openCancel = (c: CollectionRow) => {
+    setCancelTarget(c);
+    setCancelMotif("");
+  };
+
+  const handleCancel = async () => {
+    if (!cancelTarget?.paiementId || cancelMotif.trim().length < 3) return;
+    setCancelSubmitting(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const res = await fetch(`/api/prof/reverse/collections/${cancelTarget.paiementId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ motif: cancelMotif.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Erreur lors de l'annulation");
+      }
+      setCancelTarget(null);
+      setCancelMotif("");
+      setSuccess(`Encaissement de ${formatCurrency(cancelTarget.amount)} annulé. L'élève a été notifié.`);
+      const colsRes = await fetch("/api/prof/reverse/collections");
+      if (colsRes.ok) {
+        const cols = await colsRes.json();
+        setCollections(cols.collections ?? []);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setCancelSubmitting(false);
+    }
+  };
+
   if (loading) {
     return <SkeletonPage />;
   }
-
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -348,17 +387,85 @@ export default function ProfEncaisserPage() {
                         {formatDate(c.date)} · {c.groupe?.nom ?? c.seance?.groupe.nom ?? "—"}
                       </p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-[13px] font-semibold tabular-nums text-neutral-900 dark:text-neutral-100">
-                        {formatCurrency(c.amount)}
-                      </p>
-                      <p className="text-[12px] tabular-nums text-neutral-500 dark:text-neutral-400">
-                        Part centre : {formatCurrency(c.centerFee)}
-                      </p>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <p className="text-[13px] font-semibold tabular-nums text-neutral-900 dark:text-neutral-100">
+                          {formatCurrency(c.amount)}
+                        </p>
+                        <p className="text-[12px] tabular-nums text-neutral-500 dark:text-neutral-400">
+                          Part centre : {formatCurrency(c.centerFee)}
+                        </p>
+                      </div>
+                      {c.paiementId && (
+                        <button
+                          onClick={() => openCancel(c)}
+                          className="rounded p-1 text-neutral-400 hover:bg-red-50 hover:text-red-600 dark:text-neutral-500 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                          title="Annuler cet encaissement"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {cancelTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white p-0 shadow-xl dark:border-[#2a2d35] dark:bg-[#181b22]">
+            <div className="flex shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
+              <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+                Annuler l&apos;encaissement
+              </h2>
+              <button
+                onClick={() => setCancelTarget(null)}
+                className="text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-400"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
+              <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-[13px] dark:border-red-900/40 dark:bg-red-900/20">
+                <p className="font-medium text-neutral-900 dark:text-neutral-100">
+                  {cancelTarget.student.prenom} {cancelTarget.student.nom} — {formatCurrency(cancelTarget.amount)} — {cancelTarget.groupe?.nom ?? "—"}
+                </p>
+                <p className="mt-1 text-red-600 dark:text-red-400">
+                  Action définitive : l&apos;encaissement et ses écritures (crédit élève, part centre due) seront effacés. L&apos;élève recevra une notification avec le motif.
+                </p>
+              </div>
+              <div>
+                <label className="mb-1 block text-[12px] font-medium text-neutral-700 dark:text-neutral-300">
+                  Motif de l&apos;annulation <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={cancelMotif}
+                  onChange={(e) => setCancelMotif(e.target.value)}
+                  rows={3}
+                  required
+                  placeholder="Ex : Encaissement par erreur, mauvais montant, mauvais élève..."
+                  className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-[13px] text-neutral-900 dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-100"
+                />
+              </div>
+            </div>
+            <div className="flex shrink-0 items-center justify-end gap-3 border-t border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
+              <button
+                onClick={() => setCancelTarget(null)}
+                className="rounded-md border border-neutral-300 bg-white px-4 py-2 text-[13px] font-medium text-neutral-700 hover:bg-neutral-50 dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-300 dark:hover:bg-[#242833]"
+              >
+                Retour
+              </button>
+              <button
+                onClick={handleCancel}
+                disabled={cancelSubmitting || cancelMotif.trim().length < 3}
+                className="flex items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-[13px] font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                {cancelSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                Confirmer l&apos;annulation
+              </button>
             </div>
           </div>
         </div>

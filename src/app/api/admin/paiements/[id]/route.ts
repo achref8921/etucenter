@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { trackEventSafe } from "@/lib/analytics";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
-import { createStudentTransaction, deleteStudentPaiement } from "@/lib/student-finance";
+import { createStudentTransaction, cancelStudentPaiement } from "@/lib/student-finance";
 import {
   centerSharePercent,
   computePaymentSplit,
@@ -159,12 +159,14 @@ export async function PATCH(
 }
 
 /**
- * DELETE — Suppression RADICALE (définitive) d'un paiement élève.
+ * DELETE — ANNULATION d'un paiement élève.
  *
- * Efface TOUTES les traces : le paiement, toutes les StudentTransactions
- * (crédit élève + REVERSALs) et toutes les TeacherTransactions (part du prof
- * + REVERSALs). Nothing comptable ne subsiste. La suppression est notifiée
- * à l'élève via push.
+ * Le motif d'annulation est obligatoire (envoyé dans le corps : `motif` ou
+ * `raison`). L'annulation efface définitivement le paiement et toutes ses
+ * écritures comptables (crédit élève, part prof, dette centre) afin que tous
+ * les soldes et agrégats reviennent à leur état d'avant le paiement, et
+ * enregistre l'opération dans le registre `paiements_annules`. L'élève reçoit
+ * une notification contenant le motif.
  */
 export async function DELETE(
   request: NextRequest,
@@ -176,17 +178,38 @@ export async function DELETE(
 
     const { id } = await params;
     const centreId = (session.user as any).centerId;
-    const adminId = (session.user as any).id;
+    const user = session.user as any;
+    const adminId = user.id;
 
-    const result = await deleteStudentPaiement({
+    let motif = "";
+    try {
+      const body = await request.json();
+      motif = String(body?.motif ?? body?.raison ?? "").trim();
+    } catch {
+      motif = "";
+    }
+
+    if (motif.length < 3) {
+      return NextResponse.json(
+        { error: "Le motif de l'annulation est requis (min 3 caractères)" },
+        { status: 400 }
+      );
+    }
+
+    const adminName = [user.prenom, user.nom].filter(Boolean).join(" ").trim() || user.email || null;
+
+    const result = await cancelStudentPaiement({
       centerId: centreId,
       paiementId: id,
+      motif,
       actorId: adminId,
+      actorRole: (user.role as string) ?? "admin",
+      actorName: adminName,
     });
 
     await sendPushToUser(result.eleveId, {
-      title: "Paiement supprimé",
-      body: `Votre paiement pour le groupe "${result.groupeNom}" a été supprimé définitivement par l'administration. Toutes les traces de ce paiement ont été effacées (crédit élève et part du professeur).`,
+      title: "Paiement annulé",
+      body: `Votre paiement de ${result.montant} DT pour le groupe "${result.groupeNom}" a été annulé. Motif : ${result.motif}`,
       url: "/eleve/notifications",
     }).catch(() => {});
 
@@ -195,15 +218,31 @@ export async function DELETE(
       centerId: centreId,
       event: "PAYMENT_DELETED",
       feature: "Paiements",
-      metadata: { paymentId: id },
+      metadata: { paymentId: id, reason: motif },
     });
 
     return NextResponse.json(result);
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
-    const status = message === "PAIEMENT_INTROUVABLE" ? 404 : 500;
+    const status =
+      message === "PAIEMENT_INTROUVABLE"
+        ? 404
+        : message === "MOTIF_REQUIS"
+          ? 400
+          : message === "NON_AUTORISE"
+            ? 403
+            : 500;
     return NextResponse.json(
-      { error: status === 404 ? "Paiement non trouvé" : "Erreur interne du serveur" },
+      {
+        error:
+          status === 404
+            ? "Paiement non trouvé"
+            : status === 400
+              ? "Motif d'annulation requis"
+              : status === 403
+                ? "Action non autorisée"
+                : "Erreur interne du serveur",
+      },
       { status }
     );
   }

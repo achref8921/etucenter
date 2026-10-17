@@ -31,6 +31,8 @@ function typeIcon(type: string) {
   if (type === "modification_paiement") return <DollarSign className="h-5 w-5 text-orange-500" />;
   if (type === "paiement_recu") return <DollarSign className="h-5 w-5 text-green-500" />;
   if (type === "paiement_eleve") return <DollarSign className="h-5 w-5 text-green-500" />;
+  if (type === "paiement_annule") return <DollarSign className="h-5 w-5 text-red-500" />;
+  if (type === "paiement_supprime") return <DollarSign className="h-5 w-5 text-red-500" />;
   if (type === "nouvelle_seance") return <Calendar className="h-5 w-5 text-violet-500" />;
   if (type === "seance_supprimee") return <CalendarX className="h-5 w-5 text-red-500" />;
   if (type === "absence") return <UserX className="h-5 w-5 text-orange-500" />;

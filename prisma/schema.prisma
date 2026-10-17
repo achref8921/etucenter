@@ -137,6 +137,7 @@ model Center {
   userSessions        UserSession[]
   seanceDocuments     SeanceDocument[]
   teacherCenterDebts  TeacherCenterDebt[]  @relation("TeacherCenterDebtCenter")
+  paiementsAnnules    PaiementAnnule[]
 
   @@map("centers")
 }
@@ -439,6 +440,41 @@ model Paiement {
   @@index([datePaiement])
   @@index([collecteParProf])
   @@map("paiements")
+}
+
+// ─── PaiementAnnule (Registre des paiements annulés) ─────────────────────────
+// L'annulation d'un paiement efface définitivement la ligne du paiement ainsi
+// que TOUTES les écritures comptables qui en découlent (crédit élève, part du
+// professeur, dette centre), de sorte que tous les agrégats financiers existants
+// restent exacts sans aucun filtre supplémentaire. Ce registre conserve
+// l'empreinte de l'annulation : l'élève, le montant, le motif et l'auteur.
+
+model PaiementAnnule {
+  id              String          @id @default(uuid()) @db.Uuid
+  centerId        String          @map("center_id") @db.Uuid
+  paiementId      String          @map("paiement_id") @db.Uuid
+  eleveId         String          @map("eleve_id") @db.Uuid
+  eleveNom        String          @map("eleve_nom") @db.VarChar(255)
+  groupeId        String          @map("groupe_id") @db.Uuid
+  groupeNom       String          @map("groupe_nom") @db.VarChar(255)
+  montant         Decimal         @db.Decimal(10, 2)
+  methodePaiement MethodePaiement @map("methode_paiement")
+  datePaiement    DateTime        @map("date_paiement")
+  collecteParProf Boolean         @default(false) @map("collecte_par_prof")
+  collecteurId    String?         @map("collecteur_id") @db.Uuid
+  collecteurNom   String?         @map("collecteur_nom") @db.VarChar(255)
+  motif           String          @db.Text
+  annuleParId     String?         @map("annule_par_id") @db.Uuid
+  annuleParNom    String?         @map("annule_par_nom") @db.VarChar(255)
+  annuleParRole   String?         @map("annule_par_role") @db.VarChar(20)
+  annuleLe        DateTime        @default(now()) @map("annule_le")
+
+  center Center @relation(fields: [centerId], references: [id], onDelete: Cascade)
+
+  @@index([centerId, annuleLe])
+  @@index([eleveId])
+  @@index([groupeId])
+  @@map("paiements_annules")
 }
 
 // ─── TauxBenefice ────────────────────────────────────────────────────────────

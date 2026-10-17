@@ -915,3 +915,205 @@ export async function deleteStudentPaiement(input: DeleteStudentPaiementInput) {
     };
   }, { timeout: 30_000 });
 }
+
+export interface CancelStudentPaiementInput {
+  centerId: string;
+  paiementId: string;
+  motif: string;
+  actorId?: string | null;
+  actorRole?: string | null;
+  actorName?: string | null;
+  /**
+   * Lorsqu'un professeur annule un encaissement, on verrouille l'opération sur
+   * les paiements qu'IL a personnellement encaissés (collecteParProf) pour son
+   * propre groupe. Les administrateurs laissent ce champ à null.
+   */
+  restrictToTeacherId?: string | null;
+}
+
+/**
+ * ANNULATION D'UN PAIEMENT ÉLÈVE.
+ *
+ * Contrairement à la suppression radicale (deleteStudentPaiement), cette
+ * fonction conserve une trace métier de l'annulation dans le registre
+ * `paiements_annules` (motif, auteur, montant, élève, groupe, encaisseur) puis
+ * efface DÉFINITIVEMENT la ligne du paiement et TOUTES les écritures comptables
+ * engendrées :
+ *   - StudentTransaction (crédit prépayé de l'élève, reference/idempotencyKey
+ *     `paiement:{id}`) ainsi que leurs éventuelles annulations ;
+ *   - TeacherTransaction (gain du prof, espèces perçues, encaissement inverse)
+ *     liées par `reference` ou par `linkedDebtId` ;
+ *   - TeacherCenterDebt (part centre due par le professeur).
+ *
+ * Résultat : tous les soldes et agrégats financiers reprennent leur valeur
+ * d'avant le paiement, exactement comme s'il n'avait jamais existé. L'élève est
+ * notifié du motif de l'annulation.
+ */
+export async function cancelStudentPaiement(input: CancelStudentPaiementInput) {
+  const motif = input.motif.trim();
+  if (motif.length < 3) {
+    throw new Error("MOTIF_REQUIS");
+  }
+
+  return prisma.$transaction(async (tx) => {
+    const paiement = await tx.paiement.findUnique({
+      where: { id: input.paiementId },
+      include: {
+        eleve: { select: { id: true, prenom: true, nom: true } },
+        groupe: { select: { id: true, nom: true, centerId: true, profId: true } },
+      },
+    });
+
+    if (!paiement || paiement.groupe.centerId !== input.centerId) {
+      throw new Error("PAIEMENT_INTROUVABLE");
+    }
+
+    if (input.restrictToTeacherId) {
+      if (!paiement.collecteParProf || paiement.groupe.profId !== input.restrictToTeacherId) {
+        throw new Error("NON_AUTORISE");
+      }
+    }
+
+    const canonicalRef = `paiement:${paiement.id}`;
+
+    // 1) Écritures élève : on cible précisément l'écriture créée pour ce
+    //    paiement via son idempotencyKey/reference canonique (jamais une
+    //    référence libre saisie par l'admin, qui pourrait collisionner).
+    const studentTxRows = await tx.studentTransaction.findMany({
+      where: {
+        centerId: input.centerId,
+        OR: [{ idempotencyKey: canonicalRef }, { reference: canonicalRef }],
+      },
+      select: { id: true },
+    });
+    const studentTxIds = new Set(studentTxRows.map((r) => r.id));
+    if (studentTxIds.size > 0) {
+      const linkedReversals = await tx.studentTransaction.findMany({
+        where: { centerId: input.centerId, reversalOfId: { in: [...studentTxIds] } },
+        select: { id: true },
+      });
+      for (const r of linkedReversals) studentTxIds.add(r.id);
+      await tx.studentTransaction.deleteMany({ where: { id: { in: [...studentTxIds] } } });
+    }
+
+    // 2) Écritures prof (gain, espèces perçues, encaissement inverse).
+    const teacherOr: Prisma.TeacherTransactionWhereInput[] = [{ reference: canonicalRef }];
+    if (paiement.collecteParProf && paiement.reverseDebtId) {
+      teacherOr.push({ linkedDebtId: paiement.reverseDebtId });
+    }
+    const teacherTxRows = await tx.teacherTransaction.findMany({
+      where: { centerId: input.centerId, OR: teacherOr },
+      select: { id: true },
+    });
+    const teacherTxIds = new Set(teacherTxRows.map((r) => r.id));
+    if (teacherTxIds.size > 0) {
+      const linkedReversals = await tx.teacherTransaction.findMany({
+        where: { centerId: input.centerId, reversalOfId: { in: [...teacherTxIds] } },
+        select: { id: true },
+      });
+      for (const r of linkedReversals) teacherTxIds.add(r.id);
+      await tx.teacherTransaction.deleteMany({ where: { id: { in: [...teacherTxIds] } } });
+    }
+
+    // 3) Dette centre liée à un encaissement par le professeur.
+    let debtsDeleted = 0;
+    if (paiement.collecteParProf && paiement.reverseDebtId) {
+      const d = await tx.teacherCenterDebt.deleteMany({
+        where: { id: paiement.reverseDebtId, centerId: input.centerId },
+      });
+      debtsDeleted = d.count;
+    }
+
+    // 4) Enregistrement au registre des annulations.
+    let collecteurNom: string | null = null;
+    if (paiement.collecteParProf && paiement.groupe.profId) {
+      const collector = await tx.utilisateur.findUnique({
+        where: { id: paiement.groupe.profId },
+        select: { prenom: true, nom: true },
+      });
+      collecteurNom = collector ? `${collector.prenom} ${collector.nom}`.trim() : null;
+    }
+
+    const eleveNom = `${paiement.eleve.prenom} ${paiement.eleve.nom}`.trim();
+
+    await tx.paiementAnnule.create({
+      data: {
+        centerId: input.centerId,
+        paiementId: paiement.id,
+        eleveId: paiement.eleveId,
+        eleveNom,
+        groupeId: paiement.groupe.id,
+        groupeNom: paiement.groupe.nom,
+        montant: paiement.montant,
+        methodePaiement: paiement.methodePaiement,
+        datePaiement: paiement.datePaiement,
+        collecteParProf: paiement.collecteParProf,
+        collecteurId: paiement.collecteParProf ? paiement.groupe.profId : null,
+        collecteurNom,
+        motif,
+        annuleParId: input.actorId ?? null,
+        annuleParNom: input.actorName ?? null,
+        annuleParRole: input.actorRole ?? null,
+      },
+    });
+
+    // 5) La ligne du paiement disparaît définitivement.
+    await tx.paiement.delete({ where: { id: paiement.id } });
+
+    // 6) Notification élève avec le motif.
+    await tx.notification.create({
+      data: {
+        centerId: input.centerId,
+        destinataireId: paiement.eleveId,
+        titre: "Paiement annulé",
+        message: `Votre paiement de ${Number(paiement.montant)} DT pour le groupe "${paiement.groupe.nom}" a été annulé. Motif : ${motif}`,
+        type: "paiement_annule",
+      },
+    });
+
+    // 7) Journal d'audit.
+    await tx.systemLog.create({
+      data: {
+        action: "finance.paiement.annule",
+        entity: "paiement",
+        entityId: paiement.id,
+        userId: input.actorId ?? null,
+        details: {
+          eleveId: paiement.eleveId,
+          groupeId: paiement.groupe.id,
+          groupeNom: paiement.groupe.nom,
+          montant: Number(paiement.montant),
+          collecteParProf: paiement.collecteParProf,
+          motif,
+          annuleParRole: input.actorRole ?? null,
+          studentTransactionsDeleted: studentTxIds.size,
+          teacherTransactionsDeleted: teacherTxIds.size,
+          debtsDeleted,
+        },
+      },
+    });
+
+    logger.info("Paiement élève annulé (registre + purge comptable)", {
+      paiementId: paiement.id,
+      eleveId: paiement.eleveId,
+      groupeId: paiement.groupe.id,
+      montant: Number(paiement.montant),
+      collecteParProf: paiement.collecteParProf,
+      actorId: input.actorId ?? null,
+      actorRole: input.actorRole ?? null,
+    });
+
+    return {
+      id: paiement.id,
+      montant: Number(paiement.montant),
+      eleveId: paiement.eleveId,
+      eleveNom,
+      groupeNom: paiement.groupe.nom,
+      collecteParProf: paiement.collecteParProf,
+      motif,
+      studentTransactionsDeleted: studentTxIds.size,
+      teacherTransactionsDeleted: teacherTxIds.size,
+      debtsDeleted,
+    };
+  }, { timeout: 30_000 });
+}

@@ -118,6 +118,8 @@ export default function NotificationBellDropdown({ role }: { role: string }) {
     if (type === "modification_paiement") return <DollarSign className="h-4 w-4 text-orange-500" />;
     if (type === "paiement_recu") return <DollarSign className="h-4 w-4 text-green-500" />;
     if (type === "paiement_eleve") return <DollarSign className="h-4 w-4 text-green-500" />;
+    if (type === "paiement_annule") return <DollarSign className="h-4 w-4 text-red-500" />;
+    if (type === "paiement_supprime") return <DollarSign className="h-4 w-4 text-red-500" />;
     if (type === "nouvelle_seance") return <Calendar className="h-4 w-4 text-violet-500" />;
     if (type === "seance_supprimee") return <CalendarX className="h-4 w-4 text-red-500" />;
     if (type === "absence") return <UserX className="h-4 w-4 text-orange-500" />;
