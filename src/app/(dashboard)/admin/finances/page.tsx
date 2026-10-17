@@ -295,7 +295,7 @@ export default function FinancesPage() {
         if (!res.ok) throw new Error("Erreur lors du chargement");
         const data = await res.json();
         setTransactions(data.transactions);
-        setBalance(data.balance);
+        setBalance(data.netBalance ?? data.balance);
         setTotal(data.total);
         setPage(data.page);
         setTotalPages(data.totalPages);
