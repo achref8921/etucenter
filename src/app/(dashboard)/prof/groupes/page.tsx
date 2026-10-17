@@ -2,12 +2,13 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { GraduationCap, Loader2, Save, Users, Calendar, Edit3, X } from "lucide-react";
+import { GraduationCap, Loader2, Save, Users, Calendar, Edit3, X, Paperclip } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
 import { SkeletonPage } from "@/components/ui/skeleton";
 import { MontantInput } from "@/components/montant-input";
 import UserAvatar from "@/components/user-avatar";
+import SeanceDocumentsModal from "@/components/seance-documents-modal";
 
 interface GroupeList {
   id: string;
@@ -40,6 +41,7 @@ export default function ProfGroupesPage() {
   const [loading, setLoading] = useState(true);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [documentsSeance, setDocumentsSeance] = useState<{ id: string; label: string } | null>(null);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editPrice, setEditPrice] = useState<number>(0);
@@ -540,6 +542,12 @@ export default function ProfGroupesPage() {
                         }`}>
                           {s.statut === "terminee" ? "Terminee" : s.statut === "planifiee" ? "Planifiee" : "En cours"}
                         </span>
+                        <button
+                          onClick={() => setDocumentsSeance({ id: s.id, label: formatDate(s.date) })}
+                          className="flex items-center gap-1 rounded-xl border border-neutral-300 dark:border-[#2a2d35] px-2.5 py-1 text-[12px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]"
+                        >
+                          <Paperclip className="h-3.5 w-3.5" /> Supports
+                        </button>
                       </div>
                     </div>
                   ))
@@ -548,6 +556,15 @@ export default function ProfGroupesPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {documentsSeance && (
+        <SeanceDocumentsModal
+          role="prof"
+          seanceId={documentsSeance.id}
+          seanceLabel={documentsSeance.label}
+          onClose={() => setDocumentsSeance(null)}
+        />
       )}
     </div>
   );

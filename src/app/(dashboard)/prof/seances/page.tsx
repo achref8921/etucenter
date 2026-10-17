@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, Plus, X, Loader2, Pencil, Trash2, CalendarPlus } from "lucide-react";
+import { Calendar, Plus, X, Loader2, Pencil, Trash2, CalendarPlus, Paperclip } from "lucide-react";
 import { formatDate, formatTime } from "@/lib/utils";
 import ConfirmDelete from "@/components/confirm-delete";
+import SeanceDocumentsModal from "@/components/seance-documents-modal";
 import TimeInput from "@/components/time-input";
 import { useToast } from "@/components/ui/toast";
 import { SkeletonPage } from "@/components/ui/skeleton";
@@ -43,6 +44,7 @@ export default function ProfSeancesPage() {
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [documentsSeance, setDocumentsSeance] = useState<{ id: string; label: string } | null>(null);
   const [groupes, setGroupes] = useState<Groupe[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [dateFrom, setDateFrom] = useState("");
@@ -477,6 +479,13 @@ export default function ProfSeancesPage() {
                       <td className="px-4 py-2.5">
                         <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                           <button
+                            onClick={(e) => { e.stopPropagation(); setDocumentsSeance({ id: seance.id, label: `${seance.groupe.nom} — ${formatDate(seance.date)}` }); }}
+                            className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-gray-100 dark:hover:bg-[#1e2128] hover:text-blue-600 dark:hover:text-blue-400"
+                            title="Supports de séance"
+                          >
+                            <Paperclip className="h-4 w-4" />
+                          </button>
+                          <button
                             onClick={(e) => openEditModal(seance, e)}
                             disabled={isSessionPast(seance)}
                             className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-gray-100 dark:hover:bg-[#1e2128] hover:text-blue-600 dark:hover:text-blue-400 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
@@ -729,6 +738,15 @@ export default function ProfSeancesPage() {
         onCancel={() => setConfirmDelete(null)}
         loading={!!confirmDelete && deletingId === confirmDelete}
       />
+
+      {documentsSeance && (
+        <SeanceDocumentsModal
+          seanceId={documentsSeance.id}
+          seanceLabel={documentsSeance.label}
+          role="prof"
+          onClose={() => setDocumentsSeance(null)}
+        />
+      )}
     </div>
   );
 }
