@@ -251,6 +251,7 @@ export async function getTeacherDashboardFinance(
       ),
       payment_roll AS (
         SELECT p.eleve_id, p.groupe_id, p.montant,
+               p.collecte_par_prof,
                COALESCE(p.part_centre, (p.montant * ${centreShare}::numeric) / 100) AS part_centre,
                SUM(p.montant) OVER (
                  PARTITION BY p.eleve_id, p.groupe_id
@@ -261,12 +262,12 @@ export async function getTeacherDashboardFinance(
         WHERE g.prof_id = ${teacherId}::uuid AND g.center_id = ${centerId}::uuid
       ),
       counted AS (
-        SELECT pr.montant, pr.part_centre,
+        SELECT pr.montant, pr.part_centre, pr.collecte_par_prof,
                GREATEST(
-                 0,
-                 LEAST(pr.run_paid, COALESCE(d.due, 0))
-                 - LEAST(pr.run_paid - pr.montant, COALESCE(d.due, 0))
-               ) AS amt
+                  0,
+                  LEAST(pr.run_paid, COALESCE(d.due, 0))
+                  - LEAST(pr.run_paid - pr.montant, COALESCE(d.due, 0))
+                ) AS amt
         FROM payment_roll pr
         LEFT JOIN teacher_due d ON d.eleve_id = pr.eleve_id AND d.groupe_id = pr.groupe_id
       ),
@@ -285,7 +286,7 @@ export async function getTeacherDashboardFinance(
       )
       SELECT
         COALESCE((SELECT SUM(GREATEST(due - paid, 0)) FROM due_paid), 0) * ${profShare}::numeric AS impaye_net,
-        COALESCE((SELECT SUM(amt * (montant - part_centre) / NULLIF(montant, 0)) FROM counted), 0) AS claimable
+        COALESCE((SELECT SUM(amt * (montant - part_centre) / NULLIF(montant, 0)) FROM counted WHERE collecte_par_prof = false), 0) AS claimable
     `,
     prisma.teacherTransaction.aggregate({
       _sum: { amount: true },
@@ -294,7 +295,7 @@ export async function getTeacherDashboardFinance(
         teacherId,
         status: "active",
         OR: [
-          { type: "PAYMENT" },
+          { type: "PAYMENT", mode: { not: "REVERSE" } },
           {
             type: "EARNING",
             OR: [
