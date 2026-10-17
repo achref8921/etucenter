@@ -26,6 +26,13 @@ export async function POST(request: NextRequest) {
     const userAgent =
       request.headers.get("user-agent")?.slice(0, 255) || null;
 
+    // Un appareil = un seul compte recevant les pushes. Sans cette purge, un
+    // téléphone ayant servi plusieurs comptes gardait une ligne par compte sur
+    // LE MÊME endpoint et chacun recevait les notifications des autres.
+    await prisma.pushSubscription.deleteMany({
+      where: { endpoint, userId: { not: userId } },
+    });
+
     await prisma.pushSubscription.upsert({
       where: { userId_endpoint: { userId, endpoint } },
       update: { p256dh: keys.p256dh, auth: keys.auth, userAgent },
@@ -47,20 +54,31 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const { session, error } = await requireActiveCenter(request.method);
-    if (error) return error;
-
-    const userId = (session.user as any).id;
     const body = await request.json().catch(() => ({}));
-    const { endpoint } = body || {};
+    const endpoint = typeof body?.endpoint === "string" ? body.endpoint : null;
+    const targetUserId = typeof body?.userId === "string" ? body.userId : null;
 
-    if (typeof endpoint === "string") {
-      await prisma.pushSubscription.deleteMany({ where: { userId, endpoint } });
-    } else {
-      await prisma.pushSubscription.deleteMany({ where: { userId } });
+    const { session, error } = await requireActiveCenter(request.method);
+
+    if (session) {
+      const userId = (session.user as any).id;
+      await prisma.pushSubscription.deleteMany({
+        where: endpoint ? { userId, endpoint } : { userId },
+      });
+      return NextResponse.json({ success: true });
     }
 
-    return NextResponse.json({ success: true });
+    // Pas de session (déconnexion / service worker) : l'endpoint est un secret
+    // cryptographique connu du seul appareil concerné, il suffit à identifier
+    // la ligne à retirer. Sans lui, aucune suppression possible.
+    if (endpoint && endpoint.length <= 1000) {
+      await prisma.pushSubscription.deleteMany({
+        where: targetUserId ? { endpoint, userId: targetUserId } : { endpoint },
+      });
+      return NextResponse.json({ success: true });
+    }
+
+    return error ?? NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   } catch (err) {
     return NextResponse.json({ error: "Erreur interne" }, { status: 500 });
   }

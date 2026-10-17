@@ -1,4 +1,4 @@
-const CACHE = "etucenter-v8";
+const CACHE = "etucenter-v9";
 
 const SKIP_CACHE = /^\/(?:api\/|_next\/data\/)/;
 
@@ -67,18 +67,72 @@ self.addEventListener("fetch", (event) => {
   );
 });
 
+async function fetchSessionUserId() {
+  const res = await fetch("/api/auth/session", {
+    credentials: "same-origin",
+    cache: "no-store",
+    headers: { Accept: "application/json" },
+  });
+  if (!res.ok) throw new Error("session http " + res.status);
+  const data = await res.json().catch(() => null);
+  return (data && data.user && data.user.id) || null;
+}
+
+async function dropStaleSubscription(endpoint, targetUserId) {
+  try {
+    await fetch("/api/push/subscribe", {
+      method: "DELETE",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ endpoint, userId: targetUserId }),
+    });
+  } catch {}
+}
+
 self.addEventListener("push", (event) => {
   let data = {};
   try { data = event.data ? event.data.json() : {}; } catch { data = { title: "Gestion Centre" }; }
+
+  const targetUserId = typeof data.userId === "string" ? data.userId : null;
+
   event.waitUntil(
-    self.registration.showNotification(data.title || "Gestion Centre", {
-      body: data.body || "",
-      icon: "/icon-192.png",
-      badge: "/icon-192.png",
-      vibrate: [200, 100, 200],
-      tag: "etucenter-" + (data.tag || Date.now()),
-      data: { url: data.url || "/" },
-    })
+    (async () => {
+      // Charge utile sans destinataire : rien n'est affiché.
+      if (!targetUserId) return;
+
+      let sessionUserId = null;
+      let sessionKnown = false;
+      try {
+        sessionUserId = await fetchSessionUserId();
+        sessionKnown = true;
+      } catch {
+        sessionKnown = false;
+      }
+
+      // Vérification impossible (réseau) : on ne peut pas prouver le
+      // destinataire, on n'affiche donc rien (sans toucher au serveur).
+      if (!sessionKnown) return;
+
+      // Le compte ouvert sur cet appareil n'est PAS le destinataire (déconnecté
+      // ou autre compte partagé sur ce téléphone) : pas d'alerte, et la ligne
+      // d'abonnement obsolète est retirée pour couper la livraison.
+      if (sessionUserId !== targetUserId) {
+        try {
+          const sub = await self.registration.pushManager.getSubscription();
+          if (sub) await dropStaleSubscription(sub.endpoint, targetUserId);
+        } catch {}
+        return;
+      }
+
+      await self.registration.showNotification(data.title || "Gestion Centre", {
+        body: data.body || "",
+        icon: "/icon-192.png",
+        badge: "/icon-192.png",
+        vibrate: [200, 100, 200],
+        tag: "etucenter-" + (data.tag || Date.now()),
+        data: { url: data.url || "/" },
+      });
+    })()
   );
 });
 

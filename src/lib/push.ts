@@ -26,15 +26,17 @@ export async function sendPushToUsers(userIds: string[], payload: PushPayload): 
 
   const subscriptions = await prisma.pushSubscription.findMany({
     where: { userId: { in: userIds } },
-    select: { id: true, endpoint: true, p256dh: true, auth: true },
+    select: { id: true, endpoint: true, p256dh: true, auth: true, userId: true, centerId: true },
   });
 
   let sent = 0;
   for (const sub of subscriptions) {
     try {
+      // Le destinataire voyage DANS la charge utile : le service worker ne peut
+      // afficher l'alerte que si le compte ouvert sur l'appareil est ce destinataire.
       await webpush.sendNotification(
         { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-        JSON.stringify(payload),
+        JSON.stringify({ ...payload, userId: sub.userId, centerId: sub.centerId }),
         { urgency: "high", TTL: 86400 }
       );
       sent++;

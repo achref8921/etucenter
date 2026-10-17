@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Bell, X } from "lucide-react";
 
@@ -18,7 +18,10 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
 type PushState = "checking" | "supported" | "granted" | "denied" | "unsupported";
 
 export default function PushSetup() {
-  const { status } = useSession();
+  const { status, data: session } = useSession();
+  const userId: string | null =
+    (session?.user as { id?: string } | null)?.id ?? null;
+  const prevStatusRef = useRef<string>("checking");
   const [state, setState] = useState<PushState>("checking");
   const [busy, setBusy] = useState(false);
 
@@ -84,7 +87,33 @@ export default function PushSetup() {
     } else {
       setState("supported");
     }
-  }, [status, ensureSw, registerSubscription]);
+    // `userId` : au changement de compte (même statut "authenticated"), on
+    // re-enregistre → le serveur purge alors l'abonnement du compte précédent.
+  }, [status, userId, ensureSw, registerSubscription]);
+
+  // Déconnexion : ce téléphone ne doit plus recevoir AUCUNE notification.
+  useEffect(() => {
+    const prev = prevStatusRef.current;
+    prevStatusRef.current = status;
+    if (prev !== "authenticated" || status !== "unauthenticated") return;
+
+    (async () => {
+      try {
+        if (!("serviceWorker" in navigator)) return;
+        const reg = await navigator.serviceWorker.getRegistration("/");
+        const sub = await reg?.pushManager?.getSubscription();
+        if (!sub) return;
+        await fetch("/api/push/subscribe", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ endpoint: sub.endpoint }),
+        }).catch(() => {});
+        await sub.unsubscribe().catch(() => {});
+      } catch {
+        /* silencieux */
+      }
+    })();
+  }, [status]);
 
   const enable = async () => {
     setBusy(true);
