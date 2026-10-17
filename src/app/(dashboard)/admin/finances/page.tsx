@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { MontantInput } from "@/components/montant-input";
@@ -22,6 +22,8 @@ import {
   Coins,
   UserCheck,
   Building2,
+  ChevronDown,
+  Filter,
 } from "lucide-react";
 import { formatCurrency, formatDateTime, formatDate } from "@/lib/utils";
 import TimeInput from "@/components/time-input";
@@ -187,8 +189,14 @@ export default function FinancesPage() {
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [loadingStudents, setLoadingStudents] = useState(true);
   const [search, setSearch] = useState("");
+  const [filterGroupe, setFilterGroupe] = useState("");
+  const [showStudentsPanel, setShowStudentsPanel] = useState(false);
 
   const selectedId = searchParams.get("studentId") || "";
+
+  useEffect(() => {
+    if (selectedId) setShowStudentsPanel(false);
+  }, [selectedId]);
   const [transactions, setTransactions] = useState<TransactionRow[]>([]);
   const [balance, setBalance] = useState(0);
   const [total, setTotal] = useState(0);
@@ -316,7 +324,20 @@ export default function FinancesPage() {
 
   const selectedStudent = students.find((s) => s.id === selectedId);
 
+  const groupOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const s of students) {
+      for (const g of s.inscriptions) {
+        if (!map.has(g.id)) map.set(g.id, g.nom);
+      }
+    }
+    return Array.from(map.entries())
+      .map(([id, nom]) => ({ id, nom }))
+      .sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
+  }, [students]);
+
   const filteredStudents = students.filter((s) => {
+    if (filterGroupe && !s.inscriptions.some((g) => g.id === filterGroupe)) return false;
     const q = search.trim().toLowerCase();
     if (!q) return true;
     return (
@@ -663,25 +684,62 @@ export default function FinancesPage() {
 
       <div className="grid grid-cols-1 gap-6lg:grid-cols-3">
         <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
-          <div className="border-b border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
-            <h2 className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-              <Users className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
+          <button
+            type="button"
+            onClick={() => setShowStudentsPanel((v) => !v)}
+            aria-expanded={showStudentsPanel}
+            className="flex w-full items-center justify-between gap-2 border-b border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 px-4 py-2.5 text-left dark:bg-[#1e2128]"
+          >
+            <h2 className="flex min-w-0 flex-wrap items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+              <Users className="h-4 w-4 shrink-0 text-neutral-500 dark:text-neutral-400" />
               Élèves ({filteredStudents.length})
+              {filterGroupe && (
+                <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-medium text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
+                  {groupOptions.find((g) => g.id === filterGroupe)?.nom ?? "Groupe"}
+                </span>
+              )}
+              {!showStudentsPanel && selectedStudent && (
+                <span className="truncate text-[12px] font-medium text-neutral-500 dark:text-neutral-400">
+                  · {selectedStudent.prenom} {selectedStudent.nom}
+                </span>
+              )}
             </h2>
-          </div>
-          <div className="border-b border-neutral-200 dark:border-[#2a2d35] p-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Rechercher..."
-                className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] pl-9 pr-3 py-2 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-blue-500 focus:outline-none"
-              />
-            </div>
-          </div>
-          <div className="max-h-[520px] overflow-y-auto">
+            <ChevronDown
+              className={`h-4 w-4 shrink-0 text-neutral-400 transition-transform dark:text-neutral-500 ${
+                showStudentsPanel ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          {showStudentsPanel && (
+            <>
+              <div className="border-b border-neutral-200 dark:border-[#2a2d35] p-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Rechercher..."
+                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] pl-9 pr-3 py-2 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+                <div className="mt-2 flex items-center gap-2">
+                  <Filter className="h-3.5 w-3.5 shrink-0 text-neutral-400 dark:text-neutral-500" />
+                  <select
+                    value={filterGroupe}
+                    onChange={(e) => setFilterGroupe(e.target.value)}
+                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-blue-500 focus:outline-none"
+                  >
+                    <option value="">Tous les groupes</option>
+                    {groupOptions.map((g) => (
+                      <option key={g.id} value={g.id}>
+                        {g.nom}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="max-h-[520px] overflow-y-auto">
             {loadingStudents ? (
               <p className="px-6 py-8 text-center">
                 <Loader2 className="mx-auto h-6 w-6 animate-spin text-blue-600" />
@@ -728,7 +786,9 @@ export default function FinancesPage() {
                 </button>
               ))
             )}
-          </div>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="space-y-6 lg:col-span-2">
