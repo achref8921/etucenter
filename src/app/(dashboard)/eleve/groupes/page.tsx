@@ -273,12 +273,6 @@ export default function EleveGroupesPage() {
 
                     <div className="flex flex-wrap gap-2">
                       <Link
-                        href="/eleve/seances"
-                        className="flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-2 text-[12px] font-semibold text-white hover:bg-blue-700"
-                      >
-                        <Calendar className="h-3.5 w-3.5" /> Mes séances
-                      </Link>
-                      <Link
                         href="/eleve/presences"
                         className="flex items-center gap-1 rounded-lg border border-neutral-200 px-3 py-2 text-[12px] font-semibold text-neutral-700 hover:bg-neutral-100 dark:border-[#2a2d35] dark:text-neutral-300 dark:hover:bg-[#1e2128]"
                       >

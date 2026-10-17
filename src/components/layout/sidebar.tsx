@@ -62,7 +62,6 @@ export const navItemsByRole: Record<Role, NavItem[]> = {
   eleve: [
     { label: "Dashboard", href: "/eleve", icon: LayoutDashboard },
     { label: "Mes Groupes", href: "/eleve/groupes", icon: GraduationCap },
-    { label: "Mes Seances", href: "/eleve/seances", icon: Calendar },
     { label: "Mes Paiements", href: "/eleve/paiements", icon: FileText },
     { label: "Mon Compte", href: "/eleve/compte", icon: Wallet },
     { label: "Mon Profil", href: "/eleve/profil", icon: User },
