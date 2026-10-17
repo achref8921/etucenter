@@ -12,10 +12,8 @@ import {
   CheckCircle2,
   XCircle,
   X,
-  Paperclip,
 } from "lucide-react";
 import { formatDate, formatTime, formatDateTime } from "@/lib/utils";
-import SeanceDocumentsModal from "@/components/seance-documents-modal";
 
 interface PresenceHistorique {
   id: string;
@@ -50,7 +48,6 @@ export default function ElevePresencesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<PresenceHistorique | null>(null);
-  const [documentsSeance, setDocumentsSeance] = useState<{ id: string; label: string } | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -179,24 +176,7 @@ export default function ElevePresencesPage() {
                       </span>
                     </td>
                     <td className="px-4 py-2.5 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDocumentsSeance({
-                              id: presence.seance.id,
-                              label: `${presence.seance.groupe.nom} — ${formatDate(presence.seance.date)}`,
-                            });
-                          }}
-                          title="Supports de la séance"
-                          aria-label={`Supports de la séance du ${formatDate(presence.seance.date)}`}
-                          className="rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-slate-700 dark:hover:text-blue-400"
-                        >
-                          <Paperclip className="h-4 w-4" />
-                        </button>
-                        <ChevronDown className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
-                      </div>
+                      <ChevronDown className="ml-auto h-4 w-4 text-neutral-400 dark:text-neutral-500" />
                     </td>
                   </tr>
                 ))
@@ -277,18 +257,6 @@ export default function ElevePresencesPage() {
                 <span className="font-medium text-gray-900 dark:text-gray-100">{formatDateTime(selected.dateCreation)}</span>
               </div>
               <button
-                onClick={() => {
-                  setDocumentsSeance({
-                    id: selected.seance.id,
-                    label: `${selected.seance.groupe.nom} — ${formatDate(selected.seance.date)}`,
-                  });
-                  setSelected(null);
-                }}
-                className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-blue-700"
-              >
-                <Paperclip className="h-4 w-4" /> Supports de la séance
-              </button>
-              <button
                 onClick={() => setSelected(null)}
                 className="mt-2 w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2.5 text-[13px] font-medium text-neutral-700 hover:bg-neutral-50 dark:text-neutral-300 dark:hover:bg-[#1e2128]"
               >
@@ -297,15 +265,6 @@ export default function ElevePresencesPage() {
             </div>
           </div>
         </div>
-      )}
-
-      {documentsSeance && (
-        <SeanceDocumentsModal
-          seanceId={documentsSeance.id}
-          seanceLabel={documentsSeance.label}
-          role="eleve"
-          onClose={() => setDocumentsSeance(null)}
-        />
       )}
     </div>
   );
