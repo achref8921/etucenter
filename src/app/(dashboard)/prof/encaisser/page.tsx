@@ -123,14 +123,6 @@ export default function ProfEncaisserPage() {
     [eleves]
   );
 
-  const selectStudent = (e: EleveRow) => {
-    const grp =
-      eligibleGroupes.find((g) => g.id === groupeId && e.groupes.some((x) => x.id === g.id)) ??
-      eligibleGroupes.find((g) => e.groupes.some((x) => x.id === g.id));
-    if (grp) setGroupeId(grp.id);
-    setStudentId(e.id);
-  };
-
   const amountNum = Math.max(0, Number(amount) || 0);
   const pct = config?.teacherReversePct ?? 20;
   const centerFee = Math.round((amountNum * pct) / 100 * 100) / 100;
@@ -445,10 +437,9 @@ export default function ProfEncaisserPage() {
               studentsWithSolde.map((e) => {
                 const solde = e.solde ?? 0;
                 return (
-                  <button
+                  <Link
                     key={e.id}
-                    type="button"
-                    onClick={() => selectStudent(e)}
+                    href={`/prof/eleves/${e.id}`}
                     className={`flex w-full items-center justify-between gap-3 px-5 py-3 text-left transition-colors hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] ${
                       studentId === e.id ? "bg-indigo-50 dark:bg-indigo-500/10" : ""
                     }`}
@@ -473,7 +464,7 @@ export default function ProfEncaisserPage() {
                       {solde > 0 ? "+" : ""}
                       {formatCurrency(solde)}
                     </span>
-                  </button>
+                  </Link>
                 );
               })
             )}
