@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Users, Loader2, X, Search, Download, Trash2, CalendarPlus } from "lucide-react";
+import { ArrowLeft, Users, Loader2, X, Search, Download, Trash2, CalendarPlus, CalendarRange, RotateCcw } from "lucide-react";
 import { MontantInput } from "@/components/montant-input";
 import { formatDate, formatCurrency, formatTime } from "@/lib/utils";
 import ConfirmDelete from "@/components/confirm-delete";
@@ -40,6 +40,20 @@ interface GroupeData {
     stats: { presentsCount: number; totalEleves: number };
   }[];
   financialSummary: { totalDue: number; totalPaid: number; unpaid: number };
+  paiements: {
+    id: string;
+    date: string;
+    montant: number;
+    methodePaiement: string;
+    reference: string | null;
+    notes: string | null;
+    collecteParProf: boolean;
+    eleve: { id: string; nom: string; prenom: string };
+    collectedBy: { id: string; nom: string; prenom: string } | null;
+  }[];
+  periodTotalPaid: number;
+  hasRange: boolean;
+  periode: { from: string | null; to: string | null };
 }
 
 interface EleveSearch {
@@ -83,12 +97,21 @@ const statusColors: Record<string, string> = {
   annulee: "bg-neutral-100 dark:bg-[#1e2128] text-neutral-800 dark:text-neutral-300",
 };
 
+const methodeLabels: Record<string, string> = {
+  especes: "Espèces",
+  virement: "Virement",
+  cheque: "Chèque",
+  autre: "Autre",
+};
+
 export default function AdminGroupeDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const [groupe, setGroupe] = useState<GroupeData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [deletingSeanceId, setDeletingSeanceId] = useState<string | null>(null);
@@ -126,7 +149,11 @@ export default function AdminGroupeDetailPage() {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(`/api/admin/groupes/${id}`);
+      const qs = new URLSearchParams();
+      if (fromDate) qs.set("from", fromDate);
+      if (toDate) qs.set("to", toDate);
+      const query = qs.toString();
+      const res = await fetch(`/api/admin/groupes/${id}${query ? `?${query}` : ""}`);
       if (!res.ok) throw new Error("Erreur lors du chargement");
       const data = await res.json();
       setGroupe(data);
@@ -135,7 +162,7 @@ export default function AdminGroupeDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, fromDate, toDate]);
 
   useEffect(() => {
     fetchGroupe();
@@ -327,7 +354,7 @@ export default function AdminGroupeDetailPage() {
     }
   };
 
-  if (loading) {
+  if (loading && !groupe) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
@@ -415,6 +442,7 @@ export default function AdminGroupeDetailPage() {
       `Prof: ${g.prof ? `${g.prof.prenom} ${g.prof.nom}` : "—"}`,
       `Matière: ${g.matiere?.nom ?? "—"}`,
       `Prix: ${g.forfaitMontant && g.forfaitSeances ? `${g.forfaitMontant} DT / ${g.forfaitSeances} séances` : `${g.prixParSeance} DT / séance`}`,
+      `Période: ${groupe.hasRange ? `${groupe.periode.from ?? "…"} → ${groupe.periode.to ?? "…"}` : "depuis la création"}`,
       "",
       headers.join(";"),
       ...rows.map((row) => row.join(";")),
@@ -455,6 +483,46 @@ export default function AdminGroupeDetailPage() {
         </div>
       )}
 
+      <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-4">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+          <div className="flex items-center gap-2 text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+            <CalendarRange className="h-4 w-4 text-blue-600 dark:text-blue-400" /> Période
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-[12px] font-medium text-neutral-500 dark:text-neutral-400">Du</label>
+            <input
+              type="date"
+              value={fromDate}
+              max={toDate || undefined}
+              onChange={(e) => setFromDate(e.target.value)}
+              className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-2.5 py-1.5 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+            <label className="text-[12px] font-medium text-neutral-500 dark:text-neutral-400">Au</label>
+            <input
+              type="date"
+              value={toDate}
+              min={fromDate || undefined}
+              onChange={(e) => setToDate(e.target.value)}
+              className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-2.5 py-1.5 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+          {(fromDate || toDate) && (
+            <button
+              onClick={() => { setFromDate(""); setToDate(""); }}
+              className="flex items-center gap-1 rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-3 py-1.5 text-[12px] font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+            >
+              <RotateCcw className="h-3.5 w-3.5" /> Toute la période
+            </button>
+          )}
+          {loading && <Loader2 className="h-4 w-4 animate-spin text-blue-600 dark:text-blue-400" />}
+          <span className="ml-auto text-[12px] text-neutral-500 dark:text-neutral-400">
+            {groupe.hasRange
+              ? `Filtré${groupe.periode.from ? ` du ${formatDate(groupe.periode.from)}` : ""}${groupe.periode.to ? ` au ${formatDate(groupe.periode.to)}` : ""}`
+              : "Depuis la création du groupe"}
+          </span>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
           <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Informations</h2>
@@ -488,7 +556,7 @@ export default function AdminGroupeDetailPage() {
         </div>
 
         <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
-          <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Résumé Financier</h2>
+          <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Résumé Financier{groupe.hasRange ? " (période)" : ""}</h2>
           <div className="space-y-3">
             <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-4">
               <div className="flex items-center justify-between">
@@ -639,6 +707,51 @@ export default function AdminGroupeDetailPage() {
                     >
                       {deletingSeanceId === s.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                     </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+        <div className="flex items-center justify-between border-b border-neutral-200 dark:border-[#2a2d35] px-6 py-3">
+          <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">Paiements{groupe.hasRange ? " (période)" : ""} ({groupe.paiements.length})</h2>
+          <span className="text-[13px] font-semibold text-green-600 dark:text-green-400">Total : {formatCurrency(groupe.periodTotalPaid)}</span>
+        </div>
+        <div className="overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
+            <tr>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Date</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Élève</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Montant</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Méthode</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Encaissé par</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+            {groupe.paiements.length === 0 ? (
+              <tr><td colSpan={5} className="px-4 py-2.5 text-center text-neutral-500 dark:text-neutral-400">Aucun paiement{groupe.hasRange ? " sur la période" : ""}</td></tr>
+            ) : (
+              groupe.paiements.map((p) => (
+                <tr key={p.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
+                  <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">{formatDate(p.date)}</td>
+                  <td className="px-4 py-2.5">
+                    <Link href={`/admin/eleves/${p.eleve.id}`} className="text-[13px] font-medium text-blue-600 dark:text-blue-400 hover:underline">{p.eleve.prenom} {p.eleve.nom}</Link>
+                  </td>
+                  <td className="px-4 py-2.5 text-[13px] font-medium text-green-600 dark:text-green-400">{formatCurrency(p.montant)}</td>
+                  <td className="px-4 py-2.5 text-[13px] text-neutral-600 dark:text-neutral-400">{methodeLabels[p.methodePaiement] ?? p.methodePaiement}</td>
+                  <td className="px-4 py-2.5 text-[13px]">
+                    {p.collecteParProf ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+                        Prof — {p.collectedBy ? `${p.collectedBy.prenom} ${p.collectedBy.nom}` : "—"}
+                      </span>
+                    ) : (
+                      <span className="text-neutral-500 dark:text-neutral-400">Centre</span>
+                    )}
                   </td>
                 </tr>
               ))
