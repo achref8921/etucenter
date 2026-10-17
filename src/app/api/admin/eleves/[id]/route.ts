@@ -167,10 +167,23 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { niveau, classe, filiere } = body || {};
+    const { niveau, classe, filiere, nom, prenom, telephone } = body || {};
 
-    if (niveau === undefined && classe === undefined && filiere === undefined) {
-      return NextResponse.json({ error: "aucun champ à modifier (niveau, classe, filiere)" }, { status: 400 });
+    const touchesIdentity = nom !== undefined || prenom !== undefined || telephone !== undefined;
+    const touchesLevel = niveau !== undefined || classe !== undefined || filiere !== undefined;
+
+    if (!touchesIdentity && !touchesLevel) {
+      return NextResponse.json({ error: "aucun champ à modifier" }, { status: 400 });
+    }
+
+    if (nom !== undefined && (typeof nom !== "string" || nom.trim().length < 2 || nom.trim().length > 255)) {
+      return NextResponse.json({ error: "Le nom doit contenir entre 2 et 255 caractères" }, { status: 400 });
+    }
+    if (prenom !== undefined && (typeof prenom !== "string" || prenom.trim().length < 2 || prenom.trim().length > 255)) {
+      return NextResponse.json({ error: "Le prénom doit contenir entre 2 et 255 caractères" }, { status: 400 });
+    }
+    if (telephone !== undefined && telephone !== null && (typeof telephone !== "string" || telephone.length > 20)) {
+      return NextResponse.json({ error: "Téléphone invalide (20 caractères max)" }, { status: 400 });
     }
 
     const validNiveaux = ["primaire", "college", "lycee"];
@@ -194,24 +207,32 @@ export async function PATCH(
       return NextResponse.json({ error: "Le niveau et la classe sont requis pour les élèves" }, { status: 400 });
     }
     const lyceeClasses = ["2ème", "3ème", "Bac"];
-    if (finalNiveau === "lycee" && finalClasse && lyceeClasses.includes(finalClasse) && !finalFiliere) {
+    if (touchesLevel && finalNiveau === "lycee" && finalClasse && lyceeClasses.includes(finalClasse) && !finalFiliere) {
       return NextResponse.json({ error: "La filière est requise pour le lycée (2ème, 3ème, Bac)" }, { status: 400 });
     }
 
     const data: any = {};
-    if (niveau !== undefined) data.niveau = niveau;
-    if (classe !== undefined) data.classe = classe;
-    if (filiere !== undefined) data.filiere = filiere;
+    if (touchesLevel) {
+      if (niveau !== undefined) data.niveau = niveau;
+      if (classe !== undefined) data.classe = classe;
+      if (filiere !== undefined) data.filiere = filiere;
+    }
+    if (nom !== undefined) data.nom = nom.trim();
+    if (prenom !== undefined) data.prenom = prenom.trim();
+    if (telephone !== undefined) data.telephone = telephone ? telephone.trim() : null;
 
     const updated = await prisma.utilisateur.update({
       where: { id },
       data,
-      select: { id: true, nom: true, prenom: true, niveau: true, classe: true, filiere: true },
+      select: { id: true, nom: true, prenom: true, telephone: true, niveau: true, classe: true, filiere: true },
     });
 
-    logger.info("Niveau scolaire de l'élève modifié", {
+    logger.info("Informations de l'élève modifiées", {
       adminId: (session.user as any).id,
       eleveId: id,
+      nom,
+      prenom,
+      telephone,
       niveau,
       classe,
       filiere,
@@ -220,15 +241,15 @@ export async function PATCH(
     try {
       await prisma.systemLog.create({
         data: {
-          action: "eleve_niveau_updated",
+          action: touchesLevel ? "eleve_niveau_updated" : "eleve_updated",
           entity: "utilisateur",
           entityId: id,
-          details: { centerId: centreId, niveau, classe, filiere },
+          details: { centerId: centreId, nom, prenom, telephone, niveau, classe, filiere },
           userId: (session.user as any).id,
         },
       });
     } catch (logError) {
-      logger.error("Echec du journal systemLog du changement de niveau", { logError });
+      logger.error("Echec du journal systemLog de la modification de l'élève", { logError });
     }
 
     void trackEventSafe({
@@ -241,7 +262,7 @@ export async function PATCH(
 
     return NextResponse.json(updated);
   } catch (error) {
-    logger.error("Erreur lors de la modification du niveau de l'élève", { error });
+    logger.error("Erreur lors de la modification de l'élève", { error });
     return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });
   }
 }

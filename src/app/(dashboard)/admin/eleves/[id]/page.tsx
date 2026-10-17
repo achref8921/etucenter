@@ -111,9 +111,13 @@ export default function AdminEleveDetailPage() {
   const [transactions, setTransactions] = useState<StudentTransaction[]>([]);
   const [presenceFilter, setPresenceFilter] = useState<"toutes" | "present" | "absent">("toutes");
   const [niveauEdit, setNiveauEdit] = useState(false);
+  const [identiteEdit, setIdentiteEdit] = useState(false);
   const [editNiveau, setEditNiveau] = useState("");
   const [editClasse, setEditClasse] = useState("");
   const [editFiliere, setEditFiliere] = useState("");
+  const [editPrenom, setEditPrenom] = useState("");
+  const [editNom, setEditNom] = useState("");
+  const [editTel, setEditTel] = useState("");
   const [editSaving, setEditSaving] = useState(false);
   const [editError, setEditError] = useState("");
 
@@ -185,6 +189,45 @@ export default function AdminEleveDetailPage() {
       }
       setEleve((prev) => (prev ? { ...prev, eleve: { ...prev.eleve, ...body } } : prev));
       setNiveauEdit(false);
+      setEditSaving(false);
+    } catch {
+      setEditError("Erreur réseau");
+      setEditSaving(false);
+    }
+  }
+
+  function openIdentiteEdit() {
+    setEditPrenom(eleve?.eleve.prenom || "");
+    setEditNom(eleve?.eleve.nom || "");
+    setEditTel(eleve?.eleve.telephone || "");
+    setEditError("");
+    setIdentiteEdit(true);
+  }
+
+  async function saveIdentite() {
+    if (!eleve) return;
+    const prenom = editPrenom.trim();
+    const nom = editNom.trim();
+    if (prenom.length < 2 || nom.length < 2) {
+      setEditError("Le nom et le prénom doivent contenir au moins 2 caractères");
+      return;
+    }
+    setEditSaving(true);
+    setEditError("");
+    try {
+      const res = await fetch(`/api/admin/eleves/${eleve.eleve.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prenom, nom, telephone: editTel.trim() }),
+      });
+      const body = await res.json();
+      if (!res.ok) {
+        setEditError(body.error || "Erreur");
+        setEditSaving(false);
+        return;
+      }
+      setEleve((prev) => (prev ? { ...prev, eleve: { ...prev.eleve, ...body } } : prev));
+      setIdentiteEdit(false);
       setEditSaving(false);
     } catch {
       setEditError("Erreur réseau");
@@ -311,7 +354,14 @@ export default function AdminEleveDetailPage() {
             <p className="mt-1 text-sm text-neutral-900 dark:text-neutral-100">{e.filiere ? e.filiere.charAt(0).toUpperCase() + e.filiere.slice(1) : "—"}</p>
           </div>
         </div>
-        <div className="mt-4 flex justify-end">
+        <div className="mt-4 flex flex-wrap justify-end gap-2">
+          <button
+            onClick={openIdentiteEdit}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition-colors dark:bg-blue-900/20 dark:text-blue-300 dark:hover:bg-blue-900/30"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            Modifier le nom / téléphone
+          </button>
           <button
             onClick={openNiveauEdit}
             className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition-colors dark:bg-blue-900/20 dark:text-blue-300 dark:hover:bg-blue-900/30"
@@ -666,6 +716,65 @@ export default function AdminEleveDetailPage() {
         </table>
         </div>
       </div>
+
+      {identiteEdit && eleve && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl dark:bg-[#181b22]">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Informations personnelles</h2>
+              <button onClick={() => setIdentiteEdit(false)} className="text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            {editError && (
+              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">{editError}</div>
+            )}
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Prénom</label>
+                <input
+                  type="text"
+                  value={editPrenom}
+                  maxLength={255}
+                  onChange={(e) => setEditPrenom(e.target.value)}
+                  className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-neutral-700 focus:border-violet-500 focus:outline-none dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-200"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Nom</label>
+                <input
+                  type="text"
+                  value={editNom}
+                  maxLength={255}
+                  onChange={(e) => setEditNom(e.target.value)}
+                  className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-neutral-700 focus:border-violet-500 focus:outline-none dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-200"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Téléphone</label>
+                <input
+                  type="tel"
+                  value={editTel}
+                  maxLength={20}
+                  onChange={(e) => setEditTel(e.target.value)}
+                  placeholder="—"
+                  className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-neutral-700 focus:border-violet-500 focus:outline-none dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-200"
+                />
+              </div>
+            </div>
+            <div className="mt-5 flex justify-end gap-3">
+              <button type="button" onClick={() => setIdentiteEdit(false)} className="rounded-lg px-4 py-2.5 text-[13px] font-medium text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-[#1e2128]">Annuler</button>
+              <button
+                onClick={saveIdentite}
+                disabled={editSaving}
+                className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-blue-700 disabled:opacity-50 dark:hover:bg-blue-500"
+              >
+                {editSaving && <Loader2 className="h-4 w-4 animate-spin" />} Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {niveauEdit && eleve && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
