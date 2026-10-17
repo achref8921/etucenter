@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { upload } from "@vercel/blob/client";
 import {
   Download,
   FileText,
@@ -96,6 +95,32 @@ async function compressImageIfNeeded(file: File): Promise<File> {
   }
 }
 
+/**
+ * Envoi direct du fichier dans le stockage objet (B2) via l'URL présignée.
+ * On utilise XMLHttpRequest plutôt que fetch pour disposer de la progression.
+ */
+function putToStorage(
+  url: string,
+  file: File,
+  contentType: string,
+  onProgress: (percent: number) => void
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("PUT", url, true);
+    xhr.setRequestHeader("Content-Type", contentType);
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+    };
+    xhr.onload = () =>
+      xhr.status >= 200 && xhr.status < 300
+        ? resolve()
+        : reject(new Error(`Envoi impossible (${xhr.status})`));
+    xhr.onerror = () => reject(new Error("Envoi impossible : connexion interrompue"));
+    xhr.send(file);
+  });
+}
+
 export default function SeanceDocumentsModal({
   seanceId,
   seanceLabel,
@@ -184,17 +209,20 @@ export default function SeanceDocumentsModal({
       const newId: string = created.documentId;
       documentId = newId;
 
-      // 2) Envoi direct au Blob via un jeton jetable, limité à CE chemin.
+      // 2) Envoi direct dans B2 via une URL présignée, limitée à CE chemin.
       setProgress({ name: payload.name, percent: 0 });
-      await upload(created.pathname, payload, {
-        access: "private",
-        contentType: payload.type,
-        handleUploadUrl: `${base}/upload-token`,
-        clientPayload: newId,
-        onUploadProgress: (e) => {
-          setProgress({ name: payload.name, percent: e.percentage ?? 0 });
-        },
+      const presignRes = await fetch(`${base}/upload-url`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ documentId: newId }),
       });
+      const presign = await presignRes.json().catch(() => ({}));
+      if (!presignRes.ok || !presign.url) {
+        throw new Error(presign.error || "Préparation de l'envoi impossible");
+      }
+      await putToStorage(presign.url, payload, payload.type, (percent) =>
+        setProgress({ name: payload.name, percent })
+      );
 
       // 3) Finalisation : contrôle réel (taille + magic bytes) côté serveur.
       setProgress({ name: payload.name, percent: 100 });

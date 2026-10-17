@@ -7,10 +7,9 @@ import {
   loadDocUser,
 } from "@/lib/seance-documents";
 import {
-  BlobMissingError,
   BlobNotConfiguredError,
+  createPresignedGetUrl,
   isBlobStoreConfigured,
-  openDocumentStream,
 } from "@/lib/seance-documents-storage";
 
 export const runtime = "nodejs";
@@ -20,8 +19,12 @@ export const dynamic = "force-dynamic";
  * GET /api/seance-documents/[id]/content
  *
  * Sert le contenu d'un support APRÈS contrôle d'accès complet
- * (document → séance → groupe → centre + rôle). L'URL permanente du blob
- * n'est jamais renvoyée : le client ne voit que cette route.
+ * (document → séance → groupe → centre + rôle). L'accès se fait par
+ * REDIRECTION vers une URL présignée à durée courte (5 min) :
+ *   - l'URL permanente du fichier n'est jamais exposée ;
+ *   - le téléchargement ne transite PAS par Vercel (aucun data transfer
+ *     facturé, egress gratuit chez B2) ;
+ *   - le nom de fichier et le type sont gravés dans la signature.
  *
  * La route est volontairement hors préfixe /api/prof et /api/eleve afin que
  * l'autorisation soit faite ici, et non par le middleware.
@@ -54,46 +57,30 @@ export async function GET(
     }
 
     if (!isBlobStoreConfigured()) {
-      logger.error("Vercel Blob non configuré : BLOB_READ_WRITE_TOKEN ou BLOB_STORE_ID manquant");
+      logger.error("Stockage objet non configuré : B2_KEY_ID / B2_BUCKET / B2_ENDPOINT manquants");
       return NextResponse.json({ error: "Stockage de fichiers non configuré" }, { status: 503 });
     }
 
-    let opened;
+    // On impose le Content-Type validé en base, jamais celui renvoyé par le stockage.
+    const inline = isPreviewableMime(document.mimeType);
+    const download = request.nextUrl.searchParams.get("telecharger") === "1" || !inline;
+    const asciiName = document.fileName.replace(/[^\x20-\x7e]/g, "_").replace(/["\\\r\n]/g, "_");
+
+    let url: string;
     try {
-      opened = await openDocumentStream(document.pathname);
+      url = await createPresignedGetUrl(document.pathname, {
+        expiresIn: 300,
+        responseContentType: document.mimeType,
+        responseContentDisposition: `${download ? "attachment" : "inline"}; filename="${asciiName}"; filename*=UTF-8''${encodeURIComponent(document.fileName)}`,
+      });
     } catch (err) {
-      if (err instanceof BlobMissingError) {
-        // Métadonnées présentes mais fichier absent : la ligne est signalée
-        // comme cassée (le cron la nettoiera), on ne dérive pas l'URL.
-        return NextResponse.json({ error: "Fichier indisponible" }, { status: 410 });
-      }
       if (err instanceof BlobNotConfiguredError) {
         return NextResponse.json({ error: "Stockage de fichiers non configuré" }, { status: 503 });
       }
       throw err;
     }
 
-    // On impose le Content-Type validé en base, jamais celui renvoyé par Blob.
-    const contentType = document.mimeType;
-    const inline = isPreviewableMime(contentType);
-    const disposition = request.nextUrl.searchParams.get("telecharger") === "1" || !inline
-      ? "attachment"
-      : "inline";
-
-    const asciiName = document.fileName.replace(/[^\x20-\x7e]/g, "_").replace(/["\\]/g, "_");
-
-    return new NextResponse(opened.stream as any, {
-      status: 200,
-      headers: {
-        "Content-Type": contentType,
-        "Content-Length": String(document.sizeBytes),
-        "Content-Disposition": `${disposition}; filename="${asciiName}"; filename*=UTF-8''${encodeURIComponent(document.fileName)}`,
-        "X-Content-Type-Options": "nosniff",
-        "Content-Security-Policy": "default-src 'none'; sandbox",
-        "Cache-Control": "private, no-store, max-age=0",
-        "Accept-Ranges": "none",
-      },
-    });
+    return NextResponse.redirect(url, 307);
   } catch (err) {
     logger.error("Erreur lors de la lecture d'un support", { error: err });
     return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });
