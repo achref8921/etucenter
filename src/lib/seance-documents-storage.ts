@@ -252,3 +252,62 @@ export async function createPresignedGetUrl(
 export function logBlobError(context: string, err: unknown): void {
   logger.error(`Stockage objet: ${context}`, { error: err });
 }
+
+export interface BlobStreamResult {
+  body: ReadableStream<Uint8Array>;
+  contentLength: number | null;
+  contentRange: string | null;
+}
+
+/**
+ * Lit un objet et renvoie son FLUX (sans présigner d'URL).
+ *
+ * Utilisé pour les ÉLÈVES : les octets transitent par la route de contenu
+ * (même origine) au lieu d'être exposés via une URL signée B2. Trois raisons :
+ *   - l'URL du fichier n'existe plus côté navigateur (rien à copier/partager) ;
+ *   - le CORS de B2 ne concerne que l'envoi (PUT) : un GET direct depuis le
+ *     navigateur est refusé, donc pdf.js ne pourrait pas lire les octets ;
+ *   - le lecteur PDF (pdf.js, rendu en canvas) fonctionne aussi sur mobile,
+ *     là où un <iframe> PDF n'est pas rendu.
+ *
+ * `range` est transmis tel quel à B2 pour permettre la lecture partielle.
+ */
+export async function getObjectStream(
+  pathname: string,
+  range?: string | null
+): Promise<BlobStreamResult> {
+  requireStore();
+  let res;
+  try {
+    res = await getClient().send(
+      new GetObjectCommand({
+        Bucket: requireBucket(),
+        Key: pathname,
+        Range: range || undefined,
+      })
+    );
+  } catch (err: unknown) {
+    const status = (err as { $metadata?: { httpStatusCode?: number } })?.$metadata?.httpStatusCode;
+    if (status === 404 || status === 416) throw new BlobMissingError();
+    throw err;
+  }
+
+  const raw = res.Body as unknown as {
+    transformToWebStream?: () => ReadableStream<Uint8Array>;
+  } | null;
+  if (!raw) throw new BlobMissingError();
+
+  let body: ReadableStream<Uint8Array>;
+  if (typeof raw.transformToWebStream === "function") {
+    body = raw.transformToWebStream();
+  } else {
+    const { Readable } = await import("node:stream");
+    body = Readable.toWeb(raw as unknown as InstanceType<typeof Readable>) as unknown as ReadableStream<Uint8Array>;
+  }
+
+  return {
+    body,
+    contentLength: typeof res.ContentLength === "number" ? res.ContentLength : null,
+    contentRange: res.ContentRange ?? null,
+  };
+}

@@ -57,3 +57,8 @@ PROJECT_MAP.md
 
 .vercel
 .env*
+
+# QA sandbox local (jamais commiter : contient l'URL de base + identifiants de test)
+.qa-sandbox/
+prisma/schema.prisma.bak*
+build.log

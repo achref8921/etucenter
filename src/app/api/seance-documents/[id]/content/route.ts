@@ -7,8 +7,10 @@ import {
   loadDocUser,
 } from "@/lib/seance-documents";
 import {
+  BlobMissingError,
   BlobNotConfiguredError,
   createPresignedGetUrl,
+  getObjectStream,
   isBlobStoreConfigured,
 } from "@/lib/seance-documents-storage";
 
@@ -27,11 +29,15 @@ import {
  * La route est volontairement hors préfixe /api/prof et /api/eleve afin que
  * l'autorisation soit faite ici, et non par le middleware.
  *
- * ÉLÈVE : la lecture est résolument « lecture seule » — le paramètre
- * ?telecharger=1 est ignoré (jamais de disposition « attachment »), et la
- * redirection est marquée no-store. Le visualiseur côté client (composant
- * protected-document-viewer) ajoute le filigrane et verrouille les
- * raccourcis de sauvegarde / menu contextuel / impression.
+ * ÉLÈVE : lecture « même origine » uniquement. Les octets sont STREAMÉS par
+ * cette route (jamais d'URL signée renvoyée au navigateur, donc rien à copier
+ * ni à partager), ?telecharger=1 est ignoré, et les en-têtes interdisent la
+ * mise en cache. Le visualiseur client (protected-document-viewer) rend les
+ * pages en canvas via pdf.js — compatible mobile — et ajoute le filigrane.
+ *
+ * PROF / ADMIN : comportement inchangé (redirection 307 vers une URL
+ * présignée de 5 min, disposition inline pour l'aperçu ou attachment pour le
+ * téléchargement explicite).
  */
 export async function GET(
   request: NextRequest,
@@ -68,12 +74,43 @@ export async function GET(
     // On impose le Content-Type validé en base, jamais celui renvoyé par le stockage.
     const role = (session.user as any).role;
     const isEleve = role === "eleve";
-    // Pour un élève : lecture seule dans le visualiseur protégé.
-    //   - ?telecharger=1 est ignoré (pas de disposition "attachment") ;
-    //   - même un MIME non prévisualisable reste en inline côté élève.
-    const inline = isPreviewableMime(document.mimeType) || isEleve;
-    const download = !isEleve && (request.nextUrl.searchParams.get("telecharger") === "1" || !inline);
     const asciiName = document.fileName.replace(/[^\x20-\x7e]/g, "_").replace(/["\\\r\n]/g, "_");
+    const disposition = `inline; filename="${asciiName}"; filename*=UTF-8''${encodeURIComponent(document.fileName)}`;
+
+    // ÉLÈVE : les octets transitent par cette route (même origine). L'URL du
+    // fichier n'est jamais exposée au navigateur, et le lecteur canvas (pdf.js)
+    // peut lire les octets sans dépendre du CORS de B2, y compris sur mobile.
+    // Conséquence assumée : la bande passante passe par Vercel, et le dépôt est
+    // plafonné à 15 Mo (PDF) / 8 Mo (images) côté téléversement.
+    if (isEleve) {
+      let stream;
+      try {
+        stream = await getObjectStream(document.pathname, request.headers.get("range"));
+      } catch (err) {
+        if (err instanceof BlobMissingError) {
+          return NextResponse.json({ error: "Fichier introuvable" }, { status: 404 });
+        }
+        if (err instanceof BlobNotConfiguredError) {
+          return NextResponse.json({ error: "Stockage de fichiers non configuré" }, { status: 503 });
+        }
+        throw err;
+      }
+
+      const headers = new Headers({
+        "Content-Type": document.mimeType,
+        "Content-Disposition": disposition,
+        "Cache-Control": "no-store, private",
+        "X-Content-Type-Options": "nosniff",
+        "Accept-Ranges": "bytes",
+      });
+      if (stream.contentLength !== null) headers.set("Content-Length", String(stream.contentLength));
+      if (stream.contentRange) headers.set("Content-Range", stream.contentRange);
+
+      return new Response(stream.body, { status: stream.contentRange ? 206 : 200, headers });
+    }
+
+    const inline = isPreviewableMime(document.mimeType);
+    const download = request.nextUrl.searchParams.get("telecharger") === "1" || !inline;
 
     let url: string;
     try {
@@ -89,12 +126,7 @@ export async function GET(
       throw err;
     }
 
-    return NextResponse.redirect(url, {
-      status: 307,
-      headers: isEleve
-        ? { "Cache-Control": "no-store, private", Pragma: "no-cache" }
-        : undefined,
-    });
+    return NextResponse.redirect(url, 307);
   } catch (err) {
     logger.error("Erreur lors de la lecture d'un support", { error: err });
     return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });

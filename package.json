@@ -31,6 +31,7 @@
     "next": "^16.2.12",
     "next-auth": "^4.24.15",
     "nodemailer": "^7.0.13",
+    "pdfjs-dist": "4.10.38",
     "prisma": "^5.22.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
