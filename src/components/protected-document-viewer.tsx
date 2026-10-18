@@ -156,6 +156,13 @@ export default function ProtectedDocumentViewer({
 
   // ---- Verrous : menu contextuel, glisser, sélection, raccourcis, impression ----
   useEffect(() => {
+    // Application Android (WebView) : bascule FLAG_SECURE pendant la consultation.
+    // Sur navigateur, l'objet est absent et l'appel est ignoré.
+    const nativeSecure = (window as unknown as {
+      AndroidSecure?: { enable?: () => void; disable?: () => void };
+    }).AndroidSecure;
+    nativeSecure?.enable?.();
+
     const block = (e: Event) => e.preventDefault();
     const onKeyDown = (e: KeyboardEvent) => {
       const key = (e.key || "").toLowerCase();
@@ -186,6 +193,7 @@ export default function ProtectedDocumentViewer({
       window.removeEventListener("keyup", onKeyUp, true);
       style.remove();
       if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined);
+      nativeSecure?.disable?.();
     };
   }, []);
 
