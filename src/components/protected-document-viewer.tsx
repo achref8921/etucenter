@@ -31,6 +31,78 @@ interface ProtectedDocumentViewerProps {
 const MAX_PAGES = 80;
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 3;
+const SLICE_BYTES = 2 * 1024 * 1024;
+
+/**
+ * Télécharge le document par tranches (Range) puis l'assemble en mémoire.
+ *
+ * Indispensable : un corps de réponse Vercel est plafonné (4,5 Mo) alors que les
+ * dépôts vont jusqu'à 15 Mo, et la route plafonne volontairement chaque tranche.
+ * On tient donc TOUJOURS le document entier avant de l'afficher : un rendu sur
+ * une réponse tronquée produirait un PDF illisible, et aucune URL de stockage
+ * n'existe côté navigateur.
+ */
+async function downloadInSlices(
+  url: string,
+  slice: number,
+  onProgress?: (percent: number | null) => void
+): Promise<Uint8Array> {
+  const chunks: Uint8Array[] = [];
+  let offset = 0;
+  let total: number | null = null;
+  const guard = 64 * 1024 * 1024;
+
+  while (offset < guard) {
+    const res = await fetch(url, {
+      headers: { Range: `bytes=${offset}-${offset + slice - 1}` },
+      cache: "no-store",
+    });
+    if (res.status !== 200 && res.status !== 206) {
+      throw new Error(`Téléchargement impossible (${res.status})`);
+    }
+
+    const match = /\/(\d+)\s*$/.exec(res.headers.get("Content-Range") || "");
+    if (match) total = Number(match[1]);
+
+    const buffer = await res.arrayBuffer();
+    if (buffer.byteLength === 0) break;
+    chunks.push(new Uint8Array(buffer));
+    offset += buffer.byteLength;
+    onProgress?.(total ? Math.min(100, Math.round((offset / total) * 100)) : null);
+
+    if (res.status === 200 || (total !== null && offset >= total)) break;
+  }
+
+  const merged = new Uint8Array(offset);
+  let written = 0;
+  for (const chunk of chunks) {
+    merged.set(chunk, written);
+    written += chunk.byteLength;
+  }
+  return merged;
+}
+
+/** Reconstruit une image affichable depuis les octets téléchargés. */
+async function toBitmap(bytes: Uint8Array, mimeType: string): Promise<ImageBitmap | HTMLImageElement> {
+  const blob = new Blob([bytes as BlobPart], { type: mimeType || "application/octet-stream" });
+  if (typeof createImageBitmap === "function") {
+    try {
+      return await createImageBitmap(blob);
+    } catch {
+      /* repli ci-dessous (image non décodable par createImageBitmap) */
+    }
+  }
+  const objectUrl = URL.createObjectURL(blob);
+  try {
+    const img = new Image();
+    img.decoding = "async";
+    img.src = objectUrl;
+    await img.decode();
+    return img;
+  } finally {
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 10_000);
+  }
+}
 
 export default function ProtectedDocumentViewer({
   documentId,
@@ -44,12 +116,13 @@ export default function ProtectedDocumentViewer({
   const scrollRef = useRef<HTMLDivElement>(null);
   const pageHostRefs = useRef<(HTMLDivElement | null)[]>([]);
   const pdfRef = useRef<{ numPages: number; getPage: (n: number) => Promise<any>; destroy: () => void } | null>(null);
-  const imageRef = useRef<HTMLImageElement | null>(null);
+  const imageRef = useRef<ImageBitmap | HTMLImageElement | null>(null);
   const renderedRef = useRef<Set<number>>(new Set());
   const tokenRef = useRef(0);
 
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState<number | null>(null);
   const [owner, setOwner] = useState("");
   const [stamp, setStamp] = useState("");
   const [zoom, setZoom] = useState(1);
@@ -124,10 +197,15 @@ export default function ProtectedDocumentViewer({
 
     (async () => {
       try {
+        // Le document est d'abord téléchargé par tranches (le serveur plafonne
+        // chaque réponse), puis affiché : le rendu n'est jamais partiel.
+        const bytes = await downloadInSlices(href, SLICE_BYTES, setProgress);
+        if (cancelled || token !== tokenRef.current) return;
+
         if (isPdfFile) {
           const pdfjs = await import("pdfjs-dist");
           pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
-          const doc = await pdfjs.getDocument({ url: href, withCredentials: true }).promise;
+          const doc = await pdfjs.getDocument({ data: bytes }).promise;
           if (cancelled || token !== tokenRef.current) {
             void doc.destroy();
             return;
@@ -136,12 +214,9 @@ export default function ProtectedDocumentViewer({
           setPageCount(doc.numPages);
           pageHostRefs.current = new Array(doc.numPages).fill(null);
         } else {
-          const img = new Image();
-          img.decoding = "async";
-          img.src = href;
-          await img.decode();
+          const bitmap = await toBitmap(bytes, mimeType);
           if (cancelled || token !== tokenRef.current) return;
-          imageRef.current = img;
+          imageRef.current = bitmap;
         }
         setStatus("ready");
         setRenderKey((k) => k + 1);
@@ -162,8 +237,7 @@ export default function ProtectedDocumentViewer({
 
   // ---- Peinture dans les canvas (recalculée au zoom) ----
   useEffect(() => {
-    if (status !== "ready") return;
-    const container = scrollRef.current;
+    if (status !== "ready") return;    const container = scrollRef.current;
     if (!container) return;
     const token = tokenRef.current;
     renderedRef.current = new Set();
@@ -176,11 +250,13 @@ export default function ProtectedDocumentViewer({
       const img = imageRef.current;
       const host = pageHostRefs.current[0];
       if (!img || !host) return;
-      const target = Math.min(width(), img.naturalWidth);
-      const scale = target / img.naturalWidth;
+      const naturalWidth = img instanceof HTMLImageElement ? img.naturalWidth : img.width;
+      const naturalHeight = img instanceof HTMLImageElement ? img.naturalHeight : img.height;
+      const target = Math.min(width(), naturalWidth);
+      const scale = target / naturalWidth;
       const canvas = document.createElement("canvas");
-      canvas.width = Math.round(img.naturalWidth * scale * dpr);
-      canvas.height = Math.round(img.naturalHeight * scale * dpr);
+      canvas.width = Math.round(naturalWidth * scale * dpr);
+      canvas.height = Math.round(naturalHeight * scale * dpr);
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -323,8 +399,16 @@ export default function ProtectedDocumentViewer({
 
       <div ref={scrollRef} className="relative flex-1 overflow-auto px-4 py-4">
         {status === "loading" && (
-          <div className="flex h-full items-center justify-center gap-2 text-sm text-white/70">
-            <Loader2 className="h-4 w-4 animate-spin" /> Chargement du document…
+          <div className="flex h-full flex-col items-center justify-center gap-3 text-sm text-slate-200">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <span>
+              Chargement du document…{progress !== null ? ` ${progress} %` : ""}
+            </span>
+            {progress !== null && (
+              <span className="h-1.5 w-48 overflow-hidden rounded-full bg-white/20">
+                <span className="block h-full bg-blue-400 transition-all" style={{ width: `${progress}%` }} />
+              </span>
+            )}
           </div>
         )}
         {status === "error" && (

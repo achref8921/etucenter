@@ -14,6 +14,18 @@ import {
   isBlobStoreConfigured,
 } from "@/lib/seance-documents-storage";
 
+/**
+ * Taille maximale servie en une seule réponse pour un élève.
+ *
+ * Vercel refuse un corps de réponse de fonction au-delà de 4,5 Mo
+ * (FUNCTION_RESPONSE_PAYLOAD_TOO_LARGE). Comme les dépôts vont jusqu'à 15 Mo
+ * (PDF) et 8 Mo (images), chaque réponse est découpée en tranches d'au plus
+ * cette taille, y compris quand le client demande un Range ouvert (`bytes=0-`).
+ * Le compteur correct est fourni par l'en-tête Content-Range, ce qui permet à
+ * pdf.js (et au fetch découpé du visualiseur) de récupérer le reste.
+ */
+const MAX_STREAM_BYTES = 4 * 1024 * 1024;
+
 
 /**
  * GET /api/seance-documents/[id]/content
@@ -83,9 +95,54 @@ export async function GET(
     // Conséquence assumée : la bande passante passe par Vercel, et le dépôt est
     // plafonné à 15 Mo (PDF) / 8 Mo (images) côté téléversement.
     if (isEleve) {
+      const size = document.sizeBytes > 0 ? document.sizeBytes : null;
+      const parsed = /^bytes=(\d+)-(\d*)$/.exec((request.headers.get("range") || "").trim());
+
+      let start = 0;
+      let wantedEnd: number | null = null;
+      if (parsed) {
+        start = Number(parsed[1]);
+        wantedEnd = parsed[2] === "" ? null : Number(parsed[2]);
+      }
+
+      if (size !== null && start >= size) {
+        return new Response(null, {
+          status: 416,
+          headers: { "Content-Range": `bytes */${size}`, "Accept-Ranges": "bytes" },
+        });
+      }
+
+      // Un corps de réponse Vercel est plafonné : un fichier plus gros n'est
+      // JAMAIS servi d'un bloc (une réponse tronquée rendrait le PDF illisible).
+      // On invite donc le client à demander des tranches, ce que fait le
+      // visualiseur de l'élève. Un fichier assez petit reste servi entier.
+      const wholeFits = size !== null && size <= MAX_STREAM_BYTES && !parsed;
+      if (size !== null && size > MAX_STREAM_BYTES && !parsed) {
+        return new Response(null, {
+          status: 416,
+          headers: {
+            "Content-Range": `bytes */${size}`,
+            "Accept-Ranges": "bytes",
+            "Cache-Control": "no-store, private",
+          },
+        });
+      }
+
+      const cap = start + MAX_STREAM_BYTES - 1;
+      const end = wholeFits
+        ? size! - 1
+        : Math.min(
+            wantedEnd ?? cap,
+            cap,
+            size !== null ? size - 1 : Number.MAX_SAFE_INTEGER
+          );
+
       let stream;
       try {
-        stream = await getObjectStream(document.pathname, request.headers.get("range"));
+        stream = await getObjectStream(
+          document.pathname,
+          wholeFits ? null : `bytes=${start}-${end}`
+        );
       } catch (err) {
         if (err instanceof BlobMissingError) {
           return NextResponse.json({ error: "Fichier introuvable" }, { status: 404 });
@@ -104,9 +161,18 @@ export async function GET(
         "Accept-Ranges": "bytes",
       });
       if (stream.contentLength !== null) headers.set("Content-Length", String(stream.contentLength));
-      if (stream.contentRange) headers.set("Content-Range", stream.contentRange);
 
-      return new Response(stream.body, { status: stream.contentRange ? 206 : 200, headers });
+      if (wholeFits) {
+        return new Response(stream.body, { status: 200, headers });
+      }
+
+      // On réécrit le Content-Range à partir de la taille connue en base : la
+      // tranche est notre découpage, pas celui demandé par le client.
+      const contentRange =
+        size !== null ? `bytes ${start}-${end}/${size}` : stream.contentRange;
+      if (contentRange) headers.set("Content-Range", contentRange);
+
+      return new Response(stream.body, { status: 206, headers });
     }
 
     const inline = isPreviewableMime(document.mimeType);
