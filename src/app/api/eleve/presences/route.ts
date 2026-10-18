@@ -19,7 +19,7 @@ export async function GET() {
           },
         },
       },
-      orderBy: { dateCreation: "desc" },
+      orderBy: [{ seance: { date: "desc" } }, { dateCreation: "desc" }],
     });
 
     const historique = presences.map((presence: any) => ({

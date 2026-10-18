@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
         centerId: centreId,
         status: { in: ["OPEN", "PARTIAL"] },
       },
-      orderBy: [{ createdAt: "asc" }],
+      orderBy: [{ createdAt: "desc" }],
       select: {
         id: true,
         createdAt: true,

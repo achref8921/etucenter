@@ -44,7 +44,7 @@ export async function GET() {
           },
         },
       },
-      orderBy: { date: "asc" },
+      orderBy: { date: "desc" },
     });
 
     logger.info("Séances élève récupérées", {

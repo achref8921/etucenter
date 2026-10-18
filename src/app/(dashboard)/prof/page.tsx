@@ -108,7 +108,8 @@ export default function ProfDashboardPage() {
           const upcoming = seancesData
             .filter((s) => new Date(s.date) >= now && s.statut !== "annulee")
             .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-            .slice(0, 5);
+            .slice(0, 5)
+            .reverse();
           setSeances(upcoming);
         }
       } catch (err) {
