@@ -46,6 +46,22 @@ export default withAuth(
     const { pathname } = req.nextUrl;
     const token = req.nextauth.token;
 
+    if (pathname === "/") {
+      if (!token) {
+        return NextResponse.next();
+      }
+      const homeRole = token.role as string;
+      const homeTarget =
+        homeRole === "super_admin"
+          ? "/super-admin"
+          : homeRole === "admin"
+            ? "/admin"
+            : homeRole === "prof"
+              ? "/prof"
+              : "/eleve";
+      return NextResponse.redirect(new URL(homeTarget, req.url));
+    }
+
     if (!token) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
@@ -70,13 +86,17 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: ({ token, req }) => {
+        if (req?.nextUrl?.pathname === "/") return true;
+        return !!token;
+      },
     },
   }
 );
 
 export const config = {
   matcher: [
+    "/",
     "/super-admin/:path*",
     "/admin/:path*",
     "/prof/:path*",
