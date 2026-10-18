@@ -26,6 +26,12 @@ import {
  *
  * La route est volontairement hors préfixe /api/prof et /api/eleve afin que
  * l'autorisation soit faite ici, et non par le middleware.
+ *
+ * ÉLÈVE : la lecture est résolument « lecture seule » — le paramètre
+ * ?telecharger=1 est ignoré (jamais de disposition « attachment »), et la
+ * redirection est marquée no-store. Le visualiseur côté client (composant
+ * protected-document-viewer) ajoute le filigrane et verrouille les
+ * raccourcis de sauvegarde / menu contextuel / impression.
  */
 export async function GET(
   request: NextRequest,
@@ -60,8 +66,13 @@ export async function GET(
     }
 
     // On impose le Content-Type validé en base, jamais celui renvoyé par le stockage.
-    const inline = isPreviewableMime(document.mimeType);
-    const download = request.nextUrl.searchParams.get("telecharger") === "1" || !inline;
+    const role = (session.user as any).role;
+    const isEleve = role === "eleve";
+    // Pour un élève : lecture seule dans le visualiseur protégé.
+    //   - ?telecharger=1 est ignoré (pas de disposition "attachment") ;
+    //   - même un MIME non prévisualisable reste en inline côté élève.
+    const inline = isPreviewableMime(document.mimeType) || isEleve;
+    const download = !isEleve && (request.nextUrl.searchParams.get("telecharger") === "1" || !inline);
     const asciiName = document.fileName.replace(/[^\x20-\x7e]/g, "_").replace(/["\\\r\n]/g, "_");
 
     let url: string;
@@ -78,7 +89,12 @@ export async function GET(
       throw err;
     }
 
-    return NextResponse.redirect(url, 307);
+    return NextResponse.redirect(url, {
+      status: 307,
+      headers: isEleve
+        ? { "Cache-Control": "no-store, private", Pragma: "no-cache" }
+        : undefined,
+    });
   } catch (err) {
     logger.error("Erreur lors de la lecture d'un support", { error: err });
     return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });

@@ -14,6 +14,7 @@ const securityHeaders = [
       "img-src 'self' data: https: blob:",
       "font-src 'self' data:",
       "connect-src 'self' https://s3.us-east-005.backblazeb2.com",
+      "frame-src 'self' https://s3.us-east-005.backblazeb2.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",

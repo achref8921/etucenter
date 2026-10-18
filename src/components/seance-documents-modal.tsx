@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Download,
+  Eye,
   FileText,
   ImageIcon,
   Loader2,
@@ -11,6 +12,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
+import ProtectedDocumentViewer from "@/components/protected-document-viewer";
 
 const MAX_PDF_BYTES = 15 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -135,6 +137,7 @@ export default function SeanceDocumentsModal({
   const [description, setDescription] = useState("");
   const [progress, setProgress] = useState<{ name: string; percent: number } | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [viewerDoc, setViewerDoc] = useState<SeanceDocumentItem | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const base = `/api/prof/seances/${seanceId}/documents`;
@@ -164,11 +167,14 @@ export default function SeanceDocumentsModal({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        if (viewerDoc) setViewerDoc(null);
+        else onClose();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [onClose, viewerDoc]);
 
   const handleFile = async (file: File) => {
     setError(null);
@@ -342,14 +348,26 @@ export default function SeanceDocumentsModal({
                           )}
                         </span>
                         <div className="min-w-0 flex-1">
-                          <a
-                            href={href}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="block truncate text-sm font-medium text-neutral-900 hover:underline dark:text-neutral-100"
-                          >
-                            {doc.fileName}
-                          </a>
+                          {role === "eleve" && doc.statut === "pret" ? (
+                            <button
+                              type="button"
+                              onClick={() => setViewerDoc(doc)}
+                              title="Consulter (lecture seule)"
+                              className="flex max-w-full items-center gap-1.5 text-left text-sm font-medium text-neutral-900 hover:underline dark:text-neutral-100"
+                            >
+                              <Eye className="h-3.5 w-3.5 shrink-0 text-neutral-400" />
+                              <span className="truncate">{doc.fileName}</span>
+                            </button>
+                          ) : (
+                            <a
+                              href={href}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="block truncate text-sm font-medium text-neutral-900 hover:underline dark:text-neutral-100"
+                            >
+                              {doc.fileName}
+                            </a>
+                          )}
                           <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
                             {formatBytes(doc.sizeBytes)} · {formatDateTime(doc.createdAt)}
                             {doc.uploadedBy ? ` · ${doc.uploadedBy.prenom} ${doc.uploadedBy.nom}` : ""}
@@ -362,14 +380,16 @@ export default function SeanceDocumentsModal({
                           )}
                         </div>
                         <div className="flex shrink-0 items-center gap-1">
-                          <a
-                            href={`${href}?telecharger=1`}
-                            className="rounded-lg p-2 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-slate-700 dark:hover:text-neutral-200"
-                            aria-label={`Télécharger ${doc.fileName}`}
-                            title="Télécharger"
-                          >
-                            <Download className="h-4 w-4" />
-                          </a>
+                          {role === "prof" && (
+                            <a
+                              href={`${href}?telecharger=1`}
+                              className="rounded-lg p-2 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-slate-700 dark:hover:text-neutral-200"
+                              aria-label={`Télécharger ${doc.fileName}`}
+                              title="Télécharger"
+                            >
+                              <Download className="h-4 w-4" />
+                            </a>
+                          )}
                           {role === "prof" && doc.canDelete && (
                             <button
                               type="button"
@@ -447,6 +467,15 @@ export default function SeanceDocumentsModal({
           </div>
         )}
       </div>
+
+      {viewerDoc && (
+        <ProtectedDocumentViewer
+          documentId={viewerDoc.id}
+          fileName={viewerDoc.fileName}
+          mimeType={viewerDoc.mimeType}
+          onClose={() => setViewerDoc(null)}
+        />
+      )}
     </div>
   );
 }
