@@ -4,7 +4,6 @@ import { Prisma } from "@prisma/client";
 import { featureLabel } from "@/lib/analytics";
 import { n, requireSuperAdmin, resolveRange } from "@/lib/usage-analytics";
 
-export const dynamic = "force-dynamic";
 
 export async function GET(
   request: NextRequest,

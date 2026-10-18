@@ -4,7 +4,6 @@ import { logger } from "@/lib/logger";
 import { readLinked, readSessionToken, writeSessionToken } from "@/lib/account-switch";
 import type { JWT } from "next-auth/jwt";
 
-export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   const token = await readSessionToken(req);

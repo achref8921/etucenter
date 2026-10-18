@@ -6,6 +6,10 @@ import { isMaintenanceMode } from "@/lib/settings";
 import DashboardLayoutClient from "@/components/layout/dashboard-layout";
 import type { SessionUser } from "@/types";
 
+// La session et le centre sont nécessaires avant de rendre quoi que ce soit :
+// ce segment doit pouvoir bloquer (pas de coquille statique partielle).
+export const unstable_instant = false;
+
 export default async function DashboardRootLayout({
   children,
 }: {

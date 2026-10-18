@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { sweepStaleSessions } from "@/lib/analytics";
 import { getUsageOverview, requireSuperAdmin, resolveRange } from "@/lib/usage-analytics";
 
-export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {

@@ -5,7 +5,6 @@ import { logger } from "@/lib/logger";
 import { authorizeDocumentAccess, loadDocUser } from "@/lib/seance-documents";
 import { deleteDocumentBlob, isBlobStoreConfigured } from "@/lib/seance-documents-storage";
 
-export const runtime = "nodejs";
 
 /**
  * DELETE /api/prof/seances/[id]/documents/[documentId]

@@ -6,7 +6,6 @@ import { rateLimit, getRateLimitKey } from "@/lib/rate-limit";
 import { runMonitorCheck } from "@/lib/monitor-service";
 
 export const maxDuration = 60;
-export const dynamic = "force-dynamic";
 
 const STATUS_RATE_LIMIT = { windowMs: 60_000, max: 10 };
 

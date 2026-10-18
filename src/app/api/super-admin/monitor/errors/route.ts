@@ -4,7 +4,6 @@ import { authOptions } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { getRecentErrors } from "@/lib/monitor-service";
 
-export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   try {

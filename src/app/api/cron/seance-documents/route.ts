@@ -11,7 +11,6 @@ import {
 } from "@/lib/seance-documents-storage";
 
 export const maxDuration = 300;
-export const dynamic = "force-dynamic";
 
 /**
  * GET /api/cron/seance-documents[?centerId=...]

@@ -18,7 +18,6 @@ import {
   readDocumentHead,
 } from "@/lib/seance-documents-storage";
 
-export const runtime = "nodejs";
 
 /**
  * POST /api/prof/seances/[id]/documents/finalize

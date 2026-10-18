@@ -11,7 +11,6 @@ import {
 } from "@/lib/seance-documents";
 import { createPresignedPutUrl, isBlobStoreConfigured } from "@/lib/seance-documents-storage";
 
-export const runtime = "nodejs";
 
 /**
  * POST /api/prof/seances/[id]/documents/upload-url

@@ -4,6 +4,7 @@ import Providers from "@/components/providers";
 import PwaRegister from "@/components/pwa-register";
 import PushSetup from "@/components/push-setup";
 import OfflineBanner from "@/components/offline-banner";
+import ScrollRestoration from "@/components/scroll-restoration";
 import "./globals.css";
 
 const inter = Inter({
@@ -51,6 +52,7 @@ export default function RootLayout({
       <body className="antialiased">
         <Providers>
           <OfflineBanner />
+          <ScrollRestoration />
           {children}
           <PwaRegister />
           <PushSetup />

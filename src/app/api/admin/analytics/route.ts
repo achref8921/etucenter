@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 
-export const dynamic = "force-dynamic";
 
 function n(v: unknown): number {
   return Number(v ?? 0);

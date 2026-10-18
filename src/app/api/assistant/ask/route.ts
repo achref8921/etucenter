@@ -6,7 +6,6 @@ import { answer } from "@/lib/assistant/service";
 import type { HistoryTurn } from "@/lib/assistant/llm";
 import { llmEnabled } from "@/lib/assistant/llm";
 
-export const runtime = "nodejs";
 
 interface HistItem {
   role?: unknown;

@@ -12,7 +12,6 @@ import {
 } from "@/lib/analytics";
 import { AnalyticsEventName } from "@prisma/client";
 
-export const dynamic = "force-dynamic";
 
 const ALLOWED_EVENTS: AnalyticsEventName[] = [
   "SESSION_STARTED",

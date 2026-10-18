@@ -72,6 +72,8 @@ const stats = [
   { value: "55K+", label: "DT de revenus" },
 ];
 
+export const unstable_instant = false;
+
 export default async function HomePage() {
   const session = await getServerSession(authOptions);
   if (session?.user) {

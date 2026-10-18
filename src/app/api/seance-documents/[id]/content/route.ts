@@ -12,8 +12,6 @@ import {
   isBlobStoreConfigured,
 } from "@/lib/seance-documents-storage";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 /**
  * GET /api/seance-documents/[id]/content

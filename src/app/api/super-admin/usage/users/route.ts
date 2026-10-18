@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { n, requireSuperAdmin, resolveRange } from "@/lib/usage-analytics";
 
-export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
