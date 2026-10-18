@@ -20,6 +20,7 @@ import { formatCurrency } from "@/lib/utils";
 import {
   getAdminDashboardMonthData,
   getAdminTodaySeances,
+  getReversePendingCenterParts,
 } from "@/lib/admin-dashboard-data";
 import { MonthSelector } from "@/components/month-selector";
 
@@ -47,6 +48,8 @@ async function DashboardContent({ month }: { month: string }) {
   const centerId = (session?.user as any)?.centerId;
   const data = await getAdminDashboardMonthData(centerId, month);
   const todaySeances = await getAdminTodaySeances(centerId);
+  const pendingParts = await getReversePendingCenterParts(centerId);
+  const pendingPartsBalance = pendingParts.reduce((sum, p) => sum + p.balance, 0);
 
   const todayLabel = new Date().toLocaleDateString("fr-FR", {
     weekday: "long",
@@ -139,6 +142,67 @@ async function DashboardContent({ month }: { month: string }) {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 px-5 py-3 dark:border-[#2a2d35]">
+          <div className="flex items-center gap-2">
+            <DollarSign className="h-4 w-4 text-amber-500 dark:text-amber-400" />
+            <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+              Parts centre en cours (non réglées)
+            </h2>
+            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-amber-700 dark:bg-amber-500/10 dark:text-amber-400">
+              {formatCurrency(pendingPartsBalance)}
+            </span>
+          </div>
+          <Link
+            href={`/admin/benefices?month=${month}`}
+            className="flex items-center gap-1 text-[12px] font-medium text-indigo-600 hover:text-indigo-800 dark:text-indigo-400"
+          >
+            Voir le détail <ArrowRight className="h-3 w-3" />
+          </Link>
+        </div>
+        {pendingParts.length === 0 ? (
+          <div className="px-5 py-8 text-center text-[13px] text-neutral-400 dark:text-neutral-500">
+            Aucune part centre en cours.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-[13px]">
+              <thead>
+                <tr className="border-b border-neutral-100 dark:border-[#2a2d35]">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                    Professeur
+                  </th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                    Dettes
+                  </th>
+                  <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                    Montant en cours
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+                {pendingParts.map((p) => (
+                  <tr
+                    key={p.prof.id}
+                    className="transition-colors hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]"
+                  >
+                    <td className="px-4 py-2.5 font-medium text-neutral-900 dark:text-neutral-100">
+                      {p.prof.prenom} {p.prof.nom}
+                    </td>
+                    <td className="px-4 py-2.5 tabular-nums text-neutral-600 dark:text-neutral-400">
+                      {p.debts.length}
+                    </td>
+                    <td className="px-4 py-2.5 text-right font-semibold tabular-nums text-amber-600 dark:text-amber-400">
+                      {formatCurrency(p.balance)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       <div className="rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">

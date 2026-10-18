@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { round2 } from "@/lib/teacher-finance";
-import { getAdminDashboardMonthData } from "@/lib/admin-dashboard-data";
+import { getAdminDashboardMonthData, getReversePendingCenterParts } from "@/lib/admin-dashboard-data";
 
 export async function GET(request: NextRequest) {
   try {
@@ -37,60 +37,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const reversePendingDebts = await prisma.teacherCenterDebt.findMany({
-      where: {
-        centerId: centreId,
-        status: { in: ["OPEN", "PARTIAL"] },
-      },
-      orderBy: [{ createdAt: "desc" }],
-      select: {
-        id: true,
-        createdAt: true,
-        amountDue: true,
-        amountPaid: true,
-        balance: true,
-        status: true,
-        teacher: { select: { id: true, nom: true, prenom: true } },
-        student: { select: { id: true, nom: true, prenom: true } },
-      },
-    });
-
-    interface PendingDebtEntry {
-      id: string;
-      date: Date;
-      amountDue: number;
-      amountPaid: number;
-      balance: number;
-      status: string;
-      student: { id: string; nom: string; prenom: string } | null;
-    }
-
-    const pendingProfMap = new Map<
-      string,
-      { prof: { id: string; nom: string; prenom: string }; balance: number; debts: PendingDebtEntry[] }
-    >();
-
-    for (const d of reversePendingDebts) {
-      const balance = round2(Number(d.balance));
-      if (balance <= 0) continue;
-      const entry =
-        pendingProfMap.get(d.teacher.id) ?? { prof: d.teacher, balance: 0, debts: [] };
-      entry.balance = round2(entry.balance + balance);
-      entry.debts.push({
-        id: d.id,
-        date: d.createdAt,
-        amountDue: Number(d.amountDue),
-        amountPaid: Number(d.amountPaid),
-        balance,
-        status: d.status,
-        student: d.student,
-      });
-      pendingProfMap.set(d.teacher.id, entry);
-    }
-
-    const reversePendingProfs = Array.from(pendingProfMap.values()).sort(
-      (a, b) => b.balance - a.balance
-    );
+    const reversePendingProfs = await getReversePendingCenterParts(centreId);
 
     const profsData = dashboardData.profs.map((p) => ({
       prof: p.prof,

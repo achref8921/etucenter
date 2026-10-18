@@ -214,6 +214,66 @@ export async function getAdminDashboardMonthData(
   };
 }
 
+export interface PendingCenterPartDebt {
+  id: string;
+  date: Date;
+  amountDue: number;
+  amountPaid: number;
+  balance: number;
+  status: string;
+  student: { id: string; nom: string; prenom: string } | null;
+}
+
+export interface PendingCenterPartProf {
+  prof: { id: string; nom: string; prenom: string };
+  balance: number;
+  debts: PendingCenterPartDebt[];
+}
+
+export async function getReversePendingCenterParts(
+  centerId: string
+): Promise<PendingCenterPartProf[]> {
+  const reversePendingDebts = await prisma.teacherCenterDebt.findMany({
+    where: {
+      centerId,
+      status: { in: ["OPEN", "PARTIAL"] },
+    },
+    orderBy: [{ createdAt: "desc" }],
+    select: {
+      id: true,
+      createdAt: true,
+      amountDue: true,
+      amountPaid: true,
+      balance: true,
+      status: true,
+      teacher: { select: { id: true, nom: true, prenom: true } },
+      student: { select: { id: true, nom: true, prenom: true } },
+    },
+  });
+
+  const pendingProfMap = new Map<string, PendingCenterPartProf>();
+
+  for (const d of reversePendingDebts) {
+    const balance = round2(Number(d.balance));
+    if (balance <= 0) continue;
+    const entry =
+      pendingProfMap.get(d.teacher.id) ?? { prof: d.teacher, balance: 0, debts: [] };
+    entry.balance = round2(entry.balance + balance);
+    entry.debts.push({
+      id: d.id,
+      date: d.createdAt,
+      amountDue: Number(d.amountDue),
+      amountPaid: Number(d.amountPaid),
+      balance,
+      status: d.status,
+      student: d.student,
+    });
+    pendingProfMap.set(d.teacher.id, entry);
+  }
+
+  return Array.from(pendingProfMap.values()).sort((a, b) => b.balance - a.balance);
+}
+
 export interface TodaySeance {
   id: string;
   date: string;
