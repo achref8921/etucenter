@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { User, Loader2, Save, Edit3, Trash2, Phone } from "lucide-react";
+import { User, Loader2, Save, Edit3, Trash2, Phone, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { formatDate } from "@/lib/utils";
 import ConfirmPermanentDelete from "@/components/confirm-permanent-delete";
@@ -28,6 +28,7 @@ interface FormInputs {
   nom: string;
   prenom: string;
   telephone: string;
+  email: string;
 }
 
 const niveauLabels: Record<string, string> = {
@@ -65,6 +66,15 @@ export default function EleveProfilPage() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
+  const [showPasswordSection, setShowPasswordSection] = useState(false);
+  const [ancienMotDePasse, setAncienMotDePasse] = useState("");
+  const [nouveauMotDePasse, setNouveauMotDePasse] = useState("");
+  const [confirmerMotDePasse, setConfirmerMotDePasse] = useState("");
+  const [showAncien, setShowAncien] = useState(false);
+  const [showNouveau, setShowNouveau] = useState(false);
+  const [showConfirmer, setShowConfirmer] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -87,6 +97,7 @@ export default function EleveProfilPage() {
           nom: data.nom,
           prenom: data.prenom,
           telephone: data.telephone ?? "",
+          email: data.email ?? "",
         });
         setScolaire({
           niveau: data.niveau ?? "",
@@ -124,6 +135,7 @@ export default function EleveProfilPage() {
           nom: data.nom,
           prenom: data.prenom,
           telephone: data.telephone || null,
+          email: data.email.trim(),
           niveau: scolaire.niveau || null,
           classe: scolaire.classe || null,
           filiere: scolaire.filiere || null,
@@ -139,6 +151,7 @@ export default function EleveProfilPage() {
         nom: updated.nom,
         prenom: updated.prenom,
         telephone: updated.telephone ?? "",
+        email: updated.email ?? "",
       });
       setScolaire({
         niveau: updated.niveau ?? "",
@@ -160,6 +173,7 @@ export default function EleveProfilPage() {
         nom: profil.nom,
         prenom: profil.prenom,
         telephone: profil.telephone ?? "",
+        email: profil.email ?? "",
       });
       setScolaire({
         niveau: profil.niveau ?? "",
@@ -169,6 +183,48 @@ export default function EleveProfilPage() {
     }
     setEditing(false);
     setError(null);
+  };
+
+  const handleChangePassword = async () => {
+    try {
+      setChangingPassword(true);
+      setError(null);
+      setSuccess(null);
+
+      if (!ancienMotDePasse || !nouveauMotDePasse) {
+        throw new Error("Tous les champs sont requis");
+      }
+      if (nouveauMotDePasse !== confirmerMotDePasse) {
+        throw new Error("Les mots de passe ne correspondent pas");
+      }
+      if (nouveauMotDePasse.length < 6) {
+        throw new Error("Le mot de passe doit contenir au moins 6 caractères");
+      }
+
+      const res = await fetch("/api/eleve/profil", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          motDePasse: nouveauMotDePasse,
+          ancienMotDePasse,
+        }),
+      });
+
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || "Erreur lors du changement de mot de passe");
+      }
+
+      setSuccess("Mot de passe changé avec succès");
+      setAncienMotDePasse("");
+      setNouveauMotDePasse("");
+      setConfirmerMotDePasse("");
+      setShowPasswordSection(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
+    } finally {
+      setChangingPassword(false);
+    }
   };
 
   const handleDeleteAccount = async (password: string) => {
@@ -262,6 +318,22 @@ export default function EleveProfilPage() {
                     <p className="mt-1 text-[12px] text-red-600 dark:text-red-400">{errors.prenom.message}</p>
                   )}
                 </div>
+              </div>
+              <div>
+                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">
+                  <Mail className="mr-1 inline h-3.5 w-3.5" /> Email
+                </label>
+                <input
+                  type="email"
+                  {...register("email", {
+                    required: "L'email est requis",
+                    pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Email invalide" },
+                  })}
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+                {errors.email && (
+                  <p className="mt-1 text-[12px] text-red-600 dark:text-red-400">{errors.email.message}</p>
+                )}
               </div>
               <div>
                 <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">
@@ -375,6 +447,103 @@ export default function EleveProfilPage() {
           )}
         </div>
       )}
+
+      <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
+        <div className="flex items-center justify-between">
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
+            <Lock className="h-4 w-4 text-blue-600" /> Mot de passe
+          </h2>
+          {!showPasswordSection && (
+            <button
+              onClick={() => setShowPasswordSection(true)}
+              className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-3 py-1.5 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+            >
+              Changer le mot de passe
+            </button>
+          )}
+        </div>
+        {showPasswordSection && (
+          <div className="mt-4 space-y-4">
+            <div>
+              <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Ancien mot de passe</label>
+              <div className="relative">
+                <input
+                  type={showAncien ? "text" : "password"}
+                  value={ancienMotDePasse}
+                  onChange={(e) => setAncienMotDePasse(e.target.value)}
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 pr-10 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowAncien(!showAncien)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
+                >
+                  {showAncien ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Nouveau mot de passe</label>
+              <div className="relative">
+                <input
+                  type={showNouveau ? "text" : "password"}
+                  value={nouveauMotDePasse}
+                  onChange={(e) => setNouveauMotDePasse(e.target.value)}
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 pr-10 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNouveau(!showNouveau)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
+                >
+                  {showNouveau ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Confirmer le nouveau mot de passe</label>
+              <div className="relative">
+                <input
+                  type={showConfirmer ? "text" : "password"}
+                  value={confirmerMotDePasse}
+                  onChange={(e) => setConfirmerMotDePasse(e.target.value)}
+                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 pr-10 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmer(!showConfirmer)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
+                >
+                  {showConfirmer ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPasswordSection(false);
+                  setAncienMotDePasse("");
+                  setNouveauMotDePasse("");
+                  setConfirmerMotDePasse("");
+                }}
+                className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={handleChangePassword}
+                disabled={changingPassword}
+                className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              >
+                {changingPassword ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                Enregistrer
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-white dark:bg-[#181b22] p-6">
         <h2 className="mb-2 text-sm font-semibold text-red-700 dark:text-red-400">
