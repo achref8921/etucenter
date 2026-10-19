@@ -10,6 +10,11 @@ export function isAdminRole(role: string): boolean {
   return role === "admin" || role === "super_admin";
 }
 
+// Doit rester identique à la règle de next-auth/jwt getToken (utilisée par le middleware),
+// sinon le middleware ne retrouve pas le cookie de session et renvoie toute page vers /login.
+const useSecureCookies =
+  process.env.NEXTAUTH_URL?.startsWith("https://") ?? !!process.env.VERCEL;
+
 async function findAndValidateUser(email: string) {
   const user = await prisma.utilisateur.findUnique({
     where: { email },
@@ -167,30 +172,30 @@ export const authOptions: NextAuthOptions = {
   },
   cookies: {
     sessionToken: {
-      name: process.env.NODE_ENV === "production" ? "__Secure-next-auth.session-token" : "next-auth.session-token",
+      name: useSecureCookies ? "__Secure-next-auth.session-token" : "next-auth.session-token",
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: process.env.NODE_ENV === "production",
+        secure: useSecureCookies,
       },
     },
     callbackUrl: {
-      name: process.env.NODE_ENV === "production" ? "__Secure-next-auth.callback-url" : "next-auth.callback-url",
+      name: useSecureCookies ? "__Secure-next-auth.callback-url" : "next-auth.callback-url",
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: process.env.NODE_ENV === "production",
+        secure: useSecureCookies,
       },
     },
     csrfToken: {
-      name: process.env.NODE_ENV === "production" ? "__Host-next-auth.csrf-token" : "next-auth.csrf-token",
+      name: useSecureCookies ? "__Host-next-auth.csrf-token" : "next-auth.csrf-token",
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: process.env.NODE_ENV === "production",
+        secure: useSecureCookies,
       },
     },
   },
