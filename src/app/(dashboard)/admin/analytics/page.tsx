@@ -140,9 +140,9 @@ export default function AdminAnalyticsPage() {
           {revenueChartData.length > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={revenueChartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="#94a3b8" />
-                <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                <XAxis dataKey="name" tick={{ fontSize: 11, fill: "var(--chart-axis)" }} stroke="var(--chart-axis)" />
+                <YAxis tick={{ fontSize: 11, fill: "var(--chart-axis)" }} stroke="var(--chart-axis)" />
                 <Tooltip
                   contentStyle={{ borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 12 }}
                   formatter={(v) => [`${Number(v).toLocaleString("fr-TN")} DT`, "Revenu"]}
@@ -163,9 +163,9 @@ export default function AdminAnalyticsPage() {
           {presenceChartData.length > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={presenceChartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="#94a3b8" />
-                <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                <XAxis dataKey="name" tick={{ fontSize: 11, fill: "var(--chart-axis)" }} stroke="var(--chart-axis)" />
+                <YAxis tick={{ fontSize: 11, fill: "var(--chart-axis)" }} stroke="var(--chart-axis)" />
                 <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 12 }} />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
                 <Bar dataKey="present" name="Présent" fill="#10b981" radius={[4, 4, 0, 0]} />
@@ -188,9 +188,9 @@ export default function AdminAnalyticsPage() {
           {studentsChartData.length > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
               <LineChart data={studentsChartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="#94a3b8" />
-                <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                <XAxis dataKey="name" tick={{ fontSize: 11, fill: "var(--chart-axis)" }} stroke="var(--chart-axis)" />
+                <YAxis tick={{ fontSize: 11, fill: "var(--chart-axis)" }} stroke="var(--chart-axis)" />
                 <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 12 }} />
                 <Line type="monotone" dataKey="eleves" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 4 }} />
               </LineChart>

@@ -38,9 +38,9 @@ export function RevenueBarChart({ data }: { data: RevenueRow[] }) {
   return (
     <ResponsiveContainer width="100%" height={280}>
       <BarChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-        <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="#94a3b8" />
-        <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" />
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+        <XAxis dataKey="name" tick={{ fontSize: 11, fill: "var(--chart-axis)" }} stroke="var(--chart-axis)" />
+        <YAxis tick={{ fontSize: 11, fill: "var(--chart-axis)" }} stroke="var(--chart-axis)" />
         <Tooltip
           contentStyle={{ borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 12 }}
           formatter={(v) => [`${Number(v).toLocaleString("fr-TN")} DT`, "Revenu"]}
@@ -110,9 +110,9 @@ export function UsageActivityChart({ data }: { data: UsageDailyRow[] }) {
             <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-        <XAxis dataKey="day" tick={{ fontSize: 11 }} stroke="#94a3b8" />
-        <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" allowDecimals={false} />
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+        <XAxis dataKey="day" tick={{ fontSize: 11, fill: "var(--chart-axis)" }} stroke="var(--chart-axis)" />
+        <YAxis tick={{ fontSize: 11, fill: "var(--chart-axis)" }} stroke="var(--chart-axis)" allowDecimals={false} />
         <Tooltip
           contentStyle={{ borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 12 }}
         />
@@ -148,9 +148,9 @@ export function FeatureUsageChart({ data }: { data: CenterRow[] }) {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <BarChart data={data} layout="vertical" margin={{ left: 20 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-        <XAxis type="number" tick={{ fontSize: 11 }} stroke="#94a3b8" allowDecimals={false} />
-        <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} stroke="#94a3b8" width={130} />
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+        <XAxis type="number" tick={{ fontSize: 11, fill: "var(--chart-axis)" }} stroke="var(--chart-axis)" allowDecimals={false} />
+        <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: "var(--chart-axis)" }} stroke="var(--chart-axis)" width={130} />
         <Tooltip
           contentStyle={{ borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 12 }}
         />

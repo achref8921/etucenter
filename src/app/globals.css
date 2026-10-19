@@ -3,7 +3,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #fafafa;
+  --background: #ecf0f5;
   --foreground: #111827;
   --card: #ffffff;
   --card-foreground: #111827;
@@ -18,11 +18,13 @@
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --border: #e5e7eb;
-  --input: #e5e7eb;
+  --input: #d1d5db;
   --ring: #1d4ed8;
   --radius: 0.625rem;
   --success: #059669;
   --warning: #d97706;
+  --chart-grid: #e2e8f0;
+  --chart-axis: #64748b;
   --sidebar-bg: #ffffff;
   --sidebar-border: #e5e7eb;
   --sidebar-text: #6b7280;
@@ -52,6 +54,8 @@
   --ring: #3b82f6;
   --success: #34d399;
   --warning: #fbbf24;
+  --chart-grid: #2a2d35;
+  --chart-axis: #94a3b8;
   --sidebar-bg: #141720;
   --sidebar-border: #1e2128;
   --sidebar-text: #9ca3af;
@@ -108,6 +112,77 @@ body {
 .frozen-mode [role="button"] {
   pointer-events: none !important;
   opacity: 0.6;
+}
+
+/* ===== Contraste light mode (WCAG AA) =====
+   Les gris clairs et les couleurs d'état -400/-500 tombent sous 4.5:1 sur fond
+   blanc/gris. On les remappe uniquement en mode clair ; les variantes `dark:`
+   (classes distinctes) gardent leur palette d'origine.
+   `:where()` garde la spécificité (0,1,0) pour que les variantes hover/focus
+   restent prioritaires. */
+@layer utilities {
+  :where(:root:not(.dark)) :is(.text-neutral-300, .text-neutral-400, .text-gray-300, .text-gray-400) {
+    color: #5f646e;
+  }
+  :where(:root:not(.dark)) .text-neutral-500 {
+    color: #545a64;
+  }
+  :where(:root:not(.dark)) .text-slate-400 {
+    color: #5b6675;
+  }
+  :where(:root:not(.dark)) :is(.text-green-400, .text-green-500, .text-green-600) {
+    color: #15803d;
+  }
+  :where(:root:not(.dark)) :is(.text-emerald-400, .text-emerald-500, .text-emerald-600) {
+    color: #047857;
+  }
+  :where(:root:not(.dark)) :is(.text-teal-500, .text-teal-600) {
+    color: #0f766e;
+  }
+  :where(:root:not(.dark)) :is(.text-amber-400, .text-amber-500, .text-amber-600) {
+    color: #b45309;
+  }
+  :where(:root:not(.dark)) :is(.text-yellow-500, .text-yellow-600) {
+    color: #a16207;
+  }
+  :where(:root:not(.dark)) :is(.text-orange-500, .text-orange-600) {
+    color: #c2410c;
+  }
+  :where(:root:not(.dark)) :is(.text-red-400, .text-red-500) {
+    color: #dc2626;
+  }
+  :where(:root:not(.dark)) :is(.text-violet-400, .text-violet-500) {
+    color: #7c3aed;
+  }
+  :where(:root:not(.dark)) .text-purple-500 {
+    color: #7e22ce;
+  }
+  :where(:root:not(.dark)) :is(.text-blue-400, .text-blue-500) {
+    color: #2563eb;
+  }
+  :where(:root:not(.dark)) :is(.text-sky-500, .text-sky-600) {
+    color: #0369a1;
+  }
+  :where(:root:not(.dark)) .text-indigo-500 {
+    color: #4f46e5;
+  }
+  :where(:root:not(.dark)) .text-rose-500 {
+    color: #be123c;
+  }
+  :where(:root:not(.dark)) .text-pink-500 {
+    color: #db2777;
+  }
+  :where(:root:not(.dark)) :is(.text-cyan-500, .text-cyan-600) {
+    color: #0e7490;
+  }
+  :where(:root:not(.dark)) .text-lime-600 {
+    color: #4d7c0f;
+  }
+  :where(:root:not(.dark)) .placeholder\:text-neutral-400::placeholder,
+  :where(:root:not(.dark)) .placeholder\:text-gray-400::placeholder,
+  :where(:root:not(.dark)) .placeholder\:text-slate-400::placeholder {
+    color: #5f646e;
+  }
 }
 
 /* ===== Modales : centrage + défilement sûrs sur tous les écrans (mobile / faible DPI) =====

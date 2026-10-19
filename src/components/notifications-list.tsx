@@ -100,7 +100,7 @@ export default function NotificationsList() {
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Notifications</h1>
           {nonLues > 0 && (
-            <span className="rounded-full bg-red-500 px-2.5 py-0.5 text-xs font-bold text-white">
+            <span className="rounded-full bg-red-600 px-2.5 py-0.5 text-xs font-bold text-white">
               {nonLues}
             </span>
           )}
