@@ -185,6 +185,29 @@ body {
   }
 }
 
+/* ===== Effet verre dépoli devant le filigrane du centre =====
+   Posé uniquement quand un logo de centre est présent : les cartes de contenu
+   (fond blanc plein) deviennent légèrement translucides et floutées, le
+   filigrane apparaît doucement DERRIÈRE elles (glassmorphism discret et pro).
+   Les tableaux et tout élément avec sa propre teinte de fond ne sont pas
+   touchés pour préserver la lisibilité. */
+@supports (backdrop-filter: blur(1px)) {
+  main[data-glass] .bg-white {
+    background-color: rgba(255, 255, 255, 0.72) !important;
+    backdrop-filter: blur(6px) saturate(1.04);
+  }
+
+  .dark main[data-glass] .bg-white {
+    background-color: rgba(24, 27, 34, 0.72) !important;
+  }
+
+  /* Fond des cellules de tableau : garde le contraste texte/fond */
+  main[data-glass] tbody tr.bg-white,
+  main[data-glass] thead tr.bg-white {
+    backdrop-filter: none;
+  }
+}
+
 /* ===== Modales : centrage + défilement sûrs sur tous les écrans (mobile / faible DPI) =====
    - la couche (overlay) devient scrollable à la place de la panneau seul ;
    - margin:auto centre le panneau quand il tient à l'écran et laisse défiler lorsqu'il
