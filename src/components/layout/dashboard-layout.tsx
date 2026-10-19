@@ -71,7 +71,7 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
   }, [user.centerId, user.id]);
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-[#0f1114]">
+    <div className="min-h-screen bg-[var(--background)]">
       <SessionGuard />
       <Suspense fallback={null}>
         <UsageTracker />

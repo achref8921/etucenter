@@ -1,74 +1,15 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { Role } from "@/types/role";
 import { cn } from "@/lib/utils";
 import {
-  LayoutDashboard,
-  Users,
-  BookOpen,
-  GraduationCap,
-  Wallet,
-  Calendar,
-  ClipboardCheck,
-  User,
-  CreditCard,
-  FileText,
-  TrendingUp,
-  Bell,
-  Settings,
-  BarChart3,
-  Database,
-  UserPlus,
-  Banknote,
-  Scale,
-} from "lucide-react";
+  getNavSections,
+  isNavGroup,
+  roleHome as roleHomePath,
+} from "./nav-config";
+import { NavGroupSection, NavLeafLink } from "./nav-group";
 
-interface NavItem {
-  label: string;
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-}
-
-export const navItemsByRole: Record<Role, NavItem[]> = {
-  super_admin: [
-    { label: "Overview", href: "/super-admin", icon: LayoutDashboard },
-  ],
-  admin: [
-    { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { label: "Analytiques", href: "/admin/analytics", icon: BarChart3 },
-    { label: "Utilisateurs", href: "/admin/utilisateurs", icon: Users },
-    { label: "Groupes", href: "/admin/groupes", icon: GraduationCap },
-    { label: "Matieres", href: "/admin/matieres", icon: BookOpen },
-    { label: "Finances", href: "/admin/finances", icon: Wallet },
-    { label: "Benefices", href: "/admin/benefices", icon: TrendingUp },
-    { label: "Comptes Profs", href: "/admin/finances-professeurs", icon: CreditCard },
-    { label: "Notifications", href: "/admin/notifications", icon: Bell },
-    { label: "Backup & Restauration", href: "/admin/backup", icon: Database },
-    { label: "Parametres", href: "/admin/parametres", icon: Settings },
-    { label: "Mon Profil", href: "/profil", icon: User },
-  ],
-  prof: [
-    { label: "Dashboard", href: "/prof", icon: LayoutDashboard },
-    { label: "Mes Groupes", href: "/prof/groupes", icon: GraduationCap },
-    { label: "Mes Seances", href: "/prof/seances", icon: Calendar },
-    { label: "Mes Eleves", href: "/prof/eleves", icon: Users },
-    { label: "Presences", href: "/prof/presences", icon: ClipboardCheck },
-    { label: "Mon Compte", href: "/prof/compte", icon: Wallet },
-    { label: "Notifications", href: "/prof/notifications", icon: Bell },
-    { label: "Mon Profil", href: "/profil", icon: User },
-  ],
-  eleve: [
-    { label: "Dashboard", href: "/eleve", icon: LayoutDashboard },
-    { label: "Mes Groupes", href: "/eleve/groupes", icon: GraduationCap },
-    { label: "Mes Paiements", href: "/eleve/paiements", icon: FileText },
-    { label: "Mon Compte", href: "/eleve/compte", icon: Wallet },
-    { label: "Mon Profil", href: "/eleve/profil", icon: User },
-    { label: "Mes Presences", href: "/eleve/presences", icon: ClipboardCheck },
-    { label: "Notifications", href: "/eleve/notifications", icon: Bell },
-  ],
-};
+export { navItemsByRole } from "./nav-config";
 
 const roleLabels: Record<Role, string> = {
   super_admin: "Super Admin",
@@ -88,24 +29,8 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ role, centerName, centerLogo, peutGererEleves, peutEncaisserReverse, open, onClose }: SidebarProps) {
-  const pathname = usePathname();
-  const baseItems = navItemsByRole[role];
-  let navItems = baseItems;
-
-  if (role === "prof") {
-    const items = [...baseItems];
-    if (peutEncaisserReverse) {
-      const idx = items.findIndex((i) => i.href === "/prof/presences");
-      items.splice(idx + 1, 0,
-        { label: "Encaisser", href: "/prof/encaisser", icon: Banknote },
-        { label: "Dettes Centre", href: "/prof/dettes", icon: Scale },
-      );
-    }
-    if (peutGererEleves) {
-      items.splice(1, 0, { label: "Gestion Élèves", href: "/prof/gestion-eleves", icon: UserPlus });
-    }
-    navItems = items;
-  }
+  const home = roleHomePath(role);
+  const sections = getNavSections(role, { peutGererEleves, peutEncaisserReverse });
 
   return (
     <>
@@ -118,11 +43,11 @@ export default function Sidebar({ role, centerName, centerLogo, peutGererEleves,
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-neutral-200 bg-white transition-transform duration-300 ease-in-out dark:border-[#1e2128] dark:bg-[#141720]",
+          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-neutral-200 bg-white transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] dark:border-[#1e2128] dark:bg-[#141720]",
           open ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
       >
-        <div className="flex h-14 items-center gap-3 border-b border-neutral-100 px-5 dark:border-[#1e2128]">
+        <div className="flex h-14 items-center gap-3 border-b border-neutral-200 px-5 dark:border-[#1e2128]">
           {centerLogo ? (
             <img src={centerLogo} alt="Logo" className="h-8 w-8 rounded-lg object-contain" />
           ) : (
@@ -136,40 +61,30 @@ export default function Sidebar({ role, centerName, centerLogo, peutGererEleves,
           </div>
         </div>
 
-        <nav className="flex-1 space-y-0.5 px-2.5 py-3 overflow-y-auto">
-          {navItems.map((item) => {
-            const isActive =
-              pathname === item.href ||
-              (item.href !== `/${role}` && pathname.startsWith(item.href));
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={onClose}
-                className={cn(
-                  "group relative flex items-center gap-2.5 rounded-md px-3 py-2 text-[13px] font-medium transition-colors duration-150",
-                  isActive
-                    ? "bg-blue-50/80 text-blue-700 dark:bg-blue-600/10 dark:text-blue-400"
-                    : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800/50 dark:hover:text-neutral-200"
-                )}
-              >
-                {isActive && (
-                  <div className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-blue-600 dark:bg-blue-400" />
-                )}
-                <item.icon
-                  className={cn(
-                    "h-[17px] w-[17px] flex-shrink-0 transition-colors",
-                    isActive ? "text-blue-600 dark:text-blue-400" : "text-neutral-400 group-hover:text-neutral-600 dark:text-neutral-500 dark:group-hover:text-neutral-300"
-                  )}
-                />
-                {item.label}
-              </Link>
-            );
-          })}
+        <nav className="flex-1 space-y-0.5 px-2.5 py-3 overflow-y-auto [scrollbar-gutter:stable] [overflow-anchor:none]">
+          {sections.map((section) =>
+            isNavGroup(section) ? (
+              <NavGroupSection
+                key={section.key}
+                group={section}
+                home={home}
+                accent="blue"
+                storageKey={`nav-open:${role}:${section.key}`}
+                onNavigate={onClose}
+              />
+            ) : (
+              <NavLeafLink
+                key={section.href}
+                item={section}
+                home={home}
+                accent="blue"
+                onNavigate={onClose}
+              />
+            )
+          )}
         </nav>
 
-        <div className="border-t border-neutral-100 px-5 py-3 dark:border-[#1e2128]">
+        <div className="border-t border-neutral-200 px-5 py-3 dark:border-[#1e2128]">
           <p className="text-[10px] text-neutral-300 dark:text-neutral-600">Étudnet v1.0</p>
         </div>
       </aside>

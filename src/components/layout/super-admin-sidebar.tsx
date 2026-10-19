@@ -1,38 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  LayoutDashboard,
-  Building2,
-  ScrollText,
-  Settings,
-  Shield,
-  BarChart3,
-  Database,
-  Users,
-  Activity,
-  MousePointerClick,
-} from "lucide-react";
-
-interface NavItem {
-  label: string;
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-}
-
-const navItems: NavItem[] = [
-  { label: "Overview", href: "/super-admin", icon: LayoutDashboard },
-  { label: "Centers", href: "/super-admin/centers", icon: Building2 },
-  { label: "Utilisateurs", href: "/super-admin/utilisateurs", icon: Users },
-  { label: "Analytiques", href: "/super-admin/analytics", icon: BarChart3 },
-  { label: "Usage", href: "/super-admin/usage", icon: MousePointerClick },
-  { label: "Sauvegardes", href: "/super-admin/backups", icon: Database },
-  { label: "Monitoring", href: "/super-admin/monitoring", icon: Activity },
-  { label: "System Logs", href: "/super-admin/logs", icon: ScrollText },
-  { label: "Settings", href: "/super-admin/settings", icon: Settings },
-];
+import { getNavSections, isNavGroup } from "./nav-config";
+import { NavGroupSection, NavLeafLink } from "./nav-group";
 
 interface SuperAdminSidebarProps {
   open: boolean;
@@ -40,7 +11,8 @@ interface SuperAdminSidebarProps {
 }
 
 export default function SuperAdminSidebar({ open, onClose }: SuperAdminSidebarProps) {
-  const pathname = usePathname();
+  const home = "/super-admin";
+  const sections = getNavSections("super_admin");
 
   return (
     <>
@@ -70,36 +42,26 @@ export default function SuperAdminSidebar({ open, onClose }: SuperAdminSidebarPr
         </div>
 
         <nav className="flex-1 space-y-0.5 px-2.5 py-3 overflow-y-auto">
-          {navItems.map((item) => {
-            const isActive =
-              pathname === item.href ||
-              (item.href !== "/super-admin" && pathname.startsWith(item.href));
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={onClose}
-                className={cn(
-                  "group relative flex items-center gap-2.5 rounded-md px-3 py-2 text-[13px] font-medium transition-colors duration-150",
-                  isActive
-                    ? "bg-violet-50/80 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400"
-                    : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800/50 dark:hover:text-neutral-200"
-                )}
-              >
-                {isActive && (
-                  <div className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-violet-500 dark:bg-violet-400" />
-                )}
-                <item.icon
-                  className={cn(
-                    "h-[17px] w-[17px] flex-shrink-0 transition-colors",
-                    isActive ? "text-violet-500 dark:text-violet-400" : "text-neutral-400 group-hover:text-neutral-600 dark:text-neutral-500 dark:group-hover:text-neutral-300"
-                  )}
-                />
-                {item.label}
-              </Link>
-            );
-          })}
+          {sections.map((section) =>
+            isNavGroup(section) ? (
+              <NavGroupSection
+                key={section.key}
+                group={section}
+                home={home}
+                accent="violet"
+                storageKey={`nav-open:super_admin:${section.key}`}
+                onNavigate={onClose}
+              />
+            ) : (
+              <NavLeafLink
+                key={section.href}
+                item={section}
+                home={home}
+                accent="violet"
+                onNavigate={onClose}
+              />
+            )
+          )}
         </nav>
 
         <div className="border-t border-neutral-100 px-5 py-3 dark:border-[#1e2128]">

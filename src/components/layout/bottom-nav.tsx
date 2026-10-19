@@ -4,114 +4,62 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Role } from "@/types/role";
 import { cn } from "@/lib/utils";
-import {
-  LayoutDashboard,
-  Users,
-  GraduationCap,
-  Calendar,
-  Wallet,
-  ClipboardCheck,
-  FileText,
-  Bell,
-  User,
-  TrendingUp,
-  Building2,
-  Settings,
-  BarChart3,
-  UserPlus,
-  Banknote,
-  Scale,
-} from "lucide-react";
+import { getBottomNav, isHrefActive, roleHome } from "./nav-config";
 
-interface NavItem {
-  label: string;
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-}
-
-const bottomNavItems: Record<Role, NavItem[]> = {
-  super_admin: [
-    { label: "Overview", href: "/super-admin", icon: LayoutDashboard },
-    { label: "Centers", href: "/super-admin/centers", icon: Building2 },
-    { label: "Users", href: "/super-admin/utilisateurs", icon: Users },
-    { label: "Analytics", href: "/super-admin/analytics", icon: BarChart3 },
-    { label: "Settings", href: "/super-admin/settings", icon: Settings },
-  ],
-  admin: [
-    { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { label: "Users", href: "/admin/utilisateurs", icon: Users },
-    { label: "Groupes", href: "/admin/groupes", icon: GraduationCap },
-    { label: "Finances", href: "/admin/benefices", icon: TrendingUp },
-    { label: "Profil", href: "/profil", icon: User },
-  ],
-  prof: [
-    { label: "Dashboard", href: "/prof", icon: LayoutDashboard },
-    { label: "Groupes", href: "/prof/groupes", icon: GraduationCap },
-    { label: "Seances", href: "/prof/seances", icon: Calendar },
-    { label: "Eleves", href: "/prof/eleves", icon: Users },
-    { label: "Presences", href: "/prof/presences", icon: ClipboardCheck },
-  ],
-  eleve: [
-    { label: "Dashboard", href: "/eleve", icon: LayoutDashboard },
-    { label: "Groupes", href: "/eleve/groupes", icon: GraduationCap },
-    { label: "Compte", href: "/eleve/compte", icon: Wallet },
-    { label: "Profil", href: "/eleve/profil", icon: User },
-    { label: "Paiements", href: "/eleve/paiements", icon: FileText },
-    { label: "Presences", href: "/eleve/presences", icon: ClipboardCheck },
-  ],
-};
-
-export default function BottomNav({ role, variant = "blue", peutGererEleves, peutEncaisserReverse }: { role: Role; variant?: "blue" | "violet"; peutGererEleves?: boolean; peutEncaisserReverse?: boolean }) {
+export default function BottomNav({
+  role,
+  variant = "blue",
+}: {
+  role: Role;
+  variant?: "blue" | "violet";
+  peutGererEleves?: boolean;
+  peutEncaisserReverse?: boolean;
+}) {
   const pathname = usePathname();
-  const baseItems = bottomNavItems[role] || [];
-  let items = baseItems;
-
-  if (role === "prof") {
-    const next = [...baseItems];
-    if (peutGererEleves) {
-      next.unshift({ label: "Gestion Élèves", href: "/prof/gestion-eleves", icon: UserPlus });
-    }
-    if (peutEncaisserReverse) {
-      next.push(
-        { label: "Encaisser", href: "/prof/encaisser", icon: Banknote },
-        { label: "Dettes", href: "/prof/dettes", icon: Scale },
-      );
-    }
-    items = next;
-  }
-  const isActiveFn = (href: string) =>
-    pathname === href ||
-    (href !== `/${role}` && href !== "/super-admin" && pathname.startsWith(href));
-
-  const activeColor = variant === "violet"
-    ? "text-violet-600 dark:text-violet-400"
-    : "text-blue-700 dark:text-blue-400";
+  const home = roleHome(role);
+  const items = getBottomNav(role);
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-200 bg-white/95 backdrop-blur-md md:hidden dark:border-[#1e2128] dark:bg-[#141720]/95">
       <div className="flex items-stretch">
         {items.map((item) => {
-          const isActive = isActiveFn(item.href);
+          const active = isHrefActive(pathname, item.href, home);
 
           return (
             <Link
               key={item.href}
               href={item.href}
               aria-label={item.label}
+              aria-current={active ? "page" : undefined}
               className={cn(
-                "flex min-w-0 flex-1 flex-col items-center justify-center gap-1 py-2 transition-colors",
-                isActive
-                  ? activeColor
+                "relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1 px-0.5 py-2 transition-colors duration-200",
+                active
+                  ? variant === "violet"
+                    ? "text-violet-600 dark:text-violet-400"
+                    : "text-blue-700 dark:text-blue-400"
                   : "text-neutral-400 active:text-neutral-600 dark:text-neutral-500 dark:active:text-neutral-300"
               )}
             >
-              <item.icon
+              <span
+                aria-hidden="true"
                 className={cn(
-                  "h-5 w-5 flex-shrink-0",
-                  isActive ? activeColor : "text-neutral-400 dark:text-neutral-500"
+                  "absolute inset-x-2 top-0 h-[2px] origin-center rounded-full transition-all duration-300 ease-out motion-reduce:transition-none",
+                  active ? "scale-x-100 opacity-100" : "scale-x-0 opacity-0",
+                  variant === "violet" ? "bg-violet-600 dark:bg-violet-400" : "bg-blue-700 dark:bg-blue-400"
                 )}
               />
-              <span className="w-full text-center text-[10px] font-medium leading-tight">{item.label}</span>
+              <item.icon
+                className={cn(
+                  "h-5 w-5 flex-shrink-0 transition-transform duration-200 ease-out motion-reduce:transition-none",
+                  active && "-translate-y-px",
+                  active
+                    ? variant === "violet"
+                      ? "text-violet-600 dark:text-violet-400"
+                      : "text-blue-700 dark:text-blue-400"
+                    : "text-neutral-400 dark:text-neutral-500"
+                )}
+              />
+              <span className="w-full truncate text-center text-[10px] font-medium leading-tight">{item.label}</span>
             </Link>
           );
         })}

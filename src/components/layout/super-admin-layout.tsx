@@ -12,7 +12,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-[#0f1114]">
+    <div className="min-h-screen bg-[var(--background)]">
       <SessionGuard />
       <Suspense fallback={null}>
         <UsageTracker />
