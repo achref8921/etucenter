@@ -582,8 +582,8 @@ export default function UtilisateursPage() {
                     <td className="px-4 py-2.5">
                       {user.role === "prof" || user.role === "PROF" ? (
                         <button onClick={(e) => { e.stopPropagation(); handleToggleGestionEleves(user.id, user.peutGererEleves); }} disabled={gestionTogglingId === user.id} className="flex items-center gap-1 disabled:opacity-50" title={user.peutGererEleves ? "Retirer la permission de gérer des élèves" : "Autoriser la gestion des élèves"}>
-                          {gestionTogglingId === user.id ? <Loader2 className="h-4 w-4 animate-spin text-neutral-400 dark:text-neutral-500" /> : user.peutGererEleves ? <ToggleRight className="h-6 w-6 text-indigo-500 dark:text-indigo-400" /> : <ToggleLeft className="h-6 w-6 text-neutral-300 dark:text-[#2a2d35]" />}
-                          <span className={`text-[11px] font-medium ${user.peutGererEleves ? "text-indigo-600 dark:text-indigo-400" : "text-neutral-400 dark:text-neutral-500"}`}>{user.peutGererEleves ? "Oui" : "Non"}</span>
+                          {gestionTogglingId === user.id ? <Loader2 className="h-4 w-4 animate-spin text-neutral-400 dark:text-neutral-500" /> : user.peutGererEleves ? <ToggleRight className="h-6 w-6 text-blue-600 dark:text-blue-400" /> : <ToggleLeft className="h-6 w-6 text-neutral-300 dark:text-[#2a2d35]" />}
+                          <span className={`text-[11px] font-medium ${user.peutGererEleves ? "text-blue-700 dark:text-blue-400" : "text-neutral-400 dark:text-neutral-500"}`}>{user.peutGererEleves ? "Oui" : "Non"}</span>
                         </button>
                       ) : (
                         <span className="text-[11px] text-neutral-300 dark:text-neutral-600">—</span>

@@ -61,7 +61,7 @@ const bottomNavItems: Record<Role, NavItem[]> = {
   ],
 };
 
-export default function BottomNav({ role, variant = "indigo", peutGererEleves, peutEncaisserReverse }: { role: Role; variant?: "indigo" | "violet"; peutGererEleves?: boolean; peutEncaisserReverse?: boolean }) {
+export default function BottomNav({ role, variant = "blue", peutGererEleves, peutEncaisserReverse }: { role: Role; variant?: "blue" | "violet"; peutGererEleves?: boolean; peutEncaisserReverse?: boolean }) {
   const pathname = usePathname();
   const baseItems = bottomNavItems[role] || [];
   let items = baseItems;
@@ -85,7 +85,7 @@ export default function BottomNav({ role, variant = "indigo", peutGererEleves, p
 
   const activeColor = variant === "violet"
     ? "text-violet-600 dark:text-violet-400"
-    : "text-indigo-600 dark:text-indigo-400";
+    : "text-blue-700 dark:text-blue-400";
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-200 bg-white/95 backdrop-blur-md md:hidden dark:border-[#1e2128] dark:bg-[#141720]/95">

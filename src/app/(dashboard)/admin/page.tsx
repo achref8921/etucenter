@@ -65,15 +65,15 @@ async function DashboardContent({ month }: { month: string }) {
             <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
               Bénéfice Net du Centre
             </p>
-            <p className="mt-2 text-2xl font-bold tabular-nums text-indigo-600 dark:text-indigo-400 sm:text-3xl">
+            <p className="mt-2 text-2xl font-bold tabular-nums text-blue-700 dark:text-blue-400 sm:text-3xl">
               {formatCurrency(data.totalCenterBenefit)}
             </p>
             <p className="mt-1 text-[12px] text-neutral-400 dark:text-neutral-500">
               20% de {formatCurrency(data.netPaidSessionsRevenue)} — Revenu brut
             </p>
           </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-500/10">
-            <Banknote className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-600/10">
+            <Banknote className="h-6 w-6 text-blue-700 dark:text-blue-400" />
           </div>
         </div>
         <div className="mt-4 grid grid-cols-1 gap-3 border-t border-neutral-100 pt-4 sm:grid-cols-3 sm:gap-4 dark:border-[#2a2d35]">
@@ -91,14 +91,14 @@ async function DashboardContent({ month }: { month: string }) {
           </div>
           <div>
             <p className="text-[12px] text-neutral-400 dark:text-neutral-500">Bénéfice Centre</p>
-            <p className="text-[13px] font-semibold tabular-nums text-indigo-600 dark:text-indigo-400">
+            <p className="text-[13px] font-semibold tabular-nums text-blue-700 dark:text-blue-400">
               {formatCurrency(data.totalCenterBenefit)}
             </p>
           </div>
         </div>
         <Link
           href={`/admin/benefices?month=${month}`}
-          className="mt-4 flex items-center gap-1 text-[12px] font-medium text-indigo-600 hover:text-indigo-800 dark:text-indigo-400"
+          className="mt-4 flex items-center gap-1 text-[12px] font-medium text-blue-700 hover:text-blue-900 dark:text-blue-400"
         >
           Voir les bénéfices détaillés <ArrowRight className="h-3 w-3" />
         </Link>
@@ -157,7 +157,7 @@ async function DashboardContent({ month }: { month: string }) {
           </div>
           <Link
             href={`/admin/benefices?month=${month}`}
-            className="flex items-center gap-1 text-[12px] font-medium text-indigo-600 hover:text-indigo-800 dark:text-indigo-400"
+            className="flex items-center gap-1 text-[12px] font-medium text-blue-700 hover:text-blue-900 dark:text-blue-400"
           >
             Voir le détail <ArrowRight className="h-3 w-3" />
           </Link>
@@ -208,11 +208,11 @@ async function DashboardContent({ month }: { month: string }) {
       <div className="rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 px-5 py-3 dark:border-[#2a2d35]">
           <div className="flex items-center gap-2">
-            <CalendarDays className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />
+            <CalendarDays className="h-4 w-4 text-blue-600 dark:text-blue-400" />
             <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
               Séances d'aujourd'hui
             </h2>
-            <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400">
+            <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-800 dark:bg-blue-600/10 dark:text-blue-400">
               {todaySeances.length}
             </span>
           </div>
@@ -339,14 +339,14 @@ async function DashboardContent({ month }: { month: string }) {
                       {p.prof.prenom} {p.prof.nom}
                     </td>
                     <td className="px-4 py-2.5">
-                      <span className="inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-[11px] font-medium text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400">
+                      <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-medium text-blue-800 dark:bg-blue-600/10 dark:text-blue-400">
                         {p.taux}%
                       </span>
                     </td>
                     <td className="px-4 py-2.5 tabular-nums text-neutral-900 dark:text-neutral-100">
                       {formatCurrency(p.netRevenue)}
                     </td>
-                    <td className="px-4 py-2.5 tabular-nums font-medium text-indigo-600 dark:text-indigo-400">
+                    <td className="px-4 py-2.5 tabular-nums font-medium text-blue-700 dark:text-blue-400">
                       {formatCurrency(p.beneficeCentre + (p.reverseSettledRevenue ?? 0))}
                     </td>
                     <td className="px-4 py-2.5 tabular-nums font-medium text-purple-600 dark:text-purple-400">
@@ -363,7 +363,7 @@ async function DashboardContent({ month }: { month: string }) {
                   <td className="px-4 py-2.5 tabular-nums text-neutral-900 dark:text-neutral-100">
                     {formatCurrency(data.netPaidSessionsRevenue)}
                   </td>
-                  <td className="px-4 py-2.5 tabular-nums text-indigo-600 dark:text-indigo-400">
+                  <td className="px-4 py-2.5 tabular-nums text-blue-700 dark:text-blue-400">
                     {formatCurrency(data.totalCenterBenefit)}
                   </td>
                   <td className="px-4 py-2.5 tabular-nums text-purple-600 dark:text-purple-400">

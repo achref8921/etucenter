@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { signOut, useSession } from "next-auth/react";
 import { LogOut, Menu, Sun, Moon } from "lucide-react";
@@ -36,7 +36,7 @@ export default function Header({ centerLogo, onMenuToggle }: HeaderProps) {
           </button>
         )}
         <img
-          src={centerLogo || "/icon-192.png"}
+          src={centerLogo || "/logo.svg"}
           alt="Logo"
           className="h-8 w-8 rounded-lg object-contain md:hidden"
         />
@@ -56,14 +56,14 @@ export default function Header({ centerLogo, onMenuToggle }: HeaderProps) {
         <div className="h-5 w-px bg-neutral-200 dark:bg-neutral-700/50" />
 
         <div className="flex items-center gap-2 sm:gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 text-[11px] font-semibold text-white shadow-sm sm:h-8 sm:w-8">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-blue-700 text-[11px] font-semibold text-white shadow-sm sm:h-8 sm:w-8">
             {user?.prenom?.[0]}{user?.nom?.[0]}
           </div>
           <div className="hidden sm:block">
             <p className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100 leading-tight">
               {user?.prenom} {user?.nom}
             </p>
-            <span className="inline-block rounded bg-indigo-50 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wider text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
+            <span className="inline-block rounded bg-blue-50 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wider text-blue-700 dark:bg-blue-600/10 dark:text-blue-400">
               {roleLabels[role] || role}
             </span>
           </div>

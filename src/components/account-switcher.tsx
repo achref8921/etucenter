@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
@@ -269,7 +269,7 @@ export default function AccountSwitcher() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="exemple@email.com"
-                  className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-[13px] text-neutral-900 outline-none transition-colors focus:border-indigo-400 dark:border-[#2a2d35] dark:bg-[#0f1114] dark:text-neutral-100"
+                  className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-[13px] text-neutral-900 outline-none transition-colors focus:border-blue-400 dark:border-[#2a2d35] dark:bg-[#0f1114] dark:text-neutral-100"
                 />
               </div>
               <div>
@@ -281,7 +281,7 @@ export default function AccountSwitcher() {
                   value={motDePasse}
                   onChange={(e) => setMotDePasse(e.target.value)}
                   placeholder="Mot de passe"
-                  className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-[13px] text-neutral-900 outline-none transition-colors focus:border-indigo-400 dark:border-[#2a2d35] dark:bg-[#0f1114] dark:text-neutral-100"
+                  className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-[13px] text-neutral-900 outline-none transition-colors focus:border-blue-400 dark:border-[#2a2d35] dark:bg-[#0f1114] dark:text-neutral-100"
                 />
               </div>
               <p className="rounded-lg bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-700 dark:bg-amber-500/10 dark:text-amber-400">
@@ -289,7 +289,7 @@ export default function AccountSwitcher() {
               </p>
               <div className="flex justify-end gap-2 pt-1">
                 <button type="button" onClick={() => setShowModal(false)} className="rounded-lg border border-neutral-200 px-3 py-1.5 text-[12px] font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-[#2a2d35] dark:text-neutral-200 dark:hover:bg-[#141823]">Annuler</button>
-                <button type="submit" disabled={saving} className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-[12px] font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-indigo-500 dark:hover:bg-indigo-600">
+                <button type="submit" disabled={saving} className="flex items-center gap-1.5 rounded-lg bg-blue-700 px-3 py-1.5 text-[12px] font-medium text-white transition-colors hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-blue-600 dark:hover:bg-blue-700">
                   {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                   Lier le compte
                 </button>

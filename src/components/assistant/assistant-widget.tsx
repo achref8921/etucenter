@@ -71,7 +71,7 @@ export default function AssistantWidget({ isProf }: { isProf: boolean }) {
         type="button"
         onClick={() => setOpen(!open)}
         aria-label="Assistant"
-        className="fixed bottom-20 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg transition-transform hover:scale-105 dark:bg-indigo-500 md:right-6"
+        className="fixed bottom-20 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-blue-700 text-white shadow-lg transition-transform hover:scale-105 dark:bg-blue-600 md:right-6"
       >
         {open ? <X className="h-5 w-5" /> : <Bot className="h-5 w-5" />}
       </button>
@@ -79,7 +79,7 @@ export default function AssistantWidget({ isProf }: { isProf: boolean }) {
       {open && (
         <div className="fixed bottom-36 right-3 z-50 flex h-[70vh] max-h-[520px] w-[calc(100vw-24px)] max-w-sm flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-[#2a2d35] dark:bg-[#181b22] md:right-6">
           <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3 dark:border-[#252830]">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-700 dark:bg-blue-600/20 dark:text-blue-300">
               <Bot className="h-4 w-4" />
             </div>
             <div>
@@ -104,7 +104,7 @@ export default function AssistantWidget({ isProf }: { isProf: boolean }) {
                           key={c}
                           type="button"
                           onClick={() => send(c)}
-                          className="rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-[11px] font-medium text-indigo-700 transition-colors hover:bg-indigo-100 dark:border-indigo-500/30 dark:bg-indigo-500/10 dark:text-indigo-300"
+                          className="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-medium text-blue-800 transition-colors hover:bg-blue-100 dark:border-blue-600/30 dark:bg-blue-600/10 dark:text-blue-300"
                         >
                           {c}
                         </button>
@@ -114,7 +114,7 @@ export default function AssistantWidget({ isProf }: { isProf: boolean }) {
                 </div>
               ) : (
                 <div key={m.id} className="flex justify-end">
-                  <div className="max-w-[85%] whitespace-pre-line rounded-2xl rounded-br-sm bg-indigo-600 px-3 py-2 text-white dark:bg-indigo-500">
+                  <div className="max-w-[85%] whitespace-pre-line rounded-2xl rounded-br-sm bg-blue-700 px-3 py-2 text-white dark:bg-blue-600">
                     {m.text}
                   </div>
                 </div>
@@ -139,7 +139,7 @@ export default function AssistantWidget({ isProf }: { isProf: boolean }) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={isProf ? "Ex: mes séances de demain…" : "Ex: qui n'a pas payé ce mois…"}
-              className="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-[13px] text-gray-800 outline-none placeholder:text-gray-400 focus:border-indigo-400 dark:border-[#2a2d35] dark:bg-[#111318] dark:text-gray-200"
+              className="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-[13px] text-gray-800 outline-none placeholder:text-gray-400 focus:border-blue-400 dark:border-[#2a2d35] dark:bg-[#111318] dark:text-gray-200"
               dir="auto"
               maxLength={500}
             />
@@ -147,7 +147,7 @@ export default function AssistantWidget({ isProf }: { isProf: boolean }) {
               type="submit"
               disabled={loading || !input.trim()}
               aria-label="Envoyer"
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white transition-opacity disabled:opacity-40 dark:bg-indigo-500"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-700 text-white transition-opacity disabled:opacity-40 dark:bg-blue-600"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </button>

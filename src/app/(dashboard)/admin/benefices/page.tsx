@@ -283,7 +283,7 @@ export default function AdminBeneficesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600 dark:text-indigo-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-blue-700 dark:text-blue-400" />
       </div>
     );
   }
@@ -330,7 +330,7 @@ export default function AdminBeneficesPage() {
                 <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
                   Bénéfice Centre
                 </p>
-                <p className="mt-2 text-xl font-bold tabular-nums text-indigo-600 dark:text-indigo-400">
+                <p className="mt-2 text-xl font-bold tabular-nums text-blue-700 dark:text-blue-400">
                   {formatCurrency(beneficesData.totalBenefice)}
                 </p>
                 {beneficesData.reverseSettledRevenue > 0 && (
@@ -343,7 +343,7 @@ export default function AdminBeneficesPage() {
                     </span>
                     <span>
                       dont revenus groupes :{" "}
-                      <b className="tabular-nums text-indigo-600 dark:text-indigo-400">
+                      <b className="tabular-nums text-blue-700 dark:text-blue-400">
                         {formatCurrency(Math.max(0, beneficesData.totalBenefice - beneficesData.reverseSettledRevenue))}
                       </b>
                     </span>
@@ -632,14 +632,14 @@ export default function AdminBeneficesPage() {
                       {e.prof.prenom} {e.prof.nom}
                     </td>
                     <td className="px-4 py-2.5">
-                      <span className="inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-[11px] font-medium text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400">
+                      <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-medium text-blue-800 dark:bg-blue-600/10 dark:text-blue-400">
                         {e.tauxPourcentage}%
                       </span>
                     </td>
                     <td className="px-4 py-2.5 tabular-nums text-neutral-900 dark:text-neutral-100">
                       {formatCurrency(e.totalRecu)}
                     </td>
-                    <td className="px-4 py-2.5 tabular-nums font-medium text-indigo-600 dark:text-indigo-400">
+                    <td className="px-4 py-2.5 tabular-nums font-medium text-blue-700 dark:text-blue-400">
                       {formatCurrency(e.beneficeCentre)}
                     </td>
                     <td className="px-4 py-2.5 tabular-nums font-medium text-purple-600 dark:text-purple-400">
@@ -653,7 +653,7 @@ export default function AdminBeneficesPage() {
                   <td className="px-4 py-2.5 tabular-nums text-neutral-900 dark:text-neutral-100">
                     {formatCurrency(beneficesData.totalRecu)}
                   </td>
-                  <td className="px-4 py-2.5 tabular-nums text-indigo-600 dark:text-indigo-400">
+                  <td className="px-4 py-2.5 tabular-nums text-blue-700 dark:text-blue-400">
                     {formatCurrency(beneficesData.totalBenefice)}
                   </td>
                   <td className="px-4 py-2.5 tabular-nums text-purple-600 dark:text-purple-400">
@@ -678,7 +678,7 @@ export default function AdminBeneficesPage() {
             </h2>
             <Link
               href={`/admin/finances?month=${beneficesData.selectedMonth}`}
-              className="flex items-center gap-1 text-[12px] font-medium text-indigo-600 hover:text-indigo-800 dark:text-indigo-400"
+              className="flex items-center gap-1 text-[12px] font-medium text-blue-700 hover:text-blue-900 dark:text-blue-400"
             >
               Tout voir <ArrowRight className="h-3 w-3" />
             </Link>
@@ -712,7 +712,7 @@ export default function AdminBeneficesPage() {
                         {p.eleve.prenom} {p.eleve.nom}
                       </Link>
                       {p.collecteParProf && (
-                        <span className="ml-2 rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-medium text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-300">
+                        <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
                           Encaissé par le prof
                         </span>
                       )}
@@ -783,7 +783,7 @@ export default function AdminBeneficesPage() {
                         value={tauxInputs[e.id] || ""}
                         onChange={(ev) => setTauxInputs((prev) => ({ ...prev, [e.id]: ev.target.value }))}
                         placeholder="0"
-                        className="w-20 rounded-lg border border-neutral-200 bg-white px-2 py-1.5 text-center text-[13px] text-neutral-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/20 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-100 dark:focus:border-indigo-400"
+                        className="w-20 rounded-lg border border-neutral-200 bg-white px-2 py-1.5 text-center text-[13px] text-neutral-900 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600/20 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-100 dark:focus:border-blue-400"
                       />
                       <Percent className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
                     </div>

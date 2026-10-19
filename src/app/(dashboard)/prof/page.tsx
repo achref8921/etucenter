@@ -49,7 +49,7 @@ interface Seance {
 }
 
 const statusColor = (s: string) => {
-  if (s === "planifiee") return "bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400";
+  if (s === "planifiee") return "bg-blue-50 text-blue-800 dark:bg-blue-600/10 dark:text-blue-400";
   if (s === "en_cours") return "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400";
   if (s === "terminee") return "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400";
   return "bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400";
@@ -168,9 +168,9 @@ export default function ProfDashboardPage() {
             {/* Hero card - Impaye net */}
             <Link
               href="/prof/eleves?filter=unpaid"
-              className="group relative overflow-hidden rounded-xl border border-neutral-200 bg-gradient-to-br from-indigo-50 via-white to-indigo-50/50 p-6 transition-all duration-200 hover:-translate-y-0.5 dark:border-[#2a2d35] dark:from-indigo-500/5 dark:via-[#181b22] dark:to-indigo-500/5"
+              className="group relative overflow-hidden rounded-xl border border-neutral-200 bg-gradient-to-br from-blue-50 via-white to-blue-50/50 p-6 transition-all duration-200 hover:-translate-y-0.5 dark:border-[#2a2d35] dark:from-blue-600/5 dark:via-[#181b22] dark:to-blue-600/5"
             >
-              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-indigo-100/50 dark:bg-indigo-500/5" />
+              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-blue-100/50 dark:bg-blue-600/5" />
               <div className="relative">
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
                   Impaye net
@@ -178,7 +178,7 @@ export default function ProfDashboardPage() {
                 <p className="mt-2 text-3xl font-bold tabular-nums tracking-tight text-neutral-900 dark:text-neutral-50">
                   {formatCurrency(stats.impayeNet)}
                 </p>
-                <div className="mt-3 flex items-center gap-1 text-[12px] font-medium text-indigo-600 opacity-0 transition-opacity group-hover:opacity-100 dark:text-indigo-400">
+                <div className="mt-3 flex items-center gap-1 text-[12px] font-medium text-blue-700 opacity-0 transition-opacity group-hover:opacity-100 dark:text-blue-400">
                   Voir les details <ChevronRight className="h-3 w-3" />
                 </div>
               </div>
@@ -202,7 +202,7 @@ export default function ProfDashboardPage() {
                   <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                 </div>
               </div>
-              <div className="mt-3 flex items-center gap-1 text-[12px] font-medium text-indigo-600 opacity-0 transition-opacity group-hover:opacity-100 dark:text-indigo-400">
+              <div className="mt-3 flex items-center gap-1 text-[12px] font-medium text-blue-700 opacity-0 transition-opacity group-hover:opacity-100 dark:text-blue-400">
                 Ce que le centre vous doit <ChevronRight className="h-3 w-3" />
               </div>
             </Link>
@@ -221,11 +221,11 @@ export default function ProfDashboardPage() {
                     {stats.totalEleves}
                   </p>
                 </div>
-                <div className="rounded-lg bg-indigo-50 p-2 dark:bg-indigo-500/10">
-                  <Users className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                <div className="rounded-lg bg-blue-50 p-2 dark:bg-blue-600/10">
+                  <Users className="h-4 w-4 text-blue-700 dark:text-blue-400" />
                 </div>
               </div>
-              <div className="mt-3 flex items-center gap-1 text-[12px] font-medium text-indigo-600 opacity-0 transition-opacity group-hover:opacity-100 dark:text-indigo-400">
+              <div className="mt-3 flex items-center gap-1 text-[12px] font-medium text-blue-700 opacity-0 transition-opacity group-hover:opacity-100 dark:text-blue-400">
                 Voir la liste <ChevronRight className="h-3 w-3" />
               </div>
             </Link>
@@ -270,7 +270,7 @@ export default function ProfDashboardPage() {
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-3">
             <Link
               href="/prof/seances"
-              className="group rounded-xl border border-neutral-200 bg-white px-4 py-3 transition-all duration-200 hover:border-indigo-200 dark:border-[#2a2d35] dark:bg-[#181b22] dark:hover:border-indigo-500/20"
+              className="group rounded-xl border border-neutral-200 bg-white px-4 py-3 transition-all duration-200 hover:border-blue-200 dark:border-[#2a2d35] dark:bg-[#181b22] dark:hover:border-blue-600/20"
             >
               <div className="flex items-center gap-3">
                 <div className="rounded-md bg-blue-50 p-1.5 dark:bg-blue-500/10">
@@ -284,7 +284,7 @@ export default function ProfDashboardPage() {
             </Link>
             <Link
               href="/prof/groupes"
-              className="group rounded-xl border border-neutral-200 bg-white px-4 py-3 transition-all duration-200 hover:border-indigo-200 dark:border-[#2a2d35] dark:bg-[#181b22] dark:hover:border-indigo-500/20"
+              className="group rounded-xl border border-neutral-200 bg-white px-4 py-3 transition-all duration-200 hover:border-blue-200 dark:border-[#2a2d35] dark:bg-[#181b22] dark:hover:border-blue-600/20"
             >
               <div className="flex items-center gap-3">
                 <div className="rounded-md bg-violet-50 p-1.5 dark:bg-violet-500/10">
@@ -298,7 +298,7 @@ export default function ProfDashboardPage() {
             </Link>
             <Link
               href="/prof/presences"
-              className="group rounded-xl border border-neutral-200 bg-white px-4 py-3 transition-all duration-200 hover:border-indigo-200 dark:border-[#2a2d35] dark:bg-[#181b22] dark:hover:border-indigo-500/20"
+              className="group rounded-xl border border-neutral-200 bg-white px-4 py-3 transition-all duration-200 hover:border-blue-200 dark:border-[#2a2d35] dark:bg-[#181b22] dark:hover:border-blue-600/20"
             >
               <div className="flex items-center gap-3">
                 <div className="rounded-md bg-emerald-50 p-1.5 dark:bg-emerald-500/10">
@@ -319,7 +319,7 @@ export default function ProfDashboardPage() {
                 <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">Mes Groupes</h2>
                 <Link
                   href="/prof/groupes"
-                  className="text-[12px] font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+                  className="text-[12px] font-medium text-blue-700 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   Voir tout
                 </Link>
@@ -342,7 +342,7 @@ export default function ProfDashboardPage() {
                         onClick={() => router.push(`/prof/groupes?id=${g.id}`)}
                         className="cursor-pointer transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800/40"
                       >
-                        <td className="px-5 py-3 font-medium text-indigo-600 dark:text-indigo-400">{g.nom}</td>
+                        <td className="px-5 py-3 font-medium text-blue-700 dark:text-blue-400">{g.nom}</td>
                         <td className="px-5 py-3">
                           <span className="inline-flex items-center rounded-md bg-neutral-100 px-2 py-0.5 text-[12px] font-medium text-neutral-700 dark:bg-neutral-700 dark:text-neutral-300">
                             {g.nbEleves}
@@ -374,13 +374,13 @@ export default function ProfDashboardPage() {
           <div className="flex items-center gap-2">
             <Link
               href="/prof/seances"
-              className="text-[12px] font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+              className="text-[12px] font-medium text-blue-700 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
             >
               Voir tout
             </Link>
             <Link
               href="/prof/seances?creer=1"
-              className="flex items-center gap-1 rounded-md bg-indigo-600 px-2.5 py-1 text-[12px] font-semibold text-white transition-colors hover:bg-indigo-700"
+              className="flex items-center gap-1 rounded-md bg-blue-700 px-2.5 py-1 text-[12px] font-semibold text-white transition-colors hover:bg-blue-800"
             >
               <Plus className="h-3 w-3" /> Nouvelle
             </Link>
@@ -430,7 +430,7 @@ export default function ProfDashboardPage() {
                           <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold ${
                             timing.live
                               ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
-                              : "bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400"
+                              : "bg-blue-50 text-blue-800 dark:bg-blue-600/10 dark:text-blue-400"
                           }`}>
                             {timing.live && <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse dark:bg-emerald-400" />}
                             {timing.label}

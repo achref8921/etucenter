@@ -44,7 +44,7 @@ export function MonthSelector({ month }: { month: string }) {
         onClick={() => navigate(month)}
         className={`min-w-[160px] rounded-lg border px-3 py-1.5 text-[13px] font-medium transition-colors ${
           month === currentMonth
-            ? "border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-400"
+            ? "border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-600/20 dark:bg-blue-600/10 dark:text-blue-400"
             : "border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-300 dark:hover:bg-[#1e2128]"
         }`}
       >

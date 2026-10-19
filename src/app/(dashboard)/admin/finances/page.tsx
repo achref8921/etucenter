@@ -1084,7 +1084,7 @@ export default function FinancesPage() {
                   key={paiement.id}
                   className={
                     paiement.collecteParProf
-                      ? "border-l-2 border-l-indigo-400 bg-indigo-50/50 hover:bg-indigo-50 dark:border-l-indigo-500 dark:bg-indigo-500/[0.06] dark:hover:bg-indigo-500/10"
+                      ? "border-l-2 border-l-blue-400 bg-blue-50/50 hover:bg-blue-50 dark:border-l-blue-600 dark:bg-blue-600/[0.06] dark:hover:bg-blue-600/10"
                       : "hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]"
                   }
                 >
@@ -1108,7 +1108,7 @@ export default function FinancesPage() {
                   </td>
                   <td className="px-4 py-2.5">
                     {paiement.collecteParProf ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-950/40 dark:text-blue-300">
                         <UserCheck className="h-3 w-3" />
                         {paiement.collectedBy
                           ? `Prof ${paiement.collectedBy.prenom} ${paiement.collectedBy.nom}`

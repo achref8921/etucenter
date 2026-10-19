@@ -105,7 +105,7 @@ export default function ProfPresencesSelectPage() {
                     <div className="flex items-center gap-2">
                       <Link
                         href={`/prof/presences/${seance.id}`}
-                        className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-3 py-1.5 text-[12px] font-medium text-white transition-all hover:bg-indigo-700"
+                        className="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-3 py-1.5 text-[12px] font-medium text-white transition-all hover:bg-blue-800"
                       >
                         <ClipboardCheck className="h-3.5 w-3.5" />
                         {seance.statut === "terminee" ? "Voir les présences" : "Enregistrer Présence"}

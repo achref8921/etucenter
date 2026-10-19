@@ -300,13 +300,13 @@ export default function GroupesPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Rechercher un groupe..."
-              className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] py-2.5 pl-10 pr-4 text-[13px] text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/20"
+              className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] py-2.5 pl-10 pr-4 text-[13px] text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600/20"
             />
           </div>
           <select
             value={filterProfId}
             onChange={(e) => setFilterProfId(e.target.value)}
-            className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/20"
+            className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600/20"
           >
             <option value="">Tous les profs</option>
             {profs.map((p) => (
@@ -316,7 +316,7 @@ export default function GroupesPage() {
           <select
             value={filterMatiereId}
             onChange={(e) => setFilterMatiereId(e.target.value)}
-            className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/20"
+            className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600/20"
           >
             <option value="">Toutes les matières</option>
             {matieres.map((m) => (

@@ -335,7 +335,7 @@ export default function ProfEncaisserPage() {
                 />
               </div>
 
-              <div className="rounded-lg border border-indigo-100 dark:border-indigo-900/50 bg-indigo-50/60 dark:bg-indigo-500/5 p-4">
+              <div className="rounded-lg border border-blue-100 dark:border-blue-950/50 bg-blue-50/60 dark:bg-blue-600/5 p-4">
                 <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                   Répartition ({pct}% pour le centre)
                 </p>
@@ -346,7 +346,7 @@ export default function ProfEncaisserPage() {
                   </div>
                   <div className="flex items-center justify-between text-neutral-700 dark:text-neutral-200">
                     <span>Part centre (à régler)</span>
-                    <span className="tabular-nums font-semibold text-indigo-600 dark:text-indigo-400">{formatCurrency(centerFee)}</span>
+                    <span className="tabular-nums font-semibold text-blue-700 dark:text-blue-400">{formatCurrency(centerFee)}</span>
                   </div>
                   <div className="flex items-center justify-between border-t border-neutral-200 dark:border-[#2a2d35] pt-1 text-neutral-700 dark:text-neutral-200">
                     <span>Net prof</span>
@@ -358,7 +358,7 @@ export default function ProfEncaisserPage() {
               <button
                 onClick={handleSubmit}
                 disabled={submitting || !groupeId || !studentId || amountNum <= 0}
-                className="flex w-full items-center justify-center gap-2 rounded-md bg-indigo-600 px-4 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-md bg-blue-700 px-4 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Banknote className="h-4 w-4" />}
                 {submitting ? "Enregistrement..." : "Enregistrer l'encaissement"}
@@ -373,7 +373,7 @@ export default function ProfEncaisserPage() {
               </h2>
               <button
                 onClick={() => fetchAll()}
-                className="flex items-center gap-1 text-[12px] font-medium text-indigo-600 hover:text-indigo-800 dark:text-indigo-400"
+                className="flex items-center gap-1 text-[12px] font-medium text-blue-700 hover:text-blue-900 dark:text-blue-400"
               >
                 <RotateCcw className="h-3 w-3" /> Actualiser
               </button>
@@ -441,7 +441,7 @@ export default function ProfEncaisserPage() {
                     key={e.id}
                     href={`/prof/eleves/${e.id}`}
                     className={`flex w-full items-center justify-between gap-3 px-5 py-3 text-left transition-colors hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] ${
-                      studentId === e.id ? "bg-indigo-50 dark:bg-indigo-500/10" : ""
+                      studentId === e.id ? "bg-blue-50 dark:bg-blue-600/10" : ""
                     }`}
                   >
                     <div className="min-w-0">

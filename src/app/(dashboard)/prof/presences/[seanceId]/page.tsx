@@ -348,7 +348,7 @@ export default function AttendanceRecordingPage() {
             <button
               onClick={handleSave}
               disabled={saving || isLocked}
-              className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
+              className="flex items-center gap-2 rounded-xl bg-blue-700 px-5 py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-blue-800 disabled:opacity-50"
             >
               {saving ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

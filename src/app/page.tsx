@@ -124,7 +124,7 @@ export default async function HomePage() {
             </div>
             <h1 className="mx-auto max-w-3xl text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-6xl">
               Gerez votre centre
-              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"> en toute simplicite</span>
+              <span className="bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent"> en toute simplicite</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-600 dark:text-slate-400">
               Suivi des presences, gestion des paiements, planning des seances et tableaux de bord en temps reel. Tout ce dont vous avez besoin pour gerer votre centre educatif.
@@ -218,7 +218,7 @@ export default async function HomePage() {
 
       {/* CTA */}
       <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-16 text-center shadow-xl shadow-blue-200/50 sm:px-16 dark:shadow-blue-900/20">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-16 text-center shadow-xl shadow-blue-200/50 sm:px-16 dark:shadow-blue-900/20">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.15),transparent)]" />
           <div className="relative">
             <h2 className="text-3xl font-bold text-white sm:text-4xl">

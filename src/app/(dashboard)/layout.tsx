@@ -33,7 +33,7 @@ export default async function DashboardRootLayout({
 
   const centerId = (session.user as any).centerId;
 
-  let centerName = "GestExam";
+  let centerName = "Ètudna";
   let centerLogo: string | null = null;
 
   if (centerId) {
@@ -41,7 +41,7 @@ export default async function DashboardRootLayout({
       where: { id: centerId },
       select: { name: true, logo: true },
     });
-    centerName = center?.name ?? "GestExam";
+    centerName = center?.name ?? "Ètudna";
     centerLogo = center?.logo ?? null;
   }
 

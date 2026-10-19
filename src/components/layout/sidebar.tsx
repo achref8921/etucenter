@@ -126,10 +126,10 @@ export default function Sidebar({ role, centerName, centerLogo, peutGererEleves,
           {centerLogo ? (
             <img src={centerLogo} alt="Logo" className="h-8 w-8 rounded-lg object-contain" />
           ) : (
-            <img src="/icon-192.png" alt="Logo" className="h-8 w-8 rounded-lg object-contain" />
+            <img src="/logo.svg" alt="Logo" className="h-8 w-8 object-contain" />
           )}
           <div className="min-w-0 flex-1">
-            <span className="block truncate text-[15px] font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">{centerName || "GestExam"}</span>
+            <span className="block truncate text-[15px] font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">{centerName || "Ètudna"}</span>
             <p className="text-[10px] font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
               {roleLabels[role]}
             </p>
@@ -150,17 +150,17 @@ export default function Sidebar({ role, centerName, centerLogo, peutGererEleves,
                 className={cn(
                   "group relative flex items-center gap-2.5 rounded-md px-3 py-2 text-[13px] font-medium transition-colors duration-150",
                   isActive
-                    ? "bg-indigo-50/80 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400"
+                    ? "bg-blue-50/80 text-blue-700 dark:bg-blue-600/10 dark:text-blue-400"
                     : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800/50 dark:hover:text-neutral-200"
                 )}
               >
                 {isActive && (
-                  <div className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-indigo-500 dark:bg-indigo-400" />
+                  <div className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-blue-600 dark:bg-blue-400" />
                 )}
                 <item.icon
                   className={cn(
                     "h-[17px] w-[17px] flex-shrink-0 transition-colors",
-                    isActive ? "text-indigo-500 dark:text-indigo-400" : "text-neutral-400 group-hover:text-neutral-600 dark:text-neutral-500 dark:group-hover:text-neutral-300"
+                    isActive ? "text-blue-600 dark:text-blue-400" : "text-neutral-400 group-hover:text-neutral-600 dark:text-neutral-500 dark:group-hover:text-neutral-300"
                   )}
                 />
                 {item.label}

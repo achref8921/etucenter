@@ -2,22 +2,23 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Gestion Centre",
-    short_name: "Gestion Centre",
+    name: "Ètudna",
+    short_name: "Ètudna",
     description:
-      "Système de gestion de centre - suivi des présences, groupes, séances et paiements",
+      "Plateforme éducative - présences, groupes, séances, paiements et documents sécurisés",
     start_url: "/",
     scope: "/",
     display: "standalone",
     orientation: "portrait",
     background_color: "#ffffff",
-    theme_color: "#2563eb",
+    theme_color: "#1D4ED8",
     lang: "fr",
     categories: ["education", "productivity"],
     icons: [
+      { src: "/icon.svg", sizes: "any", type: "image/svg+xml" },
       { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
       { src: "/icon-512.png", sizes: "512x512", type: "image/png" },
-      { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+      { src: "/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
   };
 }

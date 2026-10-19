@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -380,7 +380,7 @@ export default function ProfSeancesPage() {
         </div>
         <button
           onClick={() => { setShowCreateModal(true); setCreateGroupeId(""); setCreateDate(""); setCreateHeureDebut(""); setCreateHeureFin(""); setCreateNotes(""); setCreateErrors({}); }}
-          className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          className="flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800"
         >
           <Plus className="h-4 w-4" />
           Nouvelle Séance
@@ -412,7 +412,7 @@ export default function ProfSeancesPage() {
           <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Date fin</label>
           <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
         </div>
-        <button type="submit" className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">Filtrer</button>
+        <button type="submit" className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800">Filtrer</button>
         <button type="button" onClick={() => { setDateFrom(""); setDateTo(""); fetchSeances(); }} className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]">Réinitialiser</button>
       </form>
 
@@ -429,7 +429,7 @@ export default function ProfSeancesPage() {
             onClick={() => setStatusFilter(f.key)}
             className={`rounded-full px-3.5 py-1.5 text-[12px] font-semibold transition-all ${
               statusFilter === f.key
-                ? "bg-indigo-600 text-white"
+                ? "bg-blue-700 text-white"
                 : "border border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-300 dark:hover:bg-[#1e2128]"
             }`}
           >
@@ -625,7 +625,7 @@ export default function ProfSeancesPage() {
               <button
                 onClick={handleSaveRattrapage}
                 disabled={savingRattrapage}
-                className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 disabled:opacity-50"
               >
                 {savingRattrapage && <Loader2 className="h-4 w-4 animate-spin" />}
                 Ajouter et déduire
@@ -673,7 +673,7 @@ export default function ProfSeancesPage() {
             </form>
             <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-neutral-200 px-6 py-4 dark:border-[#2a2d35]">
               <button type="button" onClick={() => setShowCreateModal(false)} className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]">Annuler</button>
-              <button type="submit" form="create-seance-form" disabled={submitting} className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
+              <button type="submit" form="create-seance-form" disabled={submitting} className="flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 disabled:opacity-50">
                 {submitting && <Loader2 className="h-4 w-4 animate-spin" />} Créer
               </button>
             </div>
@@ -722,7 +722,7 @@ export default function ProfSeancesPage() {
             </form>
             <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-neutral-200 px-6 py-4 dark:border-[#2a2d35]">
               <button type="button" onClick={() => setShowEditModal(false)} className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]">Annuler</button>
-              <button type="submit" form="edit-seance-form" disabled={submitting} className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
+              <button type="submit" form="edit-seance-form" disabled={submitting} className="flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 disabled:opacity-50">
                 {submitting && <Loader2 className="h-4 w-4 animate-spin" />} Enregistrer
               </button>
             </div>

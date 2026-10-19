@@ -16,23 +16,27 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Gestion Centre",
+  title: "Ètudna - Plateforme éducative",
   description:
-    "Système de gestion de centre - Suivi des présences et des absences des professeurs et élèves",
+    "Plateforme éducative de gestion de centre - élèves, professeurs, présences, séances, paiements et documents sécurisés",
+  applicationName: "Ètudna",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Gestion Centre",
+    title: "Ètudna",
   },
   icons: {
-    icon: "/icon-192.png",
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
     apple: "/apple-icon.png",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#4f46e5",
+  themeColor: "#1D4ED8",
 };
 
 export default function RootLayout({

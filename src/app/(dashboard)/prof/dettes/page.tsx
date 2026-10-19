@@ -213,7 +213,7 @@ export default function ProfDettesPage() {
       </div>
 
       {(openDebts.length > 0 || pendingDeclared > 0) && (
-        <div className="animate-fade-in-up rounded-xl border border-indigo-200 bg-white p-6 dark:border-indigo-800 dark:bg-[#181b22]">
+        <div className="animate-fade-in-up rounded-xl border border-blue-200 bg-white p-6 dark:border-blue-900 dark:bg-[#181b22]">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex-1">
               <h2 className="text-[14px] font-semibold text-neutral-900 dark:text-neutral-100">
@@ -237,12 +237,12 @@ export default function ProfDettesPage() {
                 value={declaredAmount}
                 onChange={(ev) => setDeclaredAmount(ev.target.value)}
                 placeholder="Ex : 100"
-                className="w-32 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-center text-[13px] text-neutral-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/20 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-100 dark:focus:border-indigo-400"
+                className="w-32 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-center text-[13px] text-neutral-900 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600/20 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-100 dark:focus:border-blue-400"
               />
               <button
                 onClick={declare}
                 disabled={declaring || available <= 0 || !declaredAmount}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-blue-700 px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {declaring ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 Envoyer
@@ -265,7 +265,7 @@ export default function ProfDettesPage() {
                 onClick={() => setFilter("open")}
                 className={`rounded-md px-3 py-1.5 text-[12px] font-medium ${
                   filter === "open"
-                    ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400"
+                    ? "bg-blue-100 text-blue-800 dark:bg-blue-600/10 dark:text-blue-400"
                     : "text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
                 }`}
               >
@@ -275,7 +275,7 @@ export default function ProfDettesPage() {
                 onClick={() => setFilter("paid")}
                 className={`rounded-md px-3 py-1.5 text-[12px] font-medium ${
                   filter === "paid"
-                    ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400"
+                    ? "bg-blue-100 text-blue-800 dark:bg-blue-600/10 dark:text-blue-400"
                     : "text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
                 }`}
               >
@@ -342,7 +342,7 @@ export default function ProfDettesPage() {
                             <button
                               onClick={() => settle(d)}
                               disabled={settlingId === d.id}
-                              className="inline-flex items-center gap-1 rounded-md bg-indigo-600 px-3 py-1.5 text-[12px] font-semibold text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                              className="inline-flex items-center gap-1 rounded-md bg-blue-700 px-3 py-1.5 text-[12px] font-semibold text-white transition-colors hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               {settlingId === d.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
                               Régler

@@ -108,7 +108,7 @@ export default function AdminProfesseurDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600 dark:text-indigo-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-blue-700 dark:text-blue-400" />
       </div>
     );
   }
@@ -208,7 +208,7 @@ export default function AdminProfesseurDetailPage() {
           </div>
           <div>
             <p className="text-[12px] text-neutral-400 dark:text-neutral-500">Centre</p>
-            <p className="text-[13px] font-semibold tabular-nums text-indigo-600 dark:text-indigo-400">
+            <p className="text-[13px] font-semibold tabular-nums text-blue-700 dark:text-blue-400">
               {formatCurrency(fin.beneficeCentre)}
             </p>
           </div>
@@ -228,7 +228,7 @@ export default function AdminProfesseurDetailPage() {
           </h2>
           <Link
             href={`/admin/finances-professeurs?teacherId=${p.id}`}
-            className="flex items-center gap-1 text-[12px] font-medium text-indigo-600 hover:text-indigo-800 dark:text-indigo-400"
+            className="flex items-center gap-1 text-[12px] font-medium text-blue-700 hover:text-blue-900 dark:text-blue-400"
           >
             Grand livre <ArrowLeft className="h-3 w-3 rotate-180" />
           </Link>

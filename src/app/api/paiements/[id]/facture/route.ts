@@ -254,7 +254,7 @@ export async function GET(
   .badge-present { background: #dcfce7; color: #16a34a; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 12px; }
   .badge-absent { background: #fef2f2; color: #dc2626; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 12px; }
   .badge-retard { background: #fef9c3; color: #ca8a04; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 12px; }
-  .badge-excuse { background: #e0e7ff; color: #4f46e5; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 12px; }
+  .badge-excuse { background: #e0e7ff; color: #1d4ed8; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 12px; }
   .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
   .stat-card { background: #f8fafc; border-radius: 8px; padding: 12px; text-align: center; border: 1px solid #e2e8f0; }
   .stat-card .number { font-size: 22px; font-weight: 700; color: #1e293b; }

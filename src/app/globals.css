@@ -7,27 +7,27 @@
   --foreground: #111827;
   --card: #ffffff;
   --card-foreground: #111827;
-  --primary: #4f46e5;
+  --primary: #1d4ed8;
   --primary-foreground: #ffffff;
   --secondary: #f3f4f6;
   --secondary-foreground: #1f2937;
   --muted: #f3f4f6;
   --muted-foreground: #6b7280;
-  --accent: #eef2ff;
-  --accent-foreground: #4338ca;
+  --accent: #eff6ff;
+  --accent-foreground: #1e40af;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --border: #e5e7eb;
   --input: #e5e7eb;
-  --ring: #4f46e5;
+  --ring: #1d4ed8;
   --radius: 0.625rem;
   --success: #059669;
   --warning: #d97706;
   --sidebar-bg: #ffffff;
   --sidebar-border: #e5e7eb;
   --sidebar-text: #6b7280;
-  --sidebar-active: #eef2ff;
-  --sidebar-active-text: #4f46e5;
+  --sidebar-active: #eff6ff;
+  --sidebar-active-text: #1d4ed8;
   --header-bg: rgba(255, 255, 255, 0.85);
   --header-border: #e5e7eb;
 }
@@ -37,26 +37,26 @@
   --foreground: #e8eaed;
   --card: #181b22;
   --card-foreground: #e8eaed;
-  --primary: #818cf8;
+  --primary: #3b82f6;
   --primary-foreground: #ffffff;
   --secondary: #1e2128;
   --secondary-foreground: #d1d5db;
   --muted: #1e2128;
   --muted-foreground: #9ca3af;
-  --accent: #1e1b4b;
-  --accent-foreground: #a5b4fc;
+  --accent: #172554;
+  --accent-foreground: #93c5fd;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
   --border: #2a2d35;
   --input: #2a2d35;
-  --ring: #818cf8;
+  --ring: #3b82f6;
   --success: #34d399;
   --warning: #fbbf24;
   --sidebar-bg: #141720;
   --sidebar-border: #1e2128;
   --sidebar-text: #9ca3af;
-  --sidebar-active: #1e1b4b;
-  --sidebar-active-text: #818cf8;
+  --sidebar-active: #172554;
+  --sidebar-active-text: #60a5fa;
   --header-bg: rgba(15, 17, 20, 0.85);
   --header-border: #1e2128;
 }
@@ -91,13 +91,13 @@ body {
 }
 
 ::selection {
-  background-color: #4f46e533;
-  color: #3730a3;
+  background-color: #1d4ed833;
+  color: #1e3a8a;
 }
 
 .dark ::selection {
-  background-color: #818cf833;
-  color: #c7d2fe;
+  background-color: #60a5fa33;
+  color: #bfdbfe;
 }
 
 .frozen-mode button,

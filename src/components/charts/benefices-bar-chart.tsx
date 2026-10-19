@@ -50,7 +50,7 @@ export default function BeneficesBarChart({
           contentStyle={{ borderRadius: "8px", border: "1px solid #e5e7eb" }}
         />
         <Legend />
-        <Bar dataKey="Revenus" fill="#6366f1" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="Revenus" fill="#2563eb" radius={[4, 4, 0, 0]} />
         <Bar dataKey="Bénéfices" fill="#22c55e" radius={[4, 4, 0, 0]} />
         <Bar dataKey="Salaires" fill="#a855f7" radius={[4, 4, 0, 0]} />
       </BarChart>

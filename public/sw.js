@@ -1,4 +1,4 @@
-const CACHE = "etucenter-v9";
+const CACHE = "etucenter-v10";
 
 const SKIP_CACHE = /^\/(?:api\/|_next\/data\/)/;
 
@@ -91,7 +91,7 @@ async function dropStaleSubscription(endpoint, targetUserId) {
 
 self.addEventListener("push", (event) => {
   let data = {};
-  try { data = event.data ? event.data.json() : {}; } catch { data = { title: "Gestion Centre" }; }
+  try { data = event.data ? event.data.json() : {}; } catch { data = { title: "Ètudna" }; }
 
   const targetUserId = typeof data.userId === "string" ? data.userId : null;
 
@@ -124,7 +124,7 @@ self.addEventListener("push", (event) => {
         return;
       }
 
-      await self.registration.showNotification(data.title || "Gestion Centre", {
+      await self.registration.showNotification(data.title || "Ètudna", {
         body: data.body || "",
         icon: "/icon-192.png",
         badge: "/icon-192.png",
