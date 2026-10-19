@@ -24,6 +24,15 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  async redirects() {
+    return [
+      {
+        source: "/downloads/etucenter-:version.apk",
+        destination: "/downloads/etudna-:version.apk",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
