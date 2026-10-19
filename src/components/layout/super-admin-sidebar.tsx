@@ -62,7 +62,7 @@ export default function SuperAdminSidebar({ open, onClose }: SuperAdminSidebarPr
             <Shield className="h-4 w-4 text-white" />
           </div>
           <div>
-            <span className="text-[15px] font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">Ètudna</span>
+            <span className="text-[15px] font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">Étudnet</span>
             <p className="text-[10px] font-medium uppercase tracking-wider text-violet-500 dark:text-violet-400">
               Super Admin
             </p>
@@ -103,7 +103,7 @@ export default function SuperAdminSidebar({ open, onClose }: SuperAdminSidebarPr
         </nav>
 
         <div className="border-t border-neutral-100 px-5 py-3 dark:border-[#1e2128]">
-            <p className="text-[10px] text-neutral-300 dark:text-neutral-600">Ètudna Platform v1.0</p>
+            <p className="text-[10px] text-neutral-300 dark:text-neutral-600">Étudnet Platform v1.0</p>
         </div>
       </aside>
     </>

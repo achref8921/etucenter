@@ -16,15 +16,15 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Ètudna - Plateforme éducative",
+  title: "Étudnet - Plateforme éducative",
   description:
     "Plateforme éducative de gestion de centre - élèves, professeurs, présences, séances, paiements et documents sécurisés",
-  applicationName: "Ètudna",
+  applicationName: "Étudnet",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Ètudna",
+    title: "Étudnet",
   },
   icons: {
     icon: [

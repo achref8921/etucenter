@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { AlertTriangle, RefreshCw, LogOut } from "lucide-react";
 
-const STORAGE_KEY = "etudna_uid";
+const STORAGE_KEY = "etudnet_uid";
 
 export default function SessionGuard() {
   const { data: session, status } = useSession();

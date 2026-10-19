@@ -28,7 +28,12 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/downloads/etucenter-:version.apk",
-        destination: "/downloads/etudna-:version.apk",
+        destination: "/downloads/etudnet-:version.apk",
+        permanent: true,
+      },
+      {
+        source: "/downloads/etudna-:version.apk",
+        destination: "/downloads/etudnet-:version.apk",
         permanent: true,
       },
     ];

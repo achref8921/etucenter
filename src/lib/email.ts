@@ -38,11 +38,11 @@ export async function sendEmail({ to, subject, html }: SendEmailOptions): Promis
 
 export function passwordResetEmail(name: string, resetUrl: string): { subject: string; html: string } {
   return {
-    subject: "Réinitialisation de votre mot de passe - Ètudna",
+    subject: "Réinitialisation de votre mot de passe - Étudnet",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
         <div style="background: #1D4ED8; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 24px;">
-          <h1 style="color: white; margin: 0; font-size: 20px;">Ètudna</h1>
+          <h1 style="color: white; margin: 0; font-size: 20px;">Étudnet</h1>
         </div>
         <h2 style="color: #1e293b; font-size: 18px;">Bonjour ${name},</h2>
         <p style="color: #475569; line-height: 1.6;">
@@ -58,7 +58,7 @@ export function passwordResetEmail(name: string, resetUrl: string): { subject: s
         </p>
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
         <p style="color: #94a3b8; font-size: 12px; text-align: center;">
-          Ètudna - Plateforme éducative
+          Étudnet - Plateforme éducative
         </p>
       </div>
     `,
@@ -67,15 +67,15 @@ export function passwordResetEmail(name: string, resetUrl: string): { subject: s
 
 export function emailVerificationEmail(name: string, verifyUrl: string): { subject: string; html: string } {
   return {
-    subject: "Vérifiez votre adresse email - Ètudna",
+    subject: "Vérifiez votre adresse email - Étudnet",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
         <div style="background: #1D4ED8; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 24px;">
-          <h1 style="color: white; margin: 0; font-size: 20px;">Ètudna</h1>
+          <h1 style="color: white; margin: 0; font-size: 20px;">Étudnet</h1>
         </div>
         <h2 style="color: #1e293b; font-size: 18px;">Bonjour ${name},</h2>
         <p style="color: #475569; line-height: 1.6;">
-          Bienvenue sur Ètudna ! Veuillez vérifier votre adresse email en cliquant sur le bouton ci-dessous.
+          Bienvenue sur Étudnet ! Veuillez vérifier votre adresse email en cliquant sur le bouton ci-dessous.
         </p>
         <div style="text-align: center; margin: 24px 0;">
           <a href="${verifyUrl}" style="background: #10b981; color: white; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">
@@ -87,7 +87,7 @@ export function emailVerificationEmail(name: string, verifyUrl: string): { subje
         </p>
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
         <p style="color: #94a3b8; font-size: 12px; text-align: center;">
-          Ètudna - Plateforme éducative
+          Étudnet - Plateforme éducative
         </p>
       </div>
     `,
@@ -137,7 +137,7 @@ export function monitorAlertEmail(subject: string, failures: { type: string; sta
         `}
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
         <p style="color: #94a3b8; font-size: 12px; text-align: center;">
-          Ètudna - Plateforme éducative
+          Étudnet - Plateforme éducative
         </p>
       </div>
     `,

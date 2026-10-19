@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Ètudna",
-    short_name: "Ètudna",
+    name: "Étudnet",
+    short_name: "Étudnet",
     description:
       "Plateforme éducative - présences, groupes, séances, paiements et documents sécurisés",
     start_url: "/",

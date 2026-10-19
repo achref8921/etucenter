@@ -1,4 +1,4 @@
-const CACHE = "etudna-v1";
+const CACHE = "etudnet-v1";
 
 const SKIP_CACHE = /^\/(?:api\/|_next\/data\/)/;
 
@@ -91,7 +91,7 @@ async function dropStaleSubscription(endpoint, targetUserId) {
 
 self.addEventListener("push", (event) => {
   let data = {};
-  try { data = event.data ? event.data.json() : {}; } catch { data = { title: "Ètudna" }; }
+  try { data = event.data ? event.data.json() : {}; } catch { data = { title: "Étudnet" }; }
 
   const targetUserId = typeof data.userId === "string" ? data.userId : null;
 
@@ -124,12 +124,12 @@ self.addEventListener("push", (event) => {
         return;
       }
 
-      await self.registration.showNotification(data.title || "Ètudna", {
+      await self.registration.showNotification(data.title || "Étudnet", {
         body: data.body || "",
         icon: "/icon-192.png",
         badge: "/icon-192.png",
         vibrate: [200, 100, 200],
-        tag: "etudna-" + (data.tag || Date.now()),
+        tag: "etudnet-" + (data.tag || Date.now()),
         data: { url: data.url || "/" },
       });
     })()

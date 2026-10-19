@@ -89,8 +89,8 @@ export default async function HomePage() {
       <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/80">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-2.5">
-            <img src="/logo.svg" alt="Ètudna" className="h-9 w-9 object-contain" />
-            <span className="text-lg font-bold text-slate-900 dark:text-slate-100">Ètudna</span>
+            <img src="/logo.svg" alt="Étudnet" className="h-9 w-9 object-contain" />
+            <span className="text-lg font-bold text-slate-900 dark:text-slate-100">Étudnet</span>
           </div>
           <div className="flex items-center gap-3">
             <Link
@@ -222,7 +222,7 @@ export default async function HomePage() {
               Pret a commencer ?
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-base text-blue-100">
-              Rejoignez les centres qui utilisent Ètudna pour gerer leurs eleves, profs et finances.
+              Rejoignez les centres qui utilisent Étudnet pour gerer leurs eleves, profs et finances.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
@@ -247,11 +247,11 @@ export default async function HomePage() {
       <footer className="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 sm:flex-row sm:px-6">
           <div className="flex items-center gap-2.5">
-            <img src="/logo.svg" alt="Ètudna" className="h-7 w-7 object-contain" />
-            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Ètudna</span>
+            <img src="/logo.svg" alt="Étudnet" className="h-7 w-7 object-contain" />
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Étudnet</span>
           </div>
           <p className="text-xs text-slate-400 dark:text-slate-500">
-            &copy; 2026 Ètudna. Tous droits reserves.
+            &copy; 2026 Étudnet. Tous droits reserves.
           </p>
         </div>
       </footer>

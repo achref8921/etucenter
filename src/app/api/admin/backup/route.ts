@@ -17,7 +17,7 @@ export async function GET() {
     const dump = await gatherCenterBackup(prisma, centerId, centre?.name || "Unknown", centre?.slug || "");
     const json = serializeBackup(dump);
 
-    const filename = `backup-${centre?.slug || "centre"}-${new Date().toISOString().slice(0, 10)}.etudna`;
+    const filename = `backup-${centre?.slug || "centre"}-${new Date().toISOString().slice(0, 10)}.etudnet`;
 
     return new NextResponse(json, {
       headers: {

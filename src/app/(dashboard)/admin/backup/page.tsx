@@ -59,7 +59,7 @@ export default function AdminBackupPage() {
       const disposition = res.headers.get("Content-Disposition");
       const filenameMatch = disposition?.match(/filename="?(.+?)"?$/);
       a.href = url;
-      a.download = filenameMatch?.[1] || `backup-${new Date().toISOString().slice(0, 10)}.etudna`;
+      a.download = filenameMatch?.[1] || `backup-${new Date().toISOString().slice(0, 10)}.etudnet`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (e: any) {
@@ -153,7 +153,7 @@ export default function AdminBackupPage() {
 
           <div className="rounded-lg bg-amber-50 border border-amber-200 p-4 mb-4 dark:bg-amber-900/10 dark:border-amber-800">
             <p className="text-sm text-amber-800 dark:text-amber-300">
-              Le fichier <strong>.etudna</strong> contient <strong>toute la base de données du centre</strong> :
+              Le fichier <strong>.etudnet</strong> contient <strong>toute la base de données du centre</strong> :
               tous les élèves et professeurs avec leurs mots de passe, les groupes, matières, séances, présences,
               paiements, inscriptions, taux de bénéfice, notifications, et toutes les transactions financières
               des élèves et des professeurs.
@@ -182,7 +182,7 @@ export default function AdminBackupPage() {
             </div>
             <div>
               <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Importer les données</h2>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">Restaurer à partir d&apos;un fichier .etudna</p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">Restaurer à partir d&apos;un fichier .etudnet</p>
             </div>
           </div>
 
@@ -190,7 +190,7 @@ export default function AdminBackupPage() {
             <input
               ref={fileRef}
               type="file"
-              accept=".etudna, .educenter, .json, .backup"
+              accept=".etudnet, .etudna, .educenter, .json, .backup"
               onChange={handleFileChange}
               className="hidden"
             />
@@ -199,7 +199,7 @@ export default function AdminBackupPage() {
               className="w-full flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-neutral-300 bg-neutral-50 px-4 py-6 text-sm font-medium text-neutral-600 hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-700 transition-colors dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-400 dark:hover:border-emerald-500"
             >
               <FileJson className="h-5 w-5" />
-              {file ? file.name : "Choisir un fichier de backup (.etudna)"}
+              {file ? file.name : "Choisir un fichier de backup (.etudnet)"}
             </button>
 
             {preview && (

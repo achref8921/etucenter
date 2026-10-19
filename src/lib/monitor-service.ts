@@ -171,7 +171,7 @@ async function notifyDown(failures: ScopeResult[], actorId?: string): Promise<vo
   const scopes = failures.map((f) => f.type).join(", ");
   const messages = failures.map((f) => `- ${f.type}: ${f.status} (${f.details.error ?? "ressource indisponible"})`).join("\n");
 
-  const subject = `[Ètudna] ⚠️ Incident détecté (${scopes})`;
+  const subject = `[Étudnet] ⚠️ Incident détecté (${scopes})`;
   const mail = monitorAlertEmail(subject, failures);
 
   for (const email of emails) {
@@ -220,7 +220,7 @@ async function notifyDown(failures: ScopeResult[], actorId?: string): Promise<vo
 
 async function notifyRecovered(actorId?: string): Promise<void> {
   const { emails } = await alertRecipients();
-  const mail = monitorAlertEmail("[Ètudna] ✅ Système rétabli", []);
+  const mail = monitorAlertEmail("[Étudnet] ✅ Système rétabli", []);
 
   for (const email of emails) {
     if (email) await sendEmail({ to: email, subject: mail.subject, html: mail.html });

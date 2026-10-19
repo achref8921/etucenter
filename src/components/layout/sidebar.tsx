@@ -129,7 +129,7 @@ export default function Sidebar({ role, centerName, centerLogo, peutGererEleves,
             <img src="/logo.svg" alt="Logo" className="h-8 w-8 object-contain" />
           )}
           <div className="min-w-0 flex-1">
-            <span className="block truncate text-[15px] font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">{centerName || "Ètudna"}</span>
+            <span className="block truncate text-[15px] font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">{centerName || "Étudnet"}</span>
             <p className="text-[10px] font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
               {roleLabels[role]}
             </p>
@@ -170,7 +170,7 @@ export default function Sidebar({ role, centerName, centerLogo, peutGererEleves,
         </nav>
 
         <div className="border-t border-neutral-100 px-5 py-3 dark:border-[#1e2128]">
-          <p className="text-[10px] text-neutral-300 dark:text-neutral-600">Ètudna v1.0</p>
+          <p className="text-[10px] text-neutral-300 dark:text-neutral-600">Étudnet v1.0</p>
         </div>
       </aside>
     </>

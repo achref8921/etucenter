@@ -14,10 +14,10 @@ export default function AuthLayout({
         <div className="mb-8 text-center">
           <img
             src="/logo.svg"
-            alt="Ètudna"
+            alt="Étudnet"
             className="mx-auto mb-4 h-16 w-16 object-contain drop-shadow-sm"
           />
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Ètudna</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Étudnet</h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Plateforme éducative</p>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-200/50 dark:border-slate-700 dark:bg-slate-900 dark:shadow-none">

@@ -114,7 +114,7 @@ export default function SuperAdminAnalyticsPage() {
         <div>
           <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Analytiques</h1>
           <p className="mt-1 text-[13px] text-neutral-500 dark:text-neutral-400">
-            Vue globale de la plateforme Ètudna
+            Vue globale de la plateforme Étudnet
           </p>
         </div>
         <button
