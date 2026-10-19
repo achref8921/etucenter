@@ -1,10 +1,11 @@
 "use client";
 
 import { signOut, useSession } from "next-auth/react";
-import { LogOut, Menu, Sun, Moon } from "lucide-react";
+import { LogOut, Menu, Sun, Moon, ImageOff, Image as ImageIcon } from "lucide-react";
 import NotificationBellDropdown from "@/components/notification-bell-dropdown";
 import AccountSwitcher from "@/components/account-switcher";
 import { useTheme } from "@/components/theme-provider";
+import { useWatermarkEnabled } from "@/components/layout/center-watermark";
 
 const roleLabels: Record<string, string> = {
   super_admin: "Super Admin",
@@ -23,6 +24,7 @@ export default function Header({ centerLogo, onMenuToggle }: HeaderProps) {
   const user = session?.user;
   const role = (user?.role as string) || "";
   const { theme, toggleTheme } = useTheme();
+  const { enabled: watermarkEnabled, toggle: toggleWatermark } = useWatermarkEnabled();
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-neutral-200 bg-white/85 backdrop-blur-md px-4 sm:px-6 dark:border-[#1e2128] dark:bg-[#0f1114]/85">
@@ -44,6 +46,17 @@ export default function Header({ centerLogo, onMenuToggle }: HeaderProps) {
 
       <div className="flex items-center gap-1.5 sm:gap-2">
         <NotificationBellDropdown role={role} />
+
+        {centerLogo && (
+          <button
+            onClick={toggleWatermark}
+            className="hidden rounded-md p-1.5 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700 sm:block dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+            title={watermarkEnabled ? "Masquer le logo en filigrane" : "Afficher le logo en filigrane"}
+            aria-pressed={watermarkEnabled}
+          >
+            {watermarkEnabled ? <ImageIcon className="h-[18px] w-[18px]" /> : <ImageOff className="h-[18px] w-[18px]" />}
+          </button>
+        )}
 
         <button
           onClick={toggleTheme}

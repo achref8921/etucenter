@@ -12,6 +12,7 @@ import BackButton from "@/components/ui/back-button";
 import { Role } from "@/types/role";
 import AssistantWidget from "@/components/assistant/assistant-widget";
 import UsageTracker from "@/components/usage-tracker";
+import CenterWatermark from "./center-watermark";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -86,7 +87,7 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
         onClose={() => setSidebarOpen(false)}
       />
 
-      <div className="md:pl-64">
+      <div className="relative md:pl-64">
         <Header
           centerLogo={centerLogo}
           onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
@@ -97,13 +98,16 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
             <span className="hidden sm:inline">— vous pouvez uniquement consulter vos informations</span>
           </div>
         )}
-        <main className={`p-4 sm:p-5 lg:p-6 pb-28 md:pb-6 ${frozenState ? "frozen-mode" : ""}`}>
-          {showBackButton && (
-            <div className="mb-3">
-              <BackButton fallbackHref={roleHome} />
-            </div>
-          )}
-          <ToastProvider>{children}</ToastProvider>
+        <main className={`relative isolate p-4 sm:p-5 lg:p-6 pb-28 md:pb-6 ${frozenState ? "frozen-mode" : ""}`}>
+          <CenterWatermark logo={centerLogo} />
+          <div className="relative z-10">
+            {showBackButton && (
+              <div className="mb-3">
+                <BackButton fallbackHref={roleHome} />
+              </div>
+            )}
+            <ToastProvider>{children}</ToastProvider>
+          </div>
         </main>
       </div>
 
