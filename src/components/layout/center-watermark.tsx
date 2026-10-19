@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { CSSProperties, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const STORAGE_KEY = "watermark:enabled";
@@ -37,9 +37,11 @@ export function useWatermarkEnabled() {
 }
 
 /**
- * Filigrane (logo du centre) affiché en fond de la zone de contenu.
- * - opacité très faible, désaturé, non cliquable, derrière tout le contenu ;
- * - s'adapte au mode clair/sombre ;
+ * Filigrane (logo du centre) répété (mosaïque) sur toute la surface de la zone
+ * de contenu, pour un rendu homogène du haut vers le bas.
+ * - opacité très faible et léger désaturé pour ne pas gêner la lecture ;
+ * - motif discret en mode clair (logo assombri) et inversé en mode sombre ;
+ * - non cliquable, ignoré des lecteurs d'écran, derrière tout le contenu ;
  * - activation mémorisée dans localStorage par navigateur.
  */
 export default function CenterWatermark({
@@ -53,27 +55,27 @@ export default function CenterWatermark({
 
   if (!logo || !enabled) return null;
 
+  const style: CSSProperties = {
+    backgroundImage: `url("${logo}")`,
+    backgroundRepeat: "repeat",
+    backgroundSize: "clamp(72px, 9vw, 150px) auto",
+    backgroundPosition: "center",
+  };
+
   return (
-    <div
-      aria-hidden="true"
-      className={cn(
-        "pointer-events-none absolute inset-0 z-0 flex items-center justify-center overflow-hidden",
-        className
-      )}
-    >
-      <img
-        src={logo}
-        alt=""
-        draggable={false}
+    <div aria-hidden="true" className={cn("pointer-events-none absolute inset-0 z-0", className)}>
+      <div
+        aria-hidden="true"
         className={cn(
-          "select-none object-contain",
-          "h-[62vh] w-auto max-w-[78%] -translate-y-2",
-          "opacity-[0.05] dark:opacity-[0.06]",
-          "grayscale dark:grayscale-0",
+          "h-full w-full",
+          "opacity-[0.032] dark:opacity-[0.045]",
+          "grayscale-[0.35] dark:grayscale-0 dark:invert",
           "transition-opacity duration-500"
         )}
+        style={style}
       />
     </div>
   );
 }
+
 
