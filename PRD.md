@@ -1,4 +1,4 @@
-# PRD — EtuCenter (Platforme de Gestion de Centre de Tutorat)
+# PRD — Ètudna (Platforme de Gestion de Centre de Tutorat)
 
 > **Version:** 1.1.0
 > **Date:** 2026-09-06
@@ -9,7 +9,7 @@
 
 ## 1. Vue d'ensemble
 
-EtuCenter est une plateforme SaaS multi-tenant (multi-centres) qui permet à un centre de
+Ètudna est une plateforme SaaS multi-tenant (multi-centres) qui permet à un centre de
 tutorat/formation de gérer : les utilisateurs (professeurs, élèves, admins), les matières,
 les groupes, les inscriptions, les séances, les présences, les paiements, la finance des
 élèves (soldes/crédits prépayés), la finance des professeurs (bénéfices, salaires,

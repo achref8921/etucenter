@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import {
-  GraduationCap,
   Users,
   CalendarCheck,
   CreditCard,
@@ -90,10 +89,8 @@ export default async function HomePage() {
       <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/80">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 shadow-md shadow-blue-200 dark:shadow-blue-900/30">
-              <GraduationCap className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-lg font-bold text-slate-900 dark:text-slate-100">EduCenter</span>
+            <img src="/logo.svg" alt="Ètudna" className="h-9 w-9 object-contain" />
+            <span className="text-lg font-bold text-slate-900 dark:text-slate-100">Ètudna</span>
           </div>
           <div className="flex items-center gap-3">
             <Link
@@ -120,7 +117,7 @@ export default async function HomePage() {
           <div className="text-center">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-semibold text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400">
               <BookOpen className="h-3.5 w-3.5" />
-              Plateforme de gestion scolaire
+              Plateforme éducative
             </div>
             <h1 className="mx-auto max-w-3xl text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-6xl">
               Gerez votre centre
@@ -225,7 +222,7 @@ export default async function HomePage() {
               Pret a commencer ?
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-base text-blue-100">
-              Rejoignez les centres qui utilisent EduCenter pour gerer leurs eleves, profs et finances.
+              Rejoignez les centres qui utilisent Ètudna pour gerer leurs eleves, profs et finances.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
@@ -250,13 +247,11 @@ export default async function HomePage() {
       <footer className="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 sm:flex-row sm:px-6">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600">
-              <GraduationCap className="h-4 w-4 text-white" />
-            </div>
-            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">EduCenter</span>
+            <img src="/logo.svg" alt="Ètudna" className="h-7 w-7 object-contain" />
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Ètudna</span>
           </div>
           <p className="text-xs text-slate-400 dark:text-slate-500">
-            &copy; 2026 EduCenter. Tous droits reserves.
+            &copy; 2026 Ètudna. Tous droits reserves.
           </p>
         </div>
       </footer>

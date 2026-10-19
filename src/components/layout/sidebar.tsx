@@ -170,7 +170,7 @@ export default function Sidebar({ role, centerName, centerLogo, peutGererEleves,
         </nav>
 
         <div className="border-t border-neutral-100 px-5 py-3 dark:border-[#1e2128]">
-          <p className="text-[10px] text-neutral-300 dark:text-neutral-600">EduCenter v1.0</p>
+          <p className="text-[10px] text-neutral-300 dark:text-neutral-600">Ètudna v1.0</p>
         </div>
       </aside>
     </>

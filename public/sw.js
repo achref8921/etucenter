@@ -1,4 +1,4 @@
-const CACHE = "etucenter-v10";
+const CACHE = "etudna-v1";
 
 const SKIP_CACHE = /^\/(?:api\/|_next\/data\/)/;
 
@@ -129,7 +129,7 @@ self.addEventListener("push", (event) => {
         icon: "/icon-192.png",
         badge: "/icon-192.png",
         vibrate: [200, 100, 200],
-        tag: "etucenter-" + (data.tag || Date.now()),
+        tag: "etudna-" + (data.tag || Date.now()),
         data: { url: data.url || "/" },
       });
     })()

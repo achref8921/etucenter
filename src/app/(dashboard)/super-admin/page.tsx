@@ -58,7 +58,7 @@ export default async function SuperAdminDashboardPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Aperçu de la plateforme</h1>
-        <p className="mt-1 text-[13px] text-neutral-500 dark:text-neutral-400">EduCenter SaaS — Métriques globales et insights</p>
+        <p className="mt-1 text-[13px] text-neutral-500 dark:text-neutral-400">Ètudna SaaS — Métriques globales et insights</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

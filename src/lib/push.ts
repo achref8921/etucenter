@@ -9,7 +9,7 @@ export const PUSH_ENABLED = Boolean(PUBLIC_KEY && PRIVATE_KEY);
 
 if (PUSH_ENABLED) {
   webpush.setVapidDetails(
-    process.env.VAPID_SUBJECT || "mailto:admin@etucenter.app",
+    process.env.VAPID_SUBJECT || "mailto:admin@etudna.app",
     PUBLIC_KEY!,
     PRIVATE_KEY!
   );

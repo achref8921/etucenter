@@ -16,7 +16,7 @@ export async function GET() {
   return NextResponse.json(
     {
       status: dbStatus === "ok" ? "ok" : "error",
-      service: "gestexam",
+      service: "etudna",
       database: dbStatus,
       responseTimeMs: Date.now() - t0,
       time: new Date().toISOString(),
