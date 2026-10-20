@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginInput } from "@/lib/validations";
 import { ArrowLeft } from "lucide-react";
 import PasswordInput from "@/components/password-input";
+import SplashScreen from "@/components/splash-screen";
 
 function GoogleIcon() {
   return (
@@ -39,6 +40,7 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
 
   const googleError = searchParams.get("error");
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
@@ -80,7 +82,9 @@ function LoginForm() {
         setError(
           "Email ou mot de passe incorrect. Si vous venez de vous inscrire, votre compte doit être activé par un administrateur."
         );
+        setLoading(false);
       } else {
+        setRedirecting(true);
         const res = await fetch("/api/auth/session");
         const session = await res.json();
         const role = session?.user?.role;
@@ -97,7 +101,6 @@ function LoginForm() {
       }
     } catch {
       setError("Une erreur est survenue. Veuillez réessayer.");
-    } finally {
       setLoading(false);
     }
   }
@@ -105,12 +108,18 @@ function LoginForm() {
   async function handleGoogleLogin() {
     setError(null);
     setGoogleLoading(true);
+    setRedirecting(true);
     try {
       await signIn("google", { callbackUrl: "/super-admin" });
     } catch {
       setError("Erreur lors de la connexion avec Google.");
+      setRedirecting(false);
       setGoogleLoading(false);
     }
+  }
+
+  if (redirecting) {
+    return <SplashScreen label="Connexion en cours…" />;
   }
 
   return (
@@ -242,13 +251,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-screen items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-300 border-t-blue-600" />
-        </div>
-      }
-    >
+    <Suspense fallback={<SplashScreen />}>
       <LoginForm />
     </Suspense>
   );

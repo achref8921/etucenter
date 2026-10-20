@@ -12,7 +12,9 @@ import BackButton from "@/components/ui/back-button";
 import { Role } from "@/types/role";
 import AssistantWidget from "@/components/assistant/assistant-widget";
 import UsageTracker from "@/components/usage-tracker";
-import CenterWatermark, { useWatermarkEnabled } from "./center-watermark";
+import CenterWatermark from "./center-watermark";
+import RouteTransition from "./route-transition";
+import { setCachedBranding } from "@/lib/branding-cache";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -44,8 +46,10 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [frozenState, setFrozenState] = useState(!!frozen);
   const pathname = usePathname();
-  const { enabled: watermarkEnabled } = useWatermarkEnabled();
-  const glass = !!centerLogo && watermarkEnabled;
+
+  useEffect(() => {
+    setCachedBranding(centerLogo ?? null, centerName ?? null);
+  }, [centerLogo, centerName]);
 
   const roleHome =
     user.role === "admin"
@@ -76,6 +80,7 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
   return (
     <div className="min-h-screen bg-[var(--background)]">
       <SessionGuard />
+      <RouteTransition />
       <Suspense fallback={null}>
         <UsageTracker />
       </Suspense>
@@ -101,7 +106,7 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
           </div>
         )}
         <main
-          data-glass={glass ? "" : undefined}
+          data-glass=""
           className={`relative isolate p-4 sm:p-5 lg:p-6 pb-28 md:pb-6 ${frozenState ? "frozen-mode" : ""}`}
         >
           <CenterWatermark logo={centerLogo} />

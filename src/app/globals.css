@@ -185,26 +185,18 @@ body {
   }
 }
 
-/* ===== Effet verre dépoli devant le filigrane du centre =====
-   Posé uniquement quand un logo de centre est présent : les cartes de contenu
-   (fond blanc plein) deviennent légèrement translucides et floutées, le
-   filigrane apparaît doucement DERRIÈRE elles (glassmorphism discret et pro).
-   Les tableaux et tout élément avec sa propre teinte de fond ne sont pas
-   touchés pour préserver la lisibilité. */
+/* ===== Effet verre dépoli : cartes de contenu translucides =====
+   Les cartes de contenu (fond blanc plein, `.bg-white`) deviennent translucides
+   (opacité 0.60) pour laisser clairement deviner le fond/le filigrane derrière.
+   Sans flou (`backdrop-filter`) : rendu net, très lisible.
+   Les couches avec leur propre teinte de fond ne sont pas touchées. */
 @supports (backdrop-filter: blur(1px)) {
   main[data-glass] .bg-white {
-    background-color: rgba(255, 255, 255, 0.72) !important;
-    backdrop-filter: blur(6px) saturate(1.04);
+    background-color: rgba(255, 255, 255, 0.6) !important;
   }
 
   .dark main[data-glass] .bg-white {
-    background-color: rgba(24, 27, 34, 0.72) !important;
-  }
-
-  /* Fond des cellules de tableau : garde le contraste texte/fond */
-  main[data-glass] tbody tr.bg-white,
-  main[data-glass] thead tr.bg-white {
-    backdrop-filter: none;
+    background-color: rgba(24, 27, 34, 0.6) !important;
   }
 }
 
@@ -258,6 +250,16 @@ textarea {
 @keyframes pop-in {
   from { opacity: 0; transform: scale(0.96); }
   to { opacity: 1; transform: none; }
+}
+
+@keyframes splash-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.9); opacity: 0.82; }
+}
+
+@keyframes splash-bar {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(310%); }
 }
 
 .animate-toast-in { animation: toast-in 0.25s ease-out both; }

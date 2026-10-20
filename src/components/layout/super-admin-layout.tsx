@@ -6,6 +6,7 @@ import SuperAdminHeader from "@/components/layout/super-admin-header";
 import BottomNav from "@/components/layout/bottom-nav";
 import SessionGuard from "@/components/session-guard";
 import UsageTracker from "@/components/usage-tracker";
+import RouteTransition from "@/components/layout/route-transition";
 import { Role } from "@prisma/client";
 
 export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
@@ -14,6 +15,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   return (
     <div className="min-h-screen bg-[var(--background)]">
       <SessionGuard />
+      <RouteTransition />
       <Suspense fallback={null}>
         <UsageTracker />
       </Suspense>
