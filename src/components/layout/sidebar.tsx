@@ -43,7 +43,7 @@ export default function Sidebar({ role, centerName, centerLogo, peutGererEleves,
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-neutral-200 bg-white transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] dark:border-[#1e2128] dark:bg-[#141720]",
+          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-neutral-200 bg-white/80 backdrop-blur-md transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] dark:border-[#1e2128] dark:bg-[#141720]/85",
           open ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
       >
