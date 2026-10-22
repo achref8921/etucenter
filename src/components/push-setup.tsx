@@ -144,7 +144,7 @@ export default function PushSetup() {
   }
 
   return (
-    <div className="fixed bottom-4 inset-x-4 z-50 mx-auto max-w-md rounded-xl border border-blue-200 bg-[var(--surface)] p-4 shadow-lg dark:border-slate-700 dark:bg-slate-800">
+    <div className="fixed bottom-4 inset-x-4 z-40 mx-auto max-w-md rounded-xl border border-blue-200 bg-[var(--surface)] p-4 shadow-lg dark:border-slate-700 dark:bg-slate-800">
       <div className="flex items-start gap-3">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400">
           <Bell className="h-4 w-4" />
