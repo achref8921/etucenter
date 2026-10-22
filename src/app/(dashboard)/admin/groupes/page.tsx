@@ -393,7 +393,7 @@ export default function GroupesPage() {
                 filteredGroupes.map((groupe) => (
                   <tr key={groupe.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
                     <td className="px-4 py-2.5 font-medium">
-                      <Link href={`/admin/groupes/${groupe.id}`} className="text-blue-600 dark:text-blue-400 hover:underline">
+                      <Link href={`/admin/groupes/${groupe.id}`} prefetch={false} className="text-blue-600 dark:text-blue-400 hover:underline">
                         {groupe.nom}
                       </Link>
                     </td>

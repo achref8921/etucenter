@@ -357,6 +357,7 @@ export default function ProfGroupesPage() {
                   </>
                 )}
                 <Link
+                  prefetch={false}
                   href={`/prof/seances?groupeId=${groupe.id}`}
                   className="flex items-center gap-1 rounded-xl bg-purple-600 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-purple-700"
                 >
@@ -510,6 +511,7 @@ export default function ProfGroupesPage() {
                       <div className="min-w-0 flex-1">
                         <Link
                           href={`/prof/eleves/${ins.eleve.id}`}
+                          prefetch={false}
                           className="block truncate text-sm font-medium text-neutral-900 hover:text-blue-600 hover:underline dark:text-neutral-100 dark:hover:text-blue-400"
                         >
                           {ins.eleve.prenom} {ins.eleve.nom}

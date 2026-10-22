@@ -609,6 +609,7 @@ export default function AdminBeneficesPage() {
             </h2>
             <Link
               href="/admin/finances-professeurs"
+              prefetch={false}
               className="flex items-center gap-1 text-[12px] font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400"
             >
               Comptes profs <ArrowRight className="h-3 w-3" />
@@ -678,6 +679,7 @@ export default function AdminBeneficesPage() {
             </h2>
             <Link
               href={`/admin/finances?month=${beneficesData.selectedMonth}`}
+              prefetch={false}
               className="flex items-center gap-1 text-[12px] font-medium text-blue-700 hover:text-blue-900 dark:text-blue-400"
             >
               Tout voir <ArrowRight className="h-3 w-3" />
@@ -707,6 +709,7 @@ export default function AdminBeneficesPage() {
                     <td className="px-4 py-2.5">
                       <Link
                         href={`/admin/eleves/${p.eleve.id}`}
+                        prefetch={false}
                         className="font-medium text-blue-600 hover:underline dark:text-blue-400"
                       >
                         {p.eleve.prenom} {p.eleve.nom}

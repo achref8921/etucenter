@@ -831,6 +831,7 @@ export default function FinancesPage() {
                     {selectedStudent && (
                       <Link
                         href={`/admin/eleves/${selectedStudent.id}`}
+                        prefetch={false}
                         className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
                       >
                         Profil élève
@@ -1080,6 +1081,7 @@ export default function FinancesPage() {
                   <td className="px-4 py-2.5">
                     <Link
                       href={`/admin/eleves/${paiement.eleve.id}`}
+                      prefetch={false}
                       className="text-blue-600 dark:text-blue-400 hover:underline"
                     >
                       {paiement.eleve.prenom} {paiement.eleve.nom}

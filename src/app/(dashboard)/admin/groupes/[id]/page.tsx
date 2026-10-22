@@ -607,7 +607,7 @@ export default function AdminGroupeDetailPage() {
                 <tr key={ins.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
                   <td className="px-4 py-2.5">
                     <div className="flex items-center gap-2">
-                      <Link href={`/admin/eleves/${ins.eleve.id}`} className="font-medium text-blue-600 dark:text-blue-400 hover:underline">{ins.eleve.nom}</Link>
+                      <Link href={`/admin/eleves/${ins.eleve.id}`} prefetch={false} className="font-medium text-blue-600 dark:text-blue-400 hover:underline">{ins.eleve.nom}</Link>
                       <button
                         onClick={() => openForfaitModal(ins)}
                         className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[11px] font-semibold transition-colors ${
@@ -732,7 +732,7 @@ export default function AdminGroupeDetailPage() {
                 <tr key={p.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
                   <td className="px-4 py-2.5 text-[13px] text-[var(--foreground)]">{formatDate(p.date)}</td>
                   <td className="px-4 py-2.5">
-                    <Link href={`/admin/eleves/${p.eleve.id}`} className="text-[13px] font-medium text-blue-600 dark:text-blue-400 hover:underline">{p.eleve.prenom} {p.eleve.nom}</Link>
+                    <Link href={`/admin/eleves/${p.eleve.id}`} prefetch={false} className="text-[13px] font-medium text-blue-600 dark:text-blue-400 hover:underline">{p.eleve.prenom} {p.eleve.nom}</Link>
                   </td>
                   <td className="px-4 py-2.5 text-[13px] font-medium text-green-600 dark:text-green-400">{formatCurrency(p.montant)}</td>
                   <td className="px-4 py-2.5 text-[13px] text-[var(--foreground-subtle)]">{methodeLabels[p.methodePaiement] ?? p.methodePaiement}</td>

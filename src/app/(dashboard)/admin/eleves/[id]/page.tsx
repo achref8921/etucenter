@@ -379,6 +379,7 @@ export default function AdminEleveDetailPage() {
           </div>
           <Link
             href={`/admin/finances?studentId=${e.id}`}
+            prefetch={false}
             className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
           >
             Voir le grand livre <ArrowUpRight className="h-4 w-4" />
@@ -477,7 +478,7 @@ export default function AdminEleveDetailPage() {
               eleve.inscriptions.map((ins) => (
                 <tr key={ins.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
                   <td className="px-4 py-2.5 font-medium">
-                    <Link href={`/admin/groupes/${ins.groupe.id}`} className="text-blue-600 dark:text-blue-400 hover:underline">
+                    <Link href={`/admin/groupes/${ins.groupe.id}`} prefetch={false} className="text-blue-600 dark:text-blue-400 hover:underline">
                       {ins.groupe.nom}
                     </Link>
                   </td>
@@ -557,7 +558,7 @@ export default function AdminEleveDetailPage() {
                     <tr key={p.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
                       <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">{formatDate(p.seance.date)}</td>
                       <td className="px-4 py-2.5 font-medium">
-                        <Link href={`/admin/groupes/${p.seance.groupe.id}`} className="text-blue-600 dark:text-blue-400 hover:underline">
+                        <Link href={`/admin/groupes/${p.seance.groupe.id}`} prefetch={false} className="text-blue-600 dark:text-blue-400 hover:underline">
                           {p.seance.groupe.nom}
                         </Link>
                       </td>
@@ -589,6 +590,7 @@ export default function AdminEleveDetailPage() {
           <h2 className="text-sm font-semibold text-[var(--foreground)]">Grand Livre</h2>
           <Link
             href={`/admin/finances?studentId=${e.id}`}
+            prefetch={false}
             className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
           >
             Voir tout <ArrowUpRight className="h-3 w-3" />

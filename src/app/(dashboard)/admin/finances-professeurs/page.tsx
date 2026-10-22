@@ -327,6 +327,7 @@ export default function FinancesProfesseursPage() {
                     <td className="px-4 py-2.5">
                       <Link
                         href={`/admin/professeurs/${t.id}`}
+                        prefetch={false}
                         className="text-blue-600 dark:text-blue-400 hover:underline"
                         onClick={(e) => e.stopPropagation()}
                       >

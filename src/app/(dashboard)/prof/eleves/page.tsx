@@ -328,6 +328,7 @@ export default function ProfElevesPage() {
 
                     <Link
                       href={`/prof/eleves/${student.id}`}
+                      prefetch={false}
                       onClick={(e) => e.stopPropagation()}
                       className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-neutral-700 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:text-neutral-300 dark:hover:border-blue-700 dark:hover:bg-blue-950/40 dark:hover:text-blue-300"
                     >

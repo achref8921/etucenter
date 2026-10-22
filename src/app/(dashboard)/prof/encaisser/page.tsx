@@ -433,6 +433,7 @@ export default function ProfEncaisserPage() {
                   <Link
                     key={e.id}
                     href={`/prof/eleves/${e.id}`}
+                    prefetch={false}
                     className={`flex w-full items-center justify-between gap-3 px-5 py-3 text-left transition-colors hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] ${
                       studentId === e.id ? "bg-blue-50 dark:bg-blue-600/10" : ""
                     }`}

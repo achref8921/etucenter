@@ -296,6 +296,7 @@ export default function ProfEleveDetailPage() {
                   </div>
                   <Link
                     href={`/prof/seances?groupeId=${ins.groupe.id}`}
+                    prefetch={false}
                     className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline dark:text-blue-400"
                   >
                     Voir les séances <ArrowUpRight className="h-3 w-3" />

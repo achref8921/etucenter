@@ -222,7 +222,7 @@ export default function ProfDashboardPage() {
                   </span>
                 </div>
               </div>
-              <Link
+              <Link prefetch={false}
                 href="/prof/compte"
                 className="flex shrink-0 items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-[12px] font-semibold text-white transition-colors hover:bg-emerald-700"
               >
@@ -233,7 +233,7 @@ export default function ProfDashboardPage() {
 
           {/* Compact stats row */}
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-3">
-            <Link
+            <Link prefetch={false}
               href="/prof/seances"
               className="group rounded-[18px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3 transition-all duration-200 hover:border-blue-200 dark:hover:border-blue-600/20 shadow-[var(--shadow-card)]"
             >
@@ -247,7 +247,7 @@ export default function ProfDashboardPage() {
                 </div>
               </div>
             </Link>
-            <Link
+            <Link prefetch={false}
               href="/prof/groupes"
               className="group rounded-[18px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3 transition-all duration-200 hover:border-blue-200 dark:hover:border-blue-600/20 shadow-[var(--shadow-card)]"
             >
@@ -261,7 +261,7 @@ export default function ProfDashboardPage() {
                 </div>
               </div>
             </Link>
-            <Link
+            <Link prefetch={false}
               href="/prof/presences"
               className="group rounded-[18px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3 transition-all duration-200 hover:border-blue-200 dark:hover:border-blue-600/20 shadow-[var(--shadow-card)]"
             >
@@ -282,7 +282,7 @@ export default function ProfDashboardPage() {
             <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
               <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-3">
                 <h2 className="text-[13px] font-semibold text-[var(--foreground)]">Mes Groupes</h2>
-                <Link
+                <Link prefetch={false}
                   href="/prof/groupes"
                   className="text-[12px] font-medium text-blue-700 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                 >
@@ -337,13 +337,13 @@ export default function ProfDashboardPage() {
         <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-3">
           <h2 className="text-[13px] font-semibold text-[var(--foreground)]">Prochaines Seances</h2>
           <div className="flex items-center gap-2">
-            <Link
+            <Link prefetch={false}
               href="/prof/seances"
               className="text-[12px] font-medium text-blue-700 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
             >
               Voir tout
             </Link>
-            <Link
+            <Link prefetch={false}
               href="/prof/seances?creer=1"
               className="flex items-center gap-1 rounded-md bg-blue-700 px-2.5 py-1 text-[12px] font-semibold text-white transition-colors hover:bg-blue-800"
             >

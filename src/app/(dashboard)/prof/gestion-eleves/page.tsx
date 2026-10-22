@@ -326,6 +326,7 @@ export default function ProfGestionElevesPage() {
                           <div className="min-w-0">
                             <Link
                               href={`/prof/eleves/${ins.eleve.id}`}
+                              prefetch={false}
                               className="block truncate text-sm font-medium text-neutral-900 hover:text-blue-600 hover:underline dark:text-neutral-100 dark:hover:text-blue-400"
                               title="Ouvrir le profil de l'élève"
                             >

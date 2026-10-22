@@ -34,6 +34,7 @@ export default async function AdminUnpaidPage() {
         actions={
           <Link
             href="/admin/finances"
+            prefetch={false}
             className="inline-flex h-9 items-center gap-1.5 rounded-[10px] bg-[var(--primary)] px-3.5 text-[13px] font-semibold text-[var(--primary-foreground)] shadow-xs transition-[filter] hover:brightness-[0.94]"
           >
             Encaissements <ArrowRight className="h-3.5 w-3.5" />
@@ -115,6 +116,7 @@ export default async function AdminUnpaidPage() {
                     <TD>
                       <Link
                         href={`/admin/eleves/${s.student.id}`}
+                        prefetch={false}
                         className="flex items-center gap-3"
                       >
                         <Avatar name={`${s.student.prenom} ${s.student.nom}`} size={34} />
@@ -137,6 +139,7 @@ export default async function AdminUnpaidPage() {
                           <Link
                             key={g.id}
                             href={`/admin/groupes/${g.id}`}
+                            prefetch={false}
                             title={`${g.nom} · ${formatCurrency(g.unpaid)}`}
                             className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface-muted)] px-2 py-0.5 text-[11px] font-medium text-[var(--foreground-subtle)] transition-colors hover:border-[var(--primary)]/40 hover:text-[var(--primary)]"
                           >
@@ -155,12 +158,14 @@ export default async function AdminUnpaidPage() {
                       <div className="flex justify-end gap-2">
                         <Link
                           href={`/admin/eleves/${s.student.id}`}
+                          prefetch={false}
                           className="inline-flex h-8 items-center rounded-[8px] border border-[var(--border)] bg-[var(--surface)] px-2.5 text-[12px] font-semibold text-[var(--foreground-subtle)] transition-colors hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)]"
                         >
                           Fiche
                         </Link>
                         <Link
                           href={`/admin/finances?studentId=${s.student.id}`}
+                          prefetch={false}
                           className="inline-flex h-8 items-center rounded-[8px] bg-[var(--primary)] px-2.5 text-[12px] font-semibold text-[var(--primary-foreground)] transition-[filter] hover:brightness-[0.94]"
                         >
                           Encaisser

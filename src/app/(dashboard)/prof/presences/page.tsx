@@ -105,6 +105,7 @@ export default function ProfPresencesSelectPage() {
                     <div className="flex items-center gap-2">
                       <Link
                         href={`/prof/presences/${seance.id}`}
+                        prefetch={false}
                         className="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-3 py-1.5 text-[12px] font-medium text-white transition-all hover:bg-blue-800"
                       >
                         <ClipboardCheck className="h-3.5 w-3.5" />
@@ -130,6 +131,7 @@ export default function ProfPresencesSelectPage() {
             <Link
               key={seance.id}
               href={`/prof/presences/${seance.id}`}
+              prefetch={false}
               className="block rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-4 transition-all hover:-translate-y-0.5 hover:border-blue-300 dark:hover:border-blue-700 shadow-[var(--shadow-card)] duration-300 hover:shadow-[var(--shadow-md)]"
             >
               <div className="flex items-center justify-between gap-2">

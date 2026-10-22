@@ -209,6 +209,7 @@ async function DashboardContent({ month }: { month: string }) {
             </div>
             <Link
               href="/admin/finances-professeurs"
+              prefetch={false}
               className="flex shrink-0 items-center gap-1 text-[12px] font-semibold text-[var(--primary)] hover:underline"
             >
               Détail <ArrowRight className="h-3 w-3" />
@@ -292,6 +293,7 @@ async function DashboardContent({ month }: { month: string }) {
           </div>
           <Link
             href={`/admin/benefices?month=${month}`}
+            prefetch={false}
             className="flex items-center gap-1 text-[var(--text-label)] font-medium text-[var(--primary)] hover:underline"
           >
             Voir le détail <ArrowRight className="h-3 w-3" />
@@ -362,6 +364,7 @@ async function DashboardContent({ month }: { month: string }) {
           </div>
           <Link
             href="/admin/utilisateurs"
+            prefetch={false}
             className="flex shrink-0 items-center gap-1 text-[12px] font-semibold text-[var(--primary)] hover:underline"
           >
             Gérer <ArrowRight className="h-3 w-3" />
@@ -410,6 +413,7 @@ async function DashboardContent({ month }: { month: string }) {
             <CardTitle>Détail financier par professeur</CardTitle>
             <Link
               href="/admin/finances-professeurs"
+              prefetch={false}
               className="flex items-center gap-1 text-[var(--text-label)] font-medium text-[var(--primary)] hover:underline"
             >
               Comptes profs <ArrowRight className="h-3 w-3" />

@@ -212,6 +212,7 @@ export default function AdminProfesseurDetailPage() {
           </h2>
           <Link
             href={`/admin/finances-professeurs?teacherId=${p.id}`}
+            prefetch={false}
             className="flex items-center gap-1 text-[12px] font-medium text-blue-700 hover:text-blue-900 dark:text-blue-400"
           >
             Grand livre <ArrowLeft className="h-3 w-3 rotate-180" />
@@ -231,6 +232,7 @@ export default function AdminProfesseurDetailPage() {
                     <div className="flex items-center gap-3">
                       <Link
                         href={`/admin/groupes/${g.id}`}
+                        prefetch={false}
                         className="text-[13px] font-semibold text-neutral-900 hover:underline dark:text-neutral-100"
                       >
                         {g.nom}
@@ -302,6 +304,7 @@ export default function AdminProfesseurDetailPage() {
                               <td className="px-3 py-2 font-medium text-[var(--foreground)]">
                                 <Link
                                   href={`/admin/eleves/${s.eleveId}`}
+                                  prefetch={false}
                                   className="hover:underline"
                                 >
                                   {s.prenom} {s.nom}

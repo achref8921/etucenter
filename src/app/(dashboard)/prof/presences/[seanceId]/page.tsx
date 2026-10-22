@@ -222,6 +222,7 @@ export default function AttendanceRecordingPage() {
                     <td className="px-4 py-2.5 font-medium">
                       <Link
                         href={`/prof/eleves/${presence.eleveId}`}
+                        prefetch={false}
                         className="hover:text-blue-600 hover:underline dark:hover:text-blue-400"
                         title="Ouvrir le profil de l'élève"
                       >
@@ -231,6 +232,7 @@ export default function AttendanceRecordingPage() {
                     <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">
                       <Link
                         href={`/prof/eleves/${presence.eleveId}`}
+                        prefetch={false}
                         className="hover:text-blue-600 hover:underline dark:hover:text-blue-400"
                         title="Ouvrir le profil de l'élève"
                       >
@@ -278,6 +280,7 @@ export default function AttendanceRecordingPage() {
 <p className="truncate text-[13px] font-bold text-[var(--foreground)]">
                           <Link
                             href={`/prof/eleves/${presence.eleveId}`}
+                        prefetch={false}
                             className="block hover:text-blue-600 hover:underline dark:hover:text-blue-400"
                             title="Ouvrir le profil de l'élève"
                           >
