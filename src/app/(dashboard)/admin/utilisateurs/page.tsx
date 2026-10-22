@@ -8,7 +8,18 @@ import PasswordInput from "@/components/password-input";
 import ConfirmDelete from "@/components/confirm-delete";
 import ConfirmGhostDelete, { GhostImpactData } from "@/components/confirm-ghost-delete";
 import UserAvatar from "@/components/user-avatar";
-import { MetricCard } from "@/components/ui";
+import {
+  Badge,
+  Card,
+  EmptyState,
+  MetricCard,
+  PageHeader,
+  Table,
+  THead,
+  TH,
+  TR,
+  TD,
+} from "@/components/ui";
 
 interface Utilisateur {
   id: string;
@@ -437,240 +448,300 @@ export default function UtilisateursPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)]">Gestion des Utilisateurs</h1>
-        <button onClick={() => { setShowModal(true); resetForm(); }} className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700">
-          <Plus className="h-4 w-4" /> Ajouter
-        </button>
+    <div className="space-y-[var(--space-section-y)]">
+      <PageHeader
+        title="Utilisateurs"
+        subtitle="Gérez les comptes, les rôles et les permissions du centre"
+        actions={
+          <button
+            onClick={() => { setShowModal(true); resetForm(); }}
+            className="inline-flex h-9 items-center gap-1.5 rounded-[10px] bg-[var(--primary)] px-3.5 text-[13px] font-semibold text-[var(--primary-foreground)] shadow-xs transition-[filter] hover:brightness-[0.94]"
+          >
+            <Plus className="h-4 w-4" /> Ajouter
+          </button>
+        }
+      />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="animate-fade-in-up" style={{ animationDelay: "0ms" }}>
+          <MetricCard
+            className="h-full"
+            label="Utilisateurs"
+            value={users.length}
+            currency={false}
+            sub={`${roleStats.inactifs} inactif${roleStats.inactifs > 1 ? "s" : ""}`}
+            icon={Users}
+            tone="primary"
+          />
+        </div>
+        <div className="animate-fade-in-up" style={{ animationDelay: "80ms" }}>
+          <MetricCard
+            className="h-full"
+            label="Élèves"
+            value={roleStats.eleves}
+            currency={false}
+            sub="inscrits au centre"
+            icon={GraduationCap}
+            tone="success"
+          />
+        </div>
+        <div className="animate-fade-in-up" style={{ animationDelay: "160ms" }}>
+          <MetricCard
+            className="h-full"
+            label="Professeurs"
+            value={roleStats.profs}
+            currency={false}
+            sub="équipe pédagogique"
+            icon={UserCog}
+            tone="warning"
+          />
+        </div>
+        <div className="animate-fade-in-up" style={{ animationDelay: "240ms" }}>
+          <MetricCard
+            className="h-full"
+            label="Administrateurs"
+            value={roleStats.admins}
+            currency={false}
+            sub="gestion du centre"
+            icon={ShieldCheck}
+            tone="neutral"
+          />
+        </div>
       </div>
 
-      <div
-        className="grid grid-cols-2 gap-3 xl:grid-cols-4 animate-fade-in-up"
-        style={{ animationDelay: "60ms" }}
-      >
-        <MetricCard
-          label="Utilisateurs"
-          value={users.length}
-          currency={false}
-          sub={`${roleStats.inactifs} inactif${roleStats.inactifs > 1 ? "s" : ""}`}
-          icon={Users}
-          tone="primary"
-        />
-        <MetricCard
-          label="Élèves"
-          value={roleStats.eleves}
-          currency={false}
-          sub="inscrits au centre"
-          icon={GraduationCap}
-          tone="success"
-        />
-        <MetricCard
-          label="Professeurs"
-          value={roleStats.profs}
-          currency={false}
-          sub="équipe pédagogique"
-          icon={UserCog}
-          tone="warning"
-        />
-        <MetricCard
-          label="Administrateurs"
-          value={roleStats.admins}
-          currency={false}
-          sub="gestion du centre"
-          icon={ShieldCheck}
-          tone="neutral"
-        />
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="flex items-center gap-3">
-            <Filter className="h-4 w-4 text-[var(--foreground-faint)]" />
-            <div className="flex gap-2">
-              {["ALL", "ADMIN", "PROF", "ELEVE"].map((r) => (
-                <button key={r} onClick={() => { setRoleFilter(r); setNiveauFilter("ALL"); setClasseFilter("ALL"); setFiliereFilter("ALL"); setGroupeFilter("ALL"); }} className={`rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors ${roleFilter === r ? "bg-blue-600 text-white" : "bg-neutral-100 dark:bg-[#2a2d35] text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-[#1e2128]"}`}>
-                  {r === "ALL" ? "Tous" : r === "ELEVE" ? "Élèves" : r === "PROF" ? "Prof" : "Admins"}
-                </button>
-              ))}
+      <Card className="p-4">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--foreground-faint)]">
+                <Filter className="h-3.5 w-3.5" /> Rôle
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {["ALL", "ADMIN", "PROF", "ELEVE"].map((r) => (
+                  <button
+                    key={r}
+                    onClick={() => { setRoleFilter(r); setNiveauFilter("ALL"); setClasseFilter("ALL"); setFiliereFilter("ALL"); setGroupeFilter("ALL"); }}
+                    className={`rounded-full px-3 py-1 text-[12px] font-medium transition-colors ${roleFilter === r ? "bg-[var(--primary)] text-[var(--primary-foreground)] shadow-xs" : "bg-[var(--surface-muted)] text-[var(--foreground-subtle)] hover:bg-[var(--border)]"}`}
+                  >
+                    {r === "ALL" ? "Tous" : r === "ELEVE" ? "Élèves" : r === "PROF" ? "Prof" : "Admins"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="relative w-full lg:max-w-sm">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--foreground-faint)]" />
+              <input
+                type="text"
+                placeholder="Rechercher par code, nom, prénom, email..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-9 w-full rounded-[10px] border border-[var(--border)] bg-[var(--surface)] pl-9 pr-3 text-[13px] text-[var(--foreground)] placeholder-neutral-400 focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]/30 dark:placeholder-neutral-500"
+              />
             </div>
           </div>
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--foreground-faint)]" />
-            <input
-              type="text"
-              placeholder="Rechercher par code, nom, prénom, email..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] pl-9 pr-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-neutral-400 dark:placeholder-neutral-500"
-            />
+
+          {roleFilter === "ELEVE" && (
+            <div className="flex flex-wrap items-center gap-2 rounded-[12px] border border-[var(--border)] bg-[var(--surface-muted)]/60 px-3 py-2.5">
+              <span className="text-[12px] font-medium text-[var(--foreground-faint)]">Filtrer par :</span>
+              <select value={niveauFilter} onChange={(e) => { setNiveauFilter(e.target.value); setClasseFilter("ALL"); }} className="h-8 rounded-[8px] border border-[var(--border)] bg-[var(--surface)] px-2 text-[12px] text-[var(--foreground)] focus:border-[var(--primary)] focus:outline-none">
+                <option value="ALL">Niveau</option>
+                <option value="primaire">Primaire</option>
+                <option value="college">Collège</option>
+                <option value="lycee">Lycée</option>
+              </select>
+              {niveauFilter !== "ALL" && (
+                <select value={classeFilter} onChange={(e) => setClasseFilter(e.target.value)} className="h-8 rounded-[8px] border border-[var(--border)] bg-[var(--surface)] px-2 text-[12px] text-[var(--foreground)] focus:border-[var(--primary)] focus:outline-none">
+                  <option value="ALL">Classe</option>
+                  {availableClasses.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              )}
+              <select value={filiereFilter} onChange={(e) => setFiliereFilter(e.target.value)} className="h-8 rounded-[8px] border border-[var(--border)] bg-[var(--surface)] px-2 text-[12px] text-[var(--foreground)] focus:border-[var(--primary)] focus:outline-none">
+                <option value="ALL">Filière</option>
+                <option value="lettres">Lettres</option>
+                <option value="economique">Économique</option>
+                <option value="informatique">Informatique</option>
+                <option value="technique">Technique</option>
+                <option value="sciences">Sciences</option>
+                <option value="math">Mathématiques</option>
+              </select>
+              <select value={groupeFilter} onChange={(e) => setGroupeFilter(e.target.value)} className="h-8 max-w-[240px] rounded-[8px] border border-[var(--border)] bg-[var(--surface)] px-2 text-[12px] text-[var(--foreground)] focus:border-[var(--primary)] focus:outline-none">
+                <option value="ALL">Groupe</option>
+                {groupes.map((g) => (
+                  <option key={g.id} value={g.id}>{g.nom}{g.matiere ? ` — ${g.matiere.nom}` : ""}{g.prof ? ` · ${g.prof.prenom} ${g.prof.nom}` : ""}</option>
+                ))}
+              </select>
+              {groupeFilter !== "ALL" && (() => {
+                const g = groupes.find((x) => x.id === groupeFilter);
+                return g ? (
+                  <Badge variant="primary">
+                    {g.eleveIds.length} élève{g.eleveIds.length > 1 ? "s" : ""}
+                    {g.prof ? ` · Prof : ${g.prof.prenom} ${g.prof.nom}` : ""}
+                  </Badge>
+                ) : null;
+              })()}
+              {(niveauFilter !== "ALL" || classeFilter !== "ALL" || filiereFilter !== "ALL" || groupeFilter !== "ALL") && (
+                <button onClick={() => { setNiveauFilter("ALL"); setClasseFilter("ALL"); setFiliereFilter("ALL"); setGroupeFilter("ALL"); }} className="text-[12px] font-semibold text-[var(--primary)] hover:underline">Réinitialiser</button>
+              )}
+              <button onClick={handleDownloadExcel} className="ml-auto flex items-center gap-1.5 rounded-[8px] border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1.5 text-[12px] font-semibold text-[var(--foreground-subtle)] transition-colors hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)]">
+                <Download className="h-3.5 w-3.5" /> Télécharger Excel ({filteredUsers.filter((u) => u.role === "eleve" || u.role === "ELEVE").length})
+              </button>
+            </div>
+          )}
+        </div>
+      </Card>
+
+      {error && (
+        <div className="rounded-[12px] border border-red-200 bg-red-50 p-4 text-[13px] text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400">
+          {error}
+        </div>
+      )}
+
+      <Card>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] px-5 py-4">
+          <div className="flex items-center gap-2">
+            <h2 className="text-[15px] font-semibold tracking-tight text-[var(--foreground)]">
+              Liste des utilisateurs
+            </h2>
+            <Badge variant="primary">{filteredUsers.length}</Badge>
           </div>
+          <p className="text-[12px] text-[var(--foreground-faint)]">
+            Cliquez sur une ligne pour ouvrir la fiche
+          </p>
         </div>
 
-        {roleFilter === "ELEVE" && (
-          <div className="flex flex-wrap items-center gap-2 rounded-lg border border-[var(--border)] bg-neutral-50 dark:bg-[#1e2128] px-3 py-2">
-            <span className="text-[12px] text-[var(--foreground-faint)]">Filtrer par :</span>
-            <select value={niveauFilter} onChange={(e) => { setNiveauFilter(e.target.value); setClasseFilter("ALL"); }} className="rounded-md border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-2 py-1 focus:border-blue-500 focus:outline-none">
-              <option value="ALL">Niveau</option>
-              <option value="primaire">Primaire</option>
-              <option value="college">Collège</option>
-              <option value="lycee">Lycée</option>
-            </select>
-            {niveauFilter !== "ALL" && (
-              <select value={classeFilter} onChange={(e) => setClasseFilter(e.target.value)} className="rounded-md border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-2 py-1 focus:border-blue-500 focus:outline-none">
-                <option value="ALL">Classe</option>
-                {availableClasses.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
-            )}
-            <select value={filiereFilter} onChange={(e) => setFiliereFilter(e.target.value)} className="rounded-md border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-2 py-1 focus:border-blue-500 focus:outline-none">
-              <option value="ALL">Filière</option>
-              <option value="lettres">Lettres</option>
-              <option value="economique">Économique</option>
-              <option value="informatique">Informatique</option>
-              <option value="technique">Technique</option>
-              <option value="sciences">Sciences</option>
-              <option value="math">Mathématiques</option>
-            </select>
-            <select value={groupeFilter} onChange={(e) => setGroupeFilter(e.target.value)} className="rounded-md border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-2 py-1 focus:border-blue-500 focus:outline-none">
-              <option value="ALL">Groupe</option>
-              {groupes.map((g) => (
-                <option key={g.id} value={g.id}>{g.nom}{g.matiere ? ` — ${g.matiere.nom}` : ""}{g.prof ? ` · ${g.prof.prenom} ${g.prof.nom}` : ""}</option>
-              ))}
-            </select>
-            {groupeFilter !== "ALL" && (() => {
-              const g = groupes.find((x) => x.id === groupeFilter);
-              return g ? (
-                <span className="rounded-full bg-blue-100 dark:bg-blue-900/20 px-2 py-1 text-[12px] font-medium text-blue-800 dark:text-blue-300">
-                  {g.eleveIds.length} élève{g.eleveIds.length > 1 ? "s" : ""}
-                  {g.prof ? ` · Prof : ${g.prof.prenom} ${g.prof.nom}` : ""}
-                </span>
-              ) : null;
-            })()}
-            {(niveauFilter !== "ALL" || classeFilter !== "ALL" || filiereFilter !== "ALL" || groupeFilter !== "ALL") && (
-              <>
-                <button onClick={() => { setNiveauFilter("ALL"); setClasseFilter("ALL"); setFiliereFilter("ALL"); setGroupeFilter("ALL"); }} className="text-[13px] text-blue-600 dark:text-blue-400 hover:underline">Réinitialiser</button>
-                <button onClick={handleDownloadExcel} className="flex items-center gap-1 rounded-md border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-[13px] font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128] ml-auto">
-                  <Download className="h-3 w-3" /> Télécharger Excel ({filteredUsers.filter((u) => u.role === "eleve" || u.role === "ELEVE").length})
-                </button>
-              </>
-            )}
-            {!(niveauFilter !== "ALL" || classeFilter !== "ALL" || filiereFilter !== "ALL" || groupeFilter !== "ALL") && (
-              <button onClick={handleDownloadExcel} className="flex items-center gap-1 rounded-md border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-[13px] font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128] ml-auto">
-                <Download className="h-3 w-3" /> Télécharger tous ({filteredUsers.filter((u) => u.role === "eleve" || u.role === "ELEVE").length})
-              </button>
-            )}
+        {loading ? (
+          <div className="flex items-center justify-center py-14">
+            <Loader2 className="h-8 w-8 animate-spin text-[var(--primary)]" />
           </div>
-        )}
-      </div>
-
-      {error && <div className="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">{error}</div>}
-
-      {loading ? (
-        <div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-blue-600" /></div>
-      ) : (
-        <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+        ) : filteredUsers.length === 0 ? (
+          <div className="p-5">
+            <EmptyState
+              icon={Users}
+              title="Aucun utilisateur trouvé"
+              description="Modifiez les filtres ou la recherche pour afficher des comptes."
+            />
+          </div>
+        ) : (
           <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-[var(--border)]">
-              <tr>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Code</th>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Nom</th>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Email</th>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Rôle</th>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Classe</th>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">État</th>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Gestion élèves</th>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Encaisser</th>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--border)]">
-              {filteredUsers.length === 0 ? (
-                <tr><td colSpan={9} className="px-4 py-2.5 text-center text-[var(--foreground-faint)]">Aucun utilisateur trouvé</td></tr>
-              ) : (
-                filteredUsers.map((user) => (
-                  <tr key={user.id} className="cursor-pointer hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]" onClick={() => router.push(roleNav(user))}>
-                    <td className="px-4 py-2.5">
+            <Table>
+              <THead>
+                <TR className="hover:bg-transparent">
+                  <TH>Code</TH>
+                  <TH>Utilisateur</TH>
+                  <TH>Rôle</TH>
+                  <TH>Classe</TH>
+                  <TH>État</TH>
+                  <TH>Gestion élèves</TH>
+                  <TH>Encaisser</TH>
+                  <TH className="text-right">Actions</TH>
+                </TR>
+              </THead>
+              <tbody className="divide-y divide-[var(--border)]">
+                {filteredUsers.map((user) => (
+                  <TR
+                    key={user.id}
+                    className="cursor-pointer"
+                    onClick={() => {
+                      const href = roleNav(user);
+                      if (href !== "#") router.push(href);
+                    }}
+                  >
+                    <TD>
                       {user.role === "eleve" || user.role === "ELEVE" ? (
-                        <span className="inline-block rounded bg-blue-100 dark:bg-blue-900/20 px-2 py-0.5 font-mono text-xs font-bold text-blue-700 dark:text-blue-400">{user.codeEleve || "—"}</span>
+                        <Badge variant="primary" className="font-mono">{user.codeEleve || "—"}</Badge>
                       ) : user.role === "prof" || user.role === "PROF" ? (
-                        <span className="inline-block rounded bg-emerald-100 dark:bg-emerald-900/20 px-2 py-0.5 font-mono text-xs font-bold text-emerald-700 dark:text-emerald-400">{user.codeProf || "—"}</span>
-                      ) : "—"}
-                    </td>
-                    <td className="px-4 py-2.5 font-medium">
-                      <span className="flex items-center gap-2.5">
+                        <Badge variant="success" className="font-mono">{user.codeProf || "—"}</Badge>
+                      ) : (
+                        <span className="text-[var(--foreground-faint)]">—</span>
+                      )}
+                    </TD>
+                    <TD>
+                      <div className="flex items-center gap-3">
                         <UserAvatar userId={user.id} nom={user.nom} prenom={user.prenom} hasImage={user.hasImage} size="xs" />
-                        <span className="truncate">{user.prenom} {user.nom}</span>
-                      </span>
-                    </td>
-                    <td className="px-4 py-2.5 text-[13px] text-[var(--foreground)]">{user.email}</td>
-                    <td className="px-4 py-2.5">
-                      <span className="inline-block rounded-full px-2 py-0.5 text-[11px] font-medium bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300">{roleLabel(user.role)}</span>
-                    </td>
-                    <td className="px-4 py-2.5 text-[12px] text-[var(--foreground-faint)]">
+                        <div className="min-w-0">
+                          <p className="truncate text-[13px] font-medium text-[var(--foreground)]">
+                            {user.prenom} {user.nom}
+                          </p>
+                          <p className="truncate text-[11px] text-[var(--foreground-faint)]">{user.email}</p>
+                        </div>
+                      </div>
+                    </TD>
+                    <TD>
+                      <Badge
+                        variant={
+                          user.role === "admin" || user.role === "ADMIN"
+                            ? "primary"
+                            : user.role === "prof" || user.role === "PROF"
+                              ? "success"
+                              : "info"
+                        }
+                      >
+                        {roleLabel(user.role)}
+                      </Badge>
+                    </TD>
+                    <TD className="text-[12px] text-[var(--foreground-faint)]">
                       {user.role === "eleve" || user.role === "ELEVE" ? (
                         <span>{user.classe || "—"}{user.filiere ? ` (${user.filiere})` : ""}</span>
                       ) : "—"}
-                    </td>
-                    <td className="px-4 py-2.5">
+                    </TD>
+                    <TD>
                       {user.ghost ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-red-100 dark:bg-red-900/30 px-2 py-0.5 text-[11px] font-medium text-red-700 dark:text-red-400" title="Compte supprimé par son titulaire, données conservées pour l'administration">
+                        <Badge variant="error" title="Compte supprimé par son titulaire, données conservées pour l'administration">
                           <Trash2 className="h-3 w-3" />
                           Compte supprimé
-                        </span>
+                        </Badge>
                       ) : (
                         <button onClick={(e) => { e.stopPropagation(); handleToggleActif(user.id, user.actif); }} disabled={togglingId === user.id} className="flex items-center gap-1 disabled:opacity-50" title={user.actif ? "Désactiver" : "Activer"}>
-                          {togglingId === user.id ? <Loader2 className="h-4 w-4 animate-spin text-[var(--foreground-faint)]" /> : user.actif ? <ToggleRight className="h-6 w-6 text-green-500 dark:text-green-400" /> : <ToggleLeft className="h-6 w-6 text-neutral-300 dark:text-[#2a2d35]" />}
-                          <span className={`text-[11px] font-medium ${user.actif ? "text-green-600 dark:text-green-400" : "text-neutral-400 dark:text-neutral-500"}`}>{user.actif ? "Actif" : "Inactif"}</span>
+                          {togglingId === user.id ? <Loader2 className="h-4 w-4 animate-spin text-[var(--foreground-faint)]" /> : user.actif ? <ToggleRight className="h-6 w-6 text-emerald-500 dark:text-emerald-400" /> : <ToggleLeft className="h-6 w-6 text-[var(--foreground-faint)]" />}
+                          <span className={`text-[11px] font-medium ${user.actif ? "text-emerald-600 dark:text-emerald-400" : "text-[var(--foreground-faint)]"}`}>{user.actif ? "Actif" : "Inactif"}</span>
                         </button>
                       )}
-                    </td>
-                    <td className="px-4 py-2.5">
+                    </TD>
+                    <TD>
                       {user.role === "prof" || user.role === "PROF" ? (
                         <button onClick={(e) => { e.stopPropagation(); handleToggleGestionEleves(user.id, user.peutGererEleves); }} disabled={gestionTogglingId === user.id} className="flex items-center gap-1 disabled:opacity-50" title={user.peutGererEleves ? "Retirer la permission de gérer des élèves" : "Autoriser la gestion des élèves"}>
-                          {gestionTogglingId === user.id ? <Loader2 className="h-4 w-4 animate-spin text-[var(--foreground-faint)]" /> : user.peutGererEleves ? <ToggleRight className="h-6 w-6 text-blue-600 dark:text-blue-400" /> : <ToggleLeft className="h-6 w-6 text-neutral-300 dark:text-[#2a2d35]" />}
-                          <span className={`text-[11px] font-medium ${user.peutGererEleves ? "text-blue-700 dark:text-blue-400" : "text-neutral-400 dark:text-neutral-500"}`}>{user.peutGererEleves ? "Oui" : "Non"}</span>
+                          {gestionTogglingId === user.id ? <Loader2 className="h-4 w-4 animate-spin text-[var(--foreground-faint)]" /> : user.peutGererEleves ? <ToggleRight className="h-6 w-6 text-blue-600 dark:text-blue-400" /> : <ToggleLeft className="h-6 w-6 text-[var(--foreground-faint)]" />}
+                          <span className={`text-[11px] font-medium ${user.peutGererEleves ? "text-blue-700 dark:text-blue-400" : "text-[var(--foreground-faint)]"}`}>{user.peutGererEleves ? "Oui" : "Non"}</span>
                         </button>
                       ) : (
-                        <span className="text-[11px] text-neutral-300 dark:text-neutral-600">—</span>
+                        <span className="text-[11px] text-[var(--foreground-faint)]">—</span>
                       )}
-                    </td>
-                    <td className="px-4 py-2.5">
+                    </TD>
+                    <TD>
                       {user.role === "prof" || user.role === "PROF" ? (
                         <button onClick={(e) => { e.stopPropagation(); handleToggleEncaisserReverse(user.id, user.peutEncaisserReverse); }} disabled={reverseTogglingId === user.id} className="flex items-center gap-1 disabled:opacity-50" title={user.peutEncaisserReverse ? "Désactiver la collecte inverse" : "Autoriser la collecte inverse"}>
-                          {reverseTogglingId === user.id ? <Loader2 className="h-4 w-4 animate-spin text-[var(--foreground-faint)]" /> : user.peutEncaisserReverse ? <ToggleRight className="h-6 w-6 text-emerald-500 dark:text-emerald-400" /> : <ToggleLeft className="h-6 w-6 text-neutral-300 dark:text-[#2a2d35]" />}
-                          <span className={`text-[11px] font-medium ${user.peutEncaisserReverse ? "text-emerald-600 dark:text-emerald-400" : "text-neutral-400 dark:text-neutral-500"}`}>{user.peutEncaisserReverse ? "Oui" : "Non"}</span>
+                          {reverseTogglingId === user.id ? <Loader2 className="h-4 w-4 animate-spin text-[var(--foreground-faint)]" /> : user.peutEncaisserReverse ? <ToggleRight className="h-6 w-6 text-emerald-500 dark:text-emerald-400" /> : <ToggleLeft className="h-6 w-6 text-[var(--foreground-faint)]" />}
+                          <span className={`text-[11px] font-medium ${user.peutEncaisserReverse ? "text-emerald-600 dark:text-emerald-400" : "text-[var(--foreground-faint)]"}`}>{user.peutEncaisserReverse ? "Oui" : "Non"}</span>
                         </button>
                       ) : (
-                        <span className="text-[11px] text-neutral-300 dark:text-neutral-600">—</span>
+                        <span className="text-[11px] text-[var(--foreground-faint)]">—</span>
                       )}
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <div className="flex items-center gap-1">
+                    </TD>
+                    <TD>
+                      <div className="flex items-center justify-end gap-1">
                         {!user.ghost && isSuperAdmin && (
-                          <button onClick={(e) => { e.stopPropagation(); setResetPwd({ id: user.id, name: `${user.prenom} ${user.nom}` }); setNewPassword(""); setResetError(null); }} className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300" title="Réinitialiser le mot de passe">
+                          <button onClick={(e) => { e.stopPropagation(); setResetPwd({ id: user.id, name: `${user.prenom} ${user.nom}` }); setNewPassword(""); setResetError(null); }} className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] text-[var(--primary)] transition-colors hover:bg-[var(--primary)]/10" title="Réinitialiser le mot de passe" aria-label="Réinitialiser le mot de passe">
                             <KeyRound className="h-4 w-4" />
                           </button>
                         )}
                         {user.ghost ? (
-                          <button onClick={(e) => { e.stopPropagation(); handleGhostDeleteOpen(user); }} className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300" title="Effacer définitivement le compte et toutes ses données">
+                          <button onClick={(e) => { e.stopPropagation(); handleGhostDeleteOpen(user); }} className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10" title="Effacer définitivement le compte et toutes ses données" aria-label="Effacer définitivement le compte">
                             <Trash2 className="h-4 w-4" />
                           </button>
                         ) : (
-                          <button onClick={(e) => { e.stopPropagation(); setConfirmDelete({ id: user.id }); }} disabled={deletingId === user.id} className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 disabled:opacity-50">
+                          <button onClick={(e) => { e.stopPropagation(); setConfirmDelete({ id: user.id }); }} disabled={deletingId === user.id} className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-500/10" aria-label="Supprimer l'utilisateur">
                             {deletingId === user.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                           </button>
                         )}
                       </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                    </TD>
+                  </TR>
+                ))}
+              </tbody>
+            </Table>
           </div>
-        </div>
-      )}
+        )}
+      </Card>
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
