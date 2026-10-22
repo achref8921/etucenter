@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { formatDate, formatTime, formatDateTime } from "@/lib/utils";
 import SeanceDocumentsModal from "@/components/seance-documents-modal";
+import { MetricCard } from "@/components/ui";
 
 interface PresenceHistorique {
   id: string;
@@ -90,7 +91,7 @@ export default function ElevePresencesPage() {
         <ClipboardCheck className="h-6 w-6 text-blue-600" />
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Mes Présences</h1>
       </div>
-      <p className="-mt-3 text-[13px] text-neutral-500 dark:text-neutral-400">
+      <p className="-mt-3 text-[13px] text-[var(--foreground-faint)]">
         Cliquez sur une ligne pour plus de détails.
       </p>
 
@@ -101,48 +102,55 @@ export default function ElevePresencesPage() {
       )}
 
       {presences.length > 0 && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
-            <p className="text-[13px] font-medium text-neutral-600 dark:text-neutral-400">Total enregistré</p>
-            <p className="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">{presences.length}</p>
-          </div>
-          <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
-            <p className="text-[13px] font-medium text-neutral-600 dark:text-neutral-400">Présences</p>
-            <p className="mt-1 flex items-center gap-2 text-2xl font-semibold text-emerald-600 dark:text-emerald-400">
-              <CheckCircle2 className="h-6 w-6" /> {totalPresent}
-            </p>
-          </div>
-          <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
-            <p className="text-[13px] font-medium text-neutral-600 dark:text-neutral-400">Taux de présence</p>
-            <p className="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">{taux}%</p>
-            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
-              <div
-                className={`h-full rounded-full ${
-                  taux >= 80 ? "bg-emerald-500" : taux >= 60 ? "bg-amber-500" : "bg-red-500"
-                }`}
-                style={{ width: `${taux}%` }}
-              />
-            </div>
-          </div>
+        <div
+          className="grid grid-cols-1 gap-4 sm:grid-cols-3 animate-fade-in-up"
+          style={{ animationDelay: "60ms" }}
+        >
+          <MetricCard
+            label="Total enregistré"
+            value={presences.length}
+            currency={false}
+            sub="séances suivies"
+            icon={ClipboardCheck}
+            tone="primary"
+          />
+          <MetricCard
+            label="Présences"
+            value={totalPresent}
+            currency={false}
+            sub={`${presences.length - totalPresent} absence(s)`}
+            icon={CheckCircle2}
+            tone="success"
+          />
+          <MetricCard
+            label="Taux de présence"
+            value={taux}
+            currency={false}
+            suffix="%"
+            sub={taux >= 80 ? "excellent" : taux >= 60 ? "à améliorer" : "faible"}
+            icon={Clock}
+            tone={taux >= 80 ? "success" : taux >= 60 ? "warning" : "error"}
+            ring={taux}
+          />
         </div>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+      <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
+            <thead className="border-b border-[var(--border)]">
               <tr>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Date</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Séance</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Statut</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Date</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Groupe</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Séance</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Statut</th>
                 <th className="px-4 py-2.5" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+            <tbody className="divide-y divide-[var(--border)]">
               {presences.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-[13px] text-neutral-500 dark:text-neutral-400">
+                  <td colSpan={5} className="px-4 py-8 text-center text-[13px] text-[var(--foreground-faint)]">
                     Aucun historique de présence
                   </td>
                 </tr>
@@ -153,11 +161,11 @@ export default function ElevePresencesPage() {
                     onClick={() => setSelected(presence)}
                     className="cursor-pointer transition-colors hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]"
                   >
-                    <td className="px-4 py-2.5 text-[13px] text-neutral-600 dark:text-neutral-400">{formatDate(presence.seance.date)}</td>
+                    <td className="px-4 py-2.5 text-[13px] text-[var(--foreground-subtle)]">{formatDate(presence.seance.date)}</td>
                     <td className="px-4 py-2.5 text-[13px] font-medium text-blue-600 dark:text-blue-400 hover:underline">
                       {presence.seance.groupe.nom}
                     </td>
-                    <td className="px-4 py-2.5 text-[13px] text-neutral-600 dark:text-neutral-400">
+                    <td className="px-4 py-2.5 text-[13px] text-[var(--foreground-subtle)]">
                       {presence.seance.heureDebut && presence.seance.heureFin
                         ? `${formatTime(presence.seance.heureDebut)} - ${formatTime(presence.seance.heureFin)}`
                         : "—"}
@@ -195,7 +203,7 @@ export default function ElevePresencesPage() {
                         >
                           <Paperclip className="h-4 w-4" />
                         </button>
-                        <ChevronDown className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
+                        <ChevronDown className="h-4 w-4 text-[var(--foreground-faint)]" />
                       </div>
                     </td>
                   </tr>
@@ -209,7 +217,7 @@ export default function ElevePresencesPage() {
       {selected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setSelected(null)}>
           <div
-            className="w-full max-w-md overflow-hidden rounded-xl bg-white dark:bg-[#181b22]"
+            className="w-full max-w-md overflow-hidden rounded-xl bg-[var(--surface)]"
             onClick={(e) => e.stopPropagation()}
           >
             <div
@@ -237,13 +245,13 @@ export default function ElevePresencesPage() {
 
             <div className="space-y-3 p-6 text-[13px]">
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-neutral-500 dark:text-neutral-400">
+                <span className="flex items-center gap-2 text-[var(--foreground-faint)]">
                   <Calendar className="h-4 w-4" /> Date
                 </span>
                 <span className="font-medium text-gray-900 dark:text-gray-100">{formatDate(selected.seance.date)}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-neutral-500 dark:text-neutral-400">
+                <span className="flex items-center gap-2 text-[var(--foreground-faint)]">
                   <Clock className="h-4 w-4" /> Horaire
                 </span>
                 <span className="font-medium text-gray-900 dark:text-gray-100">
@@ -253,13 +261,13 @@ export default function ElevePresencesPage() {
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-neutral-500 dark:text-neutral-400">
+                <span className="flex items-center gap-2 text-[var(--foreground-faint)]">
                   <Users className="h-4 w-4" /> Groupe
                 </span>
                 <span className="font-medium text-gray-900 dark:text-gray-100">{selected.seance.groupe.nom}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-neutral-500 dark:text-neutral-400">
+                <span className="flex items-center gap-2 text-[var(--foreground-faint)]">
                   <ClipboardCheck className="h-4 w-4" /> État de la séance
                 </span>
                 <span
@@ -271,7 +279,7 @@ export default function ElevePresencesPage() {
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-neutral-500 dark:text-neutral-400">
+                <span className="flex items-center gap-2 text-[var(--foreground-faint)]">
                   <Clock className="h-4 w-4" /> Enregistrée le
                 </span>
                 <span className="font-medium text-gray-900 dark:text-gray-100">{formatDateTime(selected.dateCreation)}</span>
@@ -290,7 +298,7 @@ export default function ElevePresencesPage() {
               </button>
               <button
                 onClick={() => setSelected(null)}
-                className="mt-2 w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2.5 text-[13px] font-medium text-neutral-700 hover:bg-neutral-50 dark:text-neutral-300 dark:hover:bg-[#1e2128]"
+                className="mt-2 w-full rounded-lg border border-[var(--border)] px-4 py-2.5 text-[13px] font-medium text-neutral-700 hover:bg-neutral-50 dark:text-neutral-300 dark:hover:bg-[#1e2128]"
               >
                 Fermer
               </button>

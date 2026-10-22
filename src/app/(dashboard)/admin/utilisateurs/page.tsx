@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Plus, Trash2, X, Loader2, Filter, ToggleLeft, ToggleRight, Search, Download, KeyRound, UserCog } from "lucide-react";
+import { Plus, Trash2, X, Loader2, Filter, ToggleLeft, ToggleRight, Search, Download, KeyRound, UserCog, Users, GraduationCap, ShieldCheck } from "lucide-react";
 import PasswordInput from "@/components/password-input";
 import ConfirmDelete from "@/components/confirm-delete";
 import ConfirmGhostDelete, { GhostImpactData } from "@/components/confirm-ghost-delete";
 import UserAvatar from "@/components/user-avatar";
+import { MetricCard } from "@/components/ui";
 
 interface Utilisateur {
   id: string;
@@ -387,6 +388,13 @@ export default function UtilisateursPage() {
     URL.revokeObjectURL(url);
   };
 
+  const roleStats = {
+    eleves: users.filter((u) => u.role === "eleve" || u.role === "ELEVE").length,
+    profs: users.filter((u) => u.role === "prof" || u.role === "PROF").length,
+    admins: users.filter((u) => u.role === "admin" || u.role === "ADMIN").length,
+    inactifs: users.filter((u) => !u.actif && !u.ghost).length,
+  };
+
   const filteredUsers = users.filter((u) => {
     const matchesRole = roleFilter === "ALL" || u.role.toUpperCase() === roleFilter;
     if (!matchesRole) return false;
@@ -431,16 +439,54 @@ export default function UtilisateursPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Gestion des Utilisateurs</h1>
+        <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)]">Gestion des Utilisateurs</h1>
         <button onClick={() => { setShowModal(true); resetForm(); }} className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700">
           <Plus className="h-4 w-4" /> Ajouter
         </button>
       </div>
 
+      <div
+        className="grid grid-cols-2 gap-3 xl:grid-cols-4 animate-fade-in-up"
+        style={{ animationDelay: "60ms" }}
+      >
+        <MetricCard
+          label="Utilisateurs"
+          value={users.length}
+          currency={false}
+          sub={`${roleStats.inactifs} inactif${roleStats.inactifs > 1 ? "s" : ""}`}
+          icon={Users}
+          tone="primary"
+        />
+        <MetricCard
+          label="Élèves"
+          value={roleStats.eleves}
+          currency={false}
+          sub="inscrits au centre"
+          icon={GraduationCap}
+          tone="success"
+        />
+        <MetricCard
+          label="Professeurs"
+          value={roleStats.profs}
+          currency={false}
+          sub="équipe pédagogique"
+          icon={UserCog}
+          tone="warning"
+        />
+        <MetricCard
+          label="Administrateurs"
+          value={roleStats.admins}
+          currency={false}
+          sub="gestion du centre"
+          icon={ShieldCheck}
+          tone="neutral"
+        />
+      </div>
+
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="flex items-center gap-3">
-            <Filter className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
+            <Filter className="h-4 w-4 text-[var(--foreground-faint)]" />
             <div className="flex gap-2">
               {["ALL", "ADMIN", "PROF", "ELEVE"].map((r) => (
                 <button key={r} onClick={() => { setRoleFilter(r); setNiveauFilter("ALL"); setClasseFilter("ALL"); setFiliereFilter("ALL"); setGroupeFilter("ALL"); }} className={`rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors ${roleFilter === r ? "bg-blue-600 text-white" : "bg-neutral-100 dark:bg-[#2a2d35] text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-[#1e2128]"}`}>
@@ -450,33 +496,33 @@ export default function UtilisateursPage() {
             </div>
           </div>
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--foreground-faint)]" />
             <input
               type="text"
               placeholder="Rechercher par code, nom, prénom, email..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 pl-9 pr-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-neutral-400 dark:placeholder-neutral-500"
+              className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] pl-9 pr-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-neutral-400 dark:placeholder-neutral-500"
             />
           </div>
         </div>
 
         {roleFilter === "ELEVE" && (
-          <div className="flex flex-wrap items-center gap-2 rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-3 py-2">
-            <span className="text-[12px] text-neutral-400 dark:text-neutral-500">Filtrer par :</span>
-            <select value={niveauFilter} onChange={(e) => { setNiveauFilter(e.target.value); setClasseFilter("ALL"); }} className="rounded-md border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-2 py-1 focus:border-blue-500 focus:outline-none">
+          <div className="flex flex-wrap items-center gap-2 rounded-lg border border-[var(--border)] bg-neutral-50 dark:bg-[#1e2128] px-3 py-2">
+            <span className="text-[12px] text-[var(--foreground-faint)]">Filtrer par :</span>
+            <select value={niveauFilter} onChange={(e) => { setNiveauFilter(e.target.value); setClasseFilter("ALL"); }} className="rounded-md border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-2 py-1 focus:border-blue-500 focus:outline-none">
               <option value="ALL">Niveau</option>
               <option value="primaire">Primaire</option>
               <option value="college">Collège</option>
               <option value="lycee">Lycée</option>
             </select>
             {niveauFilter !== "ALL" && (
-              <select value={classeFilter} onChange={(e) => setClasseFilter(e.target.value)} className="rounded-md border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-2 py-1 focus:border-blue-500 focus:outline-none">
+              <select value={classeFilter} onChange={(e) => setClasseFilter(e.target.value)} className="rounded-md border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-2 py-1 focus:border-blue-500 focus:outline-none">
                 <option value="ALL">Classe</option>
                 {availableClasses.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             )}
-            <select value={filiereFilter} onChange={(e) => setFiliereFilter(e.target.value)} className="rounded-md border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-2 py-1 focus:border-blue-500 focus:outline-none">
+            <select value={filiereFilter} onChange={(e) => setFiliereFilter(e.target.value)} className="rounded-md border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-2 py-1 focus:border-blue-500 focus:outline-none">
               <option value="ALL">Filière</option>
               <option value="lettres">Lettres</option>
               <option value="economique">Économique</option>
@@ -485,7 +531,7 @@ export default function UtilisateursPage() {
               <option value="sciences">Sciences</option>
               <option value="math">Mathématiques</option>
             </select>
-            <select value={groupeFilter} onChange={(e) => setGroupeFilter(e.target.value)} className="rounded-md border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-2 py-1 focus:border-blue-500 focus:outline-none">
+            <select value={groupeFilter} onChange={(e) => setGroupeFilter(e.target.value)} className="rounded-md border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-2 py-1 focus:border-blue-500 focus:outline-none">
               <option value="ALL">Groupe</option>
               {groupes.map((g) => (
                 <option key={g.id} value={g.id}>{g.nom}{g.matiere ? ` — ${g.matiere.nom}` : ""}{g.prof ? ` · ${g.prof.prenom} ${g.prof.nom}` : ""}</option>
@@ -503,13 +549,13 @@ export default function UtilisateursPage() {
             {(niveauFilter !== "ALL" || classeFilter !== "ALL" || filiereFilter !== "ALL" || groupeFilter !== "ALL") && (
               <>
                 <button onClick={() => { setNiveauFilter("ALL"); setClasseFilter("ALL"); setFiliereFilter("ALL"); setGroupeFilter("ALL"); }} className="text-[13px] text-blue-600 dark:text-blue-400 hover:underline">Réinitialiser</button>
-                <button onClick={handleDownloadExcel} className="flex items-center gap-1 rounded-md border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-2 py-1 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128] ml-auto">
+                <button onClick={handleDownloadExcel} className="flex items-center gap-1 rounded-md border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-[13px] font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128] ml-auto">
                   <Download className="h-3 w-3" /> Télécharger Excel ({filteredUsers.filter((u) => u.role === "eleve" || u.role === "ELEVE").length})
                 </button>
               </>
             )}
             {!(niveauFilter !== "ALL" || classeFilter !== "ALL" || filiereFilter !== "ALL" || groupeFilter !== "ALL") && (
-              <button onClick={handleDownloadExcel} className="flex items-center gap-1 rounded-md border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-2 py-1 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128] ml-auto">
+              <button onClick={handleDownloadExcel} className="flex items-center gap-1 rounded-md border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-[13px] font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128] ml-auto">
                 <Download className="h-3 w-3" /> Télécharger tous ({filteredUsers.filter((u) => u.role === "eleve" || u.role === "ELEVE").length})
               </button>
             )}
@@ -522,25 +568,25 @@ export default function UtilisateursPage() {
       {loading ? (
         <div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-blue-600" /></div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+        <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
           <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
+            <thead className="border-b border-[var(--border)]">
               <tr>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Code</th>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Nom</th>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Email</th>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Rôle</th>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Classe</th>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">État</th>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Gestion élèves</th>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Encaisser</th>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Actions</th>
+                <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Code</th>
+                <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Nom</th>
+                <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Email</th>
+                <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Rôle</th>
+                <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Classe</th>
+                <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">État</th>
+                <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Gestion élèves</th>
+                <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Encaisser</th>
+                <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+            <tbody className="divide-y divide-[var(--border)]">
               {filteredUsers.length === 0 ? (
-                <tr><td colSpan={9} className="px-4 py-2.5 text-center text-neutral-500 dark:text-neutral-400">Aucun utilisateur trouvé</td></tr>
+                <tr><td colSpan={9} className="px-4 py-2.5 text-center text-[var(--foreground-faint)]">Aucun utilisateur trouvé</td></tr>
               ) : (
                 filteredUsers.map((user) => (
                   <tr key={user.id} className="cursor-pointer hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]" onClick={() => router.push(roleNav(user))}>
@@ -557,11 +603,11 @@ export default function UtilisateursPage() {
                         <span className="truncate">{user.prenom} {user.nom}</span>
                       </span>
                     </td>
-                    <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">{user.email}</td>
+                    <td className="px-4 py-2.5 text-[13px] text-[var(--foreground)]">{user.email}</td>
                     <td className="px-4 py-2.5">
                       <span className="inline-block rounded-full px-2 py-0.5 text-[11px] font-medium bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300">{roleLabel(user.role)}</span>
                     </td>
-                    <td className="px-4 py-2.5 text-[12px] text-neutral-400 dark:text-neutral-500">
+                    <td className="px-4 py-2.5 text-[12px] text-[var(--foreground-faint)]">
                       {user.role === "eleve" || user.role === "ELEVE" ? (
                         <span>{user.classe || "—"}{user.filiere ? ` (${user.filiere})` : ""}</span>
                       ) : "—"}
@@ -574,7 +620,7 @@ export default function UtilisateursPage() {
                         </span>
                       ) : (
                         <button onClick={(e) => { e.stopPropagation(); handleToggleActif(user.id, user.actif); }} disabled={togglingId === user.id} className="flex items-center gap-1 disabled:opacity-50" title={user.actif ? "Désactiver" : "Activer"}>
-                          {togglingId === user.id ? <Loader2 className="h-4 w-4 animate-spin text-neutral-400 dark:text-neutral-500" /> : user.actif ? <ToggleRight className="h-6 w-6 text-green-500 dark:text-green-400" /> : <ToggleLeft className="h-6 w-6 text-neutral-300 dark:text-[#2a2d35]" />}
+                          {togglingId === user.id ? <Loader2 className="h-4 w-4 animate-spin text-[var(--foreground-faint)]" /> : user.actif ? <ToggleRight className="h-6 w-6 text-green-500 dark:text-green-400" /> : <ToggleLeft className="h-6 w-6 text-neutral-300 dark:text-[#2a2d35]" />}
                           <span className={`text-[11px] font-medium ${user.actif ? "text-green-600 dark:text-green-400" : "text-neutral-400 dark:text-neutral-500"}`}>{user.actif ? "Actif" : "Inactif"}</span>
                         </button>
                       )}
@@ -582,7 +628,7 @@ export default function UtilisateursPage() {
                     <td className="px-4 py-2.5">
                       {user.role === "prof" || user.role === "PROF" ? (
                         <button onClick={(e) => { e.stopPropagation(); handleToggleGestionEleves(user.id, user.peutGererEleves); }} disabled={gestionTogglingId === user.id} className="flex items-center gap-1 disabled:opacity-50" title={user.peutGererEleves ? "Retirer la permission de gérer des élèves" : "Autoriser la gestion des élèves"}>
-                          {gestionTogglingId === user.id ? <Loader2 className="h-4 w-4 animate-spin text-neutral-400 dark:text-neutral-500" /> : user.peutGererEleves ? <ToggleRight className="h-6 w-6 text-blue-600 dark:text-blue-400" /> : <ToggleLeft className="h-6 w-6 text-neutral-300 dark:text-[#2a2d35]" />}
+                          {gestionTogglingId === user.id ? <Loader2 className="h-4 w-4 animate-spin text-[var(--foreground-faint)]" /> : user.peutGererEleves ? <ToggleRight className="h-6 w-6 text-blue-600 dark:text-blue-400" /> : <ToggleLeft className="h-6 w-6 text-neutral-300 dark:text-[#2a2d35]" />}
                           <span className={`text-[11px] font-medium ${user.peutGererEleves ? "text-blue-700 dark:text-blue-400" : "text-neutral-400 dark:text-neutral-500"}`}>{user.peutGererEleves ? "Oui" : "Non"}</span>
                         </button>
                       ) : (
@@ -592,7 +638,7 @@ export default function UtilisateursPage() {
                     <td className="px-4 py-2.5">
                       {user.role === "prof" || user.role === "PROF" ? (
                         <button onClick={(e) => { e.stopPropagation(); handleToggleEncaisserReverse(user.id, user.peutEncaisserReverse); }} disabled={reverseTogglingId === user.id} className="flex items-center gap-1 disabled:opacity-50" title={user.peutEncaisserReverse ? "Désactiver la collecte inverse" : "Autoriser la collecte inverse"}>
-                          {reverseTogglingId === user.id ? <Loader2 className="h-4 w-4 animate-spin text-neutral-400 dark:text-neutral-500" /> : user.peutEncaisserReverse ? <ToggleRight className="h-6 w-6 text-emerald-500 dark:text-emerald-400" /> : <ToggleLeft className="h-6 w-6 text-neutral-300 dark:text-[#2a2d35]" />}
+                          {reverseTogglingId === user.id ? <Loader2 className="h-4 w-4 animate-spin text-[var(--foreground-faint)]" /> : user.peutEncaisserReverse ? <ToggleRight className="h-6 w-6 text-emerald-500 dark:text-emerald-400" /> : <ToggleLeft className="h-6 w-6 text-neutral-300 dark:text-[#2a2d35]" />}
                           <span className={`text-[11px] font-medium ${user.peutEncaisserReverse ? "text-emerald-600 dark:text-emerald-400" : "text-neutral-400 dark:text-neutral-500"}`}>{user.peutEncaisserReverse ? "Oui" : "Non"}</span>
                         </button>
                       ) : (
@@ -628,10 +674,10 @@ export default function UtilisateursPage() {
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
-            <div className="flex shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
+          <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+            <div className="flex shrink-0 items-center justify-between border-b border-[var(--border)] px-6 py-4">
               <h2 className="text-lg font-semibold">Ajouter un utilisateur</h2>
-              <button onClick={() => { setShowModal(false); resetForm(); }} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300"><X className="h-5 w-5" /></button>
+              <button onClick={() => { setShowModal(false); resetForm(); }} className="text-[var(--foreground-faint)] hover:text-neutral-600 dark:hover:text-neutral-300"><X className="h-5 w-5" /></button>
             </div>
             <form onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col">
               <div className="flex-1 space-y-3 overflow-y-auto px-6 py-4">
@@ -644,32 +690,32 @@ export default function UtilisateursPage() {
                   </div>
                 )}
                 <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Nom</label>
-                  <input value={formData.nom} onChange={(e) => setFormData({ ...formData, nom: e.target.value })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Nom</label>
+                  <input value={formData.nom} onChange={(e) => setFormData({ ...formData, nom: e.target.value })} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                   {formErrors.nom && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.nom}</p>}
                 </div>
                 <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Prénom</label>
-                  <input value={formData.prenom} onChange={(e) => setFormData({ ...formData, prenom: e.target.value })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Prénom</label>
+                  <input value={formData.prenom} onChange={(e) => setFormData({ ...formData, prenom: e.target.value })} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                   {formErrors.prenom && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.prenom}</p>}
                 </div>
                 <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Email</label>
+                  <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Email</label>
                   <input value={formData.email} onChange={(e) => { setFormData({ ...formData, email: e.target.value }); if (formErrors.email) { const next = { ...formErrors }; delete next.email; setFormErrors(next); } }} type="email" className={`w-full rounded-lg border ${formErrors.email ? "border-red-500" : "border-neutral-200 dark:border-[#2a2d35]"} bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500`} />
                   {formErrors.email && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.email}</p>}
                 </div>
                 <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Mot de passe</label>
-                  <PasswordInput value={formData.motDePasse} onChange={(e) => setFormData({ ...formData, motDePasse: e.target.value })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Mot de passe</label>
+                  <PasswordInput value={formData.motDePasse} onChange={(e) => setFormData({ ...formData, motDePasse: e.target.value })} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                   {formErrors.motDePasse && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.motDePasse}</p>}
                 </div>
                 <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Téléphone</label>
-                  <input value={formData.telephone} onChange={(e) => setFormData({ ...formData, telephone: e.target.value })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Téléphone</label>
+                  <input value={formData.telephone} onChange={(e) => setFormData({ ...formData, telephone: e.target.value })} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                 </div>
                 <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Rôle</label>
-                  <select value={formData.role} onChange={(e) => setFormData({ ...formData, role: e.target.value, niveau: "", classe: "", filiere: "" })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                  <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Rôle</label>
+                  <select value={formData.role} onChange={(e) => setFormData({ ...formData, role: e.target.value, niveau: "", classe: "", filiere: "" })} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
                     <option value="admin">Admin</option>
                     <option value="prof">Prof</option>
                     <option value="eleve">Élève</option>
@@ -679,8 +725,8 @@ export default function UtilisateursPage() {
                 {formData.role === "eleve" && (
                   <>
                     <div>
-                      <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Niveau</label>
-                      <select value={formData.niveau} onChange={(e) => setFormData({ ...formData, niveau: e.target.value, classe: "", filiere: "" })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                      <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Niveau</label>
+                      <select value={formData.niveau} onChange={(e) => setFormData({ ...formData, niveau: e.target.value, classe: "", filiere: "" })} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
                         <option value="">-- Sélectionner --</option>
                         <option value="primaire">Primaire</option>
                         <option value="college">Collège</option>
@@ -690,8 +736,8 @@ export default function UtilisateursPage() {
                     </div>
                     {formData.niveau && (
                       <div>
-                        <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Classe</label>
-                        <select value={formData.classe} onChange={(e) => setFormData({ ...formData, classe: e.target.value, filiere: "" })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Classe</label>
+                        <select value={formData.classe} onChange={(e) => setFormData({ ...formData, classe: e.target.value, filiere: "" })} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
                           <option value="">-- Sélectionner --</option>
                           {(classesByNiveau[formData.niveau] || []).map((c) => <option key={c} value={c}>{c}</option>)}
                         </select>
@@ -700,8 +746,8 @@ export default function UtilisateursPage() {
                     )}
                     {formData.niveau === "lycee" && ["2ème", "3ème", "Bac"].includes(formData.classe) && (
                       <div>
-                        <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Filière</label>
-                        <select value={formData.filiere} onChange={(e) => setFormData({ ...formData, filiere: e.target.value })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Filière</label>
+                        <select value={formData.filiere} onChange={(e) => setFormData({ ...formData, filiere: e.target.value })} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
                           <option value="">-- Sélectionner --</option>
                           {filieres.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
                         </select>
@@ -711,8 +757,8 @@ export default function UtilisateursPage() {
                   </>
                 )}
               </div>
-              <div className="flex shrink-0 items-center justify-end gap-3 border-t border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
-                <button type="button" onClick={() => { setShowModal(false); resetForm(); }} className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]">Annuler</button>
+              <div className="flex shrink-0 items-center justify-end gap-3 border-t border-[var(--border)] px-6 py-4">
+                <button type="button" onClick={() => { setShowModal(false); resetForm(); }} className="rounded-lg border border-[var(--border)] px-4 py-2 text-[13px] font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]">Annuler</button>
                 <button type="submit" disabled={submitting} className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700 disabled:opacity-50">
                   {submitting && <Loader2 className="h-4 w-4 animate-spin" />} Créer
                 </button>
@@ -726,21 +772,21 @@ export default function UtilisateursPage() {
 
       {resetPwd && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
+          <div className="w-full max-w-md rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Réinitialiser le mot de passe</h2>
-              <button onClick={() => { setResetPwd(null); setNewPassword(""); }} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300"><X className="h-5 w-5" /></button>
+              <button onClick={() => { setResetPwd(null); setNewPassword(""); }} className="text-[var(--foreground-faint)] hover:text-neutral-600 dark:hover:text-neutral-300"><X className="h-5 w-5" /></button>
             </div>
-            <p className="mb-4 text-[13px] text-neutral-600 dark:text-neutral-400">
-              Définir un nouveau mot de passe pour <span className="font-semibold text-neutral-900 dark:text-neutral-100">{resetPwd.name}</span>. Communiquez-le lui ensuite.
+            <p className="mb-4 text-[13px] text-[var(--foreground-subtle)]">
+              Définir un nouveau mot de passe pour <span className="font-semibold text-[var(--foreground)]">{resetPwd.name}</span>. Communiquez-le lui ensuite.
             </p>
             {resetError && <div className="mb-4 rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">{resetError}</div>}
             <div>
-              <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Nouveau mot de passe (min 8 caractères)</label>
-              <PasswordInput value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Nouveau mot de passe (min 8 caractères)</label>
+              <PasswordInput value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
             </div>
             <div className="mt-5 flex justify-end gap-3">
-              <button type="button" onClick={() => { setResetPwd(null); setNewPassword(""); }} className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]">Annuler</button>
+              <button type="button" onClick={() => { setResetPwd(null); setNewPassword(""); }} className="rounded-lg border border-[var(--border)] px-4 py-2 text-[13px] font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]">Annuler</button>
               <button onClick={handleResetPassword} disabled={resetSubmitting || newPassword.length < 8} className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700 disabled:opacity-50">
                 {resetSubmitting && <Loader2 className="h-4 w-4 animate-spin" />} Enregistrer
               </button>

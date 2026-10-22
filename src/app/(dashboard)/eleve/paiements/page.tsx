@@ -95,7 +95,7 @@ export default function ElevePaiementsPage() {
         <Wallet className="h-6 w-6 text-blue-600" />
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Mes Paiements</h1>
       </div>
-      <p className="-mt-3 text-[13px] text-neutral-500 dark:text-neutral-400">
+      <p className="-mt-3 text-[13px] text-[var(--foreground-faint)]">
         Cliquez sur un paiement pour voir le reçu.
       </p>
 
@@ -106,25 +106,25 @@ export default function ElevePaiementsPage() {
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
+        <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[13px] font-medium text-neutral-600 dark:text-neutral-400">Total Payé</p>
+              <p className="text-[13px] font-medium text-[var(--foreground-subtle)]">Total Payé</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums text-gray-900 dark:text-gray-100">{formatCurrency(totalPaid)}</p>
             </div>
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800">
-              <DollarSign className="h-5 w-5 text-neutral-500 dark:text-neutral-400" />
+              <DollarSign className="h-5 w-5 text-[var(--foreground-faint)]" />
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
+        <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[13px] font-medium text-neutral-600 dark:text-neutral-400">Total Impayé</p>
+              <p className="text-[13px] font-medium text-[var(--foreground-subtle)]">Total Impayé</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums text-red-600 dark:text-red-400">{formatCurrency(totalUnpaid)}</p>
             </div>
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800">
-              <AlertTriangle className="h-5 w-5 text-neutral-500 dark:text-neutral-400" />
+              <AlertTriangle className="h-5 w-5 text-[var(--foreground-faint)]" />
             </div>
           </div>
         </div>
@@ -133,15 +133,15 @@ export default function ElevePaiementsPage() {
       {groupes.length > 0 && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {groupes.map((g) => (
-            <div key={g.groupe.id} className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
+            <div key={g.groupe.id} className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
               <h3 className="text-[13px] font-semibold text-gray-900 dark:text-gray-100">{g.groupe.nom}</h3>
               <div className="mt-3 space-y-1 text-[13px]">
                 <div className="flex justify-between">
-                  <span className="text-neutral-500 dark:text-neutral-400">Payé</span>
+                  <span className="text-[var(--foreground-faint)]">Payé</span>
                   <span className="font-medium tabular-nums text-green-600 dark:text-green-400">{formatCurrency(g.totalPaid)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-neutral-500 dark:text-neutral-400">Impayé</span>
+                  <span className="text-[var(--foreground-faint)]">Impayé</span>
                   <span className={`font-medium tabular-nums ${g.unpaid > 0 ? "text-red-600 dark:text-red-400" : "text-gray-900 dark:text-gray-100"}`}>
                     {formatCurrency(g.unpaid)}
                   </span>
@@ -152,26 +152,26 @@ export default function ElevePaiementsPage() {
         </div>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
-        <div className="border-b border-neutral-200 dark:border-[#2a2d35] px-6 py-3">
+      <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+        <div className="border-b border-[var(--border)] px-6 py-3">
           <h2 className="text-[13px] font-semibold text-gray-900 dark:text-gray-100">Historique des Paiements</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
+            <thead className="border-b border-[var(--border)]">
               <tr>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Date</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Montant</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Méthode</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Référence</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500"></th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Date</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Groupe</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Montant</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Méthode</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Référence</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+            <tbody className="divide-y divide-[var(--border)]">
               {paiements.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-[13px] text-neutral-500 dark:text-neutral-400">
+                  <td colSpan={6} className="px-4 py-8 text-center text-[13px] text-[var(--foreground-faint)]">
                     Aucun paiement enregistré
                   </td>
                 </tr>
@@ -182,7 +182,7 @@ export default function ElevePaiementsPage() {
                     onClick={() => setSelected(p)}
                     className="cursor-pointer transition-colors hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]"
                   >
-                    <td className="px-4 py-2.5 text-[13px] text-neutral-600 dark:text-neutral-400">{formatDateTime(p.datePaiement)}</td>
+                    <td className="px-4 py-2.5 text-[13px] text-[var(--foreground-subtle)]">{formatDateTime(p.datePaiement)}</td>
                     <td className="px-4 py-2.5 text-[13px] font-medium text-blue-600 dark:text-blue-400 hover:underline">{p.groupe.nom}</td>
                     <td className="px-4 py-2.5 text-[13px] font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
                       {formatCurrency(p.montant)}
@@ -192,7 +192,7 @@ export default function ElevePaiementsPage() {
                         {METHODE_LABEL[p.methodePaiement] || p.methodePaiement}
                       </span>
                     </td>
-                    <td className="px-4 py-2.5 text-[13px] text-neutral-600 dark:text-neutral-400">{p.reference || "—"}</td>
+                    <td className="px-4 py-2.5 text-[13px] text-[var(--foreground-subtle)]">{p.reference || "—"}</td>
                     <td className="px-4 py-2.5 text-right">
                       <span className="inline-flex items-center gap-1 text-[12px] font-medium text-blue-600 dark:text-blue-400">
                         Voir le reçu
@@ -209,7 +209,7 @@ export default function ElevePaiementsPage() {
       {selected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setSelected(null)}>
           <div
-            className="w-full max-w-md overflow-hidden rounded-xl bg-white dark:bg-[#181b22]"
+            className="w-full max-w-md overflow-hidden rounded-xl bg-[var(--surface)]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between bg-emerald-600 px-6 py-4">
@@ -228,7 +228,7 @@ export default function ElevePaiementsPage() {
             <div className="space-y-4 p-6">
               <div className="space-y-3 text-[13px]">
                 <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2 text-neutral-500 dark:text-neutral-400">
+                  <span className="flex items-center gap-2 text-[var(--foreground-faint)]">
                     <Calendar className="h-4 w-4" /> Date
                   </span>
                   <span className="font-medium text-gray-900 dark:text-gray-100">
@@ -236,13 +236,13 @@ export default function ElevePaiementsPage() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2 text-neutral-500 dark:text-neutral-400">
+                  <span className="flex items-center gap-2 text-[var(--foreground-faint)]">
                     <Wallet className="h-4 w-4" /> Groupe
                   </span>
                   <span className="font-medium text-gray-900 dark:text-gray-100">{selected.groupe.nom}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2 text-neutral-500 dark:text-neutral-400">
+                  <span className="flex items-center gap-2 text-[var(--foreground-faint)]">
                     <DollarSign className="h-4 w-4" /> Méthode
                   </span>
                   <span className="font-medium text-gray-900 dark:text-gray-100">
@@ -251,7 +251,7 @@ export default function ElevePaiementsPage() {
                 </div>
                 {selected.reference && (
                   <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-2 text-neutral-500 dark:text-neutral-400">
+                    <span className="flex items-center gap-2 text-[var(--foreground-faint)]">
                       <Hash className="h-4 w-4" /> Référence
                     </span>
                     <span className="flex items-center gap-1.5 font-mono text-[12px] font-medium text-gray-900 dark:text-gray-100">
@@ -267,14 +267,14 @@ export default function ElevePaiementsPage() {
                   </div>
                 )}
                 {selected.notes && (
-                  <div className="flex items-start gap-2 text-neutral-600 dark:text-neutral-400">
-                    <MessageSquareText className="mt-0.5 h-4 w-4 flex-shrink-0 text-neutral-400 dark:text-neutral-500" />
+                  <div className="flex items-start gap-2 text-[var(--foreground-subtle)]">
+                    <MessageSquareText className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--foreground-faint)]" />
                     <span>{selected.notes}</span>
                   </div>
                 )}
               </div>
 
-              <div className="flex gap-2 border-t border-neutral-100 dark:border-[#2a2d35] pt-4">
+              <div className="flex gap-2 border-t border-[var(--border)] pt-4">
                 <button
                   onClick={() => window.open(`/api/paiements/${selected.id}/facture`, "_blank")}
                   className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-emerald-700"
@@ -283,7 +283,7 @@ export default function ElevePaiementsPage() {
                 </button>
                 <button
                   onClick={() => setSelected(null)}
-                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2.5 text-[13px] font-medium text-neutral-700 hover:bg-neutral-50 dark:text-neutral-300 dark:hover:bg-[#1e2128]"
+                  className="rounded-lg border border-[var(--border)] px-4 py-2.5 text-[13px] font-medium text-neutral-700 hover:bg-neutral-50 dark:text-neutral-300 dark:hover:bg-[#1e2128]"
                 >
                   Fermer
                 </button>

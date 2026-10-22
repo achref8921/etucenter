@@ -291,7 +291,7 @@ export default function AdminBeneficesPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
+        <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)]">
           Bénéfices du Centre
         </h1>
         <MonthSelector month={selectedMonth} />
@@ -311,30 +311,30 @@ export default function AdminBeneficesPage() {
 
       {beneficesData && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="rounded-lg border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
+          <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                <p className="text-[12px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                   Revenu net
                 </p>
-                <p className="mt-2 text-xl font-bold tabular-nums text-neutral-900 dark:text-neutral-100">
+                <p className="mt-2 text-xl font-bold tabular-nums text-[var(--foreground)]">
                   {formatCurrency(beneficesData.totalRecu)}
                 </p>
               </div>
-              <Banknote className="h-5 w-5 text-neutral-400 dark:text-neutral-500" />
+              <Banknote className="h-5 w-5 text-[var(--foreground-faint)]" />
             </div>
           </div>
-          <div className="rounded-lg border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
+          <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                <p className="text-[12px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                   Bénéfice Centre
                 </p>
                 <p className="mt-2 text-xl font-bold tabular-nums text-blue-700 dark:text-blue-400">
                   {formatCurrency(beneficesData.totalBenefice)}
                 </p>
                 {beneficesData.reverseSettledRevenue > 0 && (
-                  <div className="mt-1.5 flex flex-col gap-0.5 text-[12px] text-neutral-400 dark:text-neutral-500">
+                  <div className="mt-1.5 flex flex-col gap-0.5 text-[12px] text-[var(--foreground-faint)]">
                     <span>
                       dont encaissements réglés :{" "}
                       <b className="tabular-nums text-emerald-600 dark:text-emerald-400">
@@ -350,30 +350,30 @@ export default function AdminBeneficesPage() {
                   </div>
                 )}
               </div>
-              <TrendingUp className="h-5 w-5 text-neutral-400 dark:text-neutral-500" />
+              <TrendingUp className="h-5 w-5 text-[var(--foreground-faint)]" />
             </div>
           </div>
-          <div className="rounded-lg border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
+          <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                <p className="text-[12px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                   Salaires Prof
                 </p>
                 <p className="mt-2 text-xl font-bold tabular-nums text-purple-600 dark:text-purple-400">
                   {formatCurrency(beneficesData.totalSalaire)}
                 </p>
               </div>
-              <Users className="h-5 w-5 text-neutral-400 dark:text-neutral-500" />
+              <Users className="h-5 w-5 text-[var(--foreground-faint)]" />
             </div>
           </div>
         </div>
       )}
 
       {beneficesData && beneficesData.totalUnpaid > 0 && (
-        <div className="rounded-lg border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
+        <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+              <p className="text-[12px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                 Impayés total
               </p>
               <p className="mt-2 text-xl font-bold tabular-nums text-red-600 dark:text-red-400">
@@ -386,7 +386,7 @@ export default function AdminBeneficesPage() {
       )}
 
       {beneficesData && (
-        <div className="rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)]">
           <button
             type="button"
             onClick={() => setShowPendingDetails((v) => !v)}
@@ -394,7 +394,7 @@ export default function AdminBeneficesPage() {
             aria-expanded={showPendingDetails}
           >
             <div>
-              <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+              <p className="text-[12px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                 Parts centre en cours (non réglées)
               </p>
               <p className="mt-2 text-xl font-bold tabular-nums text-amber-600 dark:text-amber-400">
@@ -412,28 +412,28 @@ export default function AdminBeneficesPage() {
           </button>
 
           {showPendingDetails && (
-            <div className="border-t border-neutral-200 dark:border-[#2a2d35]">
+            <div className="border-t border-[var(--border)]">
               {beneficesData.reversePendingProfs.length === 0 ? (
-                <p className="px-5 py-6 text-center text-[13px] text-neutral-500 dark:text-neutral-400">
+                <p className="px-5 py-6 text-center text-[13px] text-[var(--foreground-faint)]">
                   Aucune part centre en cours.
                 </p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-[13px]">
                     <thead>
-                      <tr className="border-b border-neutral-100 dark:border-[#2a2d35]">
-                        <th className="px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                      <tr className="border-b border-[var(--border)]">
+                        <th className="px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                           Professeur
                         </th>
-                        <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                        <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                           Dettes
                         </th>
-                        <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                        <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                           Montant en cours
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+                    <tbody className="divide-y divide-[var(--border)]">
                       {beneficesData.reversePendingProfs.map((p) => {
                         const open = expandedPendingProf === p.prof.id;
                         return (
@@ -442,7 +442,7 @@ export default function AdminBeneficesPage() {
                               onClick={() => setExpandedPendingProf(open ? null : p.prof.id)}
                               className="cursor-pointer hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]"
                             >
-                              <td className="px-5 py-2.5 font-medium text-neutral-900 dark:text-neutral-100">
+                              <td className="px-5 py-2.5 font-medium text-[var(--foreground)]">
                                 <div className="flex items-center gap-2">
                                   <ChevronDown
                                     className={`h-3.5 w-3.5 text-neutral-400 transition-transform ${
@@ -452,7 +452,7 @@ export default function AdminBeneficesPage() {
                                   {p.prof.prenom} {p.prof.nom}
                                 </div>
                               </td>
-                              <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                              <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">
                                 {p.debts.length}
                               </td>
                               <td className="px-4 py-2.5 text-right font-semibold tabular-nums text-amber-600 dark:text-amber-400">
@@ -464,20 +464,20 @@ export default function AdminBeneficesPage() {
                                 <td colSpan={3} className="bg-neutral-50 px-5 py-3 dark:bg-[#1e2128]">
                                   <table className="w-full text-left text-[12px]">
                                     <thead>
-                                      <tr className="border-b border-neutral-200 dark:border-[#2a2d35]">
-                                        <th className="py-1.5 pr-4 text-[10px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                                      <tr className="border-b border-[var(--border)]">
+                                        <th className="py-1.5 pr-4 text-[10px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                                           Élève
                                         </th>
-                                        <th className="py-1.5 pr-4 text-[10px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                                        <th className="py-1.5 pr-4 text-[10px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                                           Date
                                         </th>
-                                        <th className="py-1.5 pr-4 text-right text-[10px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                                        <th className="py-1.5 pr-4 text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                                           Dû
                                         </th>
-                                        <th className="py-1.5 pr-4 text-right text-[10px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                                        <th className="py-1.5 pr-4 text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                                           Réglé
                                         </th>
-                                        <th className="py-1.5 text-right text-[10px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                                        <th className="py-1.5 text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                                           Reste
                                         </th>
                                       </tr>
@@ -485,13 +485,13 @@ export default function AdminBeneficesPage() {
                                     <tbody className="divide-y divide-neutral-200 dark:divide-[#2a2d35]">
                                       {p.debts.map((d) => (
                                         <tr key={d.id}>
-                                          <td className="py-1.5 pr-4 text-neutral-700 dark:text-neutral-300">
+                                          <td className="py-1.5 pr-4 text-[var(--foreground-subtle)]">
                                             {d.student ? `${d.student.prenom} ${d.student.nom}` : "—"}
                                           </td>
-                                          <td className="py-1.5 pr-4 text-neutral-500 dark:text-neutral-400">
+                                          <td className="py-1.5 pr-4 text-[var(--foreground-faint)]">
                                             {new Date(d.date).toLocaleDateString("fr-FR")}
                                           </td>
-                                          <td className="py-1.5 pr-4 text-right tabular-nums text-neutral-600 dark:text-neutral-400">
+                                          <td className="py-1.5 pr-4 text-right tabular-nums text-[var(--foreground-subtle)]">
                                             {formatCurrency(d.amountDue)}
                                           </td>
                                           <td className="py-1.5 pr-4 text-right tabular-nums text-emerald-600 dark:text-emerald-400">
@@ -561,20 +561,20 @@ export default function AdminBeneficesPage() {
               <tbody className="divide-y divide-amber-100 dark:divide-amber-900/40">
                 {pendingSettlements.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-6 py-6 text-center text-[13px] text-neutral-500 dark:text-neutral-400">
+                    <td colSpan={5} className="px-6 py-6 text-center text-[13px] text-[var(--foreground-faint)]">
                       Aucun versement en attente de confirmation. Les versements déclarés par les professeurs apparaîtront ici.
                     </td>
                   </tr>
                 )}
                 {pendingSettlements.map((s) => (
                   <tr key={s.id}>
-                    <td className="px-4 py-2.5 font-medium text-neutral-900 dark:text-neutral-100">
+                    <td className="px-4 py-2.5 font-medium text-[var(--foreground)]">
                       {s.teacher.prenom} {s.teacher.nom}
                     </td>
-                    <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                    <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">
                       {s.student ? `${s.student.prenom} ${s.student.nom}` : "Versement global"}
                     </td>
-                    <td className="px-4 py-2.5 text-neutral-500 dark:text-neutral-400">
+                    <td className="px-4 py-2.5 text-[var(--foreground-faint)]">
                       {formatDate(s.createdAt)}
                     </td>
                     <td className="px-4 py-2.5 font-semibold tabular-nums text-amber-700 dark:text-amber-400">
@@ -602,9 +602,9 @@ export default function AdminBeneficesPage() {
         </div>
 
       {beneficesData && beneficesData.profs.length > 0 && (
-        <div className="rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
-          <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-3 dark:border-[#2a2d35]">
-            <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)]">
+          <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-3">
+            <h2 className="text-[13px] font-semibold text-[var(--foreground)]">
               Bénéfices par professeur
             </h2>
             <Link
@@ -617,18 +617,18 @@ export default function AdminBeneficesPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-[13px]">
               <thead>
-                <tr className="border-b border-neutral-100 dark:border-[#2a2d35]">
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Prof</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Taux</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Reçu</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Centre</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Salaire</th>
+                <tr className="border-b border-[var(--border)]">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Prof</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Taux</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Reçu</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Centre</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Salaire</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+              <tbody className="divide-y divide-[var(--border)]">
                 {beneficesData.profs.map((e) => (
                   <tr key={e.prof.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
-                    <td className="px-4 py-2.5 font-medium text-neutral-900 dark:text-neutral-100">
+                    <td className="px-4 py-2.5 font-medium text-[var(--foreground)]">
                       {e.prof.prenom} {e.prof.nom}
                     </td>
                     <td className="px-4 py-2.5">
@@ -636,7 +636,7 @@ export default function AdminBeneficesPage() {
                         {e.tauxPourcentage}%
                       </span>
                     </td>
-                    <td className="px-4 py-2.5 tabular-nums text-neutral-900 dark:text-neutral-100">
+                    <td className="px-4 py-2.5 tabular-nums text-[var(--foreground)]">
                       {formatCurrency(e.totalRecu)}
                     </td>
                     <td className="px-4 py-2.5 tabular-nums font-medium text-blue-700 dark:text-blue-400">
@@ -648,9 +648,9 @@ export default function AdminBeneficesPage() {
                   </tr>
                 ))}
                 <tr className="bg-neutral-50 font-semibold dark:bg-[#1e2128]">
-                  <td className="px-4 py-2.5 text-neutral-900 dark:text-neutral-100">Total</td>
+                  <td className="px-4 py-2.5 text-[var(--foreground)]">Total</td>
                   <td className="px-4 py-2.5"></td>
-                  <td className="px-4 py-2.5 tabular-nums text-neutral-900 dark:text-neutral-100">
+                  <td className="px-4 py-2.5 tabular-nums text-[var(--foreground)]">
                     {formatCurrency(beneficesData.totalRecu)}
                   </td>
                   <td className="px-4 py-2.5 tabular-nums text-blue-700 dark:text-blue-400">
@@ -667,10 +667,10 @@ export default function AdminBeneficesPage() {
       )}
 
       {beneficesData && beneficesData.monthPaiements && beneficesData.monthPaiements.length > 0 && (
-        <div className="rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
-          <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-3 dark:border-[#2a2d35]">
-            <h2 className="flex items-center gap-2 text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
-              <CreditCard className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)]">
+          <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-3">
+            <h2 className="flex items-center gap-2 text-[13px] font-semibold text-[var(--foreground)]">
+              <CreditCard className="h-4 w-4 text-[var(--foreground-faint)]" />
               Paiements du mois — {formatMonthLabel(beneficesData.selectedMonth)}
               <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-neutral-500 dark:bg-[#2a2d35] dark:text-neutral-400">
                 {beneficesData.monthPaiements.length}
@@ -686,22 +686,22 @@ export default function AdminBeneficesPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-[13px]">
               <thead>
-                <tr className="border-b border-neutral-100 dark:border-[#2a2d35]">
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                <tr className="border-b border-[var(--border)]">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                     Élève
                   </th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                     Groupe
                   </th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                     Date
                   </th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                     Montant
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+              <tbody className="divide-y divide-[var(--border)]">
                 {beneficesData.monthPaiements.map((p) => (
                   <tr key={p.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
                     <td className="px-4 py-2.5">
@@ -717,10 +717,10 @@ export default function AdminBeneficesPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                    <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">
                       {p.groupe.nom}
                     </td>
-                    <td className="px-4 py-2.5 text-neutral-500 dark:text-neutral-400">
+                    <td className="px-4 py-2.5 text-[var(--foreground-faint)]">
                       {new Date(p.datePaiement).toLocaleDateString("fr-FR")}
                     </td>
                     <td className="px-4 py-2.5 font-semibold tabular-nums text-green-600 dark:text-green-400">
@@ -734,43 +734,43 @@ export default function AdminBeneficesPage() {
         </div>
       )}
 
-      <div className="rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
-        <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-3 dark:border-[#2a2d35]">
-          <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)]">
+        <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-3">
+          <h2 className="text-[13px] font-semibold text-[var(--foreground)]">
             Taux de profit par prof
           </h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-[13px]">
             <thead>
-              <tr className="border-b border-neutral-100 dark:border-[#2a2d35]">
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+              <tr className="border-b border-[var(--border)]">
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                   Prof
                 </th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                   Groupes
                 </th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                   Élèves
                 </th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                   Taux
                 </th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                   Action
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+            <tbody className="divide-y divide-[var(--border)]">
               {profs.map((e) => (
                 <tr key={e.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
-                  <td className="px-4 py-2.5 font-medium text-neutral-900 dark:text-neutral-100">
+                  <td className="px-4 py-2.5 font-medium text-[var(--foreground)]">
                     {e.prenom} {e.nom}
                   </td>
-                  <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                  <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">
                     {e.nombreGroupes}
                   </td>
-                  <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                  <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">
                     {e.nombreEleves}
                   </td>
                   <td className="px-4 py-2.5">
@@ -783,16 +783,16 @@ export default function AdminBeneficesPage() {
                         value={tauxInputs[e.id] || ""}
                         onChange={(ev) => setTauxInputs((prev) => ({ ...prev, [e.id]: ev.target.value }))}
                         placeholder="0"
-                        className="w-20 rounded-lg border border-neutral-200 bg-white px-2 py-1.5 text-center text-[13px] text-neutral-900 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600/20 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-100 dark:focus:border-blue-400"
+                        className="w-20 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1.5 text-center text-[13px] text-neutral-900 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600/20 dark:text-neutral-100 dark:focus:border-blue-400"
                       />
-                      <Percent className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
+                      <Percent className="h-4 w-4 text-[var(--foreground-faint)]" />
                     </div>
                   </td>
                   <td className="px-4 py-2.5">
                     <button
                       onClick={() => handleSaveTaux(e.id)}
                       disabled={savingId === e.id}
-                      className="flex items-center gap-1 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-[12px] font-medium text-neutral-700 hover:bg-neutral-50 disabled:opacity-50 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-300 dark:hover:bg-[#1e2128]"
+                      className="flex items-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-[12px] font-medium text-neutral-700 hover:bg-neutral-50 disabled:opacity-50 dark:text-neutral-300 dark:hover:bg-[#1e2128]"
                     >
                       {savingId === e.id ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -806,7 +806,7 @@ export default function AdminBeneficesPage() {
               ))}
               {profs.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                  <td colSpan={5} className="px-4 py-8 text-center text-[var(--foreground-faint)]">
                     Aucun prof trouvé
                   </td>
                 </tr>
@@ -816,8 +816,8 @@ export default function AdminBeneficesPage() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22] p-6">
-        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+      <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+        <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
           Évolution des bénéfices (12 mois)
         </h2>
         <BeneficesBarChart data={chartData} formatCurrency={formatCurrency} />
@@ -825,16 +825,16 @@ export default function AdminBeneficesPage() {
 
       {pendingRate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg rounded-xl border border-neutral-200 bg-white p-6 shadow-xl dark:border-[#2a2d35] dark:bg-[#181b22]">
+          <div className="w-full max-w-lg rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-xl">
             <div className="mb-4 flex items-start gap-3">
               <div className="rounded-full bg-amber-100 p-2 dark:bg-amber-500/10">
                 <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
               </div>
               <div>
-                <h3 className="text-[15px] font-semibold text-neutral-900 dark:text-neutral-100">
+                <h3 className="text-[15px] font-semibold text-[var(--foreground)]">
                   Changer le taux de {pendingRate.name} ?
                 </h3>
-                <p className="mt-1 text-[13px] text-neutral-500 dark:text-neutral-400">
+                <p className="mt-1 text-[13px] text-[var(--foreground-faint)]">
                   Taux actuel : <strong>{pendingRate.previous ?? 0}%</strong> → nouveau :{" "}
                   <strong>{pendingRate.next}%</strong>
                 </p>
@@ -847,12 +847,12 @@ export default function AdminBeneficesPage() {
               <button
                 onClick={() => performSaveTaux(pendingRate.profId, pendingRate.next, false)}
                 disabled={savingId === pendingRate.profId}
-                className="rounded-lg border border-neutral-200 bg-white px-4 py-2.5 text-left hover:bg-neutral-50 disabled:opacity-50 dark:border-[#2a2d35] dark:bg-[#181b22] dark:hover:bg-[#1e2128]"
+                className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-left hover:bg-neutral-50 disabled:opacity-50 dark:hover:bg-[#1e2128]"
               >
-                <span className="block text-[13px] font-medium text-neutral-800 dark:text-neutral-200">
+                <span className="block text-[13px] font-medium text-[var(--foreground)]">
                   Nouvelles opérations uniquement
                 </span>
-                <span className="mt-0.5 block text-[12px] text-neutral-500 dark:text-neutral-400">
+                <span className="mt-0.5 block text-[12px] text-[var(--foreground-faint)]">
                   Les anciens calculs et paiements restent inchangés
                 </span>
               </button>

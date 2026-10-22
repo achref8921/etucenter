@@ -56,14 +56,14 @@ export default function ConfirmGhostDelete({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-lg rounded-lg bg-white dark:bg-[#181b22] border border-neutral-200 dark:border-[#2a2d35] shadow-xl">
-        <div className="border-b border-neutral-200 dark:border-[#2a2d35] px-6 py-4">
+      <div className="w-full max-w-lg rounded-lg bg-[var(--surface)] border border-neutral-200 shadow-xl">
+        <div className="border-b border-neutral-200 px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
               <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Effacer le compte supprimé</h2>
+              <h2 className="text-lg font-semibold text-[var(--foreground)] dark:text-gray-100">Effacer le compte supprimé</h2>
               <p className="text-[13px] text-neutral-500 dark:text-neutral-400">
                 <span className="font-medium text-neutral-700 dark:text-neutral-200">{user.prenom} {user.nom}</span> — action irréversible, toutes les données seront effacées
               </p>
@@ -73,41 +73,41 @@ export default function ConfirmGhostDelete({
 
         <div className="space-y-4 px-6 py-4">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-2.5 text-center">
+            <div className="rounded-lg border border-neutral-200 bg-neutral-50 dark:bg-[#1e2128] p-2.5 text-center">
               <Wallet className="mx-auto mb-1 h-4 w-4 text-red-600 dark:text-red-400" />
               <p className={`text-lg font-bold ${impact.soldeNet < 0 ? "text-red-600 dark:text-red-400" : "text-gray-900 dark:text-gray-100"}`}>{money(impact.soldeNet)}</p>
               <p className="text-[11px] text-neutral-500 dark:text-neutral-400">Solde</p>
             </div>
-            <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-2.5 text-center">
+            <div className="rounded-lg border border-neutral-200 bg-neutral-50 dark:bg-[#1e2128] p-2.5 text-center">
               <CreditCard className="mx-auto mb-1 h-4 w-4 text-red-600 dark:text-red-400" />
-              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{impact.transactions}</p>
+              <p className="text-lg font-bold text-[var(--foreground)] dark:text-gray-100">{impact.transactions}</p>
               <p className="text-[11px] text-neutral-500 dark:text-neutral-400">Opérations</p>
             </div>
-            <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-2.5 text-center">
+            <div className="rounded-lg border border-neutral-200 bg-neutral-50 dark:bg-[#1e2128] p-2.5 text-center">
               <FileText className="mx-auto mb-1 h-4 w-4 text-red-600 dark:text-red-400" />
-              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{impact.paiements.montant ? money(impact.paiements.montant) : impact.paiements.count}</p>
+              <p className="text-lg font-bold text-[var(--foreground)] dark:text-gray-100">{impact.paiements.montant ? money(impact.paiements.montant) : impact.paiements.count}</p>
               <p className="text-[11px] text-neutral-500 dark:text-neutral-400">Paiements ({impact.paiements.count})</p>
             </div>
-            <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-2.5 text-center">
+            <div className="rounded-lg border border-neutral-200 bg-neutral-50 dark:bg-[#1e2128] p-2.5 text-center">
               <UserRound className="mx-auto mb-1 h-4 w-4 text-red-600 dark:text-red-400" />
-              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{impact.inscriptions}</p>
+              <p className="text-lg font-bold text-[var(--foreground)] dark:text-gray-100">{impact.inscriptions}</p>
               <p className="text-[11px] text-neutral-500 dark:text-neutral-400">Inscriptions</p>
             </div>
-            <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-2.5 text-center">
+            <div className="rounded-lg border border-neutral-200 bg-neutral-50 dark:bg-[#1e2128] p-2.5 text-center">
               <FileText className="mx-auto mb-1 h-4 w-4 text-red-600 dark:text-red-400" />
-              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{impact.presences}</p>
+              <p className="text-lg font-bold text-[var(--foreground)] dark:text-gray-100">{impact.presences}</p>
               <p className="text-[11px] text-neutral-500 dark:text-neutral-400">Présences</p>
             </div>
             {impact.role === "prof" ? (
-              <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-2.5 text-center">
+              <div className="rounded-lg border border-neutral-200 bg-neutral-50 dark:bg-[#1e2128] p-2.5 text-center">
                 <TrendingDown className="mx-auto mb-1 h-4 w-4 text-red-600 dark:text-red-400" />
-                <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{money(impact.gainsProf.montant)}</p>
+                <p className="text-lg font-bold text-[var(--foreground)] dark:text-gray-100">{money(impact.gainsProf.montant)}</p>
                 <p className="text-[11px] text-neutral-500 dark:text-neutral-400">Gains ({impact.gainsProf.count})</p>
               </div>
             ) : (
-              <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-2.5 text-center">
+              <div className="rounded-lg border border-neutral-200 bg-neutral-50 dark:bg-[#1e2128] p-2.5 text-center">
                 <Bell className="mx-auto mb-1 h-4 w-4 text-red-600 dark:text-red-400" />
-                <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{impact.notifications}</p>
+                <p className="text-lg font-bold text-[var(--foreground)] dark:text-gray-100">{impact.notifications}</p>
                 <p className="text-[11px] text-neutral-500 dark:text-neutral-400">Notifications</p>
               </div>
             )}
@@ -136,7 +136,7 @@ export default function ConfirmGhostDelete({
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Votre mot de passe"
-                className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+                className="w-full rounded-lg border border-neutral-200 bg-[var(--surface)] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
               />
             </div>
           )}
@@ -148,11 +148,11 @@ export default function ConfirmGhostDelete({
           )}
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-neutral-200 dark:border-[#2a2d35] px-6 py-4">
+        <div className="flex justify-end gap-3 border-t border-neutral-200 px-6 py-4">
           <button
             onClick={onCancel}
             disabled={loading}
-            className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128] disabled:opacity-50"
+            className="rounded-lg border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128] disabled:opacity-50"
           >
             Annuler
           </button>

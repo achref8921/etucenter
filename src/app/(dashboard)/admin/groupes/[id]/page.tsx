@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Users, Loader2, X, Search, Download, Trash2, CalendarPlus, CalendarRange, RotateCcw } from "lucide-react";
+import { Users, Loader2, X, Search, Download, Trash2, CalendarPlus, CalendarRange, RotateCcw } from "lucide-react";
 import { MontantInput } from "@/components/montant-input";
 import { formatDate, formatCurrency, formatTime } from "@/lib/utils";
 import ConfirmDelete from "@/components/confirm-delete";
@@ -365,12 +365,7 @@ export default function AdminGroupeDetailPage() {
   if (error || !groupe) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Link href="/admin/groupes" className="flex items-center gap-1 text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white">
-            <ArrowLeft className="h-4 w-4" /> Retour
-          </Link>
-          <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Détail Groupe</h1>
-        </div>
+        <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)]">Détail Groupe</h1>
         {error && <div className="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">{error}</div>}
       </div>
     );
@@ -465,10 +460,7 @@ export default function AdminGroupeDetailPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Link href="/admin/groupes" className="flex items-center gap-1 text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white">
-          <ArrowLeft className="h-4 w-4" /> Retour
-        </Link>
-        <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">{g.nom}</h1>
+        <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)]">{g.nom}</h1>
       </div>
 
       {success && (
@@ -483,39 +475,39 @@ export default function AdminGroupeDetailPage() {
         </div>
       )}
 
-      <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-4">
+      <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
-          <div className="flex items-center gap-2 text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+          <div className="flex items-center gap-2 text-[13px] font-semibold text-[var(--foreground)]">
             <CalendarRange className="h-4 w-4 text-blue-600 dark:text-blue-400" /> Période
           </div>
           <div className="flex items-center gap-2">
-            <label className="text-[12px] font-medium text-neutral-500 dark:text-neutral-400">Du</label>
+            <label className="text-[12px] font-medium text-[var(--foreground-faint)]">Du</label>
             <input
               type="date"
               value={fromDate}
               max={toDate || undefined}
               onChange={(e) => setFromDate(e.target.value)}
-              className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-2.5 py-1.5 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1.5 text-[13px] text-[var(--foreground)] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
-            <label className="text-[12px] font-medium text-neutral-500 dark:text-neutral-400">Au</label>
+            <label className="text-[12px] font-medium text-[var(--foreground-faint)]">Au</label>
             <input
               type="date"
               value={toDate}
               min={fromDate || undefined}
               onChange={(e) => setToDate(e.target.value)}
-              className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-2.5 py-1.5 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1.5 text-[13px] text-[var(--foreground)] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
           {(fromDate || toDate) && (
             <button
               onClick={() => { setFromDate(""); setToDate(""); }}
-              className="flex items-center gap-1 rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-3 py-1.5 text-[12px] font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+              className="flex items-center gap-1 rounded-lg border border-[var(--border)] px-3 py-1.5 text-[12px] font-semibold text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
             >
               <RotateCcw className="h-3.5 w-3.5" /> Toute la période
             </button>
           )}
           {loading && <Loader2 className="h-4 w-4 animate-spin text-blue-600 dark:text-blue-400" />}
-          <span className="ml-auto text-[12px] text-neutral-500 dark:text-neutral-400">
+          <span className="ml-auto text-[12px] text-[var(--foreground-faint)]">
             {groupe.hasRange
               ? `Filtré${groupe.periode.from ? ` du ${formatDate(groupe.periode.from)}` : ""}${groupe.periode.to ? ` au ${formatDate(groupe.periode.to)}` : ""}`
               : "Depuis la création du groupe"}
@@ -524,55 +516,55 @@ export default function AdminGroupeDetailPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
-          <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Informations</h2>
+        <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+          <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Informations</h2>
           <div className="space-y-3 text-[13px]">
-            <div className="flex justify-between"><span className="text-neutral-500 dark:text-neutral-400">Nom</span><span className="font-medium text-neutral-900 dark:text-neutral-100">{g.nom}</span></div>
-            {g.description && <div className="flex justify-between"><span className="text-neutral-500 dark:text-neutral-400">Description</span><span className="text-neutral-900 dark:text-neutral-100">{g.description}</span></div>}
-            <div className="flex justify-between"><span className="text-neutral-500 dark:text-neutral-400">Prof</span><span className="font-medium text-neutral-900 dark:text-neutral-100">{g.prof ? `${g.prof.prenom} ${g.prof.nom}` : "—"}</span></div>
-            <div className="flex justify-between"><span className="text-neutral-500 dark:text-neutral-400">Matière</span><span className="font-medium text-neutral-900 dark:text-neutral-100">{g.matiere?.nom ?? "—"}</span></div>
+            <div className="flex justify-between"><span className="text-[var(--foreground-faint)]">Nom</span><span className="font-medium text-[var(--foreground)]">{g.nom}</span></div>
+            {g.description && <div className="flex justify-between"><span className="text-[var(--foreground-faint)]">Description</span><span className="text-[var(--foreground)]">{g.description}</span></div>}
+            <div className="flex justify-between"><span className="text-[var(--foreground-faint)]">Prof</span><span className="font-medium text-[var(--foreground)]">{g.prof ? `${g.prof.prenom} ${g.prof.nom}` : "—"}</span></div>
+            <div className="flex justify-between"><span className="text-[var(--foreground-faint)]">Matière</span><span className="font-medium text-[var(--foreground)]">{g.matiere?.nom ?? "—"}</span></div>
             <div className="flex items-center justify-between">
-              <span className="text-neutral-500 dark:text-neutral-400">Tarif du groupe (défaut)</span>
+              <span className="text-[var(--foreground-faint)]">Tarif du groupe (défaut)</span>
               <div className="flex items-center gap-2">
                 {g.forfaitMontant && g.forfaitSeances ? (
                   <span className="text-right">
-                    <span className="block font-medium text-neutral-900 dark:text-neutral-100">
+                    <span className="block font-medium text-[var(--foreground)]">
                       {formatCurrency(g.forfaitMontant)} / {g.forfaitSeances} séances
                     </span>
-                    <span className="block text-[12px] text-neutral-400 dark:text-neutral-500">
+                    <span className="block text-[12px] text-[var(--foreground-faint)]">
                       {formatCurrency(g.prixParSeance)} / séance
                     </span>
                   </span>
                 ) : (
-                  <span className="font-medium text-neutral-900 dark:text-neutral-100">{formatCurrency(g.prixParSeance)} / séance</span>
+                  <span className="font-medium text-[var(--foreground)]">{formatCurrency(g.prixParSeance)} / séance</span>
                 )}
-                <button onClick={openTarifModal} className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-2.5 py-1 text-[12px] font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]">
+                <button onClick={openTarifModal} className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1 text-[12px] font-semibold text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]">
                   Modifier
                 </button>
               </div>
             </div>
-            <div className="flex justify-between"><span className="text-neutral-500 dark:text-neutral-400">Capacité max</span><span className="font-medium text-neutral-900 dark:text-neutral-100">{g.capaciteMax}</span></div>
+            <div className="flex justify-between"><span className="text-[var(--foreground-faint)]">Capacité max</span><span className="font-medium text-[var(--foreground)]">{g.capaciteMax}</span></div>
           </div>
         </div>
 
-        <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
-          <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Résumé Financier{groupe.hasRange ? " (période)" : ""}</h2>
+        <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+          <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Résumé Financier{groupe.hasRange ? " (période)" : ""}</h2>
           <div className="space-y-3">
-            <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-4">
+            <div className="rounded-lg border border-[var(--border)] bg-neutral-50 dark:bg-[#1e2128] p-4">
               <div className="flex items-center justify-between">
-                <p className="text-[13px] text-neutral-600 dark:text-neutral-400">Total Dû</p>
-                <p className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">{formatCurrency(groupe.financialSummary.totalDue)}</p>
+                <p className="text-[13px] text-[var(--foreground-subtle)]">Total Dû</p>
+                <p className="text-lg font-semibold text-[var(--foreground)]">{formatCurrency(groupe.financialSummary.totalDue)}</p>
               </div>
             </div>
-            <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-4">
+            <div className="rounded-lg border border-[var(--border)] bg-neutral-50 dark:bg-[#1e2128] p-4">
               <div className="flex items-center justify-between">
-                <p className="text-[13px] text-neutral-600 dark:text-neutral-400">Total Payé</p>
+                <p className="text-[13px] text-[var(--foreground-subtle)]">Total Payé</p>
                 <p className="text-lg font-semibold text-green-600 dark:text-green-400">{formatCurrency(groupe.financialSummary.totalPaid)}</p>
               </div>
             </div>
-            <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-4">
+            <div className="rounded-lg border border-[var(--border)] bg-neutral-50 dark:bg-[#1e2128] p-4">
               <div className="flex items-center justify-between">
-                <p className="text-[13px] text-neutral-600 dark:text-neutral-400">Impayé</p>
+                <p className="text-[13px] text-[var(--foreground-subtle)]">Impayé</p>
                 <p className={`text-lg font-semibold ${groupe.financialSummary.unpaid > 0 ? "text-red-600 dark:text-red-400" : "text-neutral-900 dark:text-neutral-100"}`}>{formatCurrency(groupe.financialSummary.unpaid)}</p>
               </div>
             </div>
@@ -580,11 +572,11 @@ export default function AdminGroupeDetailPage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
-        <div className="flex items-center justify-between border-b border-neutral-200 dark:border-[#2a2d35] px-6 py-3">
-          <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">Élèves Inscrits ({groupe.inscriptions.length})</h2>
+      <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+        <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-3">
+          <h2 className="text-[13px] font-semibold text-[var(--foreground)]">Élèves Inscrits ({groupe.inscriptions.length})</h2>
           <div className="flex items-center gap-2">
-            <button onClick={handleDownloadExcel} disabled={groupe.inscriptions.length === 0} className="flex items-center gap-1 rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-1.5 text-[12px] font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128] disabled:opacity-50">
+            <button onClick={handleDownloadExcel} disabled={groupe.inscriptions.length === 0} className="flex items-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-[12px] font-semibold text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128] disabled:opacity-50">
               <Download className="h-3.5 w-3.5" /> Excel
             </button>
             <button onClick={() => setShowAddModal(true)} className="flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-blue-700">
@@ -594,22 +586,22 @@ export default function AdminGroupeDetailPage() {
         </div>
         <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
+          <thead className="border-b border-[var(--border)]">
             <tr>
-              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Nom</th>
-              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Prénom</th>
-              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Email</th>
-              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Présences</th>
-              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Absences</th>
-              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Dû</th>
-              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Payé</th>
-              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Impayé</th>
-              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Actions</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Nom</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Prénom</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Email</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Présences</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Absences</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Dû</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Payé</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Impayé</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+          <tbody className="divide-y divide-[var(--border)]">
             {groupe.inscriptions.length === 0 ? (
-              <tr><td colSpan={9} className="px-4 py-2.5 text-center text-neutral-500 dark:text-neutral-400">Aucun élève inscrit</td></tr>
+              <tr><td colSpan={9} className="px-4 py-2.5 text-center text-[var(--foreground-faint)]">Aucun élève inscrit</td></tr>
             ) : (
               groupe.inscriptions.map((ins) => (
                 <tr key={ins.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
@@ -629,11 +621,11 @@ export default function AdminGroupeDetailPage() {
                       </button>
                     </div>
                   </td>
-                  <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">{ins.eleve.prenom}</td>
-                  <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">{ins.eleve.email}</td>
+                  <td className="px-4 py-2.5 text-[13px] text-[var(--foreground)]">{ins.eleve.prenom}</td>
+                  <td className="px-4 py-2.5 text-[13px] text-[var(--foreground)]">{ins.eleve.email}</td>
                   <td className="px-4 py-2.5 text-green-600 dark:text-green-400">{ins.stats.presencesCount}</td>
                   <td className="px-4 py-2.5 text-red-600 dark:text-red-400">{ins.stats.absencesCount}</td>
-                  <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">{formatCurrency(ins.stats.totalDue)}</td>
+                  <td className="px-4 py-2.5 text-[13px] text-[var(--foreground)]">{formatCurrency(ins.stats.totalDue)}</td>
                   <td className="px-4 py-2.5 text-green-600 dark:text-green-400">{formatCurrency(ins.stats.totalPaid)}</td>
                   <td className="px-4 py-2.5">
                     <span className={`font-medium ${ins.stats.unpaid > 0 ? "text-red-600 dark:text-red-400" : "text-neutral-900 dark:text-neutral-100"}`}>{formatCurrency(ins.stats.unpaid)}</span>
@@ -642,7 +634,7 @@ export default function AdminGroupeDetailPage() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => openRattrapageModal(ins.eleve)}
-                        className="flex items-center gap-1 rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-2 py-1 text-[12px] font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+                        className="flex items-center gap-1 rounded-lg border border-[var(--border)] px-2 py-1 text-[12px] font-semibold text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
                         title="Ajouter une séance passée"
                       >
                         <CalendarPlus className="h-3.5 w-3.5" /> Séance passée
@@ -650,7 +642,7 @@ export default function AdminGroupeDetailPage() {
                       <button
                         onClick={() => setConfirmRemoveEleve({ id: ins.eleve.id, inscriptionId: ins.id, name: `${ins.eleve.prenom} ${ins.eleve.nom}` })}
                         disabled={removingId === ins.id}
-                        className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400 disabled:opacity-30"
+                        className="rounded p-1 text-[var(--foreground-faint)] hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400 disabled:opacity-30"
                         title="Retirer du groupe"
                       >
                         {removingId === ins.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
@@ -665,29 +657,29 @@ export default function AdminGroupeDetailPage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
-        <div className="border-b border-neutral-200 dark:border-[#2a2d35] px-6 py-3">
-          <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">Séances</h2>
+      <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+        <div className="border-b border-[var(--border)] px-6 py-3">
+          <h2 className="text-[13px] font-semibold text-[var(--foreground)]">Séances</h2>
         </div>
         <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
+          <thead className="border-b border-[var(--border)]">
             <tr>
-              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Date</th>
-              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Horaire</th>
-              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Statut</th>
-              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Présences</th>
-              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Actions</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Date</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Horaire</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Statut</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Présences</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+          <tbody className="divide-y divide-[var(--border)]">
             {groupe.seances.length === 0 ? (
-              <tr><td colSpan={5} className="px-4 py-2.5 text-center text-neutral-500 dark:text-neutral-400">Aucune séance</td></tr>
+              <tr><td colSpan={5} className="px-4 py-2.5 text-center text-[var(--foreground-faint)]">Aucune séance</td></tr>
             ) : (
               groupe.seances.map((s) => (
                 <tr key={s.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
-                  <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">{formatDate(s.date)}</td>
-                  <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">
+                  <td className="px-4 py-2.5 text-[13px] text-[var(--foreground)]">{formatDate(s.date)}</td>
+                  <td className="px-4 py-2.5 text-[13px] text-[var(--foreground)]">
                     {s.heureDebut && s.heureFin
                       ? `${formatTime(s.heureDebut)} - ${formatTime(s.heureFin)}`
                       : "—"}
@@ -697,12 +689,12 @@ export default function AdminGroupeDetailPage() {
                       {statusLabels[s.statut] || s.statut}
                     </span>
                   </td>
-                  <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">{s.stats.presentsCount}/{s.stats.totalEleves}</td>
+                  <td className="px-4 py-2.5 text-[13px] text-[var(--foreground)]">{s.stats.presentsCount}/{s.stats.totalEleves}</td>
                   <td className="px-4 py-2.5">
                     <button
                       onClick={() => setConfirmDeleteSeance(s.id)}
                       disabled={deletingSeanceId === s.id || s.stats.totalEleves > 0}
-                      className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100 dark:hover:bg-[#1e2128] hover:text-red-600 dark:hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-30"
+                      className="rounded p-1 text-[var(--foreground-faint)] hover:bg-neutral-100 dark:hover:bg-[#1e2128] hover:text-red-600 dark:hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-30"
                       title={s.stats.totalEleves > 0 ? "Des présences sont enregistrées — suppression impossible" : "Supprimer"}
                     >
                       {deletingSeanceId === s.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
@@ -716,41 +708,41 @@ export default function AdminGroupeDetailPage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
-        <div className="flex items-center justify-between border-b border-neutral-200 dark:border-[#2a2d35] px-6 py-3">
-          <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">Paiements{groupe.hasRange ? " (période)" : ""} ({groupe.paiements.length})</h2>
+      <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+        <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-3">
+          <h2 className="text-[13px] font-semibold text-[var(--foreground)]">Paiements{groupe.hasRange ? " (période)" : ""} ({groupe.paiements.length})</h2>
           <span className="text-[13px] font-semibold text-green-600 dark:text-green-400">Total : {formatCurrency(groupe.periodTotalPaid)}</span>
         </div>
         <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
+          <thead className="border-b border-[var(--border)]">
             <tr>
-              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Date</th>
-              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Élève</th>
-              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Montant</th>
-              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Méthode</th>
-              <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Encaissé par</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Date</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Élève</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Montant</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Méthode</th>
+              <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Encaissé par</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+          <tbody className="divide-y divide-[var(--border)]">
             {groupe.paiements.length === 0 ? (
-              <tr><td colSpan={5} className="px-4 py-2.5 text-center text-neutral-500 dark:text-neutral-400">Aucun paiement{groupe.hasRange ? " sur la période" : ""}</td></tr>
+              <tr><td colSpan={5} className="px-4 py-2.5 text-center text-[var(--foreground-faint)]">Aucun paiement{groupe.hasRange ? " sur la période" : ""}</td></tr>
             ) : (
               groupe.paiements.map((p) => (
                 <tr key={p.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
-                  <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">{formatDate(p.date)}</td>
+                  <td className="px-4 py-2.5 text-[13px] text-[var(--foreground)]">{formatDate(p.date)}</td>
                   <td className="px-4 py-2.5">
                     <Link href={`/admin/eleves/${p.eleve.id}`} className="text-[13px] font-medium text-blue-600 dark:text-blue-400 hover:underline">{p.eleve.prenom} {p.eleve.nom}</Link>
                   </td>
                   <td className="px-4 py-2.5 text-[13px] font-medium text-green-600 dark:text-green-400">{formatCurrency(p.montant)}</td>
-                  <td className="px-4 py-2.5 text-[13px] text-neutral-600 dark:text-neutral-400">{methodeLabels[p.methodePaiement] ?? p.methodePaiement}</td>
+                  <td className="px-4 py-2.5 text-[13px] text-[var(--foreground-subtle)]">{methodeLabels[p.methodePaiement] ?? p.methodePaiement}</td>
                   <td className="px-4 py-2.5 text-[13px]">
                     {p.collecteParProf ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
                         Prof — {p.collectedBy ? `${p.collectedBy.prenom} ${p.collectedBy.nom}` : "—"}
                       </span>
                     ) : (
-                      <span className="text-neutral-500 dark:text-neutral-400">Centre</span>
+                      <span className="text-[var(--foreground-faint)]">Centre</span>
                     )}
                   </td>
                 </tr>
@@ -763,10 +755,10 @@ export default function AdminGroupeDetailPage() {
 
       {showTarifModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
+          <div className="w-full max-w-md rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Tarif du groupe (tous les élèves)</h2>
-              <button onClick={() => setShowTarifModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300">
+              <button onClick={() => setShowTarifModal(false)} className="text-[var(--foreground-faint)] hover:text-neutral-600 dark:hover:text-neutral-300">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -790,24 +782,24 @@ export default function AdminGroupeDetailPage() {
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Montant (DT)</label>
+                      <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Montant (DT)</label>
                       <MontantInput
                         value={tarifMontant || ""}
                         onChange={setTarifMontant}
                         min={0}
                         placeholder="110"
-                        className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                       />
                     </div>
                     <div>
-                      <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Nombre de séances</label>
+                      <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Nombre de séances</label>
                       <input
                         type="number"
                         value={tarifSeances || ""}
                         onChange={(e) => setTarifSeances(Number(e.target.value))}
                         min={0}
                         placeholder="5"
-                        className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                       />
                     </div>
                   </div>
@@ -816,18 +808,18 @@ export default function AdminGroupeDetailPage() {
                       = {computedTarifPrixSeance.toFixed(2)} DT / séance
                     </p>
                   )}
-                  <p className="text-[11px] text-neutral-400 dark:text-neutral-500">
+                  <p className="text-[11px] text-[var(--foreground-faint)]">
                     Le prix par séance sera calculé automatiquement (montant ÷ nombre de séances) et appliqué aux futurs calculs du groupe.
                   </p>
                 </>
               ) : (
                 <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Prix / séance (DT)</label>
+                  <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Prix / séance (DT)</label>
                   <MontantInput
                     value={tarifPrixSeance || ""}
                     onChange={setTarifPrixSeance}
                     min={0}
-                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
               )}
@@ -836,7 +828,7 @@ export default function AdminGroupeDetailPage() {
                 <button
                   type="button"
                   onClick={() => setShowTarifModal(false)}
-                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+                  className="rounded-lg border border-[var(--border)] px-4 py-2 text-[13px] font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
                 >
                   Annuler
                 </button>
@@ -856,45 +848,45 @@ export default function AdminGroupeDetailPage() {
 
       {forfaitModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setForfaitModal(null)}>
-          <div className="w-full max-w-sm rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-sm rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Forfait individuel</h2>
-              <button onClick={() => setForfaitModal(null)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300">
+              <button onClick={() => setForfaitModal(null)} className="text-[var(--foreground-faint)] hover:text-neutral-600 dark:hover:text-neutral-300">
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <p className="mb-4 text-[13px] text-neutral-600 dark:text-neutral-400">
-              Forfait pour <span className="font-semibold text-neutral-900 dark:text-neutral-100">{forfaitModal.eleveName}</span>
+            <p className="mb-4 text-[13px] text-[var(--foreground-subtle)]">
+              Forfait pour <span className="font-semibold text-[var(--foreground)]">{forfaitModal.eleveName}</span>
             </p>
-            <p className="mb-3 rounded-lg bg-neutral-50 dark:bg-[#1e2128] px-3 py-2 text-[12px] text-neutral-500 dark:text-neutral-400">
-              Prix par défaut du groupe : <span className="font-medium text-neutral-900 dark:text-neutral-100">{formatCurrency(groupe.groupe.prixParSeance)}</span> / séance
+            <p className="mb-3 rounded-lg bg-neutral-50 dark:bg-[#1e2128] px-3 py-2 text-[12px] text-[var(--foreground-faint)]">
+              Prix par défaut du groupe : <span className="font-medium text-[var(--foreground)]">{formatCurrency(groupe.groupe.prixParSeance)}</span> / séance
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Prix (DT)</label>
+                <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Prix (DT)</label>
                 <MontantInput
                   step="0.01"
                   min={0}
                   value={forfaitMontantVal ? parseFloat(forfaitMontantVal) || 0 : ""}
                   onChange={(v) => setForfaitMontantVal(v === 0 ? "" : String(v))}
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#1e2128] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] dark:bg-[#1e2128] text-[13px] text-[var(--foreground)] px-3 py-2 focus:border-blue-500 focus:outline-none"
                   placeholder={`Ex : 110`}
                   autoFocus
                 />
               </div>
               <div>
-                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Nombre de séances</label>
+                <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Nombre de séances</label>
                 <input
                   type="number"
                   min="1"
                   value={forfaitSeancesVal}
                   onChange={(e) => setForfaitSeancesVal(e.target.value)}
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#1e2128] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] dark:bg-[#1e2128] text-[13px] text-[var(--foreground)] px-3 py-2 focus:border-blue-500 focus:outline-none"
                   placeholder={`Ex : 9`}
                 />
               </div>
             </div>
-            <p className="mt-2 text-[11px] text-neutral-400 dark:text-neutral-500">
+            <p className="mt-2 text-[11px] text-[var(--foreground-faint)]">
               Les montants déjà dus avant cette modification ne changent pas.
             </p>
             {forfaitError && (
@@ -903,7 +895,7 @@ export default function AdminGroupeDetailPage() {
             <div className="mt-5 flex justify-end gap-2">
               <button
                 onClick={() => setForfaitModal(null)}
-                className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-3 py-2 text-[13px] font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+                className="rounded-lg border border-[var(--border)] px-3 py-2 text-[13px] font-semibold text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
               >
                 Annuler
               </button>
@@ -922,10 +914,10 @@ export default function AdminGroupeDetailPage() {
 
       {showRattrapageModal && rattrapageEleve && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
+          <div className="w-full max-w-md rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Ajouter une séance passée</h2>
-              <button onClick={() => setShowRattrapageModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300">
+              <button onClick={() => setShowRattrapageModal(false)} className="text-[var(--foreground-faint)] hover:text-neutral-600 dark:hover:text-neutral-300">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -935,34 +927,34 @@ export default function AdminGroupeDetailPage() {
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Date</label>
+                  <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Date</label>
                   <input
                     type="date"
                     value={rattrapageDate}
                     onChange={(e) => setRattrapageDate(e.target.value)}
-                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Heure début</label>
+                  <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Heure début</label>
                   <TimeInput value={rattrapageHeureDebut} onChange={setRattrapageHeureDebut} />
                 </div>
                 <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Heure fin</label>
+                  <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Heure fin</label>
                   <TimeInput value={rattrapageHeureFin} onChange={setRattrapageHeureFin} />
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Notes</label>
+                <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Notes</label>
                 <textarea
                   value={rattrapageNotes}
                   onChange={(e) => setRattrapageNotes(e.target.value)}
                   rows={2}
                   placeholder="Ex. séance de rattrapage non saisie"
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
-              <p className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3 text-[13px] text-neutral-600 dark:text-neutral-400">
+              <p className="rounded-lg border border-[var(--border)] bg-neutral-50 dark:bg-[#1e2128] p-3 text-[13px] text-[var(--foreground-subtle)]">
                 Le montant de <strong>{formatCurrency(g.prixParSeance)}</strong> sera déduit du compte de l'élève et une notification lui sera envoyée.
               </p>
               {rattrapageError && (
@@ -974,7 +966,7 @@ export default function AdminGroupeDetailPage() {
                 <button
                   type="button"
                   onClick={() => setShowRattrapageModal(false)}
-                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+                  className="rounded-lg border border-[var(--border)] px-4 py-2 text-[13px] font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
                 >
                   Annuler
                 </button>
@@ -994,28 +986,28 @@ export default function AdminGroupeDetailPage() {
 
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-lg rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
+          <div className="w-full max-w-lg rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Ajouter un élève</h2>
-              <button onClick={() => { setShowAddModal(false); setSearchQuery(""); setFilterClasse(""); setFilterFiliere(""); }} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300">
+              <button onClick={() => { setShowAddModal(false); setSearchQuery(""); setFilterClasse(""); setFilterFiliere(""); }} className="text-[var(--foreground-faint)] hover:text-neutral-600 dark:hover:text-neutral-300">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="relative mb-3">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--foreground-faint)]" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Rechercher par nom ou email..."
-                className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 py-2 pl-10 pr-3 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] py-2 pl-10 pr-3 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
             <div className="mb-3 flex gap-2">
               <select
                 value={filterClasse}
                 onChange={(e) => setFilterClasse(e.target.value)}
-                className="flex-1 rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[13px] text-[var(--foreground)] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
                 <option value="">Toutes les classes</option>
                 {(["primaire", "college", "lycee"] as const).map((n) =>
@@ -1027,7 +1019,7 @@ export default function AdminGroupeDetailPage() {
               <select
                 value={filterFiliere}
                 onChange={(e) => setFilterFiliere(e.target.value)}
-                className="flex-1 rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[13px] text-[var(--foreground)] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
                 <option value="">Toutes les filières</option>
                 <option value="lettres">Lettres</option>
@@ -1042,14 +1034,14 @@ export default function AdminGroupeDetailPage() {
               {loadingStudents ? (
                 <div className="flex justify-center py-4"><Loader2 className="h-5 w-5 animate-spin text-blue-600" /></div>
               ) : filteredStudents.length === 0 ? (
-                <p className="py-4 text-center text-[13px] text-neutral-500 dark:text-neutral-400">Aucun élève disponible</p>
+                <p className="py-4 text-center text-[13px] text-[var(--foreground-faint)]">Aucun élève disponible</p>
               ) : (
                 <div className="space-y-2">
                   {filteredStudents.map((e) => (
-                    <div key={e.id} className="flex items-center justify-between rounded-lg border border-neutral-200 dark:border-[#2a2d35] p-3">
+                    <div key={e.id} className="flex items-center justify-between rounded-lg border border-[var(--border)] p-3">
                       <div className="min-w-0 flex-1">
-                        <p className="text-[13px] font-medium text-neutral-900 dark:text-neutral-100">{e.prenom} {e.nom}</p>
-                        <p className="text-[12px] text-neutral-400 dark:text-neutral-500">
+                        <p className="text-[13px] font-medium text-[var(--foreground)]">{e.prenom} {e.nom}</p>
+                        <p className="text-[12px] text-[var(--foreground-faint)]">
                           {e.email}
                           {e.niveau && ` · ${niveauLabels[e.niveau] ?? e.niveau}${e.classe ? ` — ${e.classe}` : ""}`}
                           {e.filiere && ` (${filiereLabels[e.filiere] ?? e.filiere})`}

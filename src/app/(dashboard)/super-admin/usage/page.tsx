@@ -192,24 +192,24 @@ function KpiCard({
   delta?: number;
 }) {
   return (
-    <div className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-[#1e2128] dark:bg-[#141720]">
+    <div className="rounded-[18px] border border-[var(--border)] bg-[var(--surface)] p-4 dark:border-[#1e2128] dark:bg-[#141720] shadow-[var(--shadow-card)]">
       <div className="flex items-start justify-between">
         <div className="min-w-0">
-          <p className="text-[11px] font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--foreground-faint)]">
             {label}
           </p>
-          <p className="mt-1.5 text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
+          <p className="mt-1.5 text-2xl font-bold tracking-tight text-[var(--foreground)]">
             {value}
           </p>
           {sub && (
-            <p className="mt-0.5 truncate text-[11px] text-neutral-500 dark:text-neutral-400">
+            <p className="mt-0.5 truncate text-[11px] text-[var(--foreground-faint)]">
               {sub}
             </p>
           )}
         </div>
         <div className="flex flex-col items-end gap-1">
-          <div className="rounded-lg bg-violet-50 p-2 dark:bg-violet-500/10">
-            <Icon className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+          <div className="rounded-lg bg-blue-50 p-2 dark:bg-blue-500/10">
+            <Icon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           </div>
           {typeof delta === "number" && <DeltaBadge value={delta} />}
         </div>
@@ -357,14 +357,14 @@ export default function SuperAdminUsagePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-violet-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="py-20 text-center text-[13px] text-neutral-500 dark:text-neutral-400">
+      <div className="py-20 text-center text-[13px] text-[var(--foreground-faint)]">
         {error ?? "Impossible de charger les données d'usage."}
       </div>
     );
@@ -383,24 +383,24 @@ export default function SuperAdminUsagePage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
+          <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)]">
             Analyse d&apos;usage
           </h1>
-          <p className="mt-1 text-[13px] text-neutral-500 dark:text-neutral-400">
+          <p className="mt-1 text-[13px] text-[var(--foreground-faint)]">
             Comportement réel des utilisateurs sur la plateforme
           </p>
         </div>
         <button
           onClick={exportCsv}
           disabled={users.length === 0}
-          className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50 disabled:opacity-50 dark:border-[#1e2128] dark:bg-[#141720] dark:text-neutral-200"
+          className="flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50 disabled:opacity-50 dark:border-[#1e2128] dark:bg-[#141720] dark:text-neutral-200"
         >
           <Download className="h-4 w-4" />
           Exporter CSV
         </button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-neutral-200 bg-white p-3 dark:border-[#1e2128] dark:bg-[#141720]">
+      <div className="flex flex-wrap items-center gap-2 rounded-[18px] border border-[var(--border)] bg-[var(--surface)] p-3 dark:border-[#1e2128] dark:bg-[#141720] shadow-[var(--shadow-card)]">
         <div className="flex flex-wrap gap-1">
           {RANGES.map((r) => (
             <button
@@ -408,7 +408,7 @@ export default function SuperAdminUsagePage() {
               onClick={() => setRange(r.value)}
               className={`rounded-lg px-3 py-1.5 text-[12px] font-medium transition-colors ${
                 range === r.value
-                  ? "bg-violet-600 text-white"
+                  ? "bg-blue-600 text-white"
                   : "text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
               }`}
             >
@@ -423,14 +423,14 @@ export default function SuperAdminUsagePage() {
               type="date"
               value={customFrom}
               onChange={(e) => setCustomFrom(e.target.value)}
-              className="rounded-lg border border-neutral-200 bg-white px-2 py-1.5 text-[12px] text-neutral-700 dark:border-[#1e2128] dark:bg-[#0f1114] dark:text-neutral-200"
+              className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1.5 text-[12px] text-neutral-700 dark:border-[#1e2128] dark:bg-[#0f1114] dark:text-neutral-200"
             />
             <span className="text-[12px] text-neutral-400">→</span>
             <input
               type="date"
               value={customTo}
               onChange={(e) => setCustomTo(e.target.value)}
-              className="rounded-lg border border-neutral-200 bg-white px-2 py-1.5 text-[12px] text-neutral-700 dark:border-[#1e2128] dark:bg-[#0f1114] dark:text-neutral-200"
+              className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1.5 text-[12px] text-neutral-700 dark:border-[#1e2128] dark:bg-[#0f1114] dark:text-neutral-200"
             />
           </div>
         )}
@@ -439,7 +439,7 @@ export default function SuperAdminUsagePage() {
           <select
             value={centerId}
             onChange={(e) => setCenterId(e.target.value)}
-            className="rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-[12px] text-neutral-700 dark:border-[#1e2128] dark:bg-[#0f1114] dark:text-neutral-200"
+            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1.5 text-[12px] text-neutral-700 dark:border-[#1e2128] dark:bg-[#0f1114] dark:text-neutral-200"
           >
             <option value="">Tous les centres</option>
             {data.centers.map((c) => (
@@ -480,57 +480,57 @@ export default function SuperAdminUsagePage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-xl border border-neutral-200 bg-white p-4 lg:col-span-2 dark:border-[#1e2128] dark:bg-[#141720]">
-          <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+        <div className="rounded-[18px] border border-[var(--border)] bg-[var(--surface)] p-4 lg:col-span-2 dark:border-[#1e2128] dark:bg-[#141720] shadow-[var(--shadow-card)]">
+          <h2 className="text-[13px] font-semibold text-[var(--foreground)]">
             Activité quotidienne
           </h2>
-          <p className="mb-3 text-[11px] text-neutral-500 dark:text-neutral-400">
+          <p className="mb-3 text-[11px] text-[var(--foreground-faint)]">
             Utilisateurs uniques et événements par jour
           </p>
           <UsageActivityChart data={data.daily} />
         </div>
 
-        <div className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-[#1e2128] dark:bg-[#141720]">
-          <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+        <div className="rounded-[18px] border border-[var(--border)] bg-[var(--surface)] p-4 dark:border-[#1e2128] dark:bg-[#141720] shadow-[var(--shadow-card)]">
+          <h2 className="text-[13px] font-semibold text-[var(--foreground)]">
             Engagement
           </h2>
           <div className="mt-3 space-y-3">
             <div className="rounded-lg bg-neutral-50 p-3 dark:bg-neutral-800/50">
-              <p className="text-[11px] text-neutral-500 dark:text-neutral-400">DAU / MAU</p>
-              <p className="text-lg font-bold text-neutral-900 dark:text-neutral-100">
+              <p className="text-[11px] text-[var(--foreground-faint)]">DAU / MAU</p>
+              <p className="text-lg font-bold text-[var(--foreground)]">
                 {o.dauMauRatio.toFixed(0)}%
               </p>
             </div>
             <div className="rounded-lg bg-neutral-50 p-3 dark:bg-neutral-800/50">
-              <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+              <p className="text-[11px] text-[var(--foreground-faint)]">
                 Taux d&apos;actif (30 j)
               </p>
-              <p className="text-lg font-bold text-neutral-900 dark:text-neutral-100">
+              <p className="text-lg font-bold text-[var(--foreground)]">
                 {data.insights.activeUserRate.toFixed(0)}%
               </p>
             </div>
             <div className="rounded-lg bg-neutral-50 p-3 dark:bg-neutral-800/50">
-              <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+              <p className="text-[11px] text-[var(--foreground-faint)]">
                 Feature la plus utilisée
               </p>
-              <p className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+              <p className="text-[13px] font-semibold text-[var(--foreground)]">
                 {data.insights.mostUsedFeature?.feature ?? "—"}
               </p>
             </div>
             <div className="rounded-lg bg-neutral-50 p-3 dark:bg-neutral-800/50">
-              <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+              <p className="text-[11px] text-[var(--foreground-faint)]">
                 Feature la moins utilisée
               </p>
-              <p className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+              <p className="text-[13px] font-semibold text-[var(--foreground)]">
                 {data.insights.leastUsedFeature?.feature ?? "—"}
               </p>
             </div>
             {data.insights.busiestDay && (
               <div className="rounded-lg bg-neutral-50 p-3 dark:bg-neutral-800/50">
-                <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                <p className="text-[11px] text-[var(--foreground-faint)]">
                   Jour le plus actif
                 </p>
-                <p className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+                <p className="text-[13px] font-semibold text-[var(--foreground)]">
                   {data.insights.busiestDay.day} ·{" "}
                   {data.insights.busiestDay.events.toLocaleString("fr-TN")} évé.
                 </p>
@@ -541,20 +541,20 @@ export default function SuperAdminUsagePage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-[#1e2128] dark:bg-[#141720]">
-          <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+        <div className="rounded-[18px] border border-[var(--border)] bg-[var(--surface)] p-4 dark:border-[#1e2128] dark:bg-[#141720] shadow-[var(--shadow-card)]">
+          <h2 className="text-[13px] font-semibold text-[var(--foreground)]">
             Fonctionnalités les plus utilisées
           </h2>
-          <p className="mb-3 text-[11px] text-neutral-500 dark:text-neutral-400">
+          <p className="mb-3 text-[11px] text-[var(--foreground-faint)]">
             Nombre d&apos;événements par feature
           </p>
           <FeatureUsageChart data={featureChartData} />
         </div>
-        <div className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-[#1e2128] dark:bg-[#141720]">
-          <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+        <div className="rounded-[18px] border border-[var(--border)] bg-[var(--surface)] p-4 dark:border-[#1e2128] dark:bg-[#141720] shadow-[var(--shadow-card)]">
+          <h2 className="text-[13px] font-semibold text-[var(--foreground)]">
             Usage par rôle
           </h2>
-          <p className="mb-3 text-[11px] text-neutral-500 dark:text-neutral-400">
+          <p className="mb-3 text-[11px] text-[var(--foreground-faint)]">
             Répartition des événements
           </p>
           <RoleShareChart data={roleChartData} />
@@ -562,8 +562,8 @@ export default function SuperAdminUsagePage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-[#1e2128] dark:bg-[#141720]">
-          <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+        <div className="rounded-[18px] border border-[var(--border)] bg-[var(--surface)] p-4 dark:border-[#1e2128] dark:bg-[#141720] shadow-[var(--shadow-card)]">
+          <h2 className="text-[13px] font-semibold text-[var(--foreground)]">
             Pages les plus visitées
           </h2>
           <div className="mt-3 space-y-2">
@@ -573,18 +573,18 @@ export default function SuperAdminUsagePage() {
               data.pages.map((p) => (
                 <div key={p.path} className="flex items-center gap-3">
                   <span
-                    className="w-10 shrink-0 text-right text-[11px] font-semibold text-neutral-500 dark:text-neutral-400"
+                    className="w-10 shrink-0 text-right text-[11px] font-semibold text-[var(--foreground-faint)]"
                   >
                     {p.percentage.toFixed(0)}%
                   </span>
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800">
                     <div
-                      className="h-full rounded-full bg-violet-500"
+                      className="h-full rounded-full bg-blue-500"
                       style={{ width: `${Math.max(2, p.percentage)}%` }}
                     />
                   </div>
                   <span
-                    className="min-w-0 flex-1 truncate text-[12px] text-neutral-700 dark:text-neutral-300"
+                    className="min-w-0 flex-1 truncate text-[12px] text-[var(--foreground-subtle)]"
                     title={p.path}
                   >
                     {p.path}
@@ -598,8 +598,8 @@ export default function SuperAdminUsagePage() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-[#1e2128] dark:bg-[#141720]">
-          <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+        <div className="rounded-[18px] border border-[var(--border)] bg-[var(--surface)] p-4 dark:border-[#1e2128] dark:bg-[#141720] shadow-[var(--shadow-card)]">
+          <h2 className="text-[13px] font-semibold text-[var(--foreground)]">
             Usage par centre
           </h2>
           <div className="mt-3 space-y-2">
@@ -609,15 +609,15 @@ export default function SuperAdminUsagePage() {
               data.centers.slice(0, 10).map((c) => (
                 <div
                   key={c.centerId}
-                  className="flex items-center justify-between rounded-lg border border-neutral-100 px-3 py-2 dark:border-neutral-800"
+                  className="flex items-center justify-between rounded-lg border border-[var(--border)] px-3 py-2 dark:border-neutral-800"
                 >
                   <div className="flex min-w-0 items-center gap-2">
                     <Building2 className="h-4 w-4 shrink-0 text-neutral-400" />
-                    <span className="truncate text-[12px] font-medium text-neutral-800 dark:text-neutral-200">
+                    <span className="truncate text-[12px] font-medium text-[var(--foreground)]">
                       {c.centerName}
                     </span>
                   </div>
-                  <div className="flex shrink-0 gap-3 text-[11px] text-neutral-500 dark:text-neutral-400">
+                  <div className="flex shrink-0 gap-3 text-[11px] text-[var(--foreground-faint)]">
                     <span>{c.users} util.</span>
                     <span>{c.sessions} sess.</span>
                     <span>{c.events.toLocaleString("fr-TN")} évé.</span>
@@ -629,9 +629,9 @@ export default function SuperAdminUsagePage() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-[#1e2128] dark:bg-[#141720]">
+      <div className="rounded-[18px] border border-[var(--border)] bg-[var(--surface)] p-4 dark:border-[#1e2128] dark:bg-[#141720] shadow-[var(--shadow-card)]">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+          <h2 className="text-[13px] font-semibold text-[var(--foreground)]">
             Utilisateurs ({usersTotal.toLocaleString("fr-TN")})
           </h2>
           <div className="flex flex-wrap items-center gap-2">
@@ -641,13 +641,13 @@ export default function SuperAdminUsagePage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Nom, prénom, email…"
-                className="w-48 rounded-lg border border-neutral-200 bg-white py-1.5 pl-8 pr-2.5 text-[12px] text-neutral-700 dark:border-[#1e2128] dark:bg-[#0f1114] dark:text-neutral-200"
+                className="w-48 rounded-lg border border-[var(--border)] bg-[var(--surface)] py-1.5 pl-8 pr-2.5 text-[12px] text-neutral-700 dark:border-[#1e2128] dark:bg-[#0f1114] dark:text-neutral-200"
               />
             </div>
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="rounded-lg border border-neutral-200 bg-white px-2 py-1.5 text-[12px] text-neutral-700 dark:border-[#1e2128] dark:bg-[#0f1114] dark:text-neutral-200"
+              className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1.5 text-[12px] text-neutral-700 dark:border-[#1e2128] dark:bg-[#0f1114] dark:text-neutral-200"
             >
               {ROLES.map((r) => (
                 <option key={r.value} value={r.value}>
@@ -658,7 +658,7 @@ export default function SuperAdminUsagePage() {
             <select
               value={activeFilter}
               onChange={(e) => setActiveFilter(e.target.value)}
-              className="rounded-lg border border-neutral-200 bg-white px-2 py-1.5 text-[12px] text-neutral-700 dark:border-[#1e2128] dark:bg-[#0f1114] dark:text-neutral-200"
+              className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1.5 text-[12px] text-neutral-700 dark:border-[#1e2128] dark:bg-[#0f1114] dark:text-neutral-200"
             >
               <option value="">Tous</option>
               <option value="active">Actifs sur la période</option>
@@ -670,7 +670,7 @@ export default function SuperAdminUsagePage() {
         <div className="-mx-4 overflow-x-auto px-4">
           <table className="w-full min-w-[860px] text-left">
             <thead>
-              <tr className="border-b border-neutral-200 text-[11px] uppercase tracking-wide text-neutral-500 dark:border-[#1e2128] dark:text-neutral-400">
+              <tr className="border-b border-[var(--border)] text-[11px] uppercase tracking-wide text-neutral-500 dark:border-[#1e2128] dark:text-neutral-400">
                 <th className="py-2 pr-3 font-medium">Utilisateur</th>
                 <th className="py-2 pr-3 font-medium">Rôle</th>
                 <th className="py-2 pr-3 font-medium">Centre</th>
@@ -685,14 +685,14 @@ export default function SuperAdminUsagePage() {
               {usersLoading ? (
                 <tr>
                   <td colSpan={8} className="py-10 text-center">
-                    <Loader2 className="mx-auto h-5 w-5 animate-spin text-violet-600" />
+                    <Loader2 className="mx-auto h-5 w-5 animate-spin text-blue-600" />
                   </td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
                   <td
                     colSpan={8}
-                    className="py-10 text-center text-[13px] text-neutral-500 dark:text-neutral-400"
+                    className="py-10 text-center text-[13px] text-[var(--foreground-faint)]"
                   >
                     Aucun utilisateur trouvé
                   </td>
@@ -701,10 +701,10 @@ export default function SuperAdminUsagePage() {
                 users.map((u) => (
                   <tr
                     key={u.id}
-                    className="border-b border-neutral-100 text-[12px] text-neutral-700 dark:border-neutral-800 dark:text-neutral-300"
+                    className="border-b border-[var(--border)] text-[12px] text-neutral-700 dark:border-neutral-800 dark:text-neutral-300"
                   >
                     <td className="py-2.5 pr-3">
-                      <div className="font-medium text-neutral-900 dark:text-neutral-100">
+                      <div className="font-medium text-[var(--foreground)]">
                         {u.prenom} {u.nom}
                       </div>
                       <div className="text-[11px] text-neutral-400">{u.email}</div>
@@ -722,7 +722,7 @@ export default function SuperAdminUsagePage() {
                     <td className="py-2.5 text-right">
                       <button
                         onClick={() => openUser(u.id)}
-                        className="text-[11px] font-semibold text-violet-600 hover:text-violet-700 dark:text-violet-400"
+                        className="text-[11px] font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400"
                       >
                         Détails
                       </button>
@@ -736,21 +736,21 @@ export default function SuperAdminUsagePage() {
 
         {usersTotalPages > 1 && (
           <div className="mt-3 flex items-center justify-between">
-            <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+            <p className="text-[11px] text-[var(--foreground-faint)]">
               Page {usersPage} sur {usersTotalPages}
             </p>
             <div className="flex gap-1.5">
               <button
                 onClick={() => setUsersPage((p) => Math.max(1, p - 1))}
                 disabled={usersPage <= 1}
-                className="rounded-lg border border-neutral-200 px-2.5 py-1 text-[12px] disabled:opacity-40 dark:border-[#1e2128]"
+                className="rounded-lg border border-[var(--border)] px-2.5 py-1 text-[12px] disabled:opacity-40 dark:border-[#1e2128]"
               >
                 Précédent
               </button>
               <button
                 onClick={() => setUsersPage((p) => Math.min(usersTotalPages, p + 1))}
                 disabled={usersPage >= usersTotalPages}
-                className="rounded-lg border border-neutral-200 px-2.5 py-1 text-[12px] disabled:opacity-40 dark:border-[#1e2128]"
+                className="rounded-lg border border-[var(--border)] px-2.5 py-1 text-[12px] disabled:opacity-40 dark:border-[#1e2128]"
               >
                 Suivant
               </button>
@@ -761,13 +761,13 @@ export default function SuperAdminUsagePage() {
 
       {selectedUser && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-t-2xl bg-white p-5 sm:rounded-2xl dark:bg-[#141720]">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-t-2xl bg-[var(--surface)] p-5 sm:rounded-2xl dark:bg-[#141720]">
             <div className="mb-4 flex items-start justify-between">
               <div>
-                <h3 className="text-base font-bold text-neutral-900 dark:text-neutral-100">
+                <h3 className="text-base font-bold text-[var(--foreground)]">
                   {selectedUser.user.prenom} {selectedUser.user.nom}
                 </h3>
-                <p className="text-[12px] text-neutral-500 dark:text-neutral-400">
+                <p className="text-[12px] text-[var(--foreground-faint)]">
                   {selectedUser.user.email} · {ROLE_LABELS[selectedUser.user.role] ??
                     selectedUser.user.role}{" "}
                   · {selectedUser.user.centerName}
@@ -783,28 +783,28 @@ export default function SuperAdminUsagePage() {
 
             <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
               <div className="rounded-lg bg-neutral-50 p-2.5 dark:bg-neutral-800/50">
-                <p className="text-[10px] text-neutral-500 dark:text-neutral-400">Sessions</p>
-                <p className="text-base font-bold text-neutral-900 dark:text-neutral-100">
+                <p className="text-[10px] text-[var(--foreground-faint)]">Sessions</p>
+                <p className="text-base font-bold text-[var(--foreground)]">
                   {selectedUser.stats.sessions}
                 </p>
               </div>
               <div className="rounded-lg bg-neutral-50 p-2.5 dark:bg-neutral-800/50">
-                <p className="text-[10px] text-neutral-500 dark:text-neutral-400">Jours actifs</p>
-                <p className="text-base font-bold text-neutral-900 dark:text-neutral-100">
+                <p className="text-[10px] text-[var(--foreground-faint)]">Jours actifs</p>
+                <p className="text-base font-bold text-[var(--foreground)]">
                   {selectedUser.stats.activeDays}
                 </p>
               </div>
               <div className="rounded-lg bg-neutral-50 p-2.5 dark:bg-neutral-800/50">
-                <p className="text-[10px] text-neutral-500 dark:text-neutral-400">
+                <p className="text-[10px] text-[var(--foreground-faint)]">
                   Durée moy.
                 </p>
-                <p className="text-base font-bold text-neutral-900 dark:text-neutral-100">
+                <p className="text-base font-bold text-[var(--foreground)]">
                   {formatDuration(selectedUser.stats.averageSessionDurationSeconds)}
                 </p>
               </div>
               <div className="rounded-lg bg-neutral-50 p-2.5 dark:bg-neutral-800/50">
-                <p className="text-[10px] text-neutral-500 dark:text-neutral-400">Total</p>
-                <p className="text-base font-bold text-neutral-900 dark:text-neutral-100">
+                <p className="text-[10px] text-[var(--foreground-faint)]">Total</p>
+                <p className="text-base font-bold text-[var(--foreground)]">
                   {formatDuration(selectedUser.stats.totalUsageSeconds)}
                 </p>
               </div>
@@ -812,7 +812,7 @@ export default function SuperAdminUsagePage() {
 
             <div className="mb-4 grid gap-4 sm:grid-cols-2">
               <div>
-                <h4 className="mb-2 text-[12px] font-semibold text-neutral-900 dark:text-neutral-100">
+                <h4 className="mb-2 text-[12px] font-semibold text-[var(--foreground)]">
                   Ses fonctionnalités
                 </h4>
                 <div className="space-y-1.5">
@@ -821,7 +821,7 @@ export default function SuperAdminUsagePage() {
                   ) : (
                     selectedUser.topFeatures.map((f) => (
                       <div key={f.feature} className="flex items-center justify-between text-[12px]">
-                        <span className="truncate text-neutral-700 dark:text-neutral-300">
+                        <span className="truncate text-[var(--foreground-subtle)]">
                           {f.feature}
                         </span>
                         <span className="shrink-0 text-neutral-400">{f.count}</span>
@@ -831,7 +831,7 @@ export default function SuperAdminUsagePage() {
                 </div>
               </div>
               <div>
-                <h4 className="mb-2 text-[12px] font-semibold text-neutral-900 dark:text-neutral-100">
+                <h4 className="mb-2 text-[12px] font-semibold text-[var(--foreground)]">
                   Parcours
                 </h4>
                 <div className="flex flex-wrap gap-1">
@@ -841,7 +841,7 @@ export default function SuperAdminUsagePage() {
                     selectedUser.journey.map((p, i) => (
                       <span
                         key={`${p}-${i}`}
-                        className="rounded-md bg-violet-50 px-2 py-0.5 text-[11px] text-violet-700 dark:bg-violet-500/10 dark:text-violet-300"
+                        className="rounded-md bg-blue-50 px-2 py-0.5 text-[11px] text-blue-700 dark:bg-blue-500/10 dark:text-blue-300"
                       >
                         {p}
                       </span>
@@ -851,7 +851,7 @@ export default function SuperAdminUsagePage() {
               </div>
             </div>
 
-            <h4 className="mb-2 text-[12px] font-semibold text-neutral-900 dark:text-neutral-100">
+            <h4 className="mb-2 text-[12px] font-semibold text-[var(--foreground)]">
               Activité récente
             </h4>
             <div className="space-y-1">
@@ -863,7 +863,7 @@ export default function SuperAdminUsagePage() {
                     key={a.id}
                     className="flex items-center justify-between rounded-lg px-2 py-1.5 text-[12px] odd:bg-neutral-50 dark:odd:bg-neutral-800/40"
                   >
-                    <span className="font-medium text-neutral-800 dark:text-neutral-200">
+                    <span className="font-medium text-[var(--foreground)]">
                       {a.event.replace(/_/g, " ")}
                     </span>
                     <span className="truncate text-[11px] text-neutral-400">{a.path ?? "—"}</span>

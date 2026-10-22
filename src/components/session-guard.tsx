@@ -60,7 +60,7 @@ export default function SessionGuard() {
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4">
-      <div dir="ltr" className="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-2xl dark:bg-slate-900">
+      <div dir="ltr" className="w-full max-w-md rounded-2xl bg-[var(--surface)] p-6 text-center shadow-2xl dark:bg-slate-900">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
           <AlertTriangle className="h-6 w-6 text-amber-600 dark:text-amber-400" />
         </div>

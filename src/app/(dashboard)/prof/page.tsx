@@ -18,6 +18,7 @@ import {
 import { formatDate, formatCurrency } from "@/lib/utils";
 import type { SessionUser } from "@/types";
 import { SkeletonPage } from "@/components/ui/skeleton";
+import { MetricCard } from "@/components/ui";
 
 interface GroupeStats {
   id: string;
@@ -147,10 +148,10 @@ export default function ProfDashboardPage() {
   return (
     <div className="space-y-5">
       <div className="flex flex-col gap-0.5">
-        <h1 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
+        <h1 className="text-xl font-semibold text-[var(--foreground)]">
           Bonjour, {user?.prenom ?? "Prof"}
         </h1>
-        <p className="text-[13px] text-neutral-400 dark:text-neutral-500">
+        <p className="text-[13px] text-[var(--foreground-faint)]">
           Vue d&apos;ensemble de votre activite.
         </p>
       </div>
@@ -163,72 +164,40 @@ export default function ProfDashboardPage() {
 
       {stats && (
         <>
-          {/* Hero card + secondary stats */}
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            {/* Hero card - Impaye net */}
-            <Link
-              href="/prof/eleves?filter=unpaid"
-              className="group relative overflow-hidden rounded-xl border border-neutral-200 bg-gradient-to-br from-blue-50 via-white to-blue-50/50 p-6 transition-all duration-200 hover:-translate-y-0.5 dark:border-[#2a2d35] dark:from-blue-600/5 dark:via-[#181b22] dark:to-blue-600/5"
-            >
-              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-blue-100/50 dark:bg-blue-600/5" />
-              <div className="relative">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                  Impaye net
-                </p>
-                <p className="mt-2 text-3xl font-bold tabular-nums tracking-tight text-neutral-900 dark:text-neutral-50">
-                  {formatCurrency(stats.impayeNet)}
-                </p>
-                <div className="mt-3 flex items-center gap-1 text-[12px] font-medium text-blue-700 opacity-0 transition-opacity group-hover:opacity-100 dark:text-blue-400">
-                  Voir les details <ChevronRight className="h-3 w-3" />
-                </div>
-              </div>
-            </Link>
-
-            {/* Encaisser */}
-            <Link
-              href="/prof/compte"
-              className="group rounded-xl border border-neutral-200 bg-white p-5 transition-all duration-200 hover:-translate-y-0.5 dark:border-[#2a2d35] dark:bg-[#181b22]"
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                    A encaisser net
-                  </p>
-                  <p className="mt-2 text-2xl font-bold tabular-nums tracking-tight text-emerald-600 dark:text-emerald-400">
-                    {formatCurrency(stats.claimable)}
-                  </p>
-                </div>
-                <div className="rounded-lg bg-emerald-50 p-2 dark:bg-emerald-500/10">
-                  <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                </div>
-              </div>
-              <div className="mt-3 flex items-center gap-1 text-[12px] font-medium text-blue-700 opacity-0 transition-opacity group-hover:opacity-100 dark:text-blue-400">
-                Ce que le centre vous doit <ChevronRight className="h-3 w-3" />
-              </div>
-            </Link>
-
-            {/* Eleves */}
-            <Link
-              href="/prof/eleves"
-              className="group rounded-xl border border-neutral-200 bg-white p-5 transition-all duration-200 hover:-translate-y-0.5 dark:border-[#2a2d35] dark:bg-[#181b22]"
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                    Mes Eleves
-                  </p>
-                  <p className="mt-2 text-2xl font-bold tabular-nums tracking-tight text-neutral-900 dark:text-neutral-50">
-                    {stats.totalEleves}
-                  </p>
-                </div>
-                <div className="rounded-lg bg-blue-50 p-2 dark:bg-blue-600/10">
-                  <Users className="h-4 w-4 text-blue-700 dark:text-blue-400" />
-                </div>
-              </div>
-              <div className="mt-3 flex items-center gap-1 text-[12px] font-medium text-blue-700 opacity-0 transition-opacity group-hover:opacity-100 dark:text-blue-400">
-                Voir la liste <ChevronRight className="h-3 w-3" />
-              </div>
-            </Link>
+          {/* KPI cards */}
+          <div
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 animate-fade-in-up"
+            style={{ animationDelay: "60ms" }}
+          >
+            <MetricCard
+              label="Impayé net"
+              value={stats.impayeNet}
+              sub="à recouvrer"
+              icon={AlertTriangle}
+              tone="error"
+            />
+            <MetricCard
+              label="À encaisser net"
+              value={stats.claimable}
+              sub="dû par le centre"
+              icon={TrendingUp}
+              tone="primary"
+            />
+            <MetricCard
+              label="Profit net · ce mois"
+              value={stats.profit.total}
+              sub={`${formatCurrency(stats.profit.studentShare)} gains élèves`}
+              icon={ClipboardCheck}
+              tone="success"
+            />
+            <MetricCard
+              label="Mes élèves"
+              value={stats.totalEleves}
+              currency={false}
+              sub={`${stats.groupes.length} groupe${stats.groupes.length > 1 ? "s" : ""}`}
+              icon={Users}
+              tone="warning"
+            />
           </div>
 
           {/* Profit net du mois */}
@@ -236,24 +205,24 @@ export default function ProfDashboardPage() {
             <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-emerald-100/50 dark:bg-emerald-500/5" />
             <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                   Profit net · {monthLabel()}
                 </p>
                 <p className="mt-2 text-3xl font-bold tabular-nums tracking-tight text-emerald-600 dark:text-emerald-400">
                   {formatCurrency(stats.profit.total)}
                 </p>
-                <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-neutral-500 dark:text-neutral-400">
+                <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-[var(--foreground-faint)]">
                   <span>
                     Gains élèves :{" "}
-                    <b className="tabular-nums text-neutral-900 dark:text-neutral-100">{formatCurrency(stats.profit.studentShare)}</b>
+                    <b className="tabular-nums text-[var(--foreground)]">{formatCurrency(stats.profit.studentShare)}</b>
                   </span>
                   <span>
                     Encaissements directs :{" "}
-                    <b className="tabular-nums text-neutral-900 dark:text-neutral-100">{formatCurrency(stats.profit.reverseNet)}</b>
+                    <b className="tabular-nums text-[var(--foreground)]">{formatCurrency(stats.profit.reverseNet)}</b>
                   </span>
                   <span>
                     Ajustements :{" "}
-                    <b className="tabular-nums text-neutral-900 dark:text-neutral-100">{formatCurrency(stats.profit.adjustments)}</b>
+                    <b className="tabular-nums text-[var(--foreground)]">{formatCurrency(stats.profit.adjustments)}</b>
                   </span>
                 </div>
               </div>
@@ -270,7 +239,7 @@ export default function ProfDashboardPage() {
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-3">
             <Link
               href="/prof/seances"
-              className="group rounded-xl border border-neutral-200 bg-white px-4 py-3 transition-all duration-200 hover:border-blue-200 dark:border-[#2a2d35] dark:bg-[#181b22] dark:hover:border-blue-600/20"
+              className="group rounded-[18px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3 transition-all duration-200 hover:border-blue-200 dark:hover:border-blue-600/20 shadow-[var(--shadow-card)]"
             >
               <div className="flex items-center gap-3">
                 <div className="rounded-md bg-blue-50 p-1.5 dark:bg-blue-500/10">
@@ -278,27 +247,27 @@ export default function ProfDashboardPage() {
                 </div>
                 <div>
                   <p className="text-lg font-bold tabular-nums text-neutral-900 dark:text-neutral-50">{stats.totalSeances}</p>
-                  <p className="text-[11px] text-neutral-400 dark:text-neutral-500">Seances</p>
+                  <p className="text-[11px] text-[var(--foreground-faint)]">Seances</p>
                 </div>
               </div>
             </Link>
             <Link
               href="/prof/groupes"
-              className="group rounded-xl border border-neutral-200 bg-white px-4 py-3 transition-all duration-200 hover:border-blue-200 dark:border-[#2a2d35] dark:bg-[#181b22] dark:hover:border-blue-600/20"
+              className="group rounded-[18px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3 transition-all duration-200 hover:border-blue-200 dark:hover:border-blue-600/20 shadow-[var(--shadow-card)]"
             >
               <div className="flex items-center gap-3">
-                <div className="rounded-md bg-violet-50 p-1.5 dark:bg-violet-500/10">
-                  <FolderOpen className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                <div className="rounded-md bg-blue-50 p-1.5 dark:bg-blue-500/10">
+                  <FolderOpen className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
                   <p className="text-lg font-bold tabular-nums text-neutral-900 dark:text-neutral-50">{stats.groupes.length}</p>
-                  <p className="text-[11px] text-neutral-400 dark:text-neutral-500">Groupes</p>
+                  <p className="text-[11px] text-[var(--foreground-faint)]">Groupes</p>
                 </div>
               </div>
             </Link>
             <Link
               href="/prof/presences"
-              className="group rounded-xl border border-neutral-200 bg-white px-4 py-3 transition-all duration-200 hover:border-blue-200 dark:border-[#2a2d35] dark:bg-[#181b22] dark:hover:border-blue-600/20"
+              className="group rounded-[18px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3 transition-all duration-200 hover:border-blue-200 dark:hover:border-blue-600/20 shadow-[var(--shadow-card)]"
             >
               <div className="flex items-center gap-3">
                 <div className="rounded-md bg-emerald-50 p-1.5 dark:bg-emerald-500/10">
@@ -306,7 +275,7 @@ export default function ProfDashboardPage() {
                 </div>
                 <div>
                   <p className="text-lg font-bold tabular-nums text-neutral-900 dark:text-neutral-50">{stats.totalSeancesTerminees}</p>
-                  <p className="text-[11px] text-neutral-400 dark:text-neutral-500">Presences</p>
+                  <p className="text-[11px] text-[var(--foreground-faint)]">Presences</p>
                 </div>
               </div>
             </Link>
@@ -314,9 +283,9 @@ export default function ProfDashboardPage() {
 
           {/* Mes Groupes table */}
           {stats.groupes.length > 0 && (
-            <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
-              <div className="flex items-center justify-between border-b border-neutral-100 px-5 py-3 dark:border-[#2a2d35]">
-                <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">Mes Groupes</h2>
+            <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+              <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-3">
+                <h2 className="text-[13px] font-semibold text-[var(--foreground)]">Mes Groupes</h2>
                 <Link
                   href="/prof/groupes"
                   className="text-[12px] font-medium text-blue-700 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
@@ -327,15 +296,15 @@ export default function ProfDashboardPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-[13px]">
                   <thead>
-                    <tr className="border-b border-neutral-100 dark:border-[#2a2d35]">
-                      <th className="px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
-                      <th className="px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Eleves</th>
-                      <th className="px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Seances</th>
-                      <th className="px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Prix/Seance</th>
+                    <tr className="border-b border-[var(--border)]">
+                      <th className="px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Groupe</th>
+                      <th className="px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Eleves</th>
+                      <th className="px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Seances</th>
+                      <th className="px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Prix/Seance</th>
                       <th className="px-5 py-2.5" />
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+                  <tbody className="divide-y divide-[var(--border)]">
                     {stats.groupes.map((g) => (
                       <tr
                         key={g.id}
@@ -353,7 +322,7 @@ export default function ProfDashboardPage() {
                             {g.nbSeances}
                           </span>
                         </td>
-                        <td className="px-5 py-3 tabular-nums font-medium text-neutral-900 dark:text-neutral-100">{formatCurrency(g.prixParSeance)}</td>
+                        <td className="px-5 py-3 tabular-nums font-medium text-[var(--foreground)]">{formatCurrency(g.prixParSeance)}</td>
                         <td className="px-5 py-3">
                           <ChevronRight className="h-4 w-4 text-neutral-300 dark:text-neutral-600" />
                         </td>
@@ -368,9 +337,9 @@ export default function ProfDashboardPage() {
       )}
 
       {/* Prochaines Seances */}
-      <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
-        <div className="flex items-center justify-between border-b border-neutral-100 px-5 py-3 dark:border-[#2a2d35]">
-          <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">Prochaines Seances</h2>
+      <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+        <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-3">
+          <h2 className="text-[13px] font-semibold text-[var(--foreground)]">Prochaines Seances</h2>
           <div className="flex items-center gap-2">
             <Link
               href="/prof/seances"
@@ -389,21 +358,21 @@ export default function ProfDashboardPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-[13px]">
             <thead>
-              <tr className="border-b border-neutral-100 dark:border-[#2a2d35]">
-                <th className="px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Date</th>
-                <th className="px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
-                <th className="px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Statut</th>
-                <th className="px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Presences</th>
-                <th className="px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Action</th>
+              <tr className="border-b border-[var(--border)]">
+                <th className="px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Date</th>
+                <th className="px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Groupe</th>
+                <th className="px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Statut</th>
+                <th className="px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Presences</th>
+                <th className="px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+            <tbody className="divide-y divide-[var(--border)]">
               {seances.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-5 py-12 text-center">
                     <div className="flex flex-col items-center gap-2">
                       <Calendar className="h-8 w-8 text-neutral-300 dark:text-neutral-600" />
-                      <p className="text-[13px] text-neutral-400 dark:text-neutral-500">Aucune seance a venir</p>
+                      <p className="text-[13px] text-[var(--foreground-faint)]">Aucune seance a venir</p>
                     </div>
                   </td>
                 </tr>
@@ -416,14 +385,14 @@ export default function ProfDashboardPage() {
                     onClick={() => router.push(`/prof/presences/${seance.id}`)}
                     className="cursor-pointer transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800/40"
                   >
-                    <td className="px-5 py-3 text-neutral-500 dark:text-neutral-400">{formatDate(seance.date)}</td>
-                    <td className="px-5 py-3 font-medium text-neutral-900 dark:text-neutral-100">{seance.groupe.nom}</td>
+                    <td className="px-5 py-3 text-[var(--foreground-faint)]">{formatDate(seance.date)}</td>
+                    <td className="px-5 py-3 font-medium text-[var(--foreground)]">{seance.groupe.nom}</td>
                     <td className="px-5 py-3">
                       <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold ${statusColor(seance.statut)}`}>
                         {statusLabel(seance.statut)}
                       </span>
                     </td>
-                    <td className="px-5 py-3 tabular-nums text-neutral-500 dark:text-neutral-400">{seance._count.presences}</td>
+                    <td className="px-5 py-3 tabular-nums text-[var(--foreground-faint)]">{seance._count.presences}</td>
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-2">
                         {timing && (

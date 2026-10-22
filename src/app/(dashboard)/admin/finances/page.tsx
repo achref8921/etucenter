@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { formatCurrency, formatDateTime, formatDate } from "@/lib/utils";
 import TimeInput from "@/components/time-input";
+import { Button, PageHeader, MetricCard } from "@/components/ui";
 
 interface Stats {
   totalRevenue: number;
@@ -605,93 +606,76 @@ export default function FinancesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-[var(--primary)]" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Finances</h1>
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={openModal}
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700"
-          >
-            <Plus className="h-4 w-4" />
-            Enregistrer un paiement
-          </button>
-          <button
-            onClick={openCreditModal}
-            className="flex items-center gap-2 rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
-          >
-            <Coins className="h-4 w-4" />
-            Ajouter un crédit
-          </button>
-        </div>
-      </div>
+    <div className="space-y-[var(--space-section-y)]">
+      <PageHeader
+        title="Finances"
+        subtitle="Comptes élèves, encaissements, crédits et grand livre"
+        actions={
+          <>
+            <Button variant="outline" onClick={openCreditModal}>
+              <Coins className="h-4 w-4" />
+              Ajouter un crédit
+            </Button>
+            <Button onClick={openModal}>
+              <Plus className="h-4 w-4" />
+              Enregistrer un paiement
+            </Button>
+          </>
+        }
+      />
 
       {error && (
-        <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">
+        <div className="rounded-[var(--radius-lg)] border border-red-200 bg-red-50 p-4 text-[var(--text-base)] text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
           {error}
         </div>
       )}
 
       {stats && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[13px] text-neutral-500 dark:text-neutral-400">Revenus Totaux</p>
-                <p className="mt-1 text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
-                  {formatCurrency(stats.totalRevenue)}
-                </p>
-              </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-500">
-                <DollarSign className="h-6 w-6 text-white" />
-              </div>
-            </div>
-          </div>
-          <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[13px] text-neutral-500 dark:text-neutral-400">Total Payé</p>
-                <p className="mt-1 text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
-                  {formatCurrency(stats.totalPaid)}
-                </p>
-              </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-500">
-                <TrendingUp className="h-6 w-6 text-white" />
-              </div>
-            </div>
-          </div>
-          <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[13px] text-neutral-500 dark:text-neutral-400">Impayés</p>
-                <p className="mt-1 text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
-                  {formatCurrency(stats.totalUnpaid)}
-                </p>
-              </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-red-500">
-                <AlertTriangle className="h-6 w-6 text-white" />
-              </div>
-            </div>
-          </div>
+        <div
+          className="grid grid-cols-1 gap-4 sm:grid-cols-3 animate-fade-in-up"
+          style={{ animationDelay: "80ms" }}
+        >
+          <MetricCard
+            label="Revenus Totaux"
+            value={stats.totalRevenue}
+            sub={`${stats.totalRevenue > 0 ? Math.round((stats.totalPaid / stats.totalRevenue) * 100) : 0}% encaissé`}
+            icon={DollarSign}
+            tone="success"
+            ring={stats.totalRevenue > 0 ? Math.round((stats.totalPaid / stats.totalRevenue) * 100) : 0}
+          />
+          <MetricCard
+            label="Total Payé"
+            value={stats.totalPaid}
+            sub="règlements reçus"
+            icon={TrendingUp}
+            tone="primary"
+          />
+          <MetricCard
+            label="Impayés"
+            value={stats.totalUnpaid}
+            sub={stats.totalUnpaid > 0 ? "à recouvrer" : "aucun impayé"}
+            icon={AlertTriangle}
+            tone="error"
+          />
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-6lg:grid-cols-3">
-        <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] shadow-sm">
           <button
             type="button"
             onClick={() => setShowStudentsPanel((v) => !v)}
             aria-expanded={showStudentsPanel}
-            className="flex w-full items-center justify-between gap-2 border-b border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 px-4 py-2.5 text-left dark:bg-[#1e2128]"
+            className="flex w-full items-center justify-between gap-2 border-b border-[var(--border)] bg-neutral-50 px-4 py-2.5 text-left dark:bg-[#1e2128]"
           >
-            <h2 className="flex min-w-0 flex-wrap items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-              <Users className="h-4 w-4 shrink-0 text-neutral-500 dark:text-neutral-400" />
+            <h2 className="flex min-w-0 flex-wrap items-center gap-2 text-sm font-semibold text-[var(--foreground)]">
+              <Users className="h-4 w-4 shrink-0 text-[var(--foreground-faint)]" />
               Élèves ({filteredStudents.length})
               {filterGroupe && (
                 <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-medium text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
@@ -699,7 +683,7 @@ export default function FinancesPage() {
                 </span>
               )}
               {!showStudentsPanel && selectedStudent && (
-                <span className="truncate text-[12px] font-medium text-neutral-500 dark:text-neutral-400">
+                <span className="truncate text-[12px] font-medium text-[var(--foreground-faint)]">
                   · {selectedStudent.prenom} {selectedStudent.nom}
                 </span>
               )}
@@ -712,7 +696,7 @@ export default function FinancesPage() {
           </button>
           {showStudentsPanel && (
             <>
-              <div className="border-b border-neutral-200 dark:border-[#2a2d35] p-3">
+              <div className="border-b border-[var(--border)] p-3">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
                   <input
@@ -720,15 +704,15 @@ export default function FinancesPage() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Rechercher..."
-                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] pl-9 pr-3 py-2 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] pl-9 pr-3 py-2 text-[13px] text-[var(--foreground)] focus:border-blue-500 focus:outline-none"
                   />
                 </div>
                 <div className="mt-2 flex items-center gap-2">
-                  <Filter className="h-3.5 w-3.5 shrink-0 text-neutral-400 dark:text-neutral-500" />
+                  <Filter className="h-3.5 w-3.5 shrink-0 text-[var(--foreground-faint)]" />
                   <select
                     value={filterGroupe}
                     onChange={(e) => setFilterGroupe(e.target.value)}
-                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-[13px] text-neutral-900 dark:text-neutral-100 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[13px] text-[var(--foreground)] focus:border-blue-500 focus:outline-none"
                   >
                     <option value="">Tous les groupes</option>
                     {groupOptions.map((g) => (
@@ -745,7 +729,7 @@ export default function FinancesPage() {
                 <Loader2 className="mx-auto h-6 w-6 animate-spin text-blue-600" />
               </p>
             ) : filteredStudents.length === 0 ? (
-              <p className="px-6 py-8 text-center text-sm text-neutral-500 dark:text-neutral-400">
+              <p className="px-6 py-8 text-center text-sm text-[var(--foreground-faint)]">
                 Aucun élève
               </p>
             ) : (
@@ -755,18 +739,18 @@ export default function FinancesPage() {
                   onClick={() =>
                     router.replace(`/admin/finances?studentId=${s.id}`)
                   }
-                  className={`block w-full border-b border-neutral-100 dark:border-[#2a2d35] px-4 py-3 text-left transition-colors ${
+                  className={`block w-full border-b border-[var(--border)] px-4 py-3 text-left transition-colors ${
                     selectedId === s.id
                       ? "bg-blue-50 dark:bg-blue-900/20"
-                      : "hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]"
+                      : "hover:bg-[var(--surface-muted)]"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                      <p className="truncate text-sm font-medium text-[var(--foreground)]">
                         {s.prenom} {s.nom}
                       </p>
-                      <p className="truncate text-xs text-neutral-500 dark:text-neutral-400">
+                      <p className="truncate text-xs text-[var(--foreground-faint)]">
                         {s.codeEleve ? `#${s.codeEleve}` : ""} {s.classe ? `· ${s.classe}` : ""}
                       </p>
                     </div>
@@ -793,9 +777,9 @@ export default function FinancesPage() {
 
         <div className="space-y-6 lg:col-span-2">
           {!selectedId ? (
-            <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-12 text-center">
+            <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] p-12 text-center">
               <Coins className="mx-auto h-12 w-12 text-neutral-300 dark:text-neutral-600" />
-              <p className="mt-4 text-sm text-neutral-500 dark:text-neutral-400">
+              <p className="mt-4 text-sm text-[var(--foreground-faint)]">
                 Sélectionnez un élève pour voir son compte financier
               </p>
             </div>
@@ -807,7 +791,7 @@ export default function FinancesPage() {
                     ? "border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-900/10"
                     : balance < 0
                       ? "border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-900/10"
-                      : "border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]"
+                      : "border-[var(--border)] bg-white dark:bg-[#181b22]"
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -824,7 +808,7 @@ export default function FinancesPage() {
                       <Wallet className="h-6 w-6 text-white" />
                     </div>
                     <div>
-                      <p className="text-[13px] text-neutral-500 dark:text-neutral-400">
+                      <p className="text-[13px] text-[var(--foreground-faint)]">
                         Solde du compte
                       </p>
                       <p
@@ -833,7 +817,7 @@ export default function FinancesPage() {
                             ? "text-green-700 dark:text-green-400"
                             : balance < 0
                               ? "text-red-700 dark:text-red-400"
-                              : "text-neutral-900 dark:text-neutral-100"
+                              : "text-[var(--foreground)]"
                         }`}
                       >
                         {balance > 0 ? "+" : ""}
@@ -852,7 +836,7 @@ export default function FinancesPage() {
                     )}
                   </div>
                 </div>
-                <p className="mt-3 text-sm text-neutral-600 dark:text-neutral-400">
+                <p className="mt-3 text-sm text-[var(--foreground-subtle)]">
                   {balance > 0
                     ? "Solde prépayé disponible pour l'élève."
                     : balance < 0
@@ -861,17 +845,17 @@ export default function FinancesPage() {
                 </p>
               </div>
 
-              <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
-                <div className="border-b border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
+              <div className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] shadow-sm">
+                <div className="border-b border-[var(--border)] bg-[var(--surface-muted)] px-4 py-2.5">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+                    <h2 className="text-sm font-semibold text-[var(--foreground)]">
                       Grand livre des transactions ({total})
                     </h2>
                     <div className="flex flex-wrap items-center gap-2">
                       <select
                         value={filters.type}
                         onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-                        className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-2 py-1.5 text-xs text-neutral-900 dark:text-neutral-100"
+                        className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] px-2 py-1.5 text-xs text-[var(--foreground)]"
                       >
                         <option value="">Tous les types</option>
                         <option value="PREPAYMENT">Pré-paiement</option>
@@ -883,14 +867,14 @@ export default function FinancesPage() {
                         type="date"
                         value={filters.from}
                         onChange={(e) => setFilters({ ...filters, from: e.target.value })}
-                        className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-2 py-1.5 text-xs text-neutral-900 dark:text-neutral-100"
+                        className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] px-2 py-1.5 text-xs text-[var(--foreground)]"
                       />
                       <span className="text-xs text-neutral-400">→</span>
                       <input
                         type="date"
                         value={filters.to}
                         onChange={(e) => setFilters({ ...filters, to: e.target.value })}
-                        className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-2 py-1.5 text-xs text-neutral-900 dark:text-neutral-100"
+                        className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] px-2 py-1.5 text-xs text-[var(--foreground)]"
                       />
                       <button
                         onClick={applyFilters}
@@ -904,19 +888,19 @@ export default function FinancesPage() {
 
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm">
-                    <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
+                    <thead className="border-b border-[var(--border)]">
                       <tr>
-                        <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Date</th>
-                        <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Type</th>
-                        <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Description</th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Méthode</th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Encaissé par</th>
-                        <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Montant</th>
-                        <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Reçu</th>
-                        <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500"></th>
+                        <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Date</th>
+                        <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Type</th>
+                        <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Description</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Méthode</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Encaissé par</th>
+                        <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Montant</th>
+                        <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Reçu</th>
+                        <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]"></th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+                    <tbody className="divide-y divide-[var(--border)]">
                       {loadingLedger ? (
                         <tr>
                           <td colSpan={7} className="px-6 py-10 text-center">
@@ -925,7 +909,7 @@ export default function FinancesPage() {
                         </tr>
                       ) : transactions.length === 0 ? (
                         <tr>
-                          <td colSpan={7} className="px-6 py-10 text-center text-neutral-500 dark:text-neutral-400">
+                          <td colSpan={7} className="px-6 py-10 text-center text-[var(--foreground-faint)]">
                             Aucune transaction
                           </td>
                         </tr>
@@ -934,11 +918,11 @@ export default function FinancesPage() {
                           <tr
                             key={tx.id}
                             onClick={() => openDetail(tx)}
-                            className={`cursor-pointer hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] ${
+                            className={`cursor-pointer hover:bg-[var(--surface-muted)] ${
                               tx.status === "reversed" ? "opacity-50" : ""
                             }`}
                           >
-                            <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                            <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">
                               {formatDate(tx.date)}
                             </td>
                             <td className="px-4 py-2.5">
@@ -958,14 +942,14 @@ export default function FinancesPage() {
                               </div>
                             </td>
                             <td className="max-w-[220px] px-4 py-2.5">
-                              <p className="truncate text-neutral-900 dark:text-neutral-100">{tx.description}</p>
+                              <p className="truncate text-[var(--foreground)]">{tx.description}</p>
                               {tx.attendance && (
-                                <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                                <p className="text-xs text-[var(--foreground-faint)]">
                                   {tx.attendance.seance.groupe.nom}
                                 </p>
                               )}
                             </td>
-                            <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                            <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">
                               {tx.paymentMethod ? (METHODE_LABEL[tx.paymentMethod] || tx.paymentMethod) : "—"}
                             </td>
                             <td className="px-4 py-2.5">
@@ -980,7 +964,7 @@ export default function FinancesPage() {
                                 {formatCurrency(tx.signedAmount)}
                               </span>
                             </td>
-                            <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                            <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">
                               {tx.receiptNumber || "—"}
                             </td>
                             <td className="px-4 py-2.5">
@@ -991,7 +975,7 @@ export default function FinancesPage() {
                                     openDetail(tx);
                                   }}
                                   title="Détails"
-                                  className="rounded-lg p-1.5 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]"
+                                  className="rounded-lg p-1.5 text-[var(--foreground-faint)] hover:bg-[var(--surface-muted)]"
                                 >
                                   <Eye className="h-4 w-4" />
                                 </button>
@@ -1001,7 +985,7 @@ export default function FinancesPage() {
                                     openReceipt(tx);
                                   }}
                                   title="Reçu"
-                                  className="rounded-lg p-1.5 text-blue-600 dark:text-blue-400 hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]"
+                                  className="rounded-lg p-1.5 text-blue-600 dark:text-blue-400 hover:bg-[var(--surface-muted)]"
                                 >
                                   <FileText className="h-4 w-4" />
                                 </button>
@@ -1012,7 +996,7 @@ export default function FinancesPage() {
                                       openReverse(tx);
                                     }}
                                     title="Annuler"
-                                    className="rounded-lg p-1.5 text-red-600 dark:text-red-400 hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]"
+                                    className="rounded-lg p-1.5 text-red-600 dark:text-red-400 hover:bg-[var(--surface-muted)]"
                                   >
                                     <Undo2 className="h-4 w-4" />
                                   </button>
@@ -1027,22 +1011,22 @@ export default function FinancesPage() {
                 </div>
 
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-between border-t border-neutral-200 dark:border-[#2a2d35] px-4 py-2.5">
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                  <div className="flex items-center justify-between border-t border-[var(--border)] px-4 py-2.5">
+                    <p className="text-sm text-[var(--foreground-faint)]">
                       Page {page} / {totalPages}
                     </p>
                     <div className="flex gap-2">
                       <button
                         onClick={() => fetchLedger(selectedId, page - 1, filters)}
                         disabled={page <= 1}
-                        className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-3 py-1.5 text-sm disabled:opacity-40"
+                        className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm disabled:opacity-40"
                       >
                         Précédent
                       </button>
                       <button
                         onClick={() => fetchLedger(selectedId, page + 1, filters)}
                         disabled={page >= totalPages}
-                        className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-3 py-1.5 text-sm disabled:opacity-40"
+                        className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm disabled:opacity-40"
                       >
                         Suivant
                       </button>
@@ -1055,26 +1039,26 @@ export default function FinancesPage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
-        <div className="border-b border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
-          <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Historique des Paiements</h2>
+      <div className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] shadow-sm">
+        <div className="border-b border-[var(--border)] bg-[var(--surface-muted)] px-4 py-2.5">
+          <h2 className="text-sm font-semibold text-[var(--foreground)]">Historique des Paiements</h2>
         </div>
         <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
+          <thead className="border-b border-[var(--border)]">
             <tr>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Date</th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Élève</th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Montant</th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Méthode</th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500"></th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Date</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Élève</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Groupe</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Montant</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Méthode</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+          <tbody className="divide-y divide-[var(--border)]">
             {paiements.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-6 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                <td colSpan={7} className="px-6 py-8 text-center text-[var(--foreground-faint)]">
                   Aucune transaction trouvée
                 </td>
               </tr>
@@ -1085,10 +1069,10 @@ export default function FinancesPage() {
                   className={
                     paiement.collecteParProf
                       ? "border-l-2 border-l-blue-400 bg-blue-50/50 hover:bg-blue-50 dark:border-l-blue-600 dark:bg-blue-600/[0.06] dark:hover:bg-blue-600/10"
-                      : "hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]"
+                      : "hover:bg-[var(--surface-muted)]"
                   }
                 >
-                  <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                  <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">
                     {formatDateTime(paiement.datePaiement)}
                   </td>
                   <td className="px-4 py-2.5">
@@ -1099,10 +1083,10 @@ export default function FinancesPage() {
                       {paiement.eleve.prenom} {paiement.eleve.nom}
                     </Link>
                   </td>
-                  <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{paiement.groupe.nom}</td>
+                  <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">{paiement.groupe.nom}</td>
                   <td className="px-4 py-2.5 font-medium">{formatCurrency(paiement.montant)}</td>
                   <td className="px-4 py-2.5">
-                    <span className="inline-block rounded-full bg-neutral-100 dark:bg-[#1e2128] px-2.5 py-0.5 text-xs font-medium text-neutral-800 dark:text-neutral-200">
+                    <span className="inline-block rounded-full bg-neutral-100 dark:bg-[#1e2128] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
                       {paiement.methodePaiement}
                     </span>
                   </td>
@@ -1125,21 +1109,21 @@ export default function FinancesPage() {
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => window.open(`/api/paiements/${paiement.id}/facture`, "_blank")}
-                        className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] hover:text-emerald-600 dark:hover:text-emerald-400"
+                        className="rounded p-1 text-[var(--foreground-faint)] hover:bg-[var(--surface-muted)] hover:text-emerald-600 dark:hover:text-emerald-400"
                         title="Générer la facture"
                       >
                         <FileText className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => openEditModal(paiement)}
-                        className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] hover:text-blue-600 dark:hover:text-blue-400"
+                        className="rounded p-1 text-[var(--foreground-faint)] hover:bg-[var(--surface-muted)] hover:text-blue-600 dark:hover:text-blue-400"
                         title="Modifier le montant"
                       >
                         <Pencil className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => openDeleteModal(paiement)}
-                        className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] hover:text-red-600 dark:hover:text-red-400"
+                        className="rounded p-1 text-[var(--foreground-faint)] hover:bg-[var(--surface-muted)] hover:text-red-600 dark:hover:text-red-400"
                         title="Annuler le paiement"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -1155,34 +1139,34 @@ export default function FinancesPage() {
       </div>
 
       {annules.length > 0 && (
-        <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
-          <div className="border-b border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
-            <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+        <div className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] shadow-sm">
+          <div className="border-b border-[var(--border)] bg-[var(--surface-muted)] px-4 py-2.5">
+            <h2 className="text-sm font-semibold text-[var(--foreground)]">
               Paiements annulés
-              <span className="ml-2 text-xs font-normal text-neutral-500 dark:text-neutral-400">({annules.length})</span>
+              <span className="ml-2 text-xs font-normal text-[var(--foreground-faint)]">({annules.length})</span>
             </h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
+              <thead className="border-b border-[var(--border)]">
                 <tr>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Annulé le</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Élève</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Montant</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Motif</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Annulé par</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Annulé le</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Élève</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Groupe</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Montant</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Motif</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Annulé par</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+              <tbody className="divide-y divide-[var(--border)]">
                 {annules.map((a) => (
-                  <tr key={a.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
-                    <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{formatDateTime(a.annuleLe)}</td>
-                    <td className="px-4 py-2.5 text-neutral-900 dark:text-neutral-100">{a.eleveNom}</td>
-                    <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{a.groupeNom}</td>
+                  <tr key={a.id} className="hover:bg-[var(--surface-muted)]">
+                    <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">{formatDateTime(a.annuleLe)}</td>
+                    <td className="px-4 py-2.5 text-[var(--foreground)]">{a.eleveNom}</td>
+                    <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">{a.groupeNom}</td>
                     <td className="px-4 py-2.5 font-medium text-neutral-400 line-through dark:text-neutral-500">{formatCurrency(a.montant)}</td>
-                    <td className="max-w-xs truncate px-4 py-2.5 text-neutral-600 dark:text-neutral-400" title={a.motif}>{a.motif}</td>
-                    <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                    <td className="max-w-xs truncate px-4 py-2.5 text-[var(--foreground-subtle)]" title={a.motif}>{a.motif}</td>
+                    <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">
                       {a.annuleParNom || (a.annuleParRole === "prof" ? "Professeur" : a.annuleParRole === "admin" ? "Administration" : "—")}
                     </td>
                   </tr>
@@ -1195,12 +1179,12 @@ export default function FinancesPage() {
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-0 shadow-xl">
-            <div className="flex shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
+          <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] p-0 shadow-lg">
+            <div className="flex shrink-0 items-center justify-between border-b border-[var(--border)] px-6 py-4">
               <h2 className="text-lg font-semibold">Enregistrer un paiement</h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"
+                className="text-[var(--foreground-faint)] hover:text-neutral-600 dark:hover:text-neutral-400"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -1214,7 +1198,7 @@ export default function FinancesPage() {
                     <select
                       value={filterNiveau}
                       onChange={(e) => { setFilterNiveau(e.target.value); setFilterClasse(""); setFilterFiliere(""); setSelectedEleveId(""); setSelectedGroupeId(""); setMontant(0); }}
-                      className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-2 py-1.5 text-xs focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                      className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-2 py-1.5 text-xs focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                     >
                       <option value="">Niveau</option>
                       <option value="primaire">Primaire</option>
@@ -1227,7 +1211,7 @@ export default function FinancesPage() {
                       value={filterClasse}
                       onChange={(e) => { setFilterClasse(e.target.value); setFilterFiliere(""); setSelectedEleveId(""); setSelectedGroupeId(""); setMontant(0); }}
                       disabled={!filterNiveau}
-                      className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-2 py-1.5 text-xs focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50"
+                      className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-2 py-1.5 text-xs focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50"
                     >
                       <option value="">Classe</option>
                       {availableClasses.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -1238,7 +1222,7 @@ export default function FinancesPage() {
                       value={filterFiliere}
                       onChange={(e) => { setFilterFiliere(e.target.value); setSelectedEleveId(""); setSelectedGroupeId(""); setMontant(0); }}
                       disabled={!showFiliere}
-                      className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-2 py-1.5 text-xs focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50"
+                      className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-2 py-1.5 text-xs focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50"
                     >
                       <option value="">Filière</option>
                       {filieres.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
@@ -1268,15 +1252,15 @@ export default function FinancesPage() {
                     setMontant(0);
                   }}
                   placeholder="Rechercher un élève par nom ou code..."
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 pl-9 pr-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] pl-9 pr-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">
                   Élève
                   {filteredEleves.length > 0 && (
-                    <span className="ml-1 text-xs text-neutral-400 dark:text-neutral-500">({filteredEleves.length})</span>
+                    <span className="ml-1 text-xs text-[var(--foreground-faint)]">({filteredEleves.length})</span>
                   )}
                 </label>
                 <select
@@ -1287,7 +1271,7 @@ export default function FinancesPage() {
                     setMontant(0);
                   }}
                   required
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 >
                   <option value="">Sélectionner un élève</option>
                   {filteredEleves.map((e) => (
@@ -1297,13 +1281,13 @@ export default function FinancesPage() {
                   ))}
                 </select>
                 {filteredEleves.length === 0 && (
-                  <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">Aucun élève trouvé pour ce filtre.</p>
+                  <p className="mt-1 text-xs text-[var(--foreground-faint)]">Aucun élève trouvé pour ce filtre.</p>
                 )}
               </div>
 
               {selectedEleve && selectedEleve.groupes.length > 0 && (
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Groupe</label>
+                  <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">Groupe</label>
                   <select
                     value={selectedGroupeId}
                     onChange={(e) => {
@@ -1314,7 +1298,7 @@ export default function FinancesPage() {
                       if (gd) setMontant(gd.unpaid > 0 ? gd.unpaid : 0);
                     }}
                     required
-                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                    className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                   >
                     <option value="">Sélectionner un groupe</option>
                     {selectedEleve.groupes.map((g) => (
@@ -1327,21 +1311,21 @@ export default function FinancesPage() {
               )}
 
               {selectedEleve && selectedEleve.groupes.length === 0 && (
-                <p className="text-sm text-neutral-500 dark:text-neutral-400">Cet élève n&apos;est inscrit à aucun groupe.</p>
+                <p className="text-sm text-[var(--foreground-faint)]">Cet élève n&apos;est inscrit à aucun groupe.</p>
               )}
 
               {selectedGroupeData && (
-                <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-4 text-sm">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] p-4 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-neutral-600 dark:text-neutral-400">Total dû</span>
+                    <span className="text-[var(--foreground-subtle)]">Total dû</span>
                     <span className="font-medium">{formatCurrency(selectedGroupeData.totalDue)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-neutral-600 dark:text-neutral-400">Total payé</span>
+                    <span className="text-[var(--foreground-subtle)]">Total payé</span>
                     <span className="font-medium text-green-600 dark:text-green-400">{formatCurrency(selectedGroupeData.totalPaid)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-neutral-600 dark:text-neutral-400">Impayé</span>
+                    <span className="text-[var(--foreground-subtle)]">Impayé</span>
                     <span className={`font-medium ${selectedGroupeData.unpaid > 0 ? "text-red-600 dark:text-red-400" : ""}`}>
                       {formatCurrency(selectedGroupeData.unpaid)}
                     </span>
@@ -1350,22 +1334,22 @@ export default function FinancesPage() {
               )}
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Montant (DT)</label>
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">Montant (DT)</label>
                 <MontantInput
                   value={montant || ""}
                   onChange={setMontant}
                   min={0}
                   required
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Méthode de paiement</label>
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">Méthode de paiement</label>
                 <select
                   value={methodePaiement}
                   onChange={(e) => setMethodePaiement(e.target.value)}
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 >
                   <option value="especes">Espèces</option>
                   <option value="virement">Virement</option>
@@ -1375,33 +1359,33 @@ export default function FinancesPage() {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Référence</label>
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">Référence</label>
                 <input
                   type="text"
                   value={reference}
                   onChange={(e) => setReference(e.target.value)}
                   placeholder="Numéro de référence (optionnel)"
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Notes</label>
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">Notes</label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={2}
                   placeholder="Notes (optionnel)"
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
               </div>
 
               </div>
-              <div className="flex shrink-0 items-center justify-end gap-3 border-t border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
+              <div className="flex shrink-0 items-center justify-end gap-3 border-t border-[var(--border)] px-6 py-4">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+                  className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-[13px] font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
                 >
                   Annuler
                 </button>
@@ -1421,23 +1405,23 @@ export default function FinancesPage() {
 
       {editModal && editPaiement && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-0 shadow-xl">
-            <div className="flex shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
+          <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] p-0 shadow-lg">
+            <div className="flex shrink-0 items-center justify-between border-b border-[var(--border)] px-6 py-4">
               <h2 className="text-lg font-semibold">Modifier le paiement</h2>
-              <button onClick={() => setEditModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400">
+              <button onClick={() => setEditModal(false)} className="text-[var(--foreground-faint)] hover:text-neutral-600 dark:hover:text-neutral-400">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="shrink-0 border-b border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
-              <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3 text-sm">
-                <p className="text-neutral-600 dark:text-neutral-400">
+            <div className="shrink-0 border-b border-[var(--border)] px-6 py-4">
+              <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] p-3 text-sm">
+                <p className="text-[var(--foreground-subtle)]">
                   <span className="font-medium">{editPaiement.eleve.prenom} {editPaiement.eleve.nom}</span>
                   {" — "}
                   {editPaiement.groupe.nom}
                 </p>
-                <p className="mt-1 text-neutral-500 dark:text-neutral-400">
-                  Montant actuel: <span className="font-semibold text-neutral-900 dark:text-neutral-100">{formatCurrency(editPaiement.montant)}</span>
+                <p className="mt-1 text-[var(--foreground-faint)]">
+                  Montant actuel: <span className="font-semibold text-[var(--foreground)]">{formatCurrency(editPaiement.montant)}</span>
                 </p>
               </div>
             </div>
@@ -1445,13 +1429,13 @@ export default function FinancesPage() {
             <form onSubmit={handleEditSubmit} className="flex min-h-0 flex-1 flex-col">
               <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Nouveau montant (DT)</label>
+                  <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">Nouveau montant (DT)</label>
                   <MontantInput
                     value={editMontant || ""}
                     onChange={setEditMontant}
                     min={0}
                     required
-                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                    className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                   />
                   {editMontant !== Number(editPaiement.montant) && (
                     <p className={`mt-1 text-xs ${editMontant > Number(editPaiement.montant) ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
@@ -1462,7 +1446,7 @@ export default function FinancesPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                  <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">
                     Raison de la modification <span className="text-red-500">*</span>
                   </label>
                   <textarea
@@ -1471,15 +1455,15 @@ export default function FinancesPage() {
                     rows={3}
                     required
                     placeholder="Expliquez la raison de cette modification..."
-                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                    className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                   />
                 </div>
               </div>
-              <div className="flex shrink-0 items-center justify-end gap-3 border-t border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
+              <div className="flex shrink-0 items-center justify-end gap-3 border-t border-[var(--border)] px-6 py-4">
                 <button
                   type="button"
                   onClick={() => setEditModal(false)}
-                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+                  className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-[13px] font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
                 >
                   Annuler
                 </button>
@@ -1499,14 +1483,14 @@ export default function FinancesPage() {
 
       {showCreditModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-0 shadow-xl">
-            <div className="flex shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
-              <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+          <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] p-0 shadow-lg">
+            <div className="flex shrink-0 items-center justify-between border-b border-[var(--border)] px-6 py-4">
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">
                 Ajouter un crédit
               </h2>
               <button
                 onClick={() => setShowCreditModal(false)}
-                className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"
+                className="text-[var(--foreground-faint)] hover:text-neutral-600 dark:hover:text-neutral-400"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -1514,10 +1498,10 @@ export default function FinancesPage() {
             <form onSubmit={handleCreditSubmit} className="flex min-h-0 flex-1 flex-col">
               <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">
                   Élève
                   {filteredCreditStudents.length > 0 && (
-                    <span className="ml-1 text-xs text-neutral-400 dark:text-neutral-500">({filteredCreditStudents.length})</span>
+                    <span className="ml-1 text-xs text-[var(--foreground-faint)]">({filteredCreditStudents.length})</span>
                   )}
                 </label>
                 <div className="relative mb-2">
@@ -1530,7 +1514,7 @@ export default function FinancesPage() {
                       setCreditForm({ ...creditForm, studentId: "" });
                     }}
                     placeholder="Rechercher un élève par nom ou code..."
-                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 pl-9 pr-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] pl-9 pr-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
                   />
                 </div>
                 <select
@@ -1544,7 +1528,7 @@ export default function FinancesPage() {
                       groupeId: groups.length === 1 ? groups[0].id : "",
                     });
                   }}
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
                 >
                   <option value="">Sélectionner un élève</option>
                   {filteredCreditStudents.map((s) => (
@@ -1554,18 +1538,18 @@ export default function FinancesPage() {
                   ))}
                 </select>
                 {filteredCreditStudents.length === 0 && (
-                  <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">Aucun élève trouvé pour cette recherche.</p>
+                  <p className="mt-1 text-xs text-[var(--foreground-faint)]">Aucun élève trouvé pour cette recherche.</p>
                 )}
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">
                   Type
                 </label>
                 <select
                   value={creditForm.type}
                   onChange={(e) => setCreditForm({ ...creditForm, type: e.target.value })}
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
                 >
                   <option value="PREPAYMENT">Pré-paiement (crédit du solde)</option>
                   <option value="ADJUSTMENT">Ajustement (correction manuelle)</option>
@@ -1573,7 +1557,7 @@ export default function FinancesPage() {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">
                   Montant (DT)
                 </label>
                 <MontantInput
@@ -1582,19 +1566,19 @@ export default function FinancesPage() {
                   min={0}
                   step="0.01"
                   required
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
                 />
               </div>
 
               {creditForm.type === "ADJUSTMENT" && (
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                  <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">
                     Sens
                   </label>
                   <select
                     value={creditForm.credit ? "credit" : "debit"}
                     onChange={(e) => setCreditForm({ ...creditForm, credit: e.target.value === "credit" })}
-                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
                   >
                     <option value="credit">Crédit (+ augmente le solde)</option>
                     <option value="debit">Débit (− diminue le solde)</option>
@@ -1604,7 +1588,7 @@ export default function FinancesPage() {
 
               {creditForm.type === "PREPAYMENT" && (
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                  <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">
                     Groupe
                   </label>
                   {(() => {
@@ -1623,7 +1607,7 @@ export default function FinancesPage() {
                         onChange={(e) =>
                           setCreditForm({ ...creditForm, groupeId: e.target.value })
                         }
-                        className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
+                        className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
                       >
                         <option value="">Sélectionner un groupe</option>
                         {groups.map((g) => (
@@ -1641,13 +1625,13 @@ export default function FinancesPage() {
 
               {creditForm.type === "PREPAYMENT" && (
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                  <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">
                     Méthode de paiement
                   </label>
                   <select
                     value={creditForm.paymentMethod}
                     onChange={(e) => setCreditForm({ ...creditForm, paymentMethod: e.target.value })}
-                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
                   >
                     <option value="especes">Espèces</option>
                     <option value="virement">Virement</option>
@@ -1659,7 +1643,7 @@ export default function FinancesPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                  <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">
                     Date
                   </label>
                   <input
@@ -1667,11 +1651,11 @@ export default function FinancesPage() {
                     value={creditForm.date}
                     onChange={(e) => setCreditForm({ ...creditForm, date: e.target.value })}
                     required
-                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                  <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">
                     Heure
                   </label>
                   <TimeInput value={creditForm.time} onChange={(v) => setCreditForm({ ...creditForm, time: v })} />
@@ -1679,7 +1663,7 @@ export default function FinancesPage() {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">
                   Notes
                 </label>
                 <textarea
@@ -1687,16 +1671,16 @@ export default function FinancesPage() {
                   onChange={(e) => setCreditForm({ ...creditForm, notes: e.target.value })}
                   rows={2}
                   placeholder="Optionnel (ex : Paiement anticipé de plusieurs mois)"
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
                 />
               </div>
 
               </div>
-              <div className="flex shrink-0 items-center justify-end gap-3 border-t border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
+              <div className="flex shrink-0 items-center justify-end gap-3 border-t border-[var(--border)] px-6 py-4">
                 <button
                   type="button"
                   onClick={() => setShowCreditModal(false)}
-                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+                  className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-[13px] font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
                 >
                   Annuler
                 </button>
@@ -1716,29 +1700,29 @@ export default function FinancesPage() {
 
       {showDetail && detailTx && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-0 shadow-xl">
-            <div className="flex shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
-              <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+          <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] p-0 shadow-lg">
+            <div className="flex shrink-0 items-center justify-between border-b border-[var(--border)] px-6 py-4">
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">
                 Détails de la transaction
               </h2>
               <button
                 onClick={() => setShowDetail(false)}
-                className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"
+                className="text-[var(--foreground-faint)] hover:text-neutral-600 dark:hover:text-neutral-400"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="flex-1 space-y-3 overflow-y-auto px-6 py-4 text-sm">
               <div className="flex justify-between">
-                <span className="text-neutral-500 dark:text-neutral-400">Type</span>
+                <span className="text-[var(--foreground-faint)]">Type</span>
                 <span className="font-medium">{TYPE_LABEL[detailTx.type] || detailTx.type}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-neutral-500 dark:text-neutral-400">Date</span>
+                <span className="text-[var(--foreground-faint)]">Date</span>
                 <span className="font-medium">{formatDate(detailTx.date)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-neutral-500 dark:text-neutral-400">Montant</span>
+                <span className="text-[var(--foreground-faint)]">Montant</span>
                 <span
                   className={`font-semibold ${
                     detailTx.signedAmount >= 0
@@ -1751,18 +1735,18 @@ export default function FinancesPage() {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-neutral-500 dark:text-neutral-400">Description</span>
+                <span className="text-[var(--foreground-faint)]">Description</span>
                 <span className="max-w-[60%] text-right font-medium">{detailTx.description || "—"}</span>
               </div>
               {detailTx.attendance && (
                 <div className="flex justify-between">
-                  <span className="text-neutral-500 dark:text-neutral-400">Cours lié</span>
+                  <span className="text-[var(--foreground-faint)]">Cours lié</span>
                   <span className="max-w-[60%] text-right font-medium">
                     {detailTx.attendance.seance.groupe.nom}
                     {detailTx.attendance.seance.groupe.matiere?.nom
                       ? ` — ${detailTx.attendance.seance.groupe.matiere.nom}`
                       : ""}
-                    <span className="block text-xs text-neutral-500 dark:text-neutral-400">
+                    <span className="block text-xs text-[var(--foreground-faint)]">
                       {formatDate(detailTx.attendance.seance.date)}
                     </span>
                   </span>
@@ -1770,7 +1754,7 @@ export default function FinancesPage() {
               )}
               {detailTx.paymentMethod && (
                 <div className="flex justify-between">
-                  <span className="text-neutral-500 dark:text-neutral-400">Méthode</span>
+                  <span className="text-[var(--foreground-faint)]">Méthode</span>
                   <span className="font-medium">
                     {METHODE_LABEL[detailTx.paymentMethod] || detailTx.paymentMethod}
                   </span>
@@ -1778,19 +1762,19 @@ export default function FinancesPage() {
               )}
               {detailTx.receiptNumber && (
                 <div className="flex justify-between">
-                  <span className="text-neutral-500 dark:text-neutral-400">Reçu</span>
+                  <span className="text-[var(--foreground-faint)]">Reçu</span>
                   <span className="font-mono font-medium">{detailTx.receiptNumber}</span>
                 </div>
               )}
               {detailTx.reference && (
                 <div className="flex justify-between">
-                  <span className="text-neutral-500 dark:text-neutral-400">Référence</span>
+                  <span className="text-[var(--foreground-faint)]">Référence</span>
                   <span className="max-w-[60%] truncate font-mono font-medium">{detailTx.reference}</span>
                 </div>
               )}
               {detailTx.reversalOf && (
                 <div className="flex justify-between">
-                  <span className="text-neutral-500 dark:text-neutral-400">Annule</span>
+                  <span className="text-[var(--foreground-faint)]">Annule</span>
                   <span className="font-medium">
                     {detailTx.reversalOf.receiptNumber
                       ? detailTx.reversalOf.receiptNumber
@@ -1800,16 +1784,16 @@ export default function FinancesPage() {
               )}
               {detailTx.notes && (
                 <div className="flex justify-between">
-                  <span className="text-neutral-500 dark:text-neutral-400">Notes</span>
+                  <span className="text-[var(--foreground-faint)]">Notes</span>
                   <span className="max-w-[60%] text-right font-medium">{detailTx.notes}</span>
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="text-neutral-500 dark:text-neutral-400">Créée le</span>
+                <span className="text-[var(--foreground-faint)]">Créée le</span>
                 <span className="font-medium">{new Date(detailTx.createdAt).toLocaleString("fr-FR")}</span>
               </div>
             </div>
-            <div className="flex shrink-0 items-center justify-end border-t border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
+            <div className="flex shrink-0 items-center justify-end border-t border-[var(--border)] px-6 py-4">
               <button
                 onClick={() => openReceipt(detailTx)}
                 className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700"
@@ -1824,21 +1808,21 @@ export default function FinancesPage() {
 
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-0 shadow-xl">
-            <div className="flex shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
-              <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+          <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] p-0 shadow-lg">
+            <div className="flex shrink-0 items-center justify-between border-b border-[var(--border)] px-6 py-4">
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">
                 Annuler le paiement
               </h2>
               <button
                 onClick={() => setDeleteTarget(null)}
-                className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"
+                className="text-[var(--foreground-faint)] hover:text-neutral-600 dark:hover:text-neutral-400"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
               <div className="rounded-lg border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-900/20 p-3 text-sm">
-                <p className="font-medium text-neutral-900 dark:text-neutral-100">
+                <p className="font-medium text-[var(--foreground)]">
                   {deleteTarget.eleve.prenom} {deleteTarget.eleve.nom} — {formatCurrency(deleteTarget.montant)} — {deleteTarget.groupe.nom}
                 </p>
                 <p className="mt-1 text-red-600 dark:text-red-400">
@@ -1846,7 +1830,7 @@ export default function FinancesPage() {
                 </p>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">
                   Motif de l&apos;annulation <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -1855,14 +1839,14 @@ export default function FinancesPage() {
                   rows={3}
                   required
                   placeholder="Ex : Paiement enregistré par erreur, mauvais élève, mauvais groupe..."
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
                 />
               </div>
             </div>
-            <div className="flex shrink-0 items-center justify-end gap-3 border-t border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
+            <div className="flex shrink-0 items-center justify-end gap-3 border-t border-[var(--border)] px-6 py-4">
               <button
                 onClick={() => setDeleteTarget(null)}
-                className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+                className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-[13px] font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
               >
                 Retour
               </button>
@@ -1881,28 +1865,28 @@ export default function FinancesPage() {
 
       {showReverseModal && reverseTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-0 shadow-xl">
-            <div className="flex shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
-              <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+          <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] p-0 shadow-lg">
+            <div className="flex shrink-0 items-center justify-between border-b border-[var(--border)] px-6 py-4">
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">
                 Annuler la transaction
               </h2>
               <button
                 onClick={() => setShowReverseModal(false)}
-                className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"
+                className="text-[var(--foreground-faint)] hover:text-neutral-600 dark:hover:text-neutral-400"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
-              <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3 text-sm">
-                <p className="font-medium text-neutral-900 dark:text-neutral-100">
+              <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] p-3 text-sm">
+                <p className="font-medium text-[var(--foreground)]">
                   {TYPE_LABEL[reverseTarget.type] || reverseTarget.type} —{" "}
                   {formatCurrency(Math.abs(reverseTarget.signedAmount))}
                 </p>
-                <p className="mt-1 text-neutral-600 dark:text-neutral-400">{reverseTarget.description || "—"}</p>
+                <p className="mt-1 text-[var(--foreground-subtle)]">{reverseTarget.description || "—"}</p>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">
                   Raison de l&apos;annulation
                 </label>
                 <textarea
@@ -1911,14 +1895,14 @@ export default function FinancesPage() {
                   rows={3}
                   required
                   placeholder="Ex : Erreur de saisie, annulation du paiement..."
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none"
                 />
               </div>
             </div>
-            <div className="flex shrink-0 items-center justify-end gap-3 border-t border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
+            <div className="flex shrink-0 items-center justify-end gap-3 border-t border-[var(--border)] px-6 py-4">
               <button
                 onClick={() => setShowReverseModal(false)}
-                className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+                className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-[13px] font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
               >
                 Retour
               </button>

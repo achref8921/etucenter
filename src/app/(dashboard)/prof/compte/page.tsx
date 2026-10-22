@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Wallet, FileText, ArrowLeft, ChevronLeft, ChevronRight, TrendingUp } from "lucide-react";
-import Link from "next/link";
+import { Wallet, FileText, ChevronLeft, ChevronRight, TrendingUp } from "lucide-react";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { SkeletonPage } from "@/components/ui/skeleton";
 
@@ -129,14 +128,7 @@ export default function ProfComptePage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Link
-          href="/prof"
-          className="flex items-center gap-1 text-[13px] text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Retour
-        </Link>
-        <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Mon Compte</h1>
+        <h1 className="text-2xl font-bold text-[var(--foreground)]">Mon Compte</h1>
       </div>
 
       {error && (
@@ -173,7 +165,7 @@ export default function ProfComptePage() {
               {claimable !== 0 && (claimable > 0 ? "+" : "−")}
               {formatCurrency(Math.abs(displayBalance))}
             </p>
-            <p className="mt-1 text-[12px] text-neutral-500 dark:text-neutral-400">
+            <p className="mt-1 text-[12px] text-[var(--foreground-faint)]">
               {claimable > 0
                 ? "Le centre vous doit ce montant."
                 : claimable < 0
@@ -181,7 +173,7 @@ export default function ProfComptePage() {
                   : "Votre à encaisser est nul."}
             </p>
           </div>
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white dark:bg-[#181b22]">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--surface)]">
             <Wallet className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
           </div>
         </div>
@@ -195,69 +187,69 @@ export default function ProfComptePage() {
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => shiftMonth(-1)}
-                  className="flex h-7 w-7 items-center justify-center rounded-md border border-neutral-200 dark:border-[#2a2d35] text-neutral-500 dark:text-neutral-400 hover:bg-white dark:hover:bg-[#1e2128]"
+                  className="flex h-7 w-7 items-center justify-center rounded-md border border-[var(--border)] text-[var(--foreground-faint)] hover:bg-[var(--surface)] dark:hover:bg-[#1e2128]"
                   aria-label="Mois précédent"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => shiftMonth(1)}
-                  className="flex h-7 w-7 items-center justify-center rounded-md border border-neutral-200 dark:border-[#2a2d35] text-neutral-500 dark:text-neutral-400 hover:bg-white dark:hover:bg-[#1e2128]"
+                  className="flex h-7 w-7 items-center justify-center rounded-md border border-[var(--border)] text-[var(--foreground-faint)] hover:bg-[var(--surface)] dark:hover:bg-[#1e2128]"
                   aria-label="Mois suivant"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
               </div>
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                 Profit net · {monthLabel()}
               </p>
             </div>
             <p className="mt-2 text-3xl font-bold tabular-nums tracking-tight text-emerald-600 dark:text-emerald-400">
               {formatCurrency(profit.total)}
             </p>
-            <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-neutral-500 dark:text-neutral-400">
+            <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-[var(--foreground-faint)]">
               <span>
                 Gains élèves :{" "}
-                <b className="tabular-nums text-neutral-900 dark:text-neutral-100">{formatCurrency(profit.studentShare)}</b>
+                <b className="tabular-nums text-[var(--foreground)]">{formatCurrency(profit.studentShare)}</b>
               </span>
               <span>
                 Encaissements directs :{" "}
-                <b className="tabular-nums text-neutral-900 dark:text-neutral-100">{formatCurrency(profit.reverseNet)}</b>
+                <b className="tabular-nums text-[var(--foreground)]">{formatCurrency(profit.reverseNet)}</b>
               </span>
               <span>
                 Ajustements :{" "}
-                <b className="tabular-nums text-neutral-900 dark:text-neutral-100">{formatCurrency(profit.adjustments)}</b>
+                <b className="tabular-nums text-[var(--foreground)]">{formatCurrency(profit.adjustments)}</b>
               </span>
             </div>
           </div>
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white dark:bg-[#181b22]">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[var(--surface)]">
             <TrendingUp className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
           </div>
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
-        <div className="border-b border-neutral-200 dark:border-[#2a2d35] px-5 py-3">
-          <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+      <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+        <div className="border-b border-[var(--border)] px-5 py-3">
+          <h2 className="text-[13px] font-semibold text-[var(--foreground)]">
             Historique des transactions
           </h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-[13px]">
-            <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
+            <thead className="border-b border-[var(--border)]">
               <tr>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Date</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Type</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Description</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Méthode</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Montant</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Reçu</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Date</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Type</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Description</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Méthode</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Montant</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Reçu</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100 dark:divide-slate-700">
+            <tbody className="divide-y divide-[var(--border)] dark:divide-slate-700">
               {transactions.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                  <td colSpan={6} className="px-6 py-8 text-center text-[var(--foreground-faint)]">
                     Aucune transaction
                   </td>
                 </tr>
@@ -269,7 +261,7 @@ export default function ProfComptePage() {
                       tx.status === "reversed" ? "opacity-50" : ""
                     }`}
                   >
-                    <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                    <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">
                       {formatDate(tx.date)}
                     </td>
                     <td className="px-4 py-2.5">
@@ -295,12 +287,12 @@ export default function ProfComptePage() {
                       )}
                     </td>
                     <td className="max-w-xs px-4 py-2.5">
-                      <p className="truncate text-neutral-600 dark:text-neutral-400">{tx.description}</p>
+                      <p className="truncate text-[var(--foreground-subtle)]">{tx.description}</p>
                       {tx.receiptNumber && (
-                        <p className="text-[12px] text-neutral-400 dark:text-neutral-500">{tx.receiptNumber}</p>
+                        <p className="text-[12px] text-[var(--foreground-faint)]">{tx.receiptNumber}</p>
                       )}
                     </td>
-                    <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                    <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">
                       {tx.paymentMethod ? METHODE_LABEL[tx.paymentMethod] || tx.paymentMethod : "—"}
                     </td>
                     <td
@@ -316,7 +308,7 @@ export default function ProfComptePage() {
                     <td className="px-4 py-2.5">
                       <button
                         onClick={() => openReceipt(tx)}
-                        className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-gray-100 dark:hover:bg-[#1e2128] hover:text-emerald-600 dark:hover:text-emerald-400"
+                        className="rounded p-1 text-[var(--foreground-faint)] hover:bg-gray-100 dark:hover:bg-[#1e2128] hover:text-emerald-600 dark:hover:text-emerald-400"
                         title="Imprimer le reçu"
                       >
                         <FileText className="h-4 w-4" />

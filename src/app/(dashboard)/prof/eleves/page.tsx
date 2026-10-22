@@ -142,54 +142,54 @@ export default function ProfElevesPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Mes Élèves</h1>
-        <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+        <h1 className="text-2xl font-bold text-[var(--foreground)]">Mes Élèves</h1>
+        <p className="text-sm text-[var(--foreground-faint)] mt-1">
           Suivi des paiements et présences de vos élèves
         </p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-4">
+        <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800">
               <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">Total Élèves</p>
-              <p className="text-xl font-bold text-neutral-900 dark:text-neutral-100">{totalStudents}</p>
+              <p className="text-xs text-[var(--foreground-faint)]">Total Élèves</p>
+              <p className="text-xl font-bold text-[var(--foreground)]">{totalStudents}</p>
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-4">
+        <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800">
               <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">À jour</p>
+              <p className="text-xs text-[var(--foreground-faint)]">À jour</p>
               <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{totalPaid}</p>
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-4">
+        <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800">
               <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
             </div>
             <div>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">Impayés</p>
+              <p className="text-xs text-[var(--foreground-faint)]">Impayés</p>
               <p className="text-xl font-bold text-red-600 dark:text-red-400">{totalUnpaid}</p>
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-4">
+        <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800">
               <DollarSign className="h-5 w-5 text-amber-600 dark:text-amber-400" />
             </div>
             <div>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">Impayé Total</p>
+              <p className="text-xs text-[var(--foreground-faint)]">Impayé Total</p>
               <p className="text-xl font-bold text-amber-600 dark:text-amber-400">{formatCurrency(totalUnpaidAmount)}</p>
             </div>
           </div>
@@ -199,13 +199,13 @@ export default function ProfElevesPage() {
       {/* Filters */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--foreground-faint)]" />
           <input
             type="text"
             placeholder="Rechercher par nom ou code..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] py-2.5 pl-10 pr-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] py-2.5 pl-10 pr-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           />
         </div>
         <div className="flex gap-2">
@@ -232,7 +232,7 @@ export default function ProfElevesPage() {
       {/* Students List */}
       <div className="space-y-3">
         {filtered.length === 0 ? (
-          <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-12 text-center text-neutral-400 dark:text-neutral-500">
+          <div className="rounded-[18px] border border-[var(--border)] bg-[var(--surface)] p-12 text-center text-[var(--foreground-faint)] shadow-[var(--shadow-card)]">
             Aucun élève trouvé
           </div>
         ) : (
@@ -250,7 +250,7 @@ export default function ProfElevesPage() {
             return (
               <div
                 key={student.id}
-                className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] overflow-hidden transition-all"
+                className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden transition-all shadow-[var(--shadow-card)] duration-300 hover:shadow-[var(--shadow-md)]"
               >
                 {/* Main Row */}
                 <div className="flex items-center justify-between gap-3 p-4 hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] transition-colors">
@@ -271,19 +271,19 @@ export default function ProfElevesPage() {
                       }
                     />
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+                      <p className="truncate text-sm font-semibold text-[var(--foreground)]">
                         {student.prenom} {student.nom}
                       </p>
                       <div className="flex items-center gap-3 mt-0.5">
                         {student.codeEleve && (
-                          <span className="text-xs text-neutral-400 dark:text-neutral-500 font-mono">
+                          <span className="text-xs text-[var(--foreground-faint)] font-mono">
                             #{student.codeEleve}
                           </span>
                         )}
-                        <span className="text-xs text-neutral-400 dark:text-neutral-500">
+                        <span className="text-xs text-[var(--foreground-faint)]">
                           {student.niveau} — {student.classe}
                         </span>
-                        <span className="text-xs text-neutral-400 dark:text-neutral-500">
+                        <span className="text-xs text-[var(--foreground-faint)]">
                           {student.groupes.length} groupe(s)
                         </span>
                       </div>
@@ -302,7 +302,7 @@ export default function ProfElevesPage() {
                             : "bg-red-500"
                         }`}
                       />
-                      <span className="text-xs font-medium text-neutral-600 dark:text-neutral-400">
+                      <span className="text-xs font-medium text-[var(--foreground-subtle)]">
                         {avgPresence}% présence
                       </span>
                     </div>
@@ -329,7 +329,7 @@ export default function ProfElevesPage() {
                     <Link
                       href={`/prof/eleves/${student.id}`}
                       onClick={(e) => e.stopPropagation()}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 px-3 py-1.5 text-xs font-medium text-neutral-700 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:border-[#2a2d35] dark:text-neutral-300 dark:hover:border-blue-700 dark:hover:bg-blue-950/40 dark:hover:text-blue-300"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-neutral-700 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:text-neutral-300 dark:hover:border-blue-700 dark:hover:bg-blue-950/40 dark:hover:text-blue-300"
                     >
                       <Eye className="h-3.5 w-3.5" />
                       Profil
@@ -342,9 +342,9 @@ export default function ProfElevesPage() {
                       className="rounded p-1 hover:bg-neutral-200/60 dark:hover:bg-[#2a2d35]"
                     >
                       {isExpanded ? (
-                        <ChevronUp className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
+                        <ChevronUp className="h-4 w-4 text-[var(--foreground-faint)]" />
                       ) : (
-                        <ChevronDown className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
+                        <ChevronDown className="h-4 w-4 text-[var(--foreground-faint)]" />
                       )}
                     </button>
                   </div>
@@ -352,11 +352,11 @@ export default function ProfElevesPage() {
 
                 {/* Expanded Details */}
                 {isExpanded && (
-                  <div className="animate-fade-in-up border-t border-neutral-100 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-5 space-y-4">
+                  <div className="animate-fade-in-up border-t border-[var(--border)] bg-neutral-50 dark:bg-[#1e2128] p-5 space-y-4">
                     {/* Contact Info */}
                     <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                       <div className="flex items-center gap-2">
-                        <Mail className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
+                        <Mail className="h-4 w-4 text-[var(--foreground-faint)]" />
                         {student.email ? (
                           <a
                             href={`mailto:${student.email}`}
@@ -365,11 +365,11 @@ export default function ProfElevesPage() {
                             {student.email}
                           </a>
                         ) : (
-                          <span className="text-sm text-neutral-600 dark:text-neutral-400 truncate">—</span>
+                          <span className="text-sm text-[var(--foreground-subtle)] truncate">—</span>
                         )}
                       </div>
                       <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
+                        <Phone className="h-4 w-4 text-[var(--foreground-faint)]" />
                         {student.telephone ? (
                           <a
                             href={`tel:${student.telephone}`}
@@ -378,16 +378,16 @@ export default function ProfElevesPage() {
                             {student.telephone}
                           </a>
                         ) : (
-                          <span className="text-sm text-neutral-600 dark:text-neutral-400">—</span>
+                          <span className="text-sm text-[var(--foreground-subtle)]">—</span>
                         )}
                       </div>
                       <div className="flex items-center gap-2">
-                        <GraduationCap className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
-                        <span className="text-sm text-neutral-600 dark:text-neutral-400">{student.filiere || "—"}</span>
+                        <GraduationCap className="h-4 w-4 text-[var(--foreground-faint)]" />
+                        <span className="text-sm text-[var(--foreground-subtle)]">{student.filiere || "—"}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
-                        <span className="text-sm text-neutral-600 dark:text-neutral-400">
+                        <TrendingUp className="h-4 w-4 text-[var(--foreground-faint)]" />
+                        <span className="text-sm text-[var(--foreground-subtle)]">
                           {student.dateNaissance
                             ? new Date(student.dateNaissance).toLocaleDateString("fr-FR")
                             : "—"}
@@ -419,31 +419,31 @@ export default function ProfElevesPage() {
 
                     {/* Summary */}
                     <div className="flex items-center justify-between">
-                      <p className="text-[11px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--foreground-faint)]">
                         Récapitulatif financier (vos groupes)
                       </p>
-                      <p className="text-[11px] text-neutral-400 dark:text-neutral-500">
+                      <p className="text-[11px] text-[var(--foreground-faint)]">
                         Impayé = Dû − Payé
                       </p>
                     </div>
                     <div className="flex gap-4">
-                      <div className="rounded-lg bg-white dark:bg-[#181b22] border border-neutral-200 dark:border-[#2a2d35] px-4 py-2">
-                        <p className="text-[10px] uppercase text-neutral-400 dark:text-neutral-500">Dû total</p>
-                        <p className="text-sm font-bold text-neutral-900 dark:text-neutral-100">
+                      <div className="rounded-lg bg-[var(--surface)] border border-[var(--border)] px-4 py-2">
+                        <p className="text-[10px] uppercase text-[var(--foreground-faint)]">Dû total</p>
+                        <p className="text-sm font-bold text-[var(--foreground)]">
                           {formatCurrency(student.totalDue)}
                         </p>
                       </div>
-                      <div className="rounded-lg bg-white dark:bg-[#181b22] border border-neutral-200 dark:border-[#2a2d35] px-4 py-2">
-                        <p className="text-[10px] uppercase text-neutral-400 dark:text-neutral-500">Payé</p>
+                      <div className="rounded-lg bg-[var(--surface)] border border-[var(--border)] px-4 py-2">
+                        <p className="text-[10px] uppercase text-[var(--foreground-faint)]">Payé</p>
                         <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
                           {formatCurrency(student.totalPaid)}
                         </p>
                       </div>
                       <div
-                        className="rounded-lg bg-white dark:bg-[#181b22] border border-neutral-200 dark:border-[#2a2d35] px-4 py-2"
+                        className="rounded-lg bg-[var(--surface)] border border-[var(--border)] px-4 py-2"
                         title="Montant restant dû = Dû − Payé (0 si payé en avance)"
                       >
-                        <p className="text-[10px] uppercase text-neutral-400 dark:text-neutral-500">Impayé</p>
+                        <p className="text-[10px] uppercase text-[var(--foreground-faint)]">Impayé</p>
                         <p
                           className={`text-sm font-bold ${
                             student.impayeTotal > 0 ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"
@@ -455,41 +455,41 @@ export default function ProfElevesPage() {
                     </div>
 
                     {/* Groups Table */}
-                    <div className="overflow-x-auto rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+                    <div className="overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--surface)]">
                       <table className="w-full text-left text-sm">
                         <thead>
-                          <tr className="border-b border-neutral-100 dark:border-[#2a2d35]">
-                            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
-                            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Matière</th>
-                            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 text-center">
+                          <tr className="border-b border-[var(--border)]">
+                            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Groupe</th>
+                            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Matière</th>
+                            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] text-center">
                               Séances
                             </th>
-                            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 text-center">
+                            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] text-center">
                               Présences
                             </th>
-                            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 text-center">
+                            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] text-center">
                               Absences
                             </th>
-                            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 text-center">
+                            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] text-center">
                               Taux
                             </th>
-                            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 text-right">
+                            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] text-right">
                               Dû
                             </th>
-                            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 text-right">
+                            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] text-right">
                               Payé
                             </th>
-                            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 text-right">
+                            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] text-right">
                               Impayé
                             </th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-neutral-100 dark:divide-neutral-700">
+                        <tbody className="divide-y divide-[var(--border)] dark:divide-neutral-700">
                           {student.groupes.map((g) => (
                             <tr key={g.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
-                              <td className="px-4 py-3 font-medium text-neutral-900 dark:text-neutral-100">{g.nom}</td>
-                              <td className="px-4 py-3 text-neutral-600 dark:text-neutral-400">{g.matiere}</td>
-                              <td className="px-4 py-3 text-center text-neutral-600 dark:text-neutral-400">
+                              <td className="px-4 py-3 font-medium text-[var(--foreground)]">{g.nom}</td>
+                              <td className="px-4 py-3 text-[var(--foreground-subtle)]">{g.matiere}</td>
+                              <td className="px-4 py-3 text-center text-[var(--foreground-subtle)]">
                                 {g.seancesTotalies}
                               </td>
                               <td className="px-4 py-3 text-center">
@@ -515,7 +515,7 @@ export default function ProfElevesPage() {
                                   {g.tauxPresence}%
                                 </span>
                               </td>
-                              <td className="px-4 py-3 text-right text-neutral-600 dark:text-neutral-400">
+                              <td className="px-4 py-3 text-right text-[var(--foreground-subtle)]">
                                 {formatCurrency(g.due)}
                               </td>
                               <td className="px-4 py-3 text-right">
@@ -539,9 +539,9 @@ export default function ProfElevesPage() {
                     </div>
 
                     {/* Session history */}
-                    <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
-                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-100 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
-                        <h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">
+                    <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
+                        <h4 className="text-sm font-semibold text-[var(--foreground-subtle)]">
                           Historique des présences
                         </h4>
                         {history && history.sessions && history.sessions.length > 0 && (
@@ -562,12 +562,12 @@ export default function ProfElevesPage() {
                           <Loader2 className="h-5 w-5 animate-spin text-neutral-400" />
                         </div>
                       ) : !history || !history.sessions || history.sessions.length === 0 ? (
-                        <p className="px-4 py-6 text-center text-sm text-neutral-400 dark:text-neutral-500">
+                        <p className="px-4 py-6 text-center text-sm text-[var(--foreground-faint)]">
                           Aucun historique de présences
                         </p>
                       ) : (
                         <div className="max-h-72 overflow-y-auto">
-                          <ul className="divide-y divide-neutral-100 dark:divide-neutral-700">
+                          <ul className="divide-y divide-[var(--border)] dark:divide-neutral-700">
                             {history.sessions.map((s) => (
                               <li
                                 key={s.presenceId}
@@ -588,7 +588,7 @@ export default function ProfElevesPage() {
                                     )}
                                     {s.statut === "present" ? "Présent" : "Absent"}
                                   </span>
-                                  <span className="truncate text-sm text-neutral-600 dark:text-neutral-400">
+                                  <span className="truncate text-sm text-[var(--foreground-subtle)]">
                                     {formatDate(s.seance.date)}
                                     {s.seance.heureDebut &&
                                       ` · ${new Date(s.seance.heureDebut).toLocaleTimeString("fr-FR", {

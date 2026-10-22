@@ -2,8 +2,57 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ===== Exposition des tokens en utilitaires Tailwind (Phase B) =====
+   `@theme inline` branche les variables CSS ci-dessous sur des classes
+   utilitaires (bg-surface, text-subtle, shadow-md, rounded-xl, ring-focus...).
+   Purement additif : les classes Tailwind par defaut restent inchangees. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-elevated: var(--surface-elevated);
+
+  --color-subtle: var(--foreground-subtle);
+  --color-faint: var(--foreground-faint);
+
+  --color-sidebar-bg: var(--sidebar-bg);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-text: var(--sidebar-text);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-sidebar-active-text: var(--sidebar-active-text);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Remarque : les echelles `--radius-*`, `--shadow-*` et `--font-arabic` NE sont
+   PAS remappees dans `@theme` (une variable ne peut pas se referencer elle-meme).
+   Les composants les consomment directement via des valeurs arbitraires :
+   `rounded-[var(--radius-lg)]`, `shadow-[var(--shadow-sm)]`, etc. */
+
 :root {
-  --background: #ecf0f5;
+  /* ===== Palette de base (valeurs historiques preservees) ===== */
+  --background: #f5f6fa;
   --foreground: #111827;
   --card: #ffffff;
   --card-foreground: #111827;
@@ -32,6 +81,69 @@
   --sidebar-active-text: #1d4ed8;
   --header-bg: rgba(255, 255, 255, 0.85);
   --header-border: #e5e7eb;
+
+  /* ===== Tokens etendus (Phase B — ajout only, non consommes tant que les
+     composants ne les utilisent pas ; aucune valeur existante modifiee) ===== */
+
+  /* Couleur d'information (manquante historiquement) */
+  --info: #2563eb;
+  --info-foreground: #ffffff;
+
+  /* Surfaces : hierarchie canvas < surface < elevated, contraste subtil */
+  --surface: #ffffff;
+  --surface-muted: #f8fafc;
+  --surface-elevated: #ffffff;
+  --surface-overlay: rgba(255, 255, 255, 0.85);
+
+  /* Couleur de texte secondaire/tertiaire (au-dela de muted-foreground) */
+  --foreground-subtle: #4b5563;
+  --foreground-faint: #6b7280;
+
+  /* Echelle de rayons (sm < md < lg < xl < 2xl) */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+
+  /* Echelle de hauteur de controles (touch targets >= 40px) */
+  --control-sm: 2rem;
+  --control-md: 2.375rem;
+  --control-lg: 2.75rem;
+
+  /* Echelle de rythme vertical pour sections de page */
+  --space-page-y: 1.5rem;
+  --space-section-y: 1.25rem;
+  --space-card: 1.25rem;
+
+  /* Echelle de police (typo coherente) */
+  --text-caption: 0.6875rem; /* 11px */
+  --text-label: 0.75rem;      /* 12px */
+  --text-body: 0.8125rem;     /* 13px */
+  --text-base: 0.875rem;      /* 14px */
+  --text-title: 1.125rem;     /* 18px */
+  --text-display: 1.375rem;   /* 22px */
+
+  /* Echelle de profondeur : tres subtile en clair, une seule source de verite */
+  --shadow-xs: 0 1px 2px 0 rgb(15 23 42 / 0.04);
+  --shadow-sm: 0 1px 3px 0 rgb(15 23 42 / 0.06), 0 1px 2px -1px rgb(15 23 42 / 0.05);
+  --shadow-md: 0 4px 12px -2px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.05);
+  --shadow-lg: 0 12px 28px -6px rgb(15 23 42 / 0.12), 0 4px 10px -4px rgb(15 23 42 / 0.07);
+  /* Ombre « carte » douce et large (style bento) : bord net + halo diffus */
+  --shadow-card: 0 1px 2px 0 rgb(16 24 40 / 0.04), 0 10px 28px -18px rgb(16 24 40 / 0.18);
+
+  /* Masque de focus unifie (accessibilite clavier) */
+  --focus-ring: 0 0 0 2px var(--background), 0 0 0 4px color-mix(in oklab, var(--ring) 55%, transparent);
+
+  /* Pile typographique : latin + arabe (le sous-ensemble latin reste prioritaire) */
+  --font-arabic: "Segoe UI", Tahoma, "Noto Naskh Arabic", "Geeza Pro", "Arial", sans-serif;
+
+  /* Couleur des barres de graphiques (consommee par les charts) */
+  --chart-1: #1d4ed8;
+  --chart-2: #0ea5e9;
+  --chart-3: #059669;
+  --chart-4: #d97706;
+  --chart-5: #7c3aed;
 }
 
 .dark {
@@ -63,6 +175,32 @@
   --sidebar-active-text: #60a5fa;
   --header-bg: rgba(15, 17, 20, 0.85);
   --header-border: #1e2128;
+
+  /* ===== Tokens etendus (Phase B — ajout only) ===== */
+  --info: #60a5fa;
+  --info-foreground: #0b1220;
+
+  --surface: #181b22;
+  --surface-muted: #14161b;
+  --surface-elevated: #1e2128;
+  --surface-overlay: rgba(20, 23, 32, 0.85);
+
+  --foreground-subtle: #b8bdc7;
+  --foreground-faint: #9ca3af;
+
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.45), 0 2px 4px -2px rgb(0 0 0 / 0.35);
+  --shadow-lg: 0 12px 28px -6px rgb(0 0 0 / 0.55), 0 4px 10px -4px rgb(0 0 0 / 0.4);
+  --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.45), 0 10px 28px -18px rgb(0 0 0 / 0.85);
+
+  --focus-ring: 0 0 0 2px var(--background), 0 0 0 4px color-mix(in oklab, var(--ring) 65%, transparent);
+
+  --chart-1: #3b82f6;
+  --chart-2: #38bdf8;
+  --chart-3: #34d399;
+  --chart-4: #fbbf24;
+  --chart-5: #a78bfa;
 }
 
 * {
@@ -92,6 +230,38 @@ body {
     "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== Base : focus visible accessible + typographie arabe (Phase B) =====
+   - Anneau de focus unifie au clavier uniquement (:focus-visible), sans affecter
+     la souris ni les etats hover existants.
+   - Les blocs marques lang="ar" / dir="rtl" basculent sur la pile arabe. */
+@layer base {
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Retour visuel doux sur tous les contrôles (rend l'UI réactive) */
+  button {
+    transition-property: background-color, color, border-color, box-shadow, opacity, transform;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :where(a, button, input, select, textarea) {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :where([lang="ar"], [dir="rtl"]) {
+    font-family: var(--font-arabic), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  }
+
+  :where(h1, h2, h3, h4, h5, h6) {
+    text-wrap: balance;
+  }
 }
 
 ::selection {
@@ -186,18 +356,33 @@ body {
 }
 
 /* ===== Effet verre dépoli : cartes de contenu translucides =====
-   Les cartes de contenu (fond blanc plein, `.bg-white`) deviennent translucides
-   (opacité 0.60) pour laisser clairement deviner le fond/le filigrane derrière.
-   Sans flou (`backdrop-filter`) : rendu net, très lisible.
-   Les couches avec leur propre teinte de fond ne sont pas touchées. */
+   Les grandes surfaces (`.bg-white` historique et `.bg-[var(--surface)]` du
+   design system) deviennent translucides pour laisser deviner le filigrane.
+   En mode sombre, léger flou + reflet supérieur pour un rendu verre premium.
+   Les couches avec leur propre teinte de fond (KPI, alertes…) ne sont pas touchées. */
 @supports (backdrop-filter: blur(1px)) {
-  main[data-glass] .bg-white {
-    background-color: rgba(255, 255, 255, 0.6) !important;
+  main[data-glass] .bg-white,
+  main[data-glass] :where(div, section, form, article).bg-\[var\(--surface\)\] {
+    background-color: rgba(255, 255, 255, 0.72) !important;
   }
 
-  .dark main[data-glass] .bg-white {
-    background-color: rgba(24, 27, 34, 0.6) !important;
+  .dark main[data-glass] .bg-white,
+  .dark main[data-glass] :where(div, section, form, article).bg-\[var\(--surface\)\],
+  .dark main[data-glass] :where(div, section, form, article)[class~="dark:bg-[#181b22]"] {
+    background-color: rgba(26, 29, 37, 0.6) !important;
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0) 110px);
+    border-color: color-mix(in srgb, #ffffff 8%, transparent);
+    -webkit-backdrop-filter: blur(10px) saturate(1.15);
+    backdrop-filter: blur(10px) saturate(1.15);
   }
+}
+
+/* ===== Ambiance premium du tableau de bord (mode sombre) =====
+   Halo bleu très discret en haut de la zone de contenu : profondeur sans bruit. */
+.dark main[data-glass] {
+  background-image:
+    radial-gradient(900px 380px at 18% -8%, rgba(37, 99, 235, 0.12), transparent 65%),
+    radial-gradient(700px 300px at 85% -12%, rgba(56, 189, 248, 0.06), transparent 70%);
 }
 
 /* ===== Modales : centrage + défilement sûrs sur tous les écrans (mobile / faible DPI) =====
@@ -273,5 +458,109 @@ textarea {
   .animate-fade-in,
   .animate-pop-in {
     animation: none;
+  }
+}
+
+/* ===== Micro-interactions « vivantes » (tableau de bord) ===== */
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.55; }
+  50% { transform: translateY(-12px) scale(1.08); opacity: 0.85; }
+}
+
+@keyframes grow-y {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+@keyframes grow-x {
+  from { width: 0; }
+}
+
+@keyframes ring-pulse {
+  0% { transform: scale(0.9); opacity: 0.5; }
+  70% { transform: scale(1.5); opacity: 0; }
+  100% { opacity: 0; }
+}
+
+.animate-float-soft { animation: float-soft 7s ease-in-out infinite; }
+.bar-grow { transform-origin: bottom; animation: grow-y 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.fill-grow { animation: grow-x 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.animate-ring-pulse { animation: ring-pulse 2.4s ease-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-soft,
+  .bar-grow,
+  .fill-grow,
+  .animate-ring-pulse {
+    animation: none !important;
+  }
+  .bar-grow { transform: none; }
+}
+
+/* ===== Harmonisation globale des sections (design system) ===== */
+@layer components {
+  main h1 {
+    font-size: 26px !important;
+    line-height: 1.15 !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.025em !important;
+  }
+
+  main h1 + p {
+    margin-top: 4px;
+    font-size: 13px !important;
+    color: var(--foreground-faint) !important;
+  }
+
+  main table {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  main thead th {
+    padding: 11px 16px;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--foreground-faint);
+    background: color-mix(in srgb, var(--foreground) 3.5%, transparent);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  main tbody td {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  main tbody tr {
+    transition: background-color 160ms var(--ease-out, ease);
+  }
+
+  main tbody tr:hover {
+    background-color: color-mix(in srgb, var(--primary) 4.5%, transparent);
+  }
+
+  main :where(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]),
+    select,
+    textarea
+  ) {
+    border-radius: 12px;
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  }
+
+  main :where(input, select, textarea):focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 16%, transparent);
+  }
+
+  /* Cartes secondaires encore plates */
+  main div[class~="rounded-lg"][class~="border"][class~="bg-[var(--surface)]"],
+  main div[class~="rounded-xl"][class~="border"][class~="bg-[var(--surface)]"] {
+    border-radius: 18px;
+    box-shadow: var(--shadow-card);
   }
 }

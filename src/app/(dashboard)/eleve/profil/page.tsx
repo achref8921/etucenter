@@ -287,8 +287,8 @@ export default function EleveProfilPage() {
       )}
 
       {profil && (
-        <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
-          <div className="mb-6 border-b border-neutral-200 pb-6 dark:border-[#2a2d35]">
+        <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+          <div className="mb-6 border-b border-[var(--border)] pb-6">
             <AvatarUpload
               currentImage={profil.image}
               endpoint="/api/eleve/profil"
@@ -299,20 +299,20 @@ export default function EleveProfilPage() {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Nom</label>
+                  <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Nom</label>
                   <input
                     {...register("nom", { required: "Le nom est requis", minLength: { value: 2, message: "Minimum 2 caractères" } })}
-                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                   {errors.nom && (
                     <p className="mt-1 text-[12px] text-red-600 dark:text-red-400">{errors.nom.message}</p>
                   )}
                 </div>
                 <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Prénom</label>
+                  <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Prénom</label>
                   <input
                     {...register("prenom", { required: "Le prénom est requis", minLength: { value: 2, message: "Minimum 2 caractères" } })}
-                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                   {errors.prenom && (
                     <p className="mt-1 text-[12px] text-red-600 dark:text-red-400">{errors.prenom.message}</p>
@@ -320,7 +320,7 @@ export default function EleveProfilPage() {
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">
                   <Mail className="mr-1 inline h-3.5 w-3.5" /> Email
                 </label>
                 <input
@@ -329,27 +329,27 @@ export default function EleveProfilPage() {
                     required: "L'email est requis",
                     pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Email invalide" },
                   })}
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
                 {errors.email && (
                   <p className="mt-1 text-[12px] text-red-600 dark:text-red-400">{errors.email.message}</p>
                 )}
               </div>
               <div>
-                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">
                   <Phone className="mr-1 inline h-3.5 w-3.5" /> Téléphone principal
                 </label>
                 <input
                   {...register("telephone")}
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Niveau scolaire</label>
+                <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Niveau scolaire</label>
                 <select
                   value={scolaire.niveau}
                   onChange={(e) => setScolaire({ niveau: e.target.value, classe: "", filiere: "" })}
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 >
                   <option value="">-- Sélectionner --</option>
                   {Object.entries(niveauLabels).map(([k, v]) => (
@@ -358,12 +358,12 @@ export default function EleveProfilPage() {
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Classe</label>
+                <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Classe</label>
                 <select
                   value={scolaire.classe}
                   onChange={(e) => setScolaire({ ...scolaire, classe: e.target.value, filiere: "" })}
                   disabled={!scolaire.niveau}
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
                 >
                   <option value="">-- Sélectionner --</option>
                   {scolaire.niveau &&
@@ -374,11 +374,11 @@ export default function EleveProfilPage() {
               </div>
               {scolaire.niveau === "lycee" && ["2ème", "3ème", "Bac"].includes(scolaire.classe) && (
                 <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Filière</label>
+                  <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Filière</label>
                   <select
                     value={scolaire.filiere}
                     onChange={(e) => setScolaire({ ...scolaire, filiere: e.target.value })}
-                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-gray-100 px-3 py-2 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   >
                     <option value="">-- Sélectionner --</option>
                     {filieres.map((f) => (
@@ -391,7 +391,7 @@ export default function EleveProfilPage() {
                 <button
                   type="button"
                   onClick={handleCancel}
-                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+                  className="rounded-lg border border-[var(--border)] px-4 py-2 text-[13px] font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
                 >
                   Annuler
                 </button>
@@ -413,24 +413,24 @@ export default function EleveProfilPage() {
             <dl className="space-y-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <dt className="text-[13px] font-medium text-neutral-500 dark:text-neutral-400">Nom</dt>
+                  <dt className="text-[13px] font-medium text-[var(--foreground-faint)]">Nom</dt>
                   <dd className="mt-1 text-[13px] text-gray-900 dark:text-gray-100">{profil.nom}</dd>
                 </div>
                 <div>
-                  <dt className="text-[13px] font-medium text-neutral-500 dark:text-neutral-400">Prénom</dt>
+                  <dt className="text-[13px] font-medium text-[var(--foreground-faint)]">Prénom</dt>
                   <dd className="mt-1 text-[13px] text-gray-900 dark:text-gray-100">{profil.prenom}</dd>
                 </div>
               </div>
               <div>
-                <dt className="text-[13px] font-medium text-neutral-500 dark:text-neutral-400">Email</dt>
+                <dt className="text-[13px] font-medium text-[var(--foreground-faint)]">Email</dt>
                 <dd className="mt-1 text-[13px] text-gray-900 dark:text-gray-100">{profil.email}</dd>
               </div>
               <div>
-                <dt className="text-[13px] font-medium text-neutral-500 dark:text-neutral-400">Téléphone</dt>
+                <dt className="text-[13px] font-medium text-[var(--foreground-faint)]">Téléphone</dt>
                 <dd className="mt-1 text-[13px] text-gray-900 dark:text-gray-100">{profil.telephone ?? "—"}</dd>
               </div>
               <div>
-                <dt className="text-[13px] font-medium text-neutral-500 dark:text-neutral-400">Niveau scolaire</dt>
+                <dt className="text-[13px] font-medium text-[var(--foreground-faint)]">Niveau scolaire</dt>
                 <dd className="mt-1 text-[13px] text-gray-900 dark:text-gray-100">
                   {profil.niveau
                     ? `${niveauLabels[profil.niveau] ?? profil.niveau}${profil.classe ? ` — ${profil.classe}` : ""}${profil.filiere ? ` — ${filiereLabels[profil.filiere] ?? profil.filiere}` : ""}`
@@ -438,7 +438,7 @@ export default function EleveProfilPage() {
                 </dd>
               </div>
               <div>
-                <dt className="text-[13px] font-medium text-neutral-500 dark:text-neutral-400">Date de naissance</dt>
+                <dt className="text-[13px] font-medium text-[var(--foreground-faint)]">Date de naissance</dt>
                 <dd className="mt-1 text-[13px] text-gray-900 dark:text-gray-100">
                   {profil.dateNaissance ? formatDate(profil.dateNaissance) : "—"}
                 </dd>
@@ -448,7 +448,7 @@ export default function EleveProfilPage() {
         </div>
       )}
 
-      <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
+      <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
         <div className="flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
             <Lock className="h-4 w-4 text-blue-600" /> Mot de passe
@@ -456,7 +456,7 @@ export default function EleveProfilPage() {
           {!showPasswordSection && (
             <button
               onClick={() => setShowPasswordSection(true)}
-              className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-3 py-1.5 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+              className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-[13px] font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
             >
               Changer le mot de passe
             </button>
@@ -465,13 +465,13 @@ export default function EleveProfilPage() {
         {showPasswordSection && (
           <div className="mt-4 space-y-4">
             <div>
-              <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Ancien mot de passe</label>
+              <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Ancien mot de passe</label>
               <div className="relative">
                 <input
                   type={showAncien ? "text" : "password"}
                   value={ancienMotDePasse}
                   onChange={(e) => setAncienMotDePasse(e.target.value)}
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 pr-10 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-gray-100 px-3 py-2 pr-10 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
                 <button
                   type="button"
@@ -483,13 +483,13 @@ export default function EleveProfilPage() {
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Nouveau mot de passe</label>
+              <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Nouveau mot de passe</label>
               <div className="relative">
                 <input
                   type={showNouveau ? "text" : "password"}
                   value={nouveauMotDePasse}
                   onChange={(e) => setNouveauMotDePasse(e.target.value)}
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 pr-10 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-gray-100 px-3 py-2 pr-10 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
                 <button
                   type="button"
@@ -501,13 +501,13 @@ export default function EleveProfilPage() {
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Confirmer le nouveau mot de passe</label>
+              <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Confirmer le nouveau mot de passe</label>
               <div className="relative">
                 <input
                   type={showConfirmer ? "text" : "password"}
                   value={confirmerMotDePasse}
                   onChange={(e) => setConfirmerMotDePasse(e.target.value)}
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-gray-900 dark:text-gray-100 px-3 py-2 pr-10 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-gray-100 px-3 py-2 pr-10 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
                 <button
                   type="button"
@@ -527,7 +527,7 @@ export default function EleveProfilPage() {
                   setNouveauMotDePasse("");
                   setConfirmerMotDePasse("");
                 }}
-                className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+                className="rounded-lg border border-[var(--border)] px-4 py-2 text-[13px] font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
               >
                 Annuler
               </button>
@@ -545,11 +545,11 @@ export default function EleveProfilPage() {
         )}
       </div>
 
-      <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-white dark:bg-[#181b22] p-6">
+      <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-[var(--surface)] p-6">
         <h2 className="mb-2 text-sm font-semibold text-red-700 dark:text-red-400">
           <Trash2 className="mr-1 inline h-4 w-4" /> Zone Dangereuse
         </h2>
-        <p className="mb-4 text-[13px] text-neutral-600 dark:text-neutral-400">
+        <p className="mb-4 text-[13px] text-[var(--foreground-subtle)]">
           La suppression de votre compte est <span className="font-semibold text-red-600 dark:text-red-400">irréversible</span>. Toutes vos données (inscriptions, paiements, présences, notifications) seront définitivement perdues.
         </p>
         <button

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
-  ArrowLeft,
   Loader2,
   Wallet,
   ArrowUpRight,
@@ -121,12 +120,6 @@ export default function ProfEleveDetailPage() {
   if (error || !data) {
     return (
       <div className="mx-auto max-w-4xl space-y-4">
-        <Link
-          href="/prof/eleves"
-          className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"
-        >
-          <ArrowLeft className="h-4 w-4" /> Retour
-        </Link>
         <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
           {error ?? "Élève introuvable."}
         </div>
@@ -153,18 +146,11 @@ export default function ProfEleveDetailPage() {
     return true;
   });
 
-  const carte = "rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]";
+  const carte = "rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)]";
   const cartePadding = "p-6";
 
   return (
     <div className="space-y-6">
-      <Link
-        href="/prof/eleves"
-        className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"
-      >
-        <ArrowLeft className="h-4 w-4" /> Retour à mes élèves
-      </Link>
-
       {/* En-tête */}
       <div className={`${carte} ${cartePadding}`}>
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
@@ -177,10 +163,10 @@ export default function ProfEleveDetailPage() {
           />
 
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">
+            <h1 className="text-xl font-bold text-[var(--foreground)]">
               {eleve.prenom} {eleve.nom}
             </h1>
-            <div className="mt-1.5 flex flex-wrap items-center gap-3 text-sm text-neutral-500 dark:text-neutral-400">
+            <div className="mt-1.5 flex flex-wrap items-center gap-3 text-sm text-[var(--foreground-faint)]">
               {eleve.codeEleve && (
                 <span className="font-mono">#{eleve.codeEleve}</span>
               )}
@@ -245,7 +231,7 @@ export default function ProfEleveDetailPage() {
         <div className={carte}>
           <div className="p-5">
             <p className="text-xs font-medium uppercase text-neutral-400">Payé</p>
-            <p className="mt-1.5 text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+            <p className="mt-1.5 text-2xl font-bold text-[var(--foreground)]">
               {formatCurrency(totaux.paid)}
             </p>
           </div>
@@ -285,12 +271,12 @@ export default function ProfEleveDetailPage() {
             return (
               <div
                 key={ins.id}
-                className="rounded-lg border border-neutral-200 p-4 dark:border-[#2a2d35]"
+                className="rounded-lg border border-[var(--border)] p-4"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-neutral-900 dark:text-neutral-100">
+                      <h3 className="font-semibold text-[var(--foreground)]">
                         {ins.groupe.nom}
                       </h3>
                       <span
@@ -303,7 +289,7 @@ export default function ProfEleveDetailPage() {
                         {ins.statut === "actif" ? "Actif" : "Inactif"}
                       </span>
                     </div>
-                    <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">
+                    <p className="mt-0.5 text-xs text-[var(--foreground-faint)]">
                       {ins.groupe.matiere?.nom ?? "—"} · inscrit le{" "}
                       {formatDate(ins.dateInscription)}
                     </p>
@@ -319,7 +305,7 @@ export default function ProfEleveDetailPage() {
                 <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
                   <div>
                     <p className="text-xs text-neutral-400">Présences</p>
-                    <p className="font-semibold text-neutral-900 dark:text-neutral-100">
+                    <p className="font-semibold text-[var(--foreground)]">
                       {ins.stats.presencesCount}
                       {taux !== null && (
                         <span className="ml-1 text-xs font-normal text-neutral-400">
@@ -330,13 +316,13 @@ export default function ProfEleveDetailPage() {
                   </div>
                   <div>
                     <p className="text-xs text-neutral-400">Absences</p>
-                    <p className="font-semibold text-neutral-900 dark:text-neutral-100">
+                    <p className="font-semibold text-[var(--foreground)]">
                       {ins.stats.absencesCount}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-neutral-400">Du</p>
-                    <p className="font-semibold text-neutral-900 dark:text-neutral-100">
+                    <p className="font-semibold text-[var(--foreground)]">
                       {formatCurrency(ins.stats.totalDue)}
                     </p>
                   </div>
@@ -367,14 +353,14 @@ export default function ProfEleveDetailPage() {
         {paiements.length === 0 ? (
           <p className="py-4 text-center text-sm text-neutral-500">Aucun paiement</p>
         ) : (
-          <div className="divide-y divide-neutral-100 dark:divide-slate-700">
+          <div className="divide-y divide-[var(--border)] dark:divide-slate-700">
             {paiements.map((p) => (
               <div key={p.id} className="flex items-center justify-between py-3">
                 <div>
-                  <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                  <p className="text-sm font-medium text-[var(--foreground)]">
                     {p.groupe.nom}
                   </p>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                  <p className="text-xs text-[var(--foreground-faint)]">
                     {formatDate(p.datePaiement)} · {p.methodePaiement}
                     {p.notes ? ` · ${p.notes}` : ""}
                   </p>
@@ -394,7 +380,7 @@ export default function ProfEleveDetailPage() {
           <h2 className="flex items-center gap-2 text-sm font-semibold uppercase text-neutral-400">
             <ClipboardCheck className="h-4 w-4" /> Historique de présence
           </h2>
-          <div className="flex gap-1 rounded-lg border border-neutral-200 p-1 dark:border-[#2a2d35]">
+          <div className="flex gap-1 rounded-lg border border-[var(--border)] p-1">
             {(
               [
                 ["toutes", "Toutes"],
@@ -421,7 +407,7 @@ export default function ProfEleveDetailPage() {
         {presencesFiltrees.length === 0 ? (
           <p className="py-4 text-center text-sm text-neutral-500">Aucune présence</p>
         ) : (
-          <div className="divide-y divide-neutral-100 dark:divide-slate-700">
+          <div className="divide-y divide-[var(--border)] dark:divide-slate-700">
             {presencesFiltrees.map((p) => (
               <div key={p.id} className="flex items-center justify-between py-3">
                 <div className="flex items-center gap-3">
@@ -431,10 +417,10 @@ export default function ProfEleveDetailPage() {
                     <AlertCircle className="h-4 w-4 shrink-0 text-red-500" />
                   )}
                   <div>
-                    <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                    <p className="text-sm font-medium text-[var(--foreground)]">
                       {p.seance.groupe.nom}
                     </p>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    <p className="text-xs text-[var(--foreground-faint)]">
                       {formatDate(p.seance.date)}
                       {p.seance.groupe.matiere ? ` · ${p.seance.groupe.matiere.nom}` : ""}
                     </p>

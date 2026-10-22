@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Loader2, Save, AlertTriangle, CheckCheck, X, RotateCcw } from "lucide-react";
+import { Loader2, Save, AlertTriangle, CheckCheck, X, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { SkeletonPage } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/toast";
@@ -121,14 +121,7 @@ export default function AttendanceRecordingPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Link
-          href="/prof/presences"
-          className="flex items-center gap-1 text-[13px] text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Retour
-        </Link>
-        <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Enregistrement des Présences</h1>
+        <h1 className="text-2xl font-bold text-[var(--foreground)]">Enregistrement des Présences</h1>
       </div>
 
       {error && (
@@ -151,7 +144,7 @@ export default function AttendanceRecordingPage() {
       )}
 
       {presences.length > 0 && (
-        <div className="animate-fade-in-up rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-4">
+        <div className="animate-fade-in-up rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap items-center gap-3">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-[12px] font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-300">
@@ -198,23 +191,23 @@ export default function AttendanceRecordingPage() {
       )}
 
       {presences.length === 0 ? (
-          <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-8 text-center text-neutral-500 dark:text-neutral-400">
+          <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-8 text-center text-[var(--foreground-faint)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
             Aucun élève inscrit dans ce groupe
           </div>
       ) : (
         <>
-          <div className="hidden md:block overflow-hidden rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+          <div className="hidden md:block overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
             <table className="w-full text-left text-[13px]">
-              <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
+              <thead className="border-b border-[var(--border)]">
                 <tr>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Nom</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Prénom</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Email</th>
-                  <th className="px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Présent</th>
-                  <th className="px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Absent</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Nom</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Prénom</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Email</th>
+                  <th className="px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Présent</th>
+                  <th className="px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Absent</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100 dark:divide-neutral-700">
+              <tbody className="divide-y divide-[var(--border)] dark:divide-neutral-700">
                 {presences.map((presence) => (
                   <tr
                     key={presence.eleveId}
@@ -235,7 +228,7 @@ export default function AttendanceRecordingPage() {
                         {presence.eleve.nom}
                       </Link>
                     </td>
-                    <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                    <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">
                       <Link
                         href={`/prof/eleves/${presence.eleveId}`}
                         className="hover:text-blue-600 hover:underline dark:hover:text-blue-400"
@@ -244,7 +237,7 @@ export default function AttendanceRecordingPage() {
                         {presence.eleve.prenom}
                       </Link>
                     </td>
-                    <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{presence.eleve.email}</td>
+                    <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">{presence.eleve.email}</td>
                     <td className="px-4 py-2.5 text-center">
                       <button
                         type="button"
@@ -279,10 +272,10 @@ export default function AttendanceRecordingPage() {
 
           <div className="md:hidden space-y-3">
             {presences.map((presence) => (
-              <div key={presence.eleveId} className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-4">
+              <div key={presence.eleveId} className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
                 <div className="mb-3 flex items-center justify-between gap-2">
                   <div className="min-w-0">
-<p className="truncate text-[13px] font-bold text-neutral-900 dark:text-neutral-100">
+<p className="truncate text-[13px] font-bold text-[var(--foreground)]">
                           <Link
                             href={`/prof/eleves/${presence.eleveId}`}
                             className="block hover:text-blue-600 hover:underline dark:hover:text-blue-400"
@@ -291,7 +284,7 @@ export default function AttendanceRecordingPage() {
                             {presence.eleve.prenom} {presence.eleve.nom}
                           </Link>
                         </p>
-                    <p className="truncate text-[12px] text-neutral-500 dark:text-neutral-400">{presence.eleve.email}</p>
+                    <p className="truncate text-[12px] text-[var(--foreground-faint)]">{presence.eleve.email}</p>
                   </div>
                   <span
                     className={`shrink-0 rounded-full px-2.5 py-0.5 text-[12px] font-medium ${
@@ -339,8 +332,8 @@ export default function AttendanceRecordingPage() {
             ))}
           </div>
 
-          <div className="sticky bottom-0 -mx-px flex items-center justify-between gap-3 rounded-t-xl border border-b-0 border-neutral-200 bg-neutral-50/95 px-4 py-3 backdrop-blur dark:border-[#2a2d35] dark:bg-[#16181d]/95">
-            <p className="text-[13px] text-neutral-500 dark:text-neutral-400">
+          <div className="sticky bottom-0 -mx-px flex items-center justify-between gap-3 rounded-t-xl border border-b-0 border-[var(--border)] bg-neutral-50/95 px-4 py-3 backdrop-blur dark:bg-[#16181d]/95">
+            <p className="text-[13px] text-[var(--foreground-faint)]">
               {markedRatio > 0
                 ? `${presentCount + absentCount} sur ${presences.length} marqué${presentCount + absentCount > 1 ? "s" : ""}`
                 : `${presences.length} élève${presences.length > 1 ? "s" : ""} à marquer`}

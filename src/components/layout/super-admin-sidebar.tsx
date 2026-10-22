@@ -29,13 +29,13 @@ export default function SuperAdminSidebar({ open, onClose }: SuperAdminSidebarPr
           open ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
       >
-        <div className="flex h-14 items-center gap-3 border-b border-neutral-100 px-5 dark:border-[#1e2128]">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-600">
+        <div className="flex h-16 items-center gap-3 border-b border-neutral-200 px-5 dark:border-[#1e2128]">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-lg)] bg-blue-600 shadow-xs">
             <Shield className="h-4 w-4 text-white" />
           </div>
-          <div>
-            <span className="text-[15px] font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">Étudnet</span>
-            <p className="text-[10px] font-medium uppercase tracking-wider text-violet-500 dark:text-violet-400">
+          <div className="min-w-0 flex-1">
+            <span className="block truncate text-[15px] font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">Étudnet</span>
+            <p className="text-[10px] font-medium uppercase tracking-wider text-blue-500 dark:text-blue-400">
               Super Admin
             </p>
           </div>
@@ -48,7 +48,7 @@ export default function SuperAdminSidebar({ open, onClose }: SuperAdminSidebarPr
                 key={section.key}
                 group={section}
                 home={home}
-                accent="violet"
+                accent="blue"
                 storageKey={`nav-open:super_admin:${section.key}`}
                 onNavigate={onClose}
               />
@@ -57,15 +57,15 @@ export default function SuperAdminSidebar({ open, onClose }: SuperAdminSidebarPr
                 key={section.href}
                 item={section}
                 home={home}
-                accent="violet"
+                accent="blue"
                 onNavigate={onClose}
               />
             )
           )}
         </nav>
 
-        <div className="border-t border-neutral-100 px-5 py-3 dark:border-[#1e2128]">
-            <p className="text-[10px] text-neutral-300 dark:text-neutral-600">Étudnet Platform v1.0</p>
+        <div className="border-t border-neutral-200 px-5 py-3 dark:border-[#1e2128]">
+            <p className="text-[10px] font-medium text-neutral-300 dark:text-neutral-600">Étudnet <span className="text-neutral-400 dark:text-neutral-500">Platform v1.0</span></p>
         </div>
       </aside>
     </>

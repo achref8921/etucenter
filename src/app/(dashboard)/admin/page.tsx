@@ -1,18 +1,17 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import {
-  TrendingUp,
-  DollarSign,
-  AlertTriangle,
   ArrowRight,
   Users,
-  GraduationCap,
   Banknote,
   CalendarDays,
   Clock,
   UserRound,
   CheckCircle2,
   Circle,
+  AlertTriangle,
+  TrendingUp,
+  DollarSign,
 } from "lucide-react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -23,6 +22,23 @@ import {
   getReversePendingCenterParts,
 } from "@/lib/admin-dashboard-data";
 import { MonthSelector } from "@/components/month-selector";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  PageHeader,
+  EmptyState,
+  Badge,
+  Table,
+  THead,
+  TH,
+  TR,
+  TD,
+  MetricCard,
+  BarChart,
+  Avatar,
+} from "@/components/ui";
 
 const SEANCE_STATUT_LABEL: Record<string, string> = {
   planifiee: "Planifiée",
@@ -43,6 +59,43 @@ function getCurrentMonth(): string {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 }
 
+function StatutBadge({ statut }: { statut: string }) {
+  const variant =
+    statut === "terminee"
+      ? "success"
+      : statut === "en_cours"
+        ? "info"
+        : statut === "annulee"
+          ? "error"
+          : "neutral";
+  return (
+    <Badge variant={variant}>
+      {statut === "terminee" ? (
+        <CheckCircle2 className="h-3 w-3" />
+      ) : (
+        <Circle className={statut === "en_cours" ? "h-3 w-3 animate-pulse" : "h-3 w-3"} />
+      )}
+      {SEANCE_STATUT_LABEL[statut] || statut}
+    </Badge>
+  );
+}
+
+function CardPanel({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)] ${className ?? ""}`}
+    >
+      {children}
+    </div>
+  );
+}
+
 async function DashboardContent({ month }: { month: string }) {
   const session = await getServerSession(authOptions);
   const centerId = (session?.user as any)?.centerId;
@@ -57,326 +110,364 @@ async function DashboardContent({ month }: { month: string }) {
     month: "long",
   });
 
+  const revenue = data.netPaidSessionsRevenue;
+  const centerShare =
+    revenue > 0 ? Math.round((data.totalCenterBenefit / revenue) * 100) : 0;
+
+  const profsSorted = [...data.profs].sort((a, b) => b.netRevenue - a.netRevenue);
+  const activeProfs = profsSorted.filter((p) => p.netRevenue > 0);
+  const chartData = profsSorted.slice(0, 8).map((p) => ({
+    label: `${p.prof.prenom} ${p.prof.nom}`.trim(),
+    value: p.netRevenue,
+  }));
+
+  const benefitSpark = profsSorted
+    .map((p) => Math.max(0, p.beneficeCentre + (p.reverseSettledRevenue ?? 0)))
+    .slice(0, 8);
+  const revenueSpark = profsSorted.map((p) => Math.max(0, p.netRevenue)).slice(0, 8);
+  const elevesSpark = profsSorted.map((p) => p.nombreEleves).slice(0, 8);
+  const unpaidRatio =
+    revenue > 0 ? Math.round((data.totalUnpaid / revenue) * 100) : 0;
+
   return (
     <>
-      <div className="rounded-lg border border-neutral-200 bg-white p-6 dark:border-[#2a2d35] dark:bg-[#181b22]">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-              Bénéfice Net du Centre
-            </p>
-            <p className="mt-2 text-2xl font-bold tabular-nums text-blue-700 dark:text-blue-400 sm:text-3xl">
-              {formatCurrency(data.totalCenterBenefit)}
-            </p>
-            <p className="mt-1 text-[12px] text-neutral-400 dark:text-neutral-500">
-              20% de {formatCurrency(data.netPaidSessionsRevenue)} — Revenu brut
-            </p>
+      {/* Bandeau KPI */}
+      <div className="relative">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -top-10 right-1/3 h-40 w-72 rounded-full bg-blue-400/20 blur-3xl dark:bg-blue-500/20"
+        />
+        <div className="relative grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="animate-fade-in-up" style={{ animationDelay: "0ms" }}>
+            <MetricCard
+              className="h-full"
+              label="Bénéfice Net du Centre"
+              value={data.totalCenterBenefit}
+              sub={`${centerShare}% de ${formatCurrency(revenue)}`}
+              icon={Banknote}
+              tone="primary"
+              ring={centerShare}
+              spark={benefitSpark}
+              href={`/admin/benefices?month=${month}`}
+            />
           </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-600/10">
-            <Banknote className="h-6 w-6 text-blue-700 dark:text-blue-400" />
+          <div className="animate-fade-in-up" style={{ animationDelay: "80ms" }}>
+            <MetricCard
+              className="h-full"
+              label="Revenu Brut"
+              value={revenue}
+              sub={`${activeProfs.length} professeur${activeProfs.length > 1 ? "s" : ""} actif${activeProfs.length > 1 ? "s" : ""}`}
+              icon={TrendingUp}
+              tone="success"
+              spark={revenueSpark}
+              href="/admin/finances"
+            />
           </div>
-        </div>
-        <div className="mt-4 grid grid-cols-1 gap-3 border-t border-neutral-100 pt-4 sm:grid-cols-3 sm:gap-4 dark:border-[#2a2d35]">
-          <div>
-            <p className="text-[12px] text-neutral-400 dark:text-neutral-500">Revenu Brut</p>
-            <p className="text-[13px] font-semibold tabular-nums text-neutral-900 dark:text-neutral-100">
-              {formatCurrency(data.netPaidSessionsRevenue)}
-            </p>
+          <div className="animate-fade-in-up" style={{ animationDelay: "160ms" }}>
+            <MetricCard
+              className="h-full"
+              label="Impayés"
+              value={data.totalUnpaid}
+              sub={data.totalUnpaid > 0 ? "à recouvrer" : "aucun impayé"}
+              icon={AlertTriangle}
+              tone="error"
+              trend={data.totalUnpaid > 0 ? "down" : undefined}
+              ring={unpaidRatio}
+              href="/admin/impayes"
+            />
           </div>
-          <div>
-            <p className="text-[12px] text-neutral-400 dark:text-neutral-500">Impayés</p>
-            <p className="text-[13px] font-semibold tabular-nums text-red-600 dark:text-red-400">
-              {formatCurrency(data.totalUnpaid)}
-            </p>
-          </div>
-          <div>
-            <p className="text-[12px] text-neutral-400 dark:text-neutral-500">Bénéfice Centre</p>
-            <p className="text-[13px] font-semibold tabular-nums text-blue-700 dark:text-blue-400">
-              {formatCurrency(data.totalCenterBenefit)}
-            </p>
-          </div>
-        </div>
-        <Link
-          href={`/admin/benefices?month=${month}`}
-          className="mt-4 flex items-center gap-1 text-[12px] font-medium text-blue-700 hover:text-blue-900 dark:text-blue-400"
-        >
-          Voir les bénéfices détaillés <ArrowRight className="h-3 w-3" />
-        </Link>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="rounded-lg border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
-          <div className="flex items-center justify-between">
-            <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-              Impayés Total
-            </p>
-            <AlertTriangle className="h-4 w-4 text-red-400" />
-          </div>
-          <p className="mt-2 text-xl font-bold tabular-nums text-red-600 dark:text-red-400">
-            {formatCurrency(data.totalUnpaid)}
-          </p>
-          <Link
-            href="/admin/finances"
-            className="mt-2 flex items-center gap-1 text-[12px] font-medium text-red-600 opacity-0 transition-opacity hover:opacity-100 dark:text-red-400"
-          >
-            Gerer <ArrowRight className="h-3 w-3" />
-          </Link>
-        </div>
-
-        <div className="rounded-lg border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
-          <div className="flex items-center justify-between">
-            <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-              Effectifs
-            </p>
-            <Users className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
-          </div>
-          <div className="mt-2 flex items-center gap-4">
-            <div>
-              <span className="text-xl font-bold text-neutral-900 dark:text-neutral-100">{data.totalStudents}</span>
-              <span className="ml-1 text-[12px] text-neutral-400 dark:text-neutral-500">eleves</span>
-            </div>
-            <div className="h-4 w-px bg-neutral-200 dark:bg-[#2a2d35]"></div>
-            <div>
-              <span className="text-xl font-bold text-neutral-900 dark:text-neutral-100">{data.totalTeachers}</span>
-              <span className="ml-1 text-[12px] text-neutral-400 dark:text-neutral-500">profs</span>
-            </div>
+          <div className="animate-fade-in-up" style={{ animationDelay: "240ms" }}>
+            <MetricCard
+              className="h-full"
+              label="Effectifs"
+              value={data.totalStudents}
+              currency={false}
+              sub={`${data.totalTeachers} professeur${data.totalTeachers > 1 ? "s" : ""}`}
+              icon={Users}
+              tone="warning"
+              spark={elevesSpark}
+              href="/admin/utilisateurs"
+            />
           </div>
         </div>
       </div>
 
-      <div className="rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 px-5 py-3 dark:border-[#2a2d35]">
-          <div className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4 text-amber-500 dark:text-amber-400" />
-            <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
-              Parts centre en cours (non réglées)
-            </h2>
-            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-amber-700 dark:bg-amber-500/10 dark:text-amber-400">
-              {formatCurrency(pendingPartsBalance)}
+      {/* Revenus par professeur + Activité du jour */}
+      <div
+        className="grid grid-cols-1 gap-4 lg:grid-cols-3 animate-fade-in-up"
+        style={{ animationDelay: "320ms" }}
+      >
+        <CardPanel className="p-5 lg:col-span-2">
+          <div className="mb-5 flex items-start justify-between gap-3">
+            <div>
+              <h3 className="text-[15px] font-semibold tracking-tight text-[var(--foreground)]">
+                Revenus par professeur
+              </h3>
+              <p className="mt-0.5 text-[12px] text-[var(--foreground-faint)]">
+                Encaissements du mois par professeur
+              </p>
+            </div>
+            <Link
+              href="/admin/finances-professeurs"
+              className="flex shrink-0 items-center gap-1 text-[12px] font-semibold text-[var(--primary)] hover:underline"
+            >
+              Détail <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+          {chartData.length === 0 ? (
+            <EmptyState
+              icon={TrendingUp}
+              title="Aucun encaissement ce mois"
+              description="Les revenus apparaîtront ici dès le premier paiement enregistré."
+            />
+          ) : (
+            <BarChart data={chartData} format="currency" height={190} />
+          )}
+        </CardPanel>
+
+        <CardPanel className="flex flex-col p-5">
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <h3 className="text-[15px] font-semibold tracking-tight text-[var(--foreground)]">
+                Activité du jour
+              </h3>
+              <p className="mt-0.5 text-[12px] capitalize text-[var(--foreground-faint)]">
+                {todayLabel}
+              </p>
+            </div>
+            <Badge variant="primary">{todaySeances.length}</Badge>
+          </div>
+
+          {todaySeances.length === 0 ? (
+            <div className="flex flex-1 flex-col items-center justify-center py-6 text-center">
+              <span className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--surface-muted)] text-[var(--foreground-faint)]">
+                <CalendarDays className="h-5 w-5" />
+              </span>
+              <p className="text-[13px] font-medium text-[var(--foreground)]">Aucune séance</p>
+              <p className="mt-0.5 text-[12px] text-[var(--foreground-faint)]">
+                Rien de planifié aujourd&apos;hui
+              </p>
+            </div>
+          ) : (
+            <ul className="-mx-1 space-y-1">
+              {todaySeances.slice(0, 5).map((s) => (
+                <li key={s.id}>
+                  <Link
+                    href={`/admin/groupes/${s.groupe.id}`}
+                    title="Voir le groupe"
+                    className="flex items-center gap-3 rounded-[12px] px-1 py-2 transition-colors hover:bg-[var(--surface-muted)]"
+                  >
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400">
+                      <Clock className="h-4 w-4" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[13px] font-medium text-[var(--foreground)]">
+                        {s.groupe.nom}
+                      </p>
+                      <p className="truncate text-[11.5px] text-[var(--foreground-faint)]">
+                        {formatTime(s.heureDebut)}
+                        {s.heureFin ? `–${formatTime(s.heureFin)}` : ""}
+                        {s.prof ? ` · ${s.prof.prenom} ${s.prof.nom}` : ""}
+                      </p>
+                    </div>
+                    <StatutBadge statut={s.statut} />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardPanel>
+      </div>
+
+      {/* Parts centre en cours */}
+      <Card className="animate-fade-in-up" style={{ animationDelay: "400ms" }}>
+        <CardHeader>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">
+              <DollarSign className="h-4 w-4" />
             </span>
+            <CardTitle>Parts centre en cours (non réglées)</CardTitle>
+            <Badge variant="warning">{formatCurrency(pendingPartsBalance)}</Badge>
           </div>
           <Link
             href={`/admin/benefices?month=${month}`}
-            className="flex items-center gap-1 text-[12px] font-medium text-blue-700 hover:text-blue-900 dark:text-blue-400"
+            className="flex items-center gap-1 text-[var(--text-label)] font-medium text-[var(--primary)] hover:underline"
           >
             Voir le détail <ArrowRight className="h-3 w-3" />
           </Link>
-        </div>
+        </CardHeader>
         {pendingParts.length === 0 ? (
-          <div className="px-5 py-8 text-center text-[13px] text-neutral-400 dark:text-neutral-500">
-            Aucune part centre en cours.
-          </div>
+          <CardContent>
+            <EmptyState
+              icon={DollarSign}
+              title="Aucune part centre en cours"
+              description="Les parts dues par les professeurs apparaîtront ici une fois des encaissements enregistrés."
+            />
+          </CardContent>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-[13px]">
-              <thead>
-                <tr className="border-b border-neutral-100 dark:border-[#2a2d35]">
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                    Professeur
-                  </th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                    Dettes
-                  </th>
-                  <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                    Montant en cours
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
-                {pendingParts.map((p) => (
-                  <tr
-                    key={p.prof.id}
-                    className="transition-colors hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]"
-                  >
-                    <td className="px-4 py-2.5 font-medium text-neutral-900 dark:text-neutral-100">
-                      {p.prof.prenom} {p.prof.nom}
-                    </td>
-                    <td className="px-4 py-2.5 tabular-nums text-neutral-600 dark:text-neutral-400">
-                      {p.debts.length}
-                    </td>
-                    <td className="px-4 py-2.5 text-right font-semibold tabular-nums text-amber-600 dark:text-amber-400">
-                      {formatCurrency(p.balance)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      <div className="rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 px-5 py-3 dark:border-[#2a2d35]">
-          <div className="flex items-center gap-2">
-            <CalendarDays className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-            <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
-              Séances d'aujourd'hui
-            </h2>
-            <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-800 dark:bg-blue-600/10 dark:text-blue-400">
-              {todaySeances.length}
-            </span>
-          </div>
-          <p className="text-[12px] capitalize text-neutral-400 dark:text-neutral-500">{todayLabel}</p>
-        </div>
-
-        {todaySeances.length === 0 ? (
-          <div className="px-5 py-8 text-center text-[13px] text-neutral-400 dark:text-neutral-500">
-            Aucune séance enregistrée par les professeurs pour aujourd'hui.
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-[13px]">
-              <thead>
-                <tr className="border-b border-neutral-100 dark:border-[#2a2d35]">
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Heure</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Professeur</th>
-                  <th className="px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Présents</th>
-                  <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Statut</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
-                {todaySeances.map((s) => (
-                  <tr key={s.id} className="transition-colors hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
-                    <td className="whitespace-nowrap px-4 py-2.5">
-                      <span className="inline-flex items-center gap-1 font-medium text-neutral-900 dark:text-neutral-100">
-                        <Clock className="h-3.5 w-3.5 text-neutral-400" />
-                        {formatTime(s.heureDebut)}
-                        {s.heureFin ? <span className="text-neutral-400">– {formatTime(s.heureFin)}</span> : null}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <p className="font-medium text-neutral-900 dark:text-neutral-100">{s.groupe.nom}</p>
-                      {s.groupe.matiere && (
-                        <p className="text-[11px] text-neutral-400 dark:text-neutral-500">{s.groupe.matiere.nom}</p>
-                      )}
-                    </td>
-                    <td className="px-4 py-2.5">
-                      {s.prof ? (
-                        <span className="inline-flex items-center gap-1.5 text-neutral-700 dark:text-neutral-300">
-                          <UserRound className="h-3.5 w-3.5 text-neutral-400" />
-                          {s.prof.prenom} {s.prof.nom}
+            <Table>
+              <THead>
+                <TR className="hover:bg-transparent">
+                  <TH>Professeur</TH>
+                  <TH>Dettes</TH>
+                  <TH className="text-right">Montant en cours</TH>
+                </TR>
+              </THead>
+              <tbody className="divide-y divide-[var(--border)]">
+                {pendingParts.map((p) => {
+                  const href = `/admin/finances-professeurs?teacherId=${p.prof.id}`;
+                  return (
+                    <TR key={p.prof.id} className="group cursor-pointer">
+                      <TD className="relative font-medium">
+                        <Link
+                          href={href}
+                          aria-label={`Voir le compte de ${p.prof.prenom} ${p.prof.nom}`}
+                          className="absolute inset-0 rounded-[6px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--primary)]"
+                        />
+                        <span className="relative flex items-center gap-2">
+                          {p.prof.prenom} {p.prof.nom}
+                          <ArrowRight className="h-3.5 w-3.5 text-[var(--primary)] opacity-0 transition-opacity group-hover:opacity-100" />
                         </span>
-                      ) : (
-                        <span className="text-[12px] text-neutral-400 dark:text-neutral-500">Sans professeur</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-2.5 text-center tabular-nums text-neutral-700 dark:text-neutral-300">
-                      {s.elevesCount}
-                    </td>
-                    <td className="px-4 py-2.5 text-right">
-                      <span
-                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
-                          s.statut === "terminee"
-                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400"
-                            : s.statut === "en_cours"
-                              ? "bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400"
-                              : "bg-neutral-100 text-neutral-600 dark:bg-[#1e2128] dark:text-neutral-300"
-                        }`}
-                      >
-                        {s.statut === "terminee" ? (
-                          <CheckCircle2 className="h-3 w-3" />
-                        ) : s.statut === "en_cours" ? (
-                          <Circle className="h-3 w-3 animate-pulse" />
-                        ) : (
-                          <Circle className="h-3 w-3" />
-                        )}
-                        {SEANCE_STATUT_LABEL[s.statut] || s.statut}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                      </TD>
+                      <TD className="relative tabular-nums text-[var(--foreground-faint)]">
+                        <Link href={href} tabIndex={-1} aria-hidden="true" className="absolute inset-0" />
+                        <span className="relative">{p.debts.length}</span>
+                      </TD>
+                      <TD className="relative text-right font-semibold tabular-nums text-amber-600 dark:text-amber-400">
+                        <Link href={href} tabIndex={-1} aria-hidden="true" className="absolute inset-0" />
+                        <span className="relative">{formatCurrency(p.balance)}</span>
+                      </TD>
+                    </TR>
+                  );
+                })}
               </tbody>
-            </table>
+            </Table>
           </div>
         )}
-      </div>
+      </Card>
 
+      {/* Équipe pédagogique */}
+      <CardPanel className="animate-fade-in-up p-5">
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div>
+            <h3 className="text-[15px] font-semibold tracking-tight text-[var(--foreground)]">
+              Équipe pédagogique
+            </h3>
+            <p className="mt-0.5 text-[12px] text-[var(--foreground-faint)]">
+              {data.totalTeachers} professeur{data.totalTeachers > 1 ? "s" : ""}
+            </p>
+          </div>
+          <Link
+            href="/admin/utilisateurs"
+            className="flex shrink-0 items-center gap-1 text-[12px] font-semibold text-[var(--primary)] hover:underline"
+          >
+            Gérer <ArrowRight className="h-3 w-3" />
+          </Link>
+        </div>
+        {data.profs.length === 0 ? (
+          <EmptyState
+            icon={Users}
+            title="Aucun professeur"
+            description="Ajoutez des professeurs pour les voir apparaître ici."
+          />
+        ) : (
+          <ul className="grid gap-x-6 sm:grid-cols-2">
+            {profsSorted.slice(0, 10).map((p) => (
+              <li key={p.prof.id} className="border-b border-[var(--border)]">
+                <Link
+                  href={`/admin/professeurs/${p.prof.id}`}
+                  title="Voir la fiche du professeur"
+                  className="flex items-center gap-3 rounded-[12px] px-1 py-2.5 transition-colors hover:bg-[var(--surface-muted)]"
+                >
+                  <Avatar name={`${p.prof.prenom} ${p.prof.nom}`} size={36} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[13px] font-medium text-[var(--foreground)]">
+                      {p.prof.prenom} {p.prof.nom}
+                    </p>
+                    <p className="truncate text-[11.5px] text-[var(--foreground-faint)]">
+                      {p.nombreEleves} élève{p.nombreEleves > 1 ? "s" : ""}
+                    </p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-[var(--surface-muted)] px-2 py-0.5 text-[11px] font-semibold tabular-nums text-[var(--foreground-faint)]">
+                    {p.taux}%
+                  </span>
+                  <ArrowRight className="h-3.5 w-3.5 shrink-0 text-[var(--foreground-faint)]" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardPanel>
+
+      {/* Détail financier par professeur */}
       {data.profs.length > 0 && (
-        <div className="rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
-          <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-3 dark:border-[#2a2d35]">
-            <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
-              Bénéfices par professeur
-            </h2>
+        <Card>
+          <CardHeader>
+            <CardTitle>Détail financier par professeur</CardTitle>
             <Link
               href="/admin/finances-professeurs"
-              className="flex items-center gap-1 text-[12px] font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400"
+              className="flex items-center gap-1 text-[var(--text-label)] font-medium text-[var(--primary)] hover:underline"
             >
               Comptes profs <ArrowRight className="h-3 w-3" />
             </Link>
-          </div>
+          </CardHeader>
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-[13px]">
-              <thead>
-                <tr className="border-b border-neutral-100 dark:border-[#2a2d35]">
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                    Prof
-                  </th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                    Taux
-                  </th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                    Reçu
-                  </th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                    Centre
-                  </th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                    Salaire
-                  </th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                    À encaisser
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+            <Table>
+              <THead>
+                <TR className="hover:bg-transparent">
+                  <TH>Prof</TH>
+                  <TH>Taux</TH>
+                  <TH>Reçu</TH>
+                  <TH>Centre</TH>
+                  <TH>Salaire</TH>
+                  <TH>À encaisser</TH>
+                </TR>
+              </THead>
+              <tbody className="divide-y divide-[var(--border)]">
                 {data.profs.map((p) => (
-                  <tr
-                    key={p.prof.id}
-                    className="transition-colors hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]"
-                  >
-                    <td className="px-4 py-2.5 font-medium text-neutral-900 dark:text-neutral-100">
-                      {p.prof.prenom} {p.prof.nom}
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-medium text-blue-800 dark:bg-blue-600/10 dark:text-blue-400">
-                        {p.taux}%
-                      </span>
-                    </td>
-                    <td className="px-4 py-2.5 tabular-nums text-neutral-900 dark:text-neutral-100">
-                      {formatCurrency(p.netRevenue)}
-                    </td>
-                    <td className="px-4 py-2.5 tabular-nums font-medium text-blue-700 dark:text-blue-400">
+                  <TR key={p.prof.id}>
+                    <TD className="font-medium">
+                      <Link
+                        href={`/admin/professeurs/${p.prof.id}`}
+                        className="transition-colors hover:text-[var(--primary)] hover:underline"
+                      >
+                        {p.prof.prenom} {p.prof.nom}
+                      </Link>
+                    </TD>
+                    <TD>
+                      <Badge variant="primary">{p.taux}%</Badge>
+                    </TD>
+                    <TD className="tabular-nums">{formatCurrency(p.netRevenue)}</TD>
+                    <TD className="tabular-nums font-medium text-[var(--primary)]">
                       {formatCurrency(p.beneficeCentre + (p.reverseSettledRevenue ?? 0))}
-                    </td>
-                    <td className="px-4 py-2.5 tabular-nums font-medium text-purple-600 dark:text-purple-400">
+                    </TD>
+                    <TD className="tabular-nums font-medium text-purple-600 dark:text-purple-400">
                       {formatCurrency(p.salaireProf)}
-                    </td>
-                    <td className="px-4 py-2.5 tabular-nums font-medium text-emerald-600 dark:text-emerald-400">
+                    </TD>
+                    <TD className="tabular-nums font-medium text-emerald-600 dark:text-emerald-400">
                       {formatCurrency(p.claimable)}
-                    </td>
-                  </tr>
+                    </TD>
+                  </TR>
                 ))}
-                <tr className="bg-neutral-50 font-semibold dark:bg-[#1e2128]">
-                  <td className="px-4 py-2.5 text-neutral-900 dark:text-neutral-100">Total</td>
-                  <td className="px-4 py-2.5"></td>
-                  <td className="px-4 py-2.5 tabular-nums text-neutral-900 dark:text-neutral-100">
-                    {formatCurrency(data.netPaidSessionsRevenue)}
-                  </td>
-                  <td className="px-4 py-2.5 tabular-nums text-blue-700 dark:text-blue-400">
+                <TR className="bg-[var(--surface-muted)] font-semibold hover:bg-[var(--surface-muted)]">
+                  <TD>Total</TD>
+                  <TD />
+                  <TD className="tabular-nums">{formatCurrency(revenue)}</TD>
+                  <TD className="tabular-nums text-[var(--primary)]">
                     {formatCurrency(data.totalCenterBenefit)}
-                  </td>
-                  <td className="px-4 py-2.5 tabular-nums text-purple-600 dark:text-purple-400">
-                    {formatCurrency(data.netPaidSessionsRevenue - data.netCenterEarnings)}
-                  </td>
-                  <td className="px-4 py-2.5 tabular-nums text-emerald-600 dark:text-emerald-400">
+                  </TD>
+                  <TD className="tabular-nums text-purple-600 dark:text-purple-400">
+                    {formatCurrency(revenue - data.netCenterEarnings)}
+                  </TD>
+                  <TD className="tabular-nums text-emerald-600 dark:text-emerald-400">
                     {formatCurrency(data.profs.reduce((sum, p) => sum + p.claimable, 0))}
-                  </td>
-                </tr>
+                  </TD>
+                </TR>
               </tbody>
-            </table>
+            </Table>
           </div>
-        </div>
+        </Card>
       )}
     </>
   );
@@ -391,23 +482,24 @@ export default async function AdminDashboardPage({
   const month = params.month || getCurrentMonth();
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
-          Tableau de bord
-        </h1>
-        <Suspense fallback={null}>
-          <MonthSelector month={month} />
-        </Suspense>
-      </div>
+    <div className="space-y-[var(--space-section-y)]">
+      <PageHeader
+        title="Tableau de bord"
+        subtitle="Vue d'ensemble de l'activité et des finances du centre"
+        actions={
+          <Suspense fallback={null}>
+            <MonthSelector month={month} />
+          </Suspense>
+        }
+      />
 
       <Suspense
         fallback={
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {[1, 2, 3].map((i) => (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="h-32 animate-pulse rounded-lg border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]"
+                className="h-32 animate-pulse rounded-[20px] border border-[var(--border)] bg-[var(--surface)]"
               />
             ))}
           </div>

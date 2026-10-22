@@ -177,7 +177,7 @@ export default function ProfilPage() {
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex items-center gap-3">
         <User className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Mon Profil</h1>
+        <h1 className="text-2xl font-bold text-[var(--foreground)]">Mon Profil</h1>
       </div>
 
       {error && (
@@ -189,9 +189,9 @@ export default function ProfilPage() {
 
       {profil && (
         <>
-          <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm">
-            <div className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
-              <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Photo de Profil</h2>
+          <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] overflow-hidden">
+            <div className="border-b border-[var(--border)] px-6 py-3">
+              <h2 className="text-sm font-semibold text-[var(--foreground)]">Photo de Profil</h2>
             </div>
             <div className="p-6">
               <AvatarUpload
@@ -204,9 +204,9 @@ export default function ProfilPage() {
             </div>
           </div>
 
-          <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm">
-            <div className="flex items-center justify-between border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
-              <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Informations Personnelles</h2>
+          <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] overflow-hidden">
+            <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-3">
+              <h2 className="text-sm font-semibold text-[var(--foreground)]">Informations Personnelles</h2>
               {!editing ? (
                 <button
                   onClick={() => setEditing(true)}
@@ -226,7 +226,7 @@ export default function ProfilPage() {
                       setDateNaissance(profil.dateNaissance ? profil.dateNaissance.split("T")[0] : "");
                       setError(null);
                     }}
-                    className="rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800"
+                    className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800"
                   >
                     Annuler
                   </button>
@@ -250,7 +250,7 @@ export default function ProfilPage() {
                       <input
                         value={nom}
                         onChange={(e) => setNom(e.target.value)}
-                        className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="w-full rounded-lg border border-[var(--border)] bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                       />
                     </div>
                     <div>
@@ -258,7 +258,7 @@ export default function ProfilPage() {
                       <input
                         value={prenom}
                         onChange={(e) => setPrenom(e.target.value)}
-                        className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="w-full rounded-lg border border-[var(--border)] bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                       />
                     </div>
                   </div>
@@ -270,7 +270,7 @@ export default function ProfilPage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="w-full rounded-lg border border-[var(--border)] bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
                   <div>
@@ -280,7 +280,7 @@ export default function ProfilPage() {
                     <input
                       value={telephone}
                       onChange={(e) => setTelephone(e.target.value)}
-                      className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="w-full rounded-lg border border-[var(--border)] bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
                   <div>
@@ -291,7 +291,7 @@ export default function ProfilPage() {
                       type="date"
                       value={dateNaissance}
                       onChange={(e) => setDateNaissance(e.target.value)}
-                      className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="w-full rounded-lg border border-[var(--border)] bg-white dark:bg-slate-900 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
                 </div>
@@ -300,43 +300,43 @@ export default function ProfilPage() {
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                       <dt className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Nom</dt>
-                      <dd className="mt-1 text-sm font-medium text-gray-900 dark:text-gray-100">{profil.nom}</dd>
+                      <dd className="mt-1 text-sm font-medium text-[var(--foreground)]">{profil.nom}</dd>
                     </div>
                     <div>
                       <dt className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Prénom</dt>
-                      <dd className="mt-1 text-sm font-medium text-gray-900 dark:text-gray-100">{profil.prenom}</dd>
+                      <dd className="mt-1 text-sm font-medium text-[var(--foreground)]">{profil.prenom}</dd>
                     </div>
                   </div>
                   <div>
                     <dt className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Email</dt>
-                    <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">{profil.email}</dd>
+                    <dd className="mt-1 text-sm text-[var(--foreground)]">{profil.email}</dd>
                   </div>
                   <div>
                     <dt className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Téléphone</dt>
-                    <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">{profil.telephone ?? "—"}</dd>
+                    <dd className="mt-1 text-sm text-[var(--foreground)]">{profil.telephone ?? "—"}</dd>
                   </div>
                   <div>
                     <dt className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Date de naissance</dt>
-                    <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">{profil.dateNaissance ? formatDate(profil.dateNaissance) : "—"}</dd>
+                    <dd className="mt-1 text-sm text-[var(--foreground)]">{profil.dateNaissance ? formatDate(profil.dateNaissance) : "—"}</dd>
                   </div>
                   <div>
                     <dt className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Membre depuis</dt>
-                    <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">{formatDate(profil.createdAt)}</dd>
+                    <dd className="mt-1 text-sm text-[var(--foreground)]">{formatDate(profil.createdAt)}</dd>
                   </div>
                 </dl>
               )}
             </div>
           </div>
 
-          <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm">
-            <div className="flex items-center justify-between border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-3">
-              <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+          <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] overflow-hidden">
+            <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-3">
+              <h2 className="text-sm font-semibold text-[var(--foreground)]">
                 <Lock className="mr-1 inline h-4 w-4" /> Mot de Passe
               </h2>
               {!showPasswordSection ? (
                 <button
                   onClick={() => setShowPasswordSection(true)}
-                  className="rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800"
+                  className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800"
                 >
                   Changer le mot de passe
                 </button>
@@ -349,7 +349,7 @@ export default function ProfilPage() {
                     setConfirmerMotDePasse("");
                     setError(null);
                   }}
-                  className="rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800"
+                  className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800"
                 >
                   Annuler
                 </button>
@@ -364,7 +364,7 @@ export default function ProfilPage() {
                       type={showAncien ? "text" : "password"}
                       value={ancienMotDePasse}
                       onChange={(e) => setAncienMotDePasse(e.target.value)}
-                      className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 pr-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="w-full rounded-lg border border-[var(--border)] bg-white dark:bg-slate-900 px-3 py-2 pr-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                     <button
                       type="button"
@@ -382,7 +382,7 @@ export default function ProfilPage() {
                       type={showNouveau ? "text" : "password"}
                       value={nouveauMotDePasse}
                       onChange={(e) => setNouveauMotDePasse(e.target.value)}
-                      className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 pr-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="w-full rounded-lg border border-[var(--border)] bg-white dark:bg-slate-900 px-3 py-2 pr-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                     <button
                       type="button"
@@ -400,7 +400,7 @@ export default function ProfilPage() {
                       type={showConfirmer ? "text" : "password"}
                       value={confirmerMotDePasse}
                       onChange={(e) => setConfirmerMotDePasse(e.target.value)}
-                      className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 pr-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="w-full rounded-lg border border-[var(--border)] bg-white dark:bg-slate-900 px-3 py-2 pr-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                     <button
                       type="button"

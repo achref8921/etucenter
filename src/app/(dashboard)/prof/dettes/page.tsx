@@ -1,8 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import { AlertTriangle, ArrowLeft, Loader2, Scale, Send, Wallet } from "lucide-react";
+import { AlertTriangle, Loader2, Scale, Send, Wallet } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { SkeletonPage } from "@/components/ui/skeleton";
 
@@ -156,14 +155,7 @@ export default function ProfDettesPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Link
-          href="/prof"
-          className="flex items-center gap-1 text-[13px] text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Retour
-        </Link>
-        <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Dettes envers le centre</h1>
+        <h1 className="text-2xl font-bold text-[var(--foreground)]">Dettes envers le centre</h1>
       </div>
 
       {error && (
@@ -202,7 +194,7 @@ export default function ProfDettesPage() {
               {formatCurrency(Math.abs(totalPending))}
             </p>
           </div>
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white dark:bg-[#181b22]">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--surface)]">
             {totalPending > 0 ? (
               <Scale className="h-7 w-7 text-amber-600 dark:text-amber-400" />
             ) : (
@@ -213,13 +205,13 @@ export default function ProfDettesPage() {
       </div>
 
       {(openDebts.length > 0 || pendingDeclared > 0) && (
-        <div className="animate-fade-in-up rounded-xl border border-blue-200 bg-white p-6 dark:border-blue-900 dark:bg-[#181b22]">
+        <div className="animate-fade-in-up rounded-xl border border-blue-200 bg-[var(--surface)] p-6 dark:border-blue-900">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex-1">
-              <h2 className="text-[14px] font-semibold text-neutral-900 dark:text-neutral-100">
+              <h2 className="text-[14px] font-semibold text-[var(--foreground)]">
                 Déclarer un versement au centre
               </h2>
-              <p className="mt-1 text-[12px] text-neutral-500 dark:text-neutral-400">
+              <p className="mt-1 text-[12px] text-[var(--foreground-faint)]">
                 Saisissez le montant que vous remettez au centre. Il sera réparti sur vos dettes (les plus anciennes d&apos;abord) après confirmation par le centre.
               </p>
               {pendingDeclared > 0 && (
@@ -237,7 +229,7 @@ export default function ProfDettesPage() {
                 value={declaredAmount}
                 onChange={(ev) => setDeclaredAmount(ev.target.value)}
                 placeholder="Ex : 100"
-                className="w-32 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-center text-[13px] text-neutral-900 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600/20 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-100 dark:focus:border-blue-400"
+                className="w-32 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-center text-[13px] text-neutral-900 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600/20 dark:text-neutral-100 dark:focus:border-blue-400"
               />
               <button
                 onClick={declare}
@@ -253,13 +245,13 @@ export default function ProfDettesPage() {
       )}
 
       {debts.length === 0 ? (
-        <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-8 text-center text-[13px] text-neutral-500 dark:text-neutral-400">
+        <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-8 text-center text-[13px] text-[var(--foreground-faint)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
           <AlertTriangle className="mx-auto mb-2 h-6 w-6 text-neutral-300 dark:text-neutral-600" />
           Aucune dette enregistrée.
         </div>
       ) : (
-        <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
-          <div className="flex items-center justify-between border-b border-neutral-200 dark:border-[#2a2d35] px-5 py-3">
+        <div className="rounded-[18px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)]">
+          <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-3">
             <div className="flex gap-1">
               <button
                 onClick={() => setFilter("open")}
@@ -286,36 +278,36 @@ export default function ProfDettesPage() {
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-[13px]">
-              <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
+              <thead className="border-b border-[var(--border)]">
                 <tr>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Élève</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Part centre</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Reste</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Statut</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500"></th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Élève</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Groupe</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Part centre</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Reste</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Statut</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100 dark:divide-slate-700">
+              <tbody className="divide-y divide-[var(--border)] dark:divide-slate-700">
                 {shownDebts.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                    <td colSpan={6} className="px-6 py-8 text-center text-[var(--foreground-faint)]">
                       {filter === "open" ? "Aucune dette à régler" : "Aucune dette réglée"}
                     </td>
                   </tr>
                 ) : (
                   shownDebts.map((d) => (
                     <tr key={d.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
-                      <td className="px-4 py-2.5 font-medium text-neutral-900 dark:text-neutral-100">
+                      <td className="px-4 py-2.5 font-medium text-[var(--foreground)]">
                         {d.student.prenom} {d.student.nom}
                       </td>
-                      <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                      <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">
                         <div>{d.groupe?.nom ?? d.seance?.groupe.nom ?? "—"}</div>
-                        <div className="text-[12px] text-neutral-400 dark:text-neutral-500">
+                        <div className="text-[12px] text-[var(--foreground-faint)]">
                           {formatDate(d.seance?.date ?? d.createdAt)}
                         </div>
                       </td>
-                      <td className="px-4 py-2.5 tabular-nums text-neutral-900 dark:text-neutral-100">
+                      <td className="px-4 py-2.5 tabular-nums text-[var(--foreground)]">
                         {formatCurrency(Number(d.amountDue))}
                       </td>
                       <td className="px-4 py-2.5 tabular-nums font-semibold text-amber-600 dark:text-amber-400">

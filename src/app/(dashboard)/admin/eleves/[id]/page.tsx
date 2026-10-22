@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Loader2, Wallet, ArrowUpRight, CheckCircle2, AlertCircle, ClipboardCheck, Pencil, X } from "lucide-react";
+import { Loader2, Wallet, ArrowUpRight, CheckCircle2, AlertCircle, ClipboardCheck, Pencil, X } from "lucide-react";
 import { formatDate, formatDateTime, formatCurrency } from "@/lib/utils";
 import UserAvatar from "@/components/user-avatar";
 
@@ -246,16 +246,7 @@ export default function AdminEleveDetailPage() {
   if (error || !eleve) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Link
-            href="/admin/utilisateurs"
-            className="flex items-center gap-1 text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Retour
-          </Link>
-          <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Détail Élève</h1>
-        </div>
+        <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)]">Détail Élève</h1>
         {error && (
           <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">
             {error}
@@ -274,24 +265,17 @@ export default function AdminEleveDetailPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Link
-          href="/admin/utilisateurs"
-          className="flex items-center gap-1 text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Retour
-        </Link>
-        <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
+        <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)]">
           {e.prenom} {e.nom}
         </h1>
       </div>
 
-      <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6 ">
+      <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
         <div className="flex items-center gap-4">
           <UserAvatar userId={e.id} nom={e.nom} prenom={e.prenom} hasImage={e.hasImage} version={e.updatedAt} size="md" />
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-3">
-              <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">
                 {e.prenom} {e.nom}
               </h2>
               {e.codeEleve && (
@@ -309,7 +293,7 @@ export default function AdminEleveDetailPage() {
                 {e.actif ? "Actif" : "Suspendu"}
               </span>
             </div>
-            <p className="text-sm text-neutral-500 dark:text-neutral-400">
+            <p className="text-sm text-[var(--foreground-faint)]">
               {e.email}
               {e.emailVerified ? (
                 <span className="ml-2 inline-flex items-center gap-0.5 text-xs font-medium text-green-600 dark:text-green-400">
@@ -321,37 +305,37 @@ export default function AdminEleveDetailPage() {
                 </span>
               )}
             </p>
-            <p className="text-xs text-neutral-400 dark:text-neutral-500">Membre depuis le {formatDate(e.createdAt)}</p>
+            <p className="text-xs text-[var(--foreground-faint)]">Membre depuis le {formatDate(e.createdAt)}</p>
           </div>
         </div>
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div>
-            <p className="text-xs font-medium uppercase text-neutral-400 dark:text-neutral-500">Téléphone</p>
-            <p className="mt-1 text-sm text-neutral-900 dark:text-neutral-100">{e.telephone || "—"}</p>
+            <p className="text-xs font-medium uppercase text-[var(--foreground-faint)]">Téléphone</p>
+            <p className="mt-1 text-sm text-[var(--foreground)]">{e.telephone || "—"}</p>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase text-neutral-400 dark:text-neutral-500">Date de naissance</p>
-            <p className="mt-1 text-sm text-neutral-900 dark:text-neutral-100">
+            <p className="text-xs font-medium uppercase text-[var(--foreground-faint)]">Date de naissance</p>
+            <p className="mt-1 text-sm text-[var(--foreground)]">
               {e.dateNaissance ? formatDate(e.dateNaissance) : "—"}
             </p>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase text-neutral-400 dark:text-neutral-500">Email</p>
-            <p className="mt-1 text-sm text-neutral-900 dark:text-neutral-100">{e.email}</p>
+            <p className="text-xs font-medium uppercase text-[var(--foreground-faint)]">Email</p>
+            <p className="mt-1 text-sm text-[var(--foreground)]">{e.email}</p>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase text-neutral-400 dark:text-neutral-500">Niveau</p>
-            <p className="mt-1 text-sm text-neutral-900 dark:text-neutral-100">
+            <p className="text-xs font-medium uppercase text-[var(--foreground-faint)]">Niveau</p>
+            <p className="mt-1 text-sm text-[var(--foreground)]">
               {e.niveau === "primaire" ? "Primaire" : e.niveau === "college" ? "Collège" : e.niveau === "lycee" ? "Lycée" : "—"}
             </p>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase text-neutral-400 dark:text-neutral-500">Classe</p>
-            <p className="mt-1 text-sm text-neutral-900 dark:text-neutral-100">{e.classe || "—"}</p>
+            <p className="text-xs font-medium uppercase text-[var(--foreground-faint)]">Classe</p>
+            <p className="mt-1 text-sm text-[var(--foreground)]">{e.classe || "—"}</p>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase text-neutral-400 dark:text-neutral-500">Filière</p>
-            <p className="mt-1 text-sm text-neutral-900 dark:text-neutral-100">{e.filiere ? e.filiere.charAt(0).toUpperCase() + e.filiere.slice(1) : "—"}</p>
+            <p className="text-xs font-medium uppercase text-[var(--foreground-faint)]">Filière</p>
+            <p className="mt-1 text-sm text-[var(--foreground)]">{e.filiere ? e.filiere.charAt(0).toUpperCase() + e.filiere.slice(1) : "—"}</p>
           </div>
         </div>
         <div className="mt-4 flex flex-wrap justify-end gap-2">
@@ -372,7 +356,7 @@ export default function AdminEleveDetailPage() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6 ">
+      <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div
@@ -389,8 +373,8 @@ export default function AdminEleveDetailPage() {
               <Wallet className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Compte financier</h2>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">Solde prépayé</p>
+              <h2 className="text-sm font-semibold text-[var(--foreground)]">Compte financier</h2>
+              <p className="text-xs text-[var(--foreground-faint)]">Solde prépayé</p>
             </div>
           </div>
           <Link
@@ -420,7 +404,7 @@ export default function AdminEleveDetailPage() {
                   : `${financeBalance > 0 ? "+" : ""}${formatCurrency(financeBalance)}`}
             </p>
             {!financeLoading && financeBalance !== null && (
-              <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+              <p className="mt-1 text-sm text-[var(--foreground-faint)]">
                 {financeBalance > 0
                   ? "Solde prépayé disponible"
                   : financeBalance < 0
@@ -432,22 +416,22 @@ export default function AdminEleveDetailPage() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6 ">
+      <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-500 shadow-md shadow-purple-200 dark:shadow-purple-900/30">
             <ClipboardCheck className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Assiduité</h2>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+            <h2 className="text-sm font-semibold text-[var(--foreground)]">Assiduité</h2>
+            <p className="text-xs text-[var(--foreground-faint)]">
               {presents} présences · {absents} absences · {eleve.presences.length} séance{eleve.presences.length > 1 ? "s" : ""} enregistrée{eleve.presences.length > 1 ? "s" : ""}
             </p>
           </div>
         </div>
         <div className="mt-4">
           <div className="flex items-end justify-between">
-            <p className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">{attendanceRate}%</p>
-            <p className="text-sm text-neutral-500 dark:text-neutral-400">Taux de présence</p>
+            <p className="text-3xl font-bold text-[var(--foreground)]">{attendanceRate}%</p>
+            <p className="text-sm text-[var(--foreground-faint)]">Taux de présence</p>
           </div>
           <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-[#2a2d35]">
             <div
@@ -464,28 +448,28 @@ export default function AdminEleveDetailPage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
-        <div className="border-b border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
-          <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Groupes Inscrits</h2>
+      <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+        <div className="border-b border-[var(--border)] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
+          <h2 className="text-sm font-semibold text-[var(--foreground)]">Groupes Inscrits</h2>
         </div>
         <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
+          <thead className="border-b border-[var(--border)]">
             <tr>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Matière</th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Prof</th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Présences</th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Absences</th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Total Dû</th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Total Payé</th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Impayé</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Groupe</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Matière</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Prof</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Présences</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Absences</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Total Dû</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Total Payé</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Impayé</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+          <tbody className="divide-y divide-[var(--border)]">
             {eleve.inscriptions.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-6 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                <td colSpan={8} className="px-6 py-8 text-center text-[var(--foreground-faint)]">
                   Aucun groupe inscrit
                 </td>
               </tr>
@@ -497,15 +481,15 @@ export default function AdminEleveDetailPage() {
                       {ins.groupe.nom}
                     </Link>
                   </td>
-                  <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{ins.groupe.matiere?.nom ?? "—"}</td>
-                  <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                  <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">{ins.groupe.matiere?.nom ?? "—"}</td>
+                  <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">
                     {ins.groupe.prof
                       ? `${ins.groupe.prof.prenom} ${ins.groupe.prof.nom}`
                       : "—"}
                   </td>
                   <td className="px-4 py-2.5 text-green-600 dark:text-green-400">{ins.stats.presencesCount}</td>
                   <td className="px-4 py-2.5 text-red-600 dark:text-red-400">{ins.stats.absencesCount}</td>
-                  <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{formatCurrency(ins.stats.totalDue)}</td>
+                  <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">{formatCurrency(ins.stats.totalDue)}</td>
                   <td className="px-4 py-2.5 text-green-600 dark:text-green-400">{formatCurrency(ins.stats.totalPaid)}</td>
                   <td className="px-4 py-2.5">
                     <span className={`font-medium ${ins.stats.unpaid > 0 ? "text-red-600 dark:text-red-400" : "text-neutral-900 dark:text-neutral-100"}`}>
@@ -520,15 +504,15 @@ export default function AdminEleveDetailPage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
-          <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Historique des Présences</h2>
+      <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
+          <h2 className="text-sm font-semibold text-[var(--foreground)]">Historique des Présences</h2>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-neutral-500 dark:text-neutral-400">
+            <span className="text-xs text-[var(--foreground-faint)]">
               {eleve.presences.filter((p) => p.statut === "present").length} présents ·{" "}
               {eleve.presences.filter((p) => p.statut === "absent").length} absents
             </span>
-            <div className="flex rounded-lg border border-neutral-200 dark:border-[#2a2d35] p-0.5">
+            <div className="flex rounded-lg border border-[var(--border)] p-0.5">
               {(["toutes", "present", "absent"] as const).map((f) => (
                 <button
                   key={f}
@@ -548,19 +532,19 @@ export default function AdminEleveDetailPage() {
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
+            <thead className="border-b border-[var(--border)]">
               <tr>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Date</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Matière</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Prof</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Statut</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Date</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Groupe</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Matière</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Prof</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Statut</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+            <tbody className="divide-y divide-[var(--border)]">
               {eleve.presences.filter((p) => presenceFilter === "toutes" || p.statut === presenceFilter).length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                  <td colSpan={5} className="px-6 py-8 text-center text-[var(--foreground-faint)]">
                     {eleve.presences.length === 0
                       ? "Aucune présence enregistrée"
                       : "Aucune présence dans cette catégorie"}
@@ -571,14 +555,14 @@ export default function AdminEleveDetailPage() {
                   .filter((p) => presenceFilter === "toutes" || p.statut === presenceFilter)
                   .map((p) => (
                     <tr key={p.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
-                      <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{formatDate(p.seance.date)}</td>
+                      <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">{formatDate(p.seance.date)}</td>
                       <td className="px-4 py-2.5 font-medium">
                         <Link href={`/admin/groupes/${p.seance.groupe.id}`} className="text-blue-600 dark:text-blue-400 hover:underline">
                           {p.seance.groupe.nom}
                         </Link>
                       </td>
-                      <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{p.seance.groupe.matiere?.nom ?? "—"}</td>
-                      <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                      <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">{p.seance.groupe.matiere?.nom ?? "—"}</td>
+                      <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">
                         {p.seance.groupe.prof ? `${p.seance.groupe.prof.prenom} ${p.seance.groupe.prof.nom}` : "—"}
                       </td>
                       <td className="px-4 py-2.5">
@@ -600,9 +584,9 @@ export default function AdminEleveDetailPage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
-        <div className="flex items-center justify-between border-b border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
-          <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Grand Livre</h2>
+      <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+        <div className="flex items-center justify-between border-b border-[var(--border)] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
+          <h2 className="text-sm font-semibold text-[var(--foreground)]">Grand Livre</h2>
           <Link
             href={`/admin/finances?studentId=${e.id}`}
             className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
@@ -612,26 +596,26 @@ export default function AdminEleveDetailPage() {
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
+            <thead className="border-b border-[var(--border)]">
               <tr>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Date</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Description</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Type</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Montant</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Date</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Description</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Groupe</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Type</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Montant</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+            <tbody className="divide-y divide-[var(--border)]">
               {transactions.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                  <td colSpan={5} className="px-6 py-8 text-center text-[var(--foreground-faint)]">
                     Aucune transaction enregistrée
                   </td>
                 </tr>
               ) : (
                 transactions.slice(0, 10).map((t) => (
                   <tr key={t.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
-                    <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{formatDateTime(t.date)}</td>
+                    <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">{formatDateTime(t.date)}</td>
                     <td className="px-4 py-2.5 font-medium">
                       {t.description}
                       {t.receiptNumber && (
@@ -640,7 +624,7 @@ export default function AdminEleveDetailPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                    <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">
                       {t.attendance?.seance.groupe.nom ?? "—"}
                     </td>
                     <td className="px-4 py-2.5">
@@ -675,40 +659,40 @@ export default function AdminEleveDetailPage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
-        <div className="border-b border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
-          <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Historique des Paiements</h2>
+      <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+        <div className="border-b border-[var(--border)] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
+          <h2 className="text-sm font-semibold text-[var(--foreground)]">Historique des Paiements</h2>
         </div>
         <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
+          <thead className="border-b border-[var(--border)]">
             <tr>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Date</th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Montant</th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Méthode</th>
-              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Notes</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Date</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Groupe</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Montant</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Méthode</th>
+              <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Notes</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+          <tbody className="divide-y divide-[var(--border)]">
             {eleve.paiements.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-neutral-500 dark:text-neutral-400">
+                <td colSpan={5} className="px-6 py-8 text-center text-[var(--foreground-faint)]">
                   Aucun paiement enregistré
                 </td>
               </tr>
             ) : (
               eleve.paiements.map((p) => (
                 <tr key={p.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
-                  <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{formatDateTime(p.datePaiement)}</td>
+                  <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">{formatDateTime(p.datePaiement)}</td>
                   <td className="px-4 py-2.5 font-medium">{p.groupe.nom}</td>
                   <td className="px-4 py-2.5 font-medium">{formatCurrency(p.montant)}</td>
                   <td className="px-4 py-2.5">
-                    <span className="inline-block rounded-full bg-neutral-100 dark:bg-[#2a2d35] px-2.5 py-0.5 text-xs font-medium text-neutral-800 dark:text-neutral-200">
+                    <span className="inline-block rounded-full bg-neutral-100 dark:bg-[#2a2d35] px-2.5 py-0.5 text-xs font-medium text-[var(--foreground)]">
                       {p.methodePaiement}
                     </span>
                   </td>
-                  <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{p.notes || "—"}</td>
+                  <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">{p.notes || "—"}</td>
                 </tr>
               ))
             )}
@@ -719,9 +703,9 @@ export default function AdminEleveDetailPage() {
 
       {identiteEdit && eleve && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl dark:bg-[#181b22]">
+          <div className="w-full max-w-md rounded-xl bg-[var(--surface)] p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Informations personnelles</h2>
+              <h2 className="text-lg font-bold text-[var(--foreground)]">Informations personnelles</h2>
               <button onClick={() => setIdentiteEdit(false)} className="text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300">
                 <X className="h-5 w-5" />
               </button>
@@ -731,34 +715,34 @@ export default function AdminEleveDetailPage() {
             )}
             <div className="space-y-4">
               <div>
-                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Prénom</label>
+                <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Prénom</label>
                 <input
                   type="text"
                   value={editPrenom}
                   maxLength={255}
                   onChange={(e) => setEditPrenom(e.target.value)}
-                  className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-neutral-700 focus:border-violet-500 focus:outline-none dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-200"
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] text-neutral-700 focus:border-blue-500 focus:outline-none dark:bg-[#1e2128] dark:text-neutral-200"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Nom</label>
+                <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Nom</label>
                 <input
                   type="text"
                   value={editNom}
                   maxLength={255}
                   onChange={(e) => setEditNom(e.target.value)}
-                  className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-neutral-700 focus:border-violet-500 focus:outline-none dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-200"
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] text-neutral-700 focus:border-blue-500 focus:outline-none dark:bg-[#1e2128] dark:text-neutral-200"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Téléphone</label>
+                <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Téléphone</label>
                 <input
                   type="tel"
                   value={editTel}
                   maxLength={20}
                   onChange={(e) => setEditTel(e.target.value)}
                   placeholder="—"
-                  className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-neutral-700 focus:border-violet-500 focus:outline-none dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-200"
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] text-neutral-700 focus:border-blue-500 focus:outline-none dark:bg-[#1e2128] dark:text-neutral-200"
                 />
               </div>
             </div>
@@ -778,9 +762,9 @@ export default function AdminEleveDetailPage() {
 
       {niveauEdit && eleve && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl dark:bg-[#181b22]">
+          <div className="w-full max-w-md rounded-xl bg-[var(--surface)] p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Niveau scolaire</h2>
+              <h2 className="text-lg font-bold text-[var(--foreground)]">Niveau scolaire</h2>
               <button onClick={() => setNiveauEdit(false)} className="text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300">
                 <X className="h-5 w-5" />
               </button>
@@ -790,11 +774,11 @@ export default function AdminEleveDetailPage() {
             )}
             <div className="space-y-4">
               <div>
-                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Niveau</label>
+                <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Niveau</label>
                 <select
                   value={editNiveau}
                   onChange={(e) => { setEditNiveau(e.target.value); setEditClasse(""); setEditFiliere(""); }}
-                  className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-neutral-700 focus:border-violet-500 focus:outline-none dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-200"
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] text-neutral-700 focus:border-blue-500 focus:outline-none dark:bg-[#1e2128] dark:text-neutral-200"
                 >
                   <option value="">— Aucun —</option>
                   {Object.keys(classesByNiveau).map((n) => (
@@ -803,12 +787,12 @@ export default function AdminEleveDetailPage() {
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Classe</label>
+                <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Classe</label>
                 <select
                   value={editClasse}
                   onChange={(e) => { setEditClasse(e.target.value); setEditFiliere(""); }}
                   disabled={!editNiveau}
-                  className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-neutral-700 focus:border-violet-500 focus:outline-none disabled:opacity-50 dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-200"
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] text-neutral-700 focus:border-blue-500 focus:outline-none disabled:opacity-50 dark:bg-[#1e2128] dark:text-neutral-200"
                 >
                   <option value="">{editNiveau ? "— Sélectionner —" : "Choisir d'abord le niveau"}</option>
                   {(editNiveau ? classesByNiveau[editNiveau] || [] : []).map((c) => (
@@ -818,11 +802,11 @@ export default function AdminEleveDetailPage() {
               </div>
               {editNiveau === "lycee" && ["2ème", "3ème", "Bac"].includes(editClasse) && (
                 <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Filière</label>
+                  <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Filière</label>
                   <select
                     value={editFiliere}
                     onChange={(e) => setEditFiliere(e.target.value)}
-                    className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-neutral-700 focus:border-violet-500 focus:outline-none dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-200"
+                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] text-neutral-700 focus:border-blue-500 focus:outline-none dark:bg-[#1e2128] dark:text-neutral-200"
                   >
                     <option value="">— Sélectionner —</option>
                     {filieres.map((f) => (

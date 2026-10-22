@@ -47,12 +47,14 @@ export default function Sidebar({ role, centerName, centerLogo, peutGererEleves,
           open ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
       >
-        <div className="flex h-14 items-center gap-3 border-b border-neutral-200 px-5 dark:border-[#1e2128]">
-          {centerLogo ? (
-            <img src={centerLogo} alt="Logo" className="h-8 w-8 rounded-lg object-contain" />
-          ) : (
-            <img src="/logo.svg" alt="Logo" className="h-8 w-8 object-contain" />
-          )}
+        <div className="flex h-16 items-center gap-3 border-b border-neutral-200 px-5 dark:border-[#1e2128]">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius-lg)] bg-[var(--surface-muted)] ring-1 ring-[var(--border)]">
+            {centerLogo ? (
+              <img src={centerLogo} alt="Logo" className="h-9 w-9 object-contain" />
+            ) : (
+              <img src="/logo.svg" alt="Logo" className="h-8 w-8 object-contain" />
+            )}
+          </div>
           <div className="min-w-0 flex-1">
             <span className="block truncate text-[15px] font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">{centerName || "Étudnet"}</span>
             <p className="text-[10px] font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
@@ -85,7 +87,9 @@ export default function Sidebar({ role, centerName, centerLogo, peutGererEleves,
         </nav>
 
         <div className="border-t border-neutral-200 px-5 py-3 dark:border-[#1e2128]">
-          <p className="text-[10px] text-neutral-300 dark:text-neutral-600">Étudnet v1.0</p>
+          <p className="text-[10px] font-medium text-neutral-300 dark:text-neutral-600">
+            Étudnet <span className="text-neutral-400 dark:text-neutral-500">v1.0</span>
+          </p>
         </div>
       </aside>
     </>

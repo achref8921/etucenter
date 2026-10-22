@@ -55,14 +55,14 @@ export default function ConfirmGroupeDelete({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-lg rounded-lg bg-white dark:bg-[#181b22] border border-neutral-200 dark:border-[#2a2d35] shadow-xl">
-        <div className="border-b border-neutral-200 dark:border-[#2a2d35] px-6 py-4">
+      <div className="w-full max-w-lg rounded-lg bg-[var(--surface)] border border-neutral-200 shadow-xl">
+        <div className="border-b border-neutral-200 px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
               <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Supprimer le groupe</h2>
+              <h2 className="text-lg font-semibold text-[var(--foreground)] dark:text-gray-100">Supprimer le groupe</h2>
               <p className="text-[13px] text-neutral-500 dark:text-neutral-400">
                 <span className="font-medium text-neutral-700 dark:text-neutral-200">{groupe.nom}</span> — action irréversible
               </p>
@@ -72,29 +72,29 @@ export default function ConfirmGroupeDelete({
 
         <div className="space-y-4 px-6 py-4">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-2.5 text-center">
+            <div className="rounded-lg border border-neutral-200 bg-neutral-50 dark:bg-[#1e2128] p-2.5 text-center">
               <CalendarClock className="mx-auto mb-1 h-4 w-4 text-red-600 dark:text-red-400" />
-              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{impact.seances}</p>
+              <p className="text-lg font-bold text-[var(--foreground)] dark:text-gray-100">{impact.seances}</p>
               <p className="text-[11px] text-neutral-500 dark:text-neutral-400">Séances</p>
             </div>
-            <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-2.5 text-center">
+            <div className="rounded-lg border border-neutral-200 bg-neutral-50 dark:bg-[#1e2128] p-2.5 text-center">
               <UserRound className="mx-auto mb-1 h-4 w-4 text-red-600 dark:text-red-400" />
-              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{impact.presences}</p>
+              <p className="text-lg font-bold text-[var(--foreground)] dark:text-gray-100">{impact.presences}</p>
               <p className="text-[11px] text-neutral-500 dark:text-neutral-400">Présences</p>
             </div>
-            <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-2.5 text-center">
+            <div className="rounded-lg border border-neutral-200 bg-neutral-50 dark:bg-[#1e2128] p-2.5 text-center">
               <Wallet className="mx-auto mb-1 h-4 w-4 text-red-600 dark:text-red-400" />
-              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{money(impact.consommations.montant)}</p>
+              <p className="text-lg font-bold text-[var(--foreground)] dark:text-gray-100">{money(impact.consommations.montant)}</p>
               <p className="text-[11px] text-neutral-500 dark:text-neutral-400">Consommé ({impact.consommations.count} op.)</p>
             </div>
-            <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-2.5 text-center">
+            <div className="rounded-lg border border-neutral-200 bg-neutral-50 dark:bg-[#1e2128] p-2.5 text-center">
               <BadgeEuro className="mx-auto mb-1 h-4 w-4 text-red-600 dark:text-red-400" />
-              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{money(impact.paiements.montant)}</p>
+              <p className="text-lg font-bold text-[var(--foreground)] dark:text-gray-100">{money(impact.paiements.montant)}</p>
               <p className="text-[11px] text-neutral-500 dark:text-neutral-400">Paiements ({impact.paiements.count})</p>
             </div>
-            <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-2.5 text-center">
+            <div className="rounded-lg border border-neutral-200 bg-neutral-50 dark:bg-[#1e2128] p-2.5 text-center">
               <TrendingDown className="mx-auto mb-1 h-4 w-4 text-red-600 dark:text-red-400" />
-              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{money(impact.gainsProf.montant)}</p>
+              <p className="text-lg font-bold text-[var(--foreground)] dark:text-gray-100">{money(impact.gainsProf.montant)}</p>
               <p className="text-[11px] text-neutral-500 dark:text-neutral-400">Gains prof ({impact.gainsProf.count})</p>
             </div>
           </div>
@@ -117,7 +117,7 @@ export default function ConfirmGroupeDelete({
                 )}
               </div>
               <div>
-                <p className="text-[13px] font-semibold text-gray-900 dark:text-gray-100">
+                <p className="text-[13px] font-semibold text-[var(--foreground)] dark:text-gray-100">
                   <Eraser className="mr-1 inline h-3.5 w-3.5 text-red-600 dark:text-red-400" />
                   Supprimer et effacer l'impact financier
                 </p>
@@ -144,7 +144,7 @@ export default function ConfirmGroupeDelete({
                 )}
               </div>
               <div>
-                <p className="text-[13px] font-semibold text-gray-900 dark:text-gray-100">
+                <p className="text-[13px] font-semibold text-[var(--foreground)] dark:text-gray-100">
                   <Trash2 className="mr-1 inline h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
                   Supprimer le groupe uniquement
                 </p>
@@ -172,7 +172,7 @@ export default function ConfirmGroupeDelete({
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Votre mot de passe"
-                className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+                className="w-full rounded-lg border border-neutral-200 bg-[var(--surface)] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
               />
             </div>
           )}
@@ -184,11 +184,11 @@ export default function ConfirmGroupeDelete({
           )}
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-neutral-200 dark:border-[#2a2d35] px-6 py-4">
+        <div className="flex justify-end gap-3 border-t border-neutral-200 px-6 py-4">
           <button
             onClick={onCancel}
             disabled={loading}
-            className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128] disabled:opacity-50"
+            className="rounded-lg border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128] disabled:opacity-50"
           >
             Annuler
           </button>

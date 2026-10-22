@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, Plus, X, Loader2, Pencil, Trash2, CalendarPlus, Paperclip } from "lucide-react";
+import { Calendar, Plus, X, Loader2, Pencil, Trash2, CalendarPlus, Paperclip, CalendarCheck, Clock, CheckCircle2, XCircle } from "lucide-react";
 import { formatDate, formatTime } from "@/lib/utils";
 import ConfirmDelete from "@/components/confirm-delete";
 import SeanceDocumentsModal from "@/components/seance-documents-modal";
 import TimeInput from "@/components/time-input";
 import { useToast } from "@/components/ui/toast";
 import { SkeletonPage } from "@/components/ui/skeleton";
+import { MetricCard } from "@/components/ui";
 
 interface Seance {
   id: string;
@@ -376,23 +377,63 @@ export default function ProfSeancesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Mes Séances</h1>
+          <h1 className="text-2xl font-bold text-[var(--foreground)]">Mes Séances</h1>
         </div>
-        <button
-          onClick={() => { setShowCreateModal(true); setCreateGroupeId(""); setCreateDate(""); setCreateHeureDebut(""); setCreateHeureFin(""); setCreateNotes(""); setCreateErrors({}); }}
-          className="flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800"
-        >
-          <Plus className="h-4 w-4" />
-          Nouvelle Séance
-        </button>
-        <button
-          onClick={openRattrapageModal}
-          className="flex items-center gap-2 rounded-xl border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
-          title="Ajouter une séance passée pour un élève"
-        >
-          <CalendarPlus className="h-4 w-4" />
-          Séance passée
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => { setShowCreateModal(true); setCreateGroupeId(""); setCreateDate(""); setCreateHeureDebut(""); setCreateHeureFin(""); setCreateNotes(""); setCreateErrors({}); }}
+            className="flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800"
+          >
+            <Plus className="h-4 w-4" />
+            Nouvelle Séance
+          </button>
+          <button
+            onClick={openRattrapageModal}
+            className="flex items-center gap-2 rounded-xl border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+            title="Ajouter une séance passée pour un élève"
+          >
+            <CalendarPlus className="h-4 w-4" />
+            Séance passée
+          </button>
+        </div>
+      </div>
+
+      <div
+        className="grid grid-cols-2 gap-3 xl:grid-cols-4 animate-fade-in-up"
+        style={{ animationDelay: "60ms" }}
+      >
+        <MetricCard
+          label="Total séances"
+          value={seances.length}
+          currency={false}
+          sub="toutes périodes"
+          icon={CalendarCheck}
+          tone="primary"
+        />
+        <MetricCard
+          label="Planifiées"
+          value={seances.filter((s) => s.statut === "planifiee").length}
+          currency={false}
+          sub="à venir"
+          icon={Clock}
+          tone="warning"
+        />
+        <MetricCard
+          label="Terminées"
+          value={seances.filter((s) => s.statut === "terminee").length}
+          currency={false}
+          sub="effectuées"
+          icon={CheckCircle2}
+          tone="success"
+        />
+        <MetricCard
+          label="Annulées"
+          value={seances.filter((s) => s.statut === "annulee").length}
+          currency={false}
+          sub="non tenues"
+          icon={XCircle}
+          tone="neutral"
+        />
       </div>
 
       {error && (
@@ -403,17 +444,17 @@ export default function ProfSeancesPage() {
         <div className="rounded-xl border border-green-200 dark:border-green-900/50 bg-green-50 dark:bg-green-900/20 p-4 text-sm text-green-700 dark:text-green-400">{success}</div>
       )}
 
-      <form onSubmit={handleFilter} className="flex flex-wrap items-end gap-4">
+      <form onSubmit={handleFilter} className="flex flex-wrap items-end gap-4 rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)]">
         <div>
-          <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Date début</label>
-          <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+          <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">Date début</label>
+          <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Date fin</label>
-          <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+          <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">Date fin</label>
+          <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
         </div>
         <button type="submit" className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800">Filtrer</button>
-        <button type="button" onClick={() => { setDateFrom(""); setDateTo(""); fetchSeances(); }} className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]">Réinitialiser</button>
+        <button type="button" onClick={() => { setDateFrom(""); setDateTo(""); fetchSeances(); }} className="rounded-xl border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]">Réinitialiser</button>
       </form>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -429,8 +470,8 @@ export default function ProfSeancesPage() {
             onClick={() => setStatusFilter(f.key)}
             className={`rounded-full px-3.5 py-1.5 text-[12px] font-semibold transition-all ${
               statusFilter === f.key
-                ? "bg-blue-700 text-white"
-                : "border border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-300 dark:hover:bg-[#1e2128]"
+                ? "bg-blue-700 text-white shadow-sm"
+                : "border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
             }`}
           >
             {f.label}
@@ -444,28 +485,28 @@ export default function ProfSeancesPage() {
       {loading ? (
         <SkeletonPage />
       ) : (
-        <div className="overflow-hidden rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+        <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-[13px]">
-              <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
+              <thead className="border-b border-[var(--border)]">
                 <tr>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Date</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Groupe</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Horaire</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Statut</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Présences</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Actions</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Date</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Groupe</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Horaire</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Statut</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Présences</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100 dark:divide-slate-700">
+              <tbody className="divide-y divide-[var(--border)] dark:divide-slate-700">
                 {filteredSeances.length === 0 ? (
-                  <tr><td colSpan={6} className="px-4 py-8 text-center text-neutral-500 dark:text-neutral-400">Aucune séance trouvée</td></tr>
+                  <tr><td colSpan={6} className="px-4 py-8 text-center text-[var(--foreground-faint)]">Aucune séance trouvée</td></tr>
                 ) : (
                   filteredSeances.map((seance) => (
                     <tr key={seance.id} className="cursor-pointer hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]" onClick={() => router.push(`/prof/presences/${seance.id}`)}>
-                      <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{formatDate(seance.date)}</td>
+                      <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">{formatDate(seance.date)}</td>
                       <td className="px-4 py-2.5 font-medium">{seance.groupe.nom}</td>
-                      <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                      <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">
                         {seance.heureDebut && seance.heureFin
                           ? `${formatTime(seance.heureDebut)} - ${formatTime(seance.heureFin)}`
                           : "—"}
@@ -475,12 +516,12 @@ export default function ProfSeancesPage() {
                           {statusLabel(seance.statut)}
                         </span>
                       </td>
-                      <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">{seance._count.presences}</td>
+                      <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">{seance._count.presences}</td>
                       <td className="px-4 py-2.5">
                         <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                           <button
                             onClick={(e) => { e.stopPropagation(); setDocumentsSeance({ id: seance.id, label: `${seance.groupe.nom} — ${formatDate(seance.date)}` }); }}
-                            className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-gray-100 dark:hover:bg-[#1e2128] hover:text-blue-600 dark:hover:text-blue-400"
+                            className="rounded p-1 text-[var(--foreground-faint)] hover:bg-gray-100 dark:hover:bg-[#1e2128] hover:text-blue-600 dark:hover:text-blue-400"
                             title="Supports de séance"
                           >
                             <Paperclip className="h-4 w-4" />
@@ -488,7 +529,7 @@ export default function ProfSeancesPage() {
                           <button
                             onClick={(e) => openEditModal(seance, e)}
                             disabled={isSessionPast(seance)}
-                            className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-gray-100 dark:hover:bg-[#1e2128] hover:text-blue-600 dark:hover:text-blue-400 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
+                            className="rounded p-1 text-[var(--foreground-faint)] hover:bg-gray-100 dark:hover:bg-[#1e2128] hover:text-blue-600 dark:hover:text-blue-400 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
                             title={isSessionPast(seance) ? "Séance passée — modification impossible" : "Modifier"}
                           >
                             <Pencil className="h-4 w-4" />
@@ -496,7 +537,7 @@ export default function ProfSeancesPage() {
                           <button
                             onClick={(e) => { e.stopPropagation(); setConfirmDelete(seance.id); }}
                             disabled={deletingId === seance.id}
-                            className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-gray-100 dark:hover:bg-[#1e2128] hover:text-red-600 dark:hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
+                            className="rounded p-1 text-[var(--foreground-faint)] hover:bg-gray-100 dark:hover:bg-[#1e2128] hover:text-red-600 dark:hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
                             title="Supprimer"
                           >
                             {deletingId === seance.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
@@ -514,32 +555,32 @@ export default function ProfSeancesPage() {
 
       {showRattrapageModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="modal-panel flex w-full max-w-md flex-col rounded-xl bg-white shadow-xl dark:bg-[#181b22]">
-            <div className="flex flex-shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-neutral-800">
+          <div className="modal-panel flex w-full max-w-md flex-col rounded-xl bg-[var(--surface)] shadow-xl">
+            <div className="flex flex-shrink-0 items-center justify-between border-b border-[var(--border)] px-6 py-4 dark:border-neutral-800">
               <h2 className="text-lg font-semibold dark:text-neutral-100">Séance passée</h2>
-              <button onClick={() => setShowRattrapageModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"><X className="h-5 w-5" /></button>
+              <button onClick={() => setShowRattrapageModal(false)} className="text-[var(--foreground-faint)] hover:text-neutral-600 dark:hover:text-neutral-400"><X className="h-5 w-5" /></button>
             </div>
             <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Groupe</label>
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">Groupe</label>
                 <select
                   value={rattrapageGroupeId}
                   onChange={(e) => { setRattrapageGroupeId(e.target.value); loadGroupEleves(e.target.value); }}
-                  className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 >
                   <option value="">Sélectionner un groupe</option>
                   {groupes.map((g) => <option key={g.id} value={g.id}>{g.nom}</option>)}
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">
                   Élèves
                 </label>
-                <div className="overflow-hidden rounded-xl border border-neutral-200 dark:border-[#2a2d35]">
+                <div className="overflow-hidden rounded-xl border border-[var(--border)]">
                   {rattrapageEleves.length === 0 ? (
-                    <p className="px-3 py-2 text-sm text-neutral-500 dark:text-neutral-400">Choisissez d'abord un groupe</p>
+                    <p className="px-3 py-2 text-sm text-[var(--foreground-faint)]">Choisissez d'abord un groupe</p>
                   ) : (
-                    <div className="max-h-44 divide-y divide-neutral-100 overflow-y-auto dark:divide-slate-700/50">
+                    <div className="max-h-44 divide-y divide-[var(--border)] overflow-y-auto dark:divide-slate-700/50">
                       {rattrapageEleves.map((el) => {
                         const checked = rattrapageEleveIds.includes(el.id);
                         return (
@@ -555,7 +596,7 @@ export default function ProfSeancesPage() {
                               type="checkbox"
                               checked={checked}
                               onChange={() => toggleRattrapageEleve(el.id)}
-                              className="h-4 w-4 rounded border-neutral-200 text-blue-600 focus:ring-blue-500"
+                              className="h-4 w-4 rounded border-[var(--border)] text-blue-600 focus:ring-blue-500"
                             />
                             <span className={`font-medium ${checked ? "text-blue-700 dark:text-blue-300" : "text-neutral-700 dark:text-neutral-300"}`}>
                               {el.prenom} {el.nom}
@@ -575,50 +616,50 @@ export default function ProfSeancesPage() {
                     >
                       {rattrapageEleveIds.length === rattrapageEleves.length ? "Tout désélectionner" : "Tout sélectionner"}
                     </button>
-                    <span className="text-[12px] text-neutral-500 dark:text-neutral-400">
+                    <span className="text-[12px] text-[var(--foreground-faint)]">
                       {rattrapageEleveIds.length} sélectionné{rattrapageEleveIds.length > 1 ? "s" : ""}
                     </span>
                   </div>
                 )}
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Date</label>
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">Date</label>
                 <input
                   type="date"
                   value={rattrapageDate}
                   onChange={(e) => setRattrapageDate(e.target.value)}
-                  className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Heure début</label>
+                  <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">Heure début</label>
                   <TimeInput value={rattrapageHeureDebut} onChange={setRattrapageHeureDebut} />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Heure fin</label>
+                  <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">Heure fin</label>
                   <TimeInput value={rattrapageHeureFin} onChange={setRattrapageHeureFin} />
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Notes</label>
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">Notes</label>
                 <textarea
                   value={rattrapageNotes}
                   onChange={(e) => setRattrapageNotes(e.target.value)}
                   rows={2}
                   placeholder="Ex. séance de rattrapage non saisie"
-                  className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
               {rattrapageError && (
                 <div className="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">{rattrapageError}</div>
               )}
             </div>
-            <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-neutral-200 px-6 py-4 dark:border-[#2a2d35]">
+            <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-[var(--border)] px-6 py-4">
               <button
                 type="button"
                 onClick={() => setShowRattrapageModal(false)}
-                className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+                className="rounded-xl border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
               >
                 Annuler
               </button>
@@ -637,42 +678,42 @@ export default function ProfSeancesPage() {
 
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="modal-panel flex w-full max-w-md flex-col rounded-xl bg-white shadow-xl dark:bg-[#181b22]">
-            <div className="flex flex-shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-neutral-800">
+          <div className="modal-panel flex w-full max-w-md flex-col rounded-xl bg-[var(--surface)] shadow-xl">
+            <div className="flex flex-shrink-0 items-center justify-between border-b border-[var(--border)] px-6 py-4 dark:border-neutral-800">
               <h2 className="text-lg font-semibold dark:text-neutral-100">Nouvelle Séance</h2>
-              <button type="button" onClick={() => setShowCreateModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"><X className="h-5 w-5" /></button>
+              <button type="button" onClick={() => setShowCreateModal(false)} className="text-[var(--foreground-faint)] hover:text-neutral-600 dark:hover:text-neutral-400"><X className="h-5 w-5" /></button>
             </div>
             <form id="create-seance-form" onSubmit={handleCreateSubmit} className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Groupe</label>
-                <select value={createGroupeId} onChange={(e) => setCreateGroupeId(e.target.value)} className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">Groupe</label>
+                <select value={createGroupeId} onChange={(e) => setCreateGroupeId(e.target.value)} className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
                   <option value="">Sélectionner un groupe</option>
                   {groupes.map((g) => <option key={g.id} value={g.id}>{g.nom}</option>)}
                 </select>
                 {createErrors.groupeId && <p className="mt-1 text-[12px] text-red-600 dark:text-red-400">{createErrors.groupeId}</p>}
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Date</label>
-                <input type="date" value={createDate} onChange={(e) => setCreateDate(e.target.value)} className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">Date</label>
+                <input type="date" value={createDate} onChange={(e) => setCreateDate(e.target.value)} className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                 {createErrors.date && <p className="mt-1 text-[12px] text-red-600 dark:text-red-400">{createErrors.date}</p>}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Heure début</label>
+                  <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">Heure début</label>
                   <TimeInput value={createHeureDebut} onChange={setCreateHeureDebut} />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Heure fin</label>
+                  <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">Heure fin</label>
                   <TimeInput value={createHeureFin} onChange={setCreateHeureFin} />
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Notes</label>
-                <textarea value={createNotes} onChange={(e) => setCreateNotes(e.target.value)} rows={3} className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">Notes</label>
+                <textarea value={createNotes} onChange={(e) => setCreateNotes(e.target.value)} rows={3} className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
               </div>
             </form>
-            <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-neutral-200 px-6 py-4 dark:border-[#2a2d35]">
-              <button type="button" onClick={() => setShowCreateModal(false)} className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]">Annuler</button>
+            <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-[var(--border)] px-6 py-4">
+              <button type="button" onClick={() => setShowCreateModal(false)} className="rounded-xl border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]">Annuler</button>
               <button type="submit" form="create-seance-form" disabled={submitting} className="flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 disabled:opacity-50">
                 {submitting && <Loader2 className="h-4 w-4 animate-spin" />} Créer
               </button>
@@ -683,32 +724,32 @@ export default function ProfSeancesPage() {
 
       {showEditModal && editSeance && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="modal-panel flex w-full max-w-md flex-col rounded-xl bg-white shadow-xl dark:bg-[#181b22]">
-            <div className="flex flex-shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-neutral-800">
+          <div className="modal-panel flex w-full max-w-md flex-col rounded-xl bg-[var(--surface)] shadow-xl">
+            <div className="flex flex-shrink-0 items-center justify-between border-b border-[var(--border)] px-6 py-4 dark:border-neutral-800">
               <h2 className="text-lg font-semibold dark:text-neutral-100">Modifier la Séance</h2>
-              <button type="button" onClick={() => setShowEditModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"><X className="h-5 w-5" /></button>
+              <button type="button" onClick={() => setShowEditModal(false)} className="text-[var(--foreground-faint)] hover:text-neutral-600 dark:hover:text-neutral-400"><X className="h-5 w-5" /></button>
             </div>
             <form id="edit-seance-form" onSubmit={handleEditSubmit} className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-4">
-              <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3 text-sm text-neutral-600 dark:text-neutral-400">
+              <div className="rounded-xl border border-[var(--border)] bg-neutral-50 dark:bg-[#1e2128] p-3 text-sm text-[var(--foreground-subtle)]">
                 {editSeance.groupe.nom} — {formatDate(editSeance.date)}
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Date</label>
-                <input type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">Date</label>
+                <input type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Heure début</label>
+                  <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">Heure début</label>
                   <TimeInput value={editHeureDebut} onChange={setEditHeureDebut} />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Heure fin</label>
+                  <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">Heure fin</label>
                   <TimeInput value={editHeureFin} onChange={setEditHeureFin} />
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Statut</label>
-                <select value={editStatut} onChange={(e) => setEditStatut(e.target.value)} className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">Statut</label>
+                <select value={editStatut} onChange={(e) => setEditStatut(e.target.value)} className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
                   <option value="planifiee">Planifiée</option>
                   <option value="en_cours">En cours</option>
                   <option value="terminee">Terminée</option>
@@ -716,12 +757,12 @@ export default function ProfSeancesPage() {
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Notes</label>
-                <textarea value={editNotes} onChange={(e) => setEditNotes(e.target.value)} rows={3} className="w-full rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">Notes</label>
+                <textarea value={editNotes} onChange={(e) => setEditNotes(e.target.value)} rows={3} className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
               </div>
             </form>
-            <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-neutral-200 px-6 py-4 dark:border-[#2a2d35]">
-              <button type="button" onClick={() => setShowEditModal(false)} className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]">Annuler</button>
+            <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-[var(--border)] px-6 py-4">
+              <button type="button" onClick={() => setShowEditModal(false)} className="rounded-xl border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]">Annuler</button>
               <button type="submit" form="edit-seance-form" disabled={submitting} className="flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 disabled:opacity-50">
                 {submitting && <Loader2 className="h-4 w-4 animate-spin" />} Enregistrer
               </button>

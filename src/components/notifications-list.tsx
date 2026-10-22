@@ -98,7 +98,7 @@ export default function NotificationsList() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Notifications</h1>
+          <h1 className="text-2xl font-bold text-[var(--foreground)] dark:text-gray-100">Notifications</h1>
           {nonLues > 0 && (
             <span className="rounded-full bg-red-600 px-2.5 py-0.5 text-xs font-bold text-white">
               {nonLues}
@@ -108,7 +108,7 @@ export default function NotificationsList() {
         {nonLues > 0 && (
           <button
             onClick={markAllAsRead}
-            className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:border-[#2a2d35] dark:text-gray-400 dark:hover:bg-[#181b22]"
+            className="flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-[#181b22]"
           >
             <CheckCheck className="h-4 w-4" />
             Tout marquer comme lu
@@ -121,7 +121,7 @@ export default function NotificationsList() {
           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
         </div>
       ) : notifications.length === 0 ? (
-        <div className="rounded-lg border border-gray-200 bg-white p-12 text-center dark:border-[#2a2d35] dark:bg-[#181b22]">
+        <div className="rounded-[18px] border border-[var(--border)] bg-[var(--surface)] p-12 text-center shadow-[var(--shadow-card)]">
           <Bell className="mx-auto h-12 w-12 text-gray-300 dark:text-slate-600" />
           <p className="mt-4 text-gray-500 dark:text-gray-400">Aucune notification</p>
         </div>

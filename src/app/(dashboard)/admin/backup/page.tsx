@@ -132,7 +132,7 @@ export default function AdminBackupPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Backup & Restauration</h1>
+        <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)]">Backup & Restauration</h1>
         <p className="text-sm text-neutral-500 mt-1 dark:text-neutral-400">
           Sauvegardez et restaurez la base de données complète de votre centre
         </p>
@@ -140,14 +140,14 @@ export default function AdminBackupPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* EXPORT */}
-        <div className="rounded-xl border border-neutral-200 bg-white p-6 dark:border-[#2a2d35] dark:bg-[#181b22]">
+        <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
           <div className="flex items-center gap-3 mb-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
               <Download className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Exporter les données</h2>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">Télécharger la sauvegarde complète de votre centre</p>
+              <h2 className="text-lg font-bold text-[var(--foreground)]">Exporter les données</h2>
+              <p className="text-xs text-[var(--foreground-faint)]">Télécharger la sauvegarde complète de votre centre</p>
             </div>
           </div>
 
@@ -163,7 +163,7 @@ export default function AdminBackupPage() {
           <button
             onClick={handleExport}
             disabled={exporting}
-            className="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white  hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            className="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
           >
             {exporting ? (
               <RefreshCw className="h-4 w-4 animate-spin" />
@@ -175,14 +175,14 @@ export default function AdminBackupPage() {
         </div>
 
         {/* IMPORT */}
-        <div className="rounded-xl border border-neutral-200 bg-white p-6 dark:border-[#2a2d35] dark:bg-[#181b22]">
+        <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
           <div className="flex items-center gap-3 mb-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/30">
               <Upload className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Importer les données</h2>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">Restaurer à partir d&apos;un fichier .etudnet</p>
+              <h2 className="text-lg font-bold text-[var(--foreground)]">Importer les données</h2>
+              <p className="text-xs text-[var(--foreground-faint)]">Restaurer à partir d&apos;un fichier .etudnet</p>
             </div>
           </div>
 
@@ -203,19 +203,19 @@ export default function AdminBackupPage() {
             </button>
 
             {preview && (
-              <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4 dark:border-[#2a2d35] dark:bg-[#1e2128]">
+              <div className="rounded-lg border border-[var(--border)] bg-neutral-50 p-4 dark:bg-[#1e2128]">
                 <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2 dark:text-neutral-400">Aperçu du backup</p>
                 <div className="space-y-1 text-sm">
-                  <p className="text-neutral-700 dark:text-neutral-300">
+                  <p className="text-[var(--foreground-subtle)]">
                     <strong>Centre :</strong> {preview.centre}
                   </p>
-                  <p className="text-neutral-700 dark:text-neutral-300">
+                  <p className="text-[var(--foreground-subtle)]">
                     <strong>Exporté le :</strong>{" "}
                     {preview.exportedAt ? new Date(preview.exportedAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}
                   </p>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {Object.entries(preview.stats).map(([key, val]) => (
-                      <span key={key} className="inline-flex items-center gap-1 rounded-md bg-white border border-neutral-200 px-2 py-0.5 text-xs font-medium text-neutral-600 dark:bg-[#181b22] dark:border-[#2a2d35] dark:text-neutral-400">
+                      <span key={key} className="inline-flex items-center gap-1 rounded-md bg-[var(--surface)] border border-[var(--border)] px-2 py-0.5 text-xs font-medium text-neutral-600 dark:text-neutral-400">
                         {statLabels[key] || key}: <strong>{val as number}</strong>
                       </span>
                     ))}
@@ -229,13 +229,13 @@ export default function AdminBackupPage() {
               <div className="flex gap-3">
                 <label className={`flex-1 cursor-pointer rounded-lg border-2 p-3 text-center transition-colors ${mode === "merge" ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/10 dark:border-emerald-600" : "border-neutral-200 hover:border-neutral-300 dark:border-[#2a2d35]"}`}>
                   <input type="radio" name="mode" value="merge" checked={mode === "merge"} onChange={() => setMode("merge")} className="sr-only" />
-                  <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Fusionner</p>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400">Ajouter sans écraser</p>
+                  <p className="text-sm font-semibold text-[var(--foreground)]">Fusionner</p>
+                  <p className="text-xs text-[var(--foreground-faint)]">Ajouter sans écraser</p>
                 </label>
                 <label className={`flex-1 cursor-pointer rounded-lg border-2 p-3 text-center transition-colors ${mode === "full" ? "border-red-500 bg-red-50 dark:bg-red-900/10 dark:border-red-600" : "border-neutral-200 hover:border-neutral-300 dark:border-[#2a2d35]"}`}>
                   <input type="radio" name="mode" value="full" checked={mode === "full"} onChange={() => { setMode("full"); setConfirmFull(false); }} className="sr-only" />
-                  <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Remplacement complet</p>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400">Supprimer puis importer</p>
+                  <p className="text-sm font-semibold text-[var(--foreground)]">Remplacement complet</p>
+                  <p className="text-xs text-[var(--foreground-faint)]">Supprimer puis importer</p>
                 </label>
               </div>
 
@@ -292,7 +292,7 @@ export default function AdminBackupPage() {
               <p className="text-xs font-semibold text-neutral-500 mb-2 uppercase tracking-wide">Détails</p>
               <ul className="space-y-1">
                 {result.logs.map((log, i) => (
-                  <li key={i} className="text-sm text-neutral-600 dark:text-neutral-400 flex items-center gap-2">
+                  <li key={i} className="text-sm text-[var(--foreground-subtle)] flex items-center gap-2">
                     <span className="h-1.5 w-1.5 rounded-full bg-neutral-400 flex-shrink-0" />
                     {log}
                   </li>

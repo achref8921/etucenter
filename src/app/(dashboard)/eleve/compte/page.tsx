@@ -108,10 +108,10 @@ export default function EleveComptePage() {
       >
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800">
-            <Wallet className="h-5 w-5 text-neutral-500 dark:text-neutral-400" />
+            <Wallet className="h-5 w-5 text-[var(--foreground-faint)]" />
           </div>
           <div>
-            <p className="text-[13px] font-medium text-neutral-600 dark:text-neutral-400">Mon solde</p>
+            <p className="text-[13px] font-medium text-[var(--foreground-subtle)]">Mon solde</p>
             <p
               className={`text-3xl font-bold tabular-nums ${
                 netBalance > 0
@@ -126,7 +126,7 @@ export default function EleveComptePage() {
             </p>
           </div>
         </div>
-        <p className="mt-3 text-[13px] text-neutral-600 dark:text-neutral-400">
+        <p className="mt-3 text-[13px] text-[var(--foreground-subtle)]">
           {netBalance > 0
             ? "Solde disponible pour vos cours."
             : netBalance < 0
@@ -135,15 +135,15 @@ export default function EleveComptePage() {
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-neutral-200 dark:border-[#2a2d35] px-6 py-3">
+      <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-[var(--border)] px-6 py-3">
           <h2 className="text-[13px] font-semibold text-gray-900 dark:text-gray-100">
             Historique des transactions
           </h2>
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-2 py-1.5 text-[12px] text-gray-900 dark:text-gray-100"
+            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1.5 text-[12px] text-gray-900 dark:text-gray-100"
           >
             <option value="">Tous les types</option>
             <option value="PREPAYMENT">Pré-paiement</option>
@@ -155,26 +155,26 @@ export default function EleveComptePage() {
 
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
+            <thead className="border-b border-[var(--border)]">
               <tr>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Date</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Type</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Description</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Montant</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Reçu</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Date</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Type</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Description</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Montant</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Reçu</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+            <tbody className="divide-y divide-[var(--border)]">
               {transactions.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-10 text-center text-[13px] text-neutral-500 dark:text-neutral-400">
+                  <td colSpan={5} className="px-4 py-10 text-center text-[13px] text-[var(--foreground-faint)]">
                     Aucune transaction
                   </td>
                 </tr>
               ) : (
                 transactions.map((tx) => (
                   <tr key={tx.id} className={`hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] ${tx.status === "reversed" ? "opacity-50" : ""}`}>
-                    <td className="px-4 py-2.5 text-[13px] text-neutral-600 dark:text-neutral-400">{formatDate(tx.date)}</td>
+                    <td className="px-4 py-2.5 text-[13px] text-[var(--foreground-subtle)]">{formatDate(tx.date)}</td>
                     <td className="px-4 py-2.5">
                       <div className="flex items-center gap-2">
                         <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-medium ${TYPE_BADGE[tx.type] || ""}`}>
@@ -190,7 +190,7 @@ export default function EleveComptePage() {
                     <td className="max-w-[240px] px-4 py-2.5">
                       <p className="truncate text-[13px] text-gray-900 dark:text-gray-100">{tx.description}</p>
                       {tx.attendance && (
-                        <p className="text-[12px] text-neutral-500 dark:text-neutral-400">
+                        <p className="text-[12px] text-[var(--foreground-faint)]">
                           {tx.attendance.seance.groupe.nom}
                           {tx.attendance.seance.groupe.matiere?.nom
                             ? ` — ${tx.attendance.seance.groupe.matiere.nom}`
@@ -221,7 +221,7 @@ export default function EleveComptePage() {
                           {tx.receiptNumber}
                         </button>
                       ) : (
-                        <span className="text-neutral-400 dark:text-neutral-500">—</span>
+                        <span className="text-[var(--foreground-faint)]">—</span>
                       )}
                     </td>
                   </tr>

@@ -182,7 +182,7 @@ export default function MonitoringPage() {
   }
 
   if (loading) {
-    return <div className="p-8 text-center text-neutral-400 dark:text-neutral-500">Chargement du monitoring...</div>;
+    return <div className="p-8 text-center text-[var(--foreground-faint)]">Chargement du monitoring...</div>;
   }
 
   const latest = (summary?.latest ?? {}) as Record<MonitorType, CheckRow | null>;
@@ -232,15 +232,15 @@ export default function MonitoringPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Monitoring</h1>
-          <p className="mt-1 text-[13px] text-neutral-500 dark:text-neutral-400">
+          <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)]">Monitoring</h1>
+          <p className="mt-1 text-[13px] text-[var(--foreground-faint)]">
             Santé du serveur, de la base de données et des ressources — alertes automatiques en cas d&apos;incident
           </p>
         </div>
         <button
           onClick={runCheckNow}
           disabled={running}
-          className="flex items-center justify-center gap-2 rounded-lg bg-violet-600 px-4 py-2.5 text-[13px] font-medium text-white hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-[13px] font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
           {running ? "Vérification..." : "Vérifier maintenant"}
@@ -257,17 +257,17 @@ export default function MonitoringPage() {
       {/* Stat cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {statCards.map((card) => (
-          <div key={card.label} className="rounded-xl border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
+          <div key={card.label} className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
             <div className="flex items-center gap-3">
               <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${card.cls}`}>
                 <card.icon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{card.label}</p>
-                <p className="text-lg font-bold text-neutral-900 dark:text-neutral-100">{card.value}</p>
+                <p className="text-xs font-medium text-[var(--foreground-faint)]">{card.label}</p>
+                <p className="text-lg font-bold text-[var(--foreground)]">{card.value}</p>
               </div>
             </div>
-            <p className="mt-2 text-xs text-neutral-400 dark:text-neutral-500">{card.sub}</p>
+            <p className="mt-2 text-xs text-[var(--foreground-faint)]">{card.sub}</p>
           </div>
         ))}
       </div>
@@ -281,15 +281,15 @@ export default function MonitoringPage() {
           const sm = statusMeta[status];
           const Icon = meta.icon;
           return (
-            <div key={type} className="rounded-xl border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
+            <div key={type} className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${meta.cls}`}>
                     <Icon className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">{meta.label}</p>
-                    <p className="text-xs text-neutral-400 dark:text-neutral-500">
+                    <p className="text-[13px] font-semibold text-[var(--foreground)]">{meta.label}</p>
+                    <p className="text-xs text-[var(--foreground-faint)]">
                       {check ? formatDate(check.checkedAt) : "jamais contrôlé"}
                     </p>
                   </div>
@@ -333,15 +333,15 @@ export default function MonitoringPage() {
 
       {/* Charts */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
-          <h2 className="mb-4 flex items-center gap-2 text-[13px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+        <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+          <h2 className="mb-4 flex items-center gap-2 text-[13px] font-bold uppercase tracking-wider text-[var(--foreground-faint)]">
             <HardDrive className="h-4 w-4" /> Mémoire (derniers contrôles)
           </h2>
           <MemChart data={memData} />
         </div>
 
-        <div className="rounded-xl border border-neutral-200 bg-white p-5 dark:border-[#2a2d35] dark:bg-[#181b22]">
-          <h2 className="mb-4 flex items-center gap-2 text-[13px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+        <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+          <h2 className="mb-4 flex items-center gap-2 text-[13px] font-bold uppercase tracking-wider text-[var(--foreground-faint)]">
             <Zap className="h-4 w-4" /> Temps de réponse base de données
           </h2>
           <LatencyChart data={latencyData} />
@@ -349,19 +349,19 @@ export default function MonitoringPage() {
       </div>
 
       {/* Recent checks table */}
-      <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white dark:border-[#2a2d35] dark:bg-[#181b22]">
-        <div className="border-b border-neutral-100 px-5 py-4 dark:border-[#2a2d35]">
-          <h2 className="text-[13px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Contrôles récents</h2>
+      <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+        <div className="border-b border-[var(--border)] px-5 py-4">
+          <h2 className="text-[13px] font-bold uppercase tracking-wider text-[var(--foreground-faint)]">Contrôles récents</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-[13px]">
             <thead className="bg-neutral-50 dark:bg-[#1e2128]">
               <tr>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Heure</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Composant</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Statut</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Réponse</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Détail</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Heure</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Composant</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Statut</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Réponse</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Détail</th>
               </tr>
             </thead>
             <tbody>
@@ -369,19 +369,19 @@ export default function MonitoringPage() {
                 const sm = statusMeta[c.status];
                 const meta = typeMeta[c.type];
                 return (
-                  <tr key={c.id} className="border-t border-neutral-100 hover:bg-neutral-100/50 dark:border-[#2a2d35] dark:hover:bg-[#1e2128]/50">
-                    <td className="whitespace-nowrap px-4 py-2.5 text-neutral-500 dark:text-neutral-400">{formatDate(c.checkedAt)}</td>
-                    <td className="whitespace-nowrap px-4 py-2.5 font-medium text-neutral-900 dark:text-neutral-100">{meta.label}</td>
+                  <tr key={c.id} className="border-t border-[var(--border)] hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]/50">
+                    <td className="whitespace-nowrap px-4 py-2.5 text-[var(--foreground-faint)]">{formatDate(c.checkedAt)}</td>
+                    <td className="whitespace-nowrap px-4 py-2.5 font-medium text-[var(--foreground)]">{meta.label}</td>
                     <td className="px-4 py-2.5">
                       <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${sm.pill}`}>
                         <span className={`h-1.5 w-1.5 rounded-full ${sm.dot}`} />
                         {sm.label}
                       </span>
                     </td>
-                    <td className="px-4 py-2.5 text-neutral-500 dark:text-neutral-400">
+                    <td className="px-4 py-2.5 text-[var(--foreground-faint)]">
                       {c.responseTimeMs != null ? `${c.responseTimeMs} ms` : "—"}
                     </td>
-                    <td className="max-w-[280px] truncate px-4 py-2.5 text-neutral-500 dark:text-neutral-400">
+                    <td className="max-w-[280px] truncate px-4 py-2.5 text-[var(--foreground-faint)]">
                       {c.status === "error"
                         ? String(c.details?.error ?? "ressource indisponible")
                         : c.type === "database"
@@ -395,7 +395,7 @@ export default function MonitoringPage() {
               })}
               {history.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-5 py-10 text-center text-[13px] text-neutral-400 dark:text-neutral-500">
+                  <td colSpan={5} className="px-5 py-10 text-center text-[13px] text-[var(--foreground-faint)]">
                     Aucun contrôle effectué. Cliquez sur « Vérifier maintenant ».
                   </td>
                 </tr>
@@ -406,66 +406,66 @@ export default function MonitoringPage() {
       </div>
 
       {/* Alert config */}
-      <div className="rounded-xl border border-neutral-200 bg-white p-6 dark:border-[#2a2d35] dark:bg-[#181b22]">
-        <h2 className="mb-1 flex items-center gap-2 text-[13px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+      <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+        <h2 className="mb-1 flex items-center gap-2 text-[13px] font-bold uppercase tracking-wider text-[var(--foreground-faint)]">
           <ShieldAlert className="h-4 w-4" /> Alertes automatiques
         </h2>
-        <p className="mb-4 text-[13px] text-neutral-500 dark:text-neutral-400">
+        <p className="mb-4 text-[13px] text-[var(--foreground-faint)]">
           Notifications envoyées par email et dans l&apos;application en cas d&apos;incident. Une alerte de rétablissement est envoyée une fois le service de retour à la normale.
         </p>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <div>
-            <label className="mb-1.5 flex items-center justify-between text-[13px] font-semibold text-neutral-700 dark:text-neutral-300">
+            <label className="mb-1.5 flex items-center justify-between text-[13px] font-semibold text-[var(--foreground-subtle)]">
               Monitoring automatique
               <button
                 onClick={() => setSettings({ ...settings, monitorEnabled: settings.monitorEnabled === "true" ? "false" : "true" })}
-                className={`relative h-6 w-11 rounded-full transition-colors ${settings.monitorEnabled === "true" ? "bg-violet-600" : "bg-neutral-300 dark:bg-neutral-600"}`}
+                className={`relative h-6 w-11 rounded-full transition-colors ${settings.monitorEnabled === "true" ? "bg-blue-600" : "bg-neutral-300 dark:bg-neutral-600"}`}
               >
                 <span
                   className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${settings.monitorEnabled === "true" ? "translate-x-5" : "translate-x-0.5"}`}
                 />
               </button>
             </label>
-            <p className="text-xs text-neutral-400 dark:text-neutral-500">Contrôles périodiques via la tâche planifiée.</p>
+            <p className="text-xs text-[var(--foreground-faint)]">Contrôles périodiques via la tâche planifiée.</p>
           </div>
           <div>
-            <label className="mb-1.5 block text-[13px] font-semibold text-neutral-700 dark:text-neutral-300">Intervalle (minutes)</label>
+            <label className="mb-1.5 block text-[13px] font-semibold text-[var(--foreground-subtle)]">Intervalle (minutes)</label>
             <input
               type="number"
               min={1}
               max={60}
               value={settings.monitorIntervalMinutes ?? "5"}
               onChange={(e) => setSettings({ ...settings, monitorIntervalMinutes: e.target.value })}
-              className="w-full rounded-lg border border-neutral-200 bg-white px-3.5 py-2.5 text-[13px] text-neutral-900 focus:border-violet-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-100"
+              className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2.5 text-[13px] text-neutral-900 focus:border-blue-500 focus:bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:text-neutral-100"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-[13px] font-semibold text-neutral-700 dark:text-neutral-300">Emails d&apos;alerte</label>
+            <label className="mb-1.5 block text-[13px] font-semibold text-[var(--foreground-subtle)]">Emails d&apos;alerte</label>
             <input
               type="text"
               value={settings.alertEmails ?? ""}
               onChange={(e) => setSettings({ ...settings, alertEmails: e.target.value })}
               placeholder="admin@exemple.com, autre@exemple.com"
-              className="w-full rounded-lg border border-neutral-200 bg-white px-3.5 py-2.5 text-[13px] text-neutral-900 focus:border-violet-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-100"
+              className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2.5 text-[13px] text-neutral-900 focus:border-blue-500 focus:bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:text-neutral-100"
             />
-            <p className="mt-1 text-xs text-neutral-400 dark:text-neutral-500">Vide = emails des super administrateurs.</p>
+            <p className="mt-1 text-xs text-[var(--foreground-faint)]">Vide = emails des super administrateurs.</p>
           </div>
           <div>
-            <label className="mb-1.5 block text-[13px] font-semibold text-neutral-700 dark:text-neutral-300">Webhook (Slack/Discord…) — optionnel</label>
+            <label className="mb-1.5 block text-[13px] font-semibold text-[var(--foreground-subtle)]">Webhook (Slack/Discord…) — optionnel</label>
             <input
               type="url"
               value={settings.alertWebhookUrl ?? ""}
               onChange={(e) => setSettings({ ...settings, alertWebhookUrl: e.target.value })}
               placeholder="https://hooks.slack.com/services/..."
-              className="w-full rounded-lg border border-neutral-200 bg-white px-3.5 py-2.5 text-[13px] text-neutral-900 focus:border-violet-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-100"
+              className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2.5 text-[13px] text-neutral-900 focus:border-blue-500 focus:bg-[var(--surface)] focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:text-neutral-100"
             />
           </div>
         </div>
-        <div className="mt-5 flex justify-end border-t border-neutral-100 pt-4 dark:border-[#2a2d35]">
+        <div className="mt-5 flex justify-end border-t border-[var(--border)] pt-4">
           <button
             onClick={saveConfig}
             disabled={saving}
-            className="flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2.5 text-[13px] font-medium text-white hover:bg-violet-700 disabled:opacity-50"
+            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-[13px] font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             Enregistrer les alertes
@@ -479,7 +479,7 @@ export default function MonitoringPage() {
 function Row({ k, v, danger }: { k: string; v: string; danger?: boolean }) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <span className="text-xs font-medium uppercase tracking-wide text-neutral-400 dark:text-neutral-500">{k}</span>
+      <span className="text-xs font-medium uppercase tracking-wide text-[var(--foreground-faint)]">{k}</span>
       <span className={`truncate font-semibold ${danger ? "text-red-600 dark:text-red-400" : "text-neutral-700 dark:text-neutral-300"}`}>
         {danger ? <span className="inline-flex items-center gap-1"><AlertTriangle className="h-3.5 w-3.5" />{v}</span> : v}
       </span>

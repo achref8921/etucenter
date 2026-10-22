@@ -100,7 +100,7 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
           onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
         />
         {frozenState && (
-          <div className="flex items-center justify-center gap-2 bg-amber-50 px-4 py-2 text-center text-[13px] font-medium text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
+          <div className="flex items-center justify-center gap-2 border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-[var(--text-body)] font-medium text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">
             Compte gelé : aucune modification autorisée
             <span className="hidden sm:inline">— vous pouvez uniquement consulter vos informations</span>
           </div>
@@ -116,7 +116,11 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
                 <BackButton fallbackHref={roleHome} />
               </div>
             )}
-            <ToastProvider>{children}</ToastProvider>
+            <ToastProvider>
+              <div key={pathname} className="animate-fade-in-up motion-reduce:animate-none">
+                {children}
+              </div>
+            </ToastProvider>
           </div>
         </main>
       </div>

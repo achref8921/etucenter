@@ -36,7 +36,7 @@ export function MonthSelector({ month }: { month: string }) {
     <div className="flex items-center gap-1">
       <button
         onClick={() => navigate(getAdjacentMonth(month, -1))}
-        className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 bg-white text-neutral-600 transition-colors hover:bg-neutral-50 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-400 dark:hover:bg-[#1e2128]"
+        className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 bg-[var(--surface)] text-neutral-600 transition-colors hover:bg-neutral-50 dark:text-neutral-400 dark:hover:bg-[#1e2128]"
       >
         <ChevronLeft className="h-4 w-4" />
       </button>
@@ -53,14 +53,14 @@ export function MonthSelector({ month }: { month: string }) {
       <button
         onClick={() => navigate(getAdjacentMonth(month, 1))}
         disabled={month >= currentMonth}
-        className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 bg-white text-neutral-600 transition-colors hover:bg-neutral-50 disabled:opacity-30 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-400 dark:hover:bg-[#1e2128]"
+        className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 bg-[var(--surface)] text-neutral-600 transition-colors hover:bg-neutral-50 disabled:opacity-30 dark:text-neutral-400 dark:hover:bg-[#1e2128]"
       >
         <ChevronRight className="h-4 w-4" />
       </button>
       {month !== currentMonth && (
         <button
           onClick={() => navigate(currentMonth)}
-          className="ml-2 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-[12px] font-medium text-neutral-600 transition-colors hover:bg-neutral-50 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-400 dark:hover:bg-[#1e2128]"
+          className="ml-2 rounded-lg border border-neutral-200 bg-[var(--surface)] px-3 py-1.5 text-[12px] font-medium text-neutral-600 transition-colors hover:bg-neutral-50 dark:text-neutral-400 dark:hover:bg-[#1e2128]"
         >
           Aujourd&apos;hui
         </button>

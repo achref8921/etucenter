@@ -298,7 +298,7 @@ export default function SuperAdminUtilisateursPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Utilisateurs</h1>
+        <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)]">Utilisateurs</h1>
         <p className="text-[13px] text-neutral-500 mt-1 dark:text-neutral-400">Restaurer ou réactiver n'importe quel compte sur tous les centres</p>
       </div>
 
@@ -311,14 +311,14 @@ export default function SuperAdminUtilisateursPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") applyFilters(); }}
-            className="w-full rounded-lg border border-neutral-200 bg-white pl-9 pr-3 py-2.5 text-[13px] text-neutral-900 placeholder-neutral-400 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-100 dark:placeholder-neutral-500 dark:focus:border-violet-400"
+            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] pl-9 pr-3 py-2.5 text-[13px] text-neutral-900 placeholder-neutral-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:text-neutral-100 dark:placeholder-neutral-500 dark:focus:border-blue-400"
           />
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-neutral-700 focus:border-violet-500 focus:outline-none dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-200"
+            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] text-neutral-700 focus:border-blue-500 focus:outline-none dark:bg-[#1e2128] dark:text-neutral-200"
           >
             <option value="">Tous les rôles</option>
             <option value="admin">Admins</option>
@@ -328,7 +328,7 @@ export default function SuperAdminUtilisateursPage() {
           <select
             value={centerFilter}
             onChange={(e) => setCenterFilter(e.target.value)}
-            className="rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-neutral-700 focus:border-violet-500 focus:outline-none dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-200"
+            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] text-neutral-700 focus:border-blue-500 focus:outline-none dark:bg-[#1e2128] dark:text-neutral-200"
           >
             <option value="">Tous les centres</option>
             {centers.map((c) => (
@@ -338,7 +338,7 @@ export default function SuperAdminUtilisateursPage() {
           <select
             value={statutFilter}
             onChange={(e) => setStatutFilter(e.target.value)}
-            className="rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-neutral-700 focus:border-violet-500 focus:outline-none dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-200"
+            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] text-neutral-700 focus:border-blue-500 focus:outline-none dark:bg-[#1e2128] dark:text-neutral-200"
           >
             <option value="TOUS">Tous les statuts</option>
             <option value="ACTIF">Actifs</option>
@@ -347,7 +347,7 @@ export default function SuperAdminUtilisateursPage() {
           </select>
           <button
             onClick={applyFilters}
-            className="rounded-lg bg-violet-600 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-violet-700 transition-colors dark:hover:bg-violet-500"
+            className="rounded-lg bg-blue-600 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-blue-700 transition-colors dark:hover:bg-blue-500"
           >
             Rechercher
           </button>
@@ -361,48 +361,48 @@ export default function SuperAdminUtilisateursPage() {
         <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-[13px] text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-400">{success}</div>
       )}
 
-      <div className="rounded-xl border border-neutral-200 bg-white overflow-x-auto dark:border-[#2a2d35] dark:bg-[#181b22]">
-        <table className="min-w-full divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+      <div className="rounded-[18px] border border-[var(--border)] bg-[var(--surface)] overflow-x-auto shadow-[var(--shadow-card)]">
+        <table className="min-w-full divide-y divide-[var(--border)]">
           <thead className="bg-neutral-50 dark:bg-[#1e2128]">
             <tr>
-              <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Utilisateur</th>
-              <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Centre</th>
-              <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Rôle</th>
-              <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Statut</th>
-              <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Créé le</th>
-              <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Actions</th>
+              <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Utilisateur</th>
+              <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Centre</th>
+              <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Rôle</th>
+              <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Statut</th>
+              <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Créé le</th>
+              <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+          <tbody className="divide-y divide-[var(--border)]">
             {loading ? (
-              <tr><td colSpan={6} className="px-4 py-8 text-center text-[13px] text-neutral-400 dark:text-neutral-500">Chargement...</td></tr>
+              <tr><td colSpan={6} className="px-4 py-8 text-center text-[13px] text-[var(--foreground-faint)]">Chargement...</td></tr>
             ) : users.length === 0 ? (
-              <tr><td colSpan={6} className="px-4 py-8 text-center text-[13px] text-neutral-400 dark:text-neutral-500">Aucun utilisateur trouvé.</td></tr>
+              <tr><td colSpan={6} className="px-4 py-8 text-center text-[13px] text-[var(--foreground-faint)]">Aucun utilisateur trouvé.</td></tr>
             ) : users.map((u) => (
               <tr key={u.id} className="hover:bg-neutral-100/50 transition-colors dark:hover:bg-[#1e2128]">
                 <td className="px-4 py-2.5">
                   <div className="flex items-center gap-3">
                     <UserAvatar userId={u.id} nom={u.nom} prenom={u.prenom} hasImage={u.hasImage} size="xs" className="rounded-lg" />
                     <div>
-                      <p className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">{u.prenom} {u.nom}</p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">{u.email}</p>
+                      <p className="text-[13px] font-semibold text-[var(--foreground)]">{u.prenom} {u.nom}</p>
+                      <p className="text-xs text-[var(--foreground-faint)]">{u.email}</p>
                       {(u.codeEleve || u.codeProf) && (
-                        <p className="text-[10px] font-mono text-neutral-400 dark:text-neutral-500">{u.codeEleve ? `Élève ${u.codeEleve}` : `Prof ${u.codeProf}`}</p>
+                        <p className="text-[10px] font-mono text-[var(--foreground-faint)]">{u.codeEleve ? `Élève ${u.codeEleve}` : `Prof ${u.codeProf}`}</p>
                       )}
                     </div>
                   </div>
                 </td>
                 <td className="px-4 py-2.5">
                   <div>
-                    <p className="text-[13px] text-neutral-700 dark:text-neutral-300">{u.center.name}</p>
+                    <p className="text-[13px] text-[var(--foreground-subtle)]">{u.center.name}</p>
                     {!u.center.active && (
                       <span className="text-[10px] font-semibold text-red-500 dark:text-red-400">Centre suspendu</span>
                     )}
                   </div>
                 </td>
-                <td className="px-4 py-2.5 text-[13px] text-neutral-700 dark:text-neutral-300">{roleLabels[u.role] || u.role}</td>
+                <td className="px-4 py-2.5 text-[13px] text-[var(--foreground-subtle)]">{roleLabels[u.role] || u.role}</td>
                 <td className="px-4 py-2.5">{statusBadge(u)}</td>
-                <td className="px-4 py-2.5 text-[13px] text-neutral-500 dark:text-neutral-400">
+                <td className="px-4 py-2.5 text-[13px] text-[var(--foreground-faint)]">
                   {new Date(u.createdAt).toLocaleDateString("fr-FR")}
                 </td>
                 <td className="px-4 py-2.5 text-right">
@@ -445,7 +445,7 @@ export default function SuperAdminUtilisateursPage() {
                     <button
                       onClick={() => { setResetUser(u); setNewPassword(""); setResetError(""); }}
                       title="Réinitialiser le mot de passe"
-                      className="rounded-lg p-1.5 text-neutral-400 hover:bg-violet-50 hover:text-violet-600 transition-colors dark:text-neutral-500 dark:hover:bg-violet-900/20 dark:hover:text-violet-400"
+                      className="rounded-lg p-1.5 text-neutral-400 hover:bg-blue-50 hover:text-blue-600 transition-colors dark:text-neutral-500 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
                     >
                       <KeyRound className="h-4 w-4" />
                     </button>
@@ -466,37 +466,37 @@ export default function SuperAdminUtilisateursPage() {
 
       {editUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl dark:bg-[#181b22]">
+          <div className="w-full max-w-md rounded-xl bg-[var(--surface)] p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Modifier le profil</h2>
+              <h2 className="text-lg font-bold text-[var(--foreground)]">Modifier le profil</h2>
               <button onClick={() => { setEditUser(null); setEditEmail(""); setEditNiveau(""); setEditClasse(""); setEditFiliere(""); }} className="text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300">
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <p className="mb-4 text-[13px] text-neutral-600 dark:text-neutral-400">
-              Modifier <span className="font-semibold text-neutral-900 dark:text-neutral-100">{editUser.prenom} {editUser.nom}</span> ({editUser.center.name}) — {roleLabels[editUser.role] || editUser.role}
+            <p className="mb-4 text-[13px] text-[var(--foreground-subtle)]">
+              Modifier <span className="font-semibold text-[var(--foreground)]">{editUser.prenom} {editUser.nom}</span> ({editUser.center.name}) — {roleLabels[editUser.role] || editUser.role}
             </p>
             {editError && (
               <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">{editError}</div>
             )}
             <div className="space-y-4">
               <div>
-                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Email</label>
+                <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Email</label>
                 <input
                   type="email"
                   value={editEmail}
                   onChange={(e) => setEditEmail(e.target.value)}
-                  className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-neutral-900 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-100 dark:focus:border-violet-400"
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] text-neutral-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:text-neutral-100 dark:focus:border-blue-400"
                 />
               </div>
               {editUser.role === "eleve" && (
                 <>
                   <div>
-                    <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Niveau scolaire</label>
+                    <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Niveau scolaire</label>
                     <select
                       value={editNiveau}
                       onChange={(e) => { setEditNiveau(e.target.value); setEditClasse(""); setEditFiliere(""); }}
-                      className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-neutral-700 focus:border-violet-500 focus:outline-none dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-200"
+                      className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] text-neutral-700 focus:border-blue-500 focus:outline-none dark:bg-[#1e2128] dark:text-neutral-200"
                     >
                       <option value="">— Aucun —</option>
                       {Object.keys(classesByNiveau).map((n) => (
@@ -505,12 +505,12 @@ export default function SuperAdminUtilisateursPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Classe</label>
+                    <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Classe</label>
                     <select
                       value={editClasse}
                       onChange={(e) => { setEditClasse(e.target.value); setEditFiliere(""); }}
                       disabled={!editNiveau}
-                      className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-neutral-700 focus:border-violet-500 focus:outline-none disabled:opacity-50 dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-200"
+                      className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] text-neutral-700 focus:border-blue-500 focus:outline-none disabled:opacity-50 dark:bg-[#1e2128] dark:text-neutral-200"
                     >
                       <option value="">{editNiveau ? "— Sélectionner —" : "Choisir d'abord le niveau"}</option>
                       {(editNiveau ? classesByNiveau[editNiveau] || [] : []).map((c) => (
@@ -520,11 +520,11 @@ export default function SuperAdminUtilisateursPage() {
                   </div>
                   {editNiveau === "lycee" && ["2ème", "3ème", "Bac"].includes(editClasse) && (
                     <div>
-                      <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Filière</label>
+                      <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Filière</label>
                       <select
                         value={editFiliere}
                         onChange={(e) => setEditFiliere(e.target.value)}
-                        className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-neutral-700 focus:border-violet-500 focus:outline-none dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-200"
+                        className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] text-neutral-700 focus:border-blue-500 focus:outline-none dark:bg-[#1e2128] dark:text-neutral-200"
                       >
                         <option value="">— Sélectionner —</option>
                         {filieres.map((f) => (
@@ -541,7 +541,7 @@ export default function SuperAdminUtilisateursPage() {
               <button
                 onClick={handleEditUser}
                 disabled={editing}
-                className="flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-violet-700 disabled:opacity-50 dark:hover:bg-violet-500"
+                className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-blue-700 disabled:opacity-50 dark:hover:bg-blue-500"
               >
                 {editing && <Loader2 className="h-4 w-4 animate-spin" />} Enregistrer
               </button>
@@ -551,26 +551,26 @@ export default function SuperAdminUtilisateursPage() {
       )}
       {resetUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl dark:bg-[#181b22]">
+          <div className="w-full max-w-md rounded-xl bg-[var(--surface)] p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Réinitialiser le mot de passe</h2>
+              <h2 className="text-lg font-bold text-[var(--foreground)]">Réinitialiser le mot de passe</h2>
               <button onClick={() => { setResetUser(null); setNewPassword(""); }} className="text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300">
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <p className="mb-4 text-[13px] text-neutral-600 dark:text-neutral-400">
-              Définir un nouveau mot de passe pour <span className="font-semibold text-neutral-900 dark:text-neutral-100">{resetUser.prenom} {resetUser.nom}</span> ({resetUser.center.name}).
+            <p className="mb-4 text-[13px] text-[var(--foreground-subtle)]">
+              Définir un nouveau mot de passe pour <span className="font-semibold text-[var(--foreground)]">{resetUser.prenom} {resetUser.nom}</span> ({resetUser.center.name}).
             </p>
             {resetError && (
               <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">{resetError}</div>
             )}
             <div>
-              <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Nouveau mot de passe (min 8 caractères)</label>
-              <PasswordInput value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-neutral-900 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-100 dark:focus:border-violet-400" />
+              <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Nouveau mot de passe (min 8 caractères)</label>
+              <PasswordInput value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] text-neutral-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:text-neutral-100 dark:focus:border-blue-400" />
             </div>
             <div className="mt-5 flex justify-end gap-3">
               <button type="button" onClick={() => { setResetUser(null); setNewPassword(""); }} className="rounded-lg px-4 py-2.5 text-[13px] font-medium text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-[#1e2128]">Annuler</button>
-              <button onClick={handleResetPassword} disabled={resetSubmitting || newPassword.length < 8} className="flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-violet-700 disabled:opacity-50 dark:hover:bg-violet-500">
+              <button onClick={handleResetPassword} disabled={resetSubmitting || newPassword.length < 8} className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-blue-700 disabled:opacity-50 dark:hover:bg-blue-500">
                 {resetSubmitting && <Loader2 className="h-4 w-4 animate-spin" />} Enregistrer
               </button>
             </div>
@@ -579,15 +579,15 @@ export default function SuperAdminUtilisateursPage() {
       )}
       {restoreUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-2xl rounded-xl bg-white p-6 shadow-2xl max-h-[90vh] overflow-y-auto dark:bg-[#181b22]">
+          <div className="w-full max-w-2xl rounded-xl bg-[var(--surface)] p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-100 dark:bg-[#1e2128]">
                   <Database className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Restaurer les données</h2>
-                  <p className="text-[13px] text-neutral-500 dark:text-neutral-400">
+                  <h2 className="text-lg font-bold text-[var(--foreground)]">Restaurer les données</h2>
+                  <p className="text-[13px] text-[var(--foreground-faint)]">
                     {restoreUser.prenom} {restoreUser.nom} — {restoreUser.center.name}
                   </p>
                 </div>
@@ -614,8 +614,8 @@ export default function SuperAdminUtilisateursPage() {
                     ["Taux prof", restoreResult.restoredCounts.tauxBenefice],
                   ].map(([label, value]) => (
                     <div key={label as string} className="rounded-lg bg-neutral-50 px-4 py-3 text-center dark:bg-[#1e2128]">
-                      <p className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">{value}</p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">{label}</p>
+                      <p className="text-2xl font-bold text-[var(--foreground)]">{value}</p>
+                      <p className="text-xs text-[var(--foreground-faint)]">{label}</p>
                     </div>
                   ))}
                 </div>
@@ -625,14 +625,14 @@ export default function SuperAdminUtilisateursPage() {
               </div>
             ) : (
               <>
-                <p className="mb-4 text-[13px] text-neutral-600 dark:text-neutral-400">
+                <p className="mb-4 text-[13px] text-[var(--foreground-subtle)]">
                   Choisissez la version de sauvegarde à partir de laquelle restaurer le profil et toutes les données liées (inscriptions, paiements, présences, notifications). Les données actuelles de ce compte seront remplacées.
                 </p>
                 {restoreError && (
                   <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">{restoreError}</div>
                 )}
                 {restoreLoading ? (
-                  <div className="py-8 text-center text-[13px] text-neutral-400 dark:text-neutral-500">Chargement des sauvegardes...</div>
+                  <div className="py-8 text-center text-[13px] text-[var(--foreground-faint)]">Chargement des sauvegardes...</div>
                 ) : restoreBackups.length === 0 && !restoreError ? (
                   <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-4 text-[13px] text-amber-800 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-300">
                     Aucune sauvegarde ne contient de données pour ce compte.
@@ -651,19 +651,19 @@ export default function SuperAdminUtilisateursPage() {
                             <div className="flex items-center gap-3">
                               <span className="rounded-md bg-blue-100 px-2 py-0.5 font-mono text-xs font-bold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">V{b.version}</span>
                               <div>
-                                <p className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+                                <p className="text-[13px] font-semibold text-[var(--foreground)]">
                                   {new Date(b.createdAt).toLocaleString("fr-FR")}
                                   {b.restoredAt && <span className="ml-2 text-xs font-normal text-neutral-400">(déjà restaurée)</span>}
                                 </p>
-                                <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                                <p className="text-xs text-[var(--foreground-faint)]">
                                   {b.type === "automatique" ? "Automatique" : "Manuelle"} · {formatSize(b.sizeBytes)} · {b.hasPassword ? "mot de passe ✓" : "sans mot de passe"}
                                 </p>
                               </div>
                             </div>
-                            <div className="flex shrink-0 gap-2 text-[11px] font-medium text-neutral-500 dark:text-neutral-400">
-                              <span className="rounded-md bg-white px-1.5 py-0.5 dark:bg-[#2a2d35]">{b.counts.inscriptions} insc.</span>
-                              <span className="rounded-md bg-white px-1.5 py-0.5 dark:bg-[#2a2d35]">{b.counts.paiements} paiem.</span>
-                              <span className="rounded-md bg-white px-1.5 py-0.5 dark:bg-[#2a2d35]">{b.counts.presences} prés.</span>
+                            <div className="flex shrink-0 gap-2 text-[11px] font-medium text-[var(--foreground-faint)]">
+                              <span className="rounded-md bg-[var(--surface)] px-1.5 py-0.5 dark:bg-[#2a2d35]">{b.counts.inscriptions} insc.</span>
+                              <span className="rounded-md bg-[var(--surface)] px-1.5 py-0.5 dark:bg-[#2a2d35]">{b.counts.paiements} paiem.</span>
+                              <span className="rounded-md bg-[var(--surface)] px-1.5 py-0.5 dark:bg-[#2a2d35]">{b.counts.presences} prés.</span>
                             </div>
                           </div>
                         </button>

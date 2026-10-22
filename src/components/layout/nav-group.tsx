@@ -22,11 +22,11 @@ const accentStyles: Record<
   }
 > = {
   blue: {
-    activeLeaf: "bg-blue-50 text-blue-700 dark:bg-blue-600/10 dark:text-blue-400",
-    activeIcon: "text-blue-600 dark:text-blue-400",
-    activeBar: "bg-blue-600 dark:bg-blue-400",
-    headerActive: "text-blue-700 dark:text-blue-400",
-    headerActiveBg: "bg-blue-50 dark:bg-blue-600/10",
+    activeLeaf: "bg-[var(--primary)]/10 text-[var(--primary)]",
+    activeIcon: "text-[var(--primary)]",
+    activeBar: "bg-[var(--primary)]",
+    headerActive: "text-[var(--primary)]",
+    headerActiveBg: "bg-[var(--primary)]/10",
     idle:
       "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800/50 dark:hover:text-neutral-200",
     guide: "border-neutral-300/80 dark:border-[#232732]",

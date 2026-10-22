@@ -30,7 +30,7 @@ const actionColors: Record<string, string> = {
   center_activated: "text-blue-500 dark:text-blue-400",
   center_deleted: "text-red-500 dark:text-red-400",
   center_updated: "text-amber-500 dark:text-amber-400",
-  admin_created: "text-violet-500 dark:text-violet-400",
+  admin_created: "text-blue-500 dark:text-blue-400",
   admin_reset: "text-amber-500 dark:text-amber-400",
   admin_deleted: "text-red-500 dark:text-red-400",
 };
@@ -76,46 +76,46 @@ export default function SuperAdminLogsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Journaux système</h1>
-          <p className="mt-1 text-[13px] text-neutral-500 dark:text-neutral-400">Historique des actions critiques de la plateforme</p>
+          <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)]">Journaux système</h1>
+          <p className="mt-1 text-[13px] text-[var(--foreground-faint)]">Historique des actions critiques de la plateforme</p>
         </div>
         <div className="flex items-center gap-2">
           {logs.length > 0 && (
             <>
               <button
                 onClick={() => setShowConfirmAll(true)}
-                className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-[13px] font-medium text-neutral-600 hover:bg-red-50 hover:text-red-600 transition-colors dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-400 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                className="flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[13px] font-medium text-neutral-600 hover:bg-red-50 hover:text-red-600 transition-colors dark:text-neutral-400 dark:hover:bg-red-900/20 dark:hover:text-red-400"
               >
                 <Trash2 className="h-4 w-4" />
                 Tout supprimer
               </button>
             </>
           )}
-          <button onClick={loadLogs} className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-[13px] font-medium text-neutral-600 hover:bg-neutral-50 transition-colors dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-neutral-400 dark:hover:bg-[#1e2128]">
+          <button onClick={loadLogs} className="flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[13px] font-medium text-neutral-600 hover:bg-neutral-50 transition-colors dark:text-neutral-400 dark:hover:bg-[#1e2128]">
             <RefreshCw className="h-4 w-4" />
             Actualiser
           </button>
         </div>
       </div>
 
-      <div className="rounded-xl border border-neutral-200 bg-white overflow-hidden dark:border-[#2a2d35] dark:bg-[#181b22]">
+      <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
         {loading ? (
-          <div className="px-4 py-12 text-center text-[13px] text-neutral-400 dark:text-neutral-500">Chargement…</div>
+          <div className="px-4 py-12 text-center text-[13px] text-[var(--foreground-faint)]">Chargement…</div>
         ) : logs.length === 0 ? (
-          <div className="px-4 py-12 text-center text-[13px] text-neutral-400 dark:text-neutral-500">Aucun journal enregistré.</div>
+          <div className="px-4 py-12 text-center text-[13px] text-[var(--foreground-faint)]">Aucun journal enregistré.</div>
         ) : (
           <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+          <table className="min-w-full divide-y divide-[var(--border)]">
             <thead>
               <tr>
-                <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Action</th>
-                <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Entité</th>
-                <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Détails</th>
-                <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Date</th>
-                <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Action</th>
+                <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Action</th>
+                <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Entité</th>
+                <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Détails</th>
+                <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Date</th>
+                <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+            <tbody className="divide-y divide-[var(--border)]">
               {logs.map((log) => {
                 const Icon = actionIcons[log.action] || Shield;
                 const color = actionColors[log.action] || "text-neutral-400 dark:text-neutral-500";
@@ -124,14 +124,14 @@ export default function SuperAdminLogsPage() {
                     <td className="px-4 py-2.5">
                       <div className="flex items-center gap-2.5">
                         <Icon className={`h-4 w-4 flex-shrink-0 ${color}`} />
-                        <span className="text-[13px] font-medium text-neutral-900 dark:text-neutral-100">{log.action.replace(/_/g, " ")}</span>
+                        <span className="text-[13px] font-medium text-[var(--foreground)]">{log.action.replace(/_/g, " ")}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-2.5 text-[13px] text-neutral-500 dark:text-neutral-400">{log.entity || "—"}</td>
+                    <td className="px-4 py-2.5 text-[13px] text-[var(--foreground-faint)]">{log.entity || "—"}</td>
                     <td className="px-4 py-2.5 text-[13px] text-neutral-500 max-w-xs truncate dark:text-neutral-400">
                       {log.details ? JSON.stringify(log.details) : "—"}
                     </td>
-                    <td className="px-4 py-2.5 text-[13px] text-neutral-500 dark:text-neutral-400">
+                    <td className="px-4 py-2.5 text-[13px] text-[var(--foreground-faint)]">
                       {new Date(log.createdAt).toLocaleString("fr-FR")}
                     </td>
                     <td className="px-4 py-2.5 text-right">

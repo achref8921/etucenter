@@ -214,6 +214,116 @@ export async function getAdminDashboardMonthData(
   };
 }
 
+export interface UnpaidStudentGroup {
+  id: string;
+  nom: string;
+  matiere: string | null;
+  unpaid: number;
+}
+
+export interface UnpaidStudentRow {
+  student: {
+    id: string;
+    nom: string;
+    prenom: string;
+    codeEleve: string | null;
+    classe: string | null;
+  };
+  totalUnpaid: number;
+  groups: UnpaidStudentGroup[];
+}
+
+export async function getUnpaidStudents(centerId: string): Promise<UnpaidStudentRow[]> {
+  const rows = await prisma.$queryRawUnsafe<
+    {
+      eleve_id: string;
+      groupe_id: string;
+      unpaid: number;
+      nom: string;
+      prenom: string;
+      code_eleve: string | null;
+      classe: string | null;
+      groupe_nom: string;
+      matiere_nom: string | null;
+    }[]
+  >(
+    `
+    WITH due AS (
+      SELECT pr.eleve_id, s.groupe_id,
+        SUM(
+          CASE
+            WHEN i.forfait_montant IS NOT NULL AND i.forfait_seances IS NOT NULL AND i.forfait_seances > 0
+            THEN (i.forfait_montant / i.forfait_seances)
+            ELSE COALESCE(s.prix_par_seance, g.prix_par_seance)
+          END
+        ) AS due_total
+      FROM presences pr
+      JOIN seances s ON pr.seance_id = s.id
+      JOIN groupes g ON s.groupe_id = g.id
+      LEFT JOIN inscriptions i ON i.eleve_id = pr.eleve_id AND i.groupe_id = g.id AND i.statut = 'actif'
+      WHERE pr.statut = 'present' AND s.statut <> 'annulee' AND g.center_id = $1::uuid
+      GROUP BY pr.eleve_id, s.groupe_id
+    ),
+    paid AS (
+      SELECT pai.eleve_id, pai.groupe_id, SUM(pai.montant) AS paid_total
+      FROM paiements pai
+      JOIN groupes g2 ON pai.groupe_id = g2.id
+      WHERE g2.center_id = $1::uuid
+      GROUP BY pai.eleve_id, pai.groupe_id
+    )
+    SELECT due.eleve_id, due.groupe_id,
+           (due.due_total - COALESCE(paid.paid_total, 0))::float AS unpaid,
+           u.nom, u.prenom, u.code_eleve, u.classe,
+           g.nom AS groupe_nom, m.nom AS matiere_nom
+    FROM due
+    JOIN utilisateurs u ON u.id = due.eleve_id
+      AND u.role = 'eleve' AND u.deleted_at IS NULL AND u.ghost = false
+    JOIN groupes g ON g.id = due.groupe_id
+    LEFT JOIN matieres m ON m.id = g.matiere_id
+    LEFT JOIN paid ON paid.eleve_id = due.eleve_id AND paid.groupe_id = due.groupe_id
+    WHERE due.due_total > COALESCE(paid.paid_total, 0)
+    ORDER BY unpaid DESC
+    `,
+    centerId
+  );
+
+  const byStudent = new Map<string, UnpaidStudentRow>();
+
+  for (const row of rows) {
+    const unpaid = round2(Number(row.unpaid || 0));
+    if (unpaid <= 0) continue;
+
+    const entry =
+      byStudent.get(row.eleve_id) ??
+      {
+        student: {
+          id: row.eleve_id,
+          nom: row.nom,
+          prenom: row.prenom,
+          codeEleve: row.code_eleve,
+          classe: row.classe,
+        },
+        totalUnpaid: 0,
+        groups: [],
+      };
+
+    entry.totalUnpaid = round2(entry.totalUnpaid + unpaid);
+    entry.groups.push({
+      id: row.groupe_id,
+      nom: row.groupe_nom,
+      matiere: row.matiere_nom,
+      unpaid,
+    });
+    byStudent.set(row.eleve_id, entry);
+  }
+
+  const result = Array.from(byStudent.values());
+  for (const entry of result) {
+    entry.groups.sort((a, b) => b.unpaid - a.unpaid);
+  }
+  return result.sort((a, b) => b.totalUnpaid - a.totalUnpaid);
+}
+
 export interface PendingCenterPartDebt {
   id: string;
   date: Date;

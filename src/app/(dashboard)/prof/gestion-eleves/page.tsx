@@ -218,8 +218,8 @@ export default function ProfGestionElevesPage() {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Gestion des Élèves</h1>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+          <h1 className="text-2xl font-bold text-[var(--foreground)]">Gestion des Élèves</h1>
+          <p className="text-sm text-[var(--foreground-faint)] mt-1">
             Ajoutez de nouveaux élèves et inscrivez-les dans vos groupes
           </p>
         </div>
@@ -233,24 +233,24 @@ export default function ProfGestionElevesPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-4">
+        <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800">
               <GraduationCap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">Vos Groupes</p>
-              <p className="text-xl font-bold text-neutral-900 dark:text-neutral-100">{groupes.length}</p>
+              <p className="text-xs text-[var(--foreground-faint)]">Vos Groupes</p>
+              <p className="text-xl font-bold text-[var(--foreground)]">{groupes.length}</p>
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-4">
+        <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800">
               <Users className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">Élèves inscrits</p>
+              <p className="text-xs text-[var(--foreground-faint)]">Élèves inscrits</p>
               <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{totalEleves}</p>
             </div>
           </div>
@@ -261,19 +261,19 @@ export default function ProfGestionElevesPage() {
 
       {/* Search */}
       <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--foreground-faint)]" />
         <input
           type="text"
           placeholder="Rechercher un groupe ou un élève..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] py-2.5 pl-10 pr-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] py-2.5 pl-10 pr-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
         />
       </div>
 
       {/* Groups */}
       {filteredGroupes.length === 0 ? (
-        <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-12 text-center text-neutral-400 dark:text-neutral-500">
+        <div className="rounded-[18px] border border-[var(--border)] bg-[var(--surface)] p-12 text-center text-[var(--foreground-faint)] shadow-[var(--shadow-card)]">
           {groupes.length === 0
             ? "Vous n'avez aucun groupe. Contactez l'administration du centre."
             : "Aucun résultat trouvé"}
@@ -285,15 +285,15 @@ export default function ProfGestionElevesPage() {
             const capLabel = g.capaciteMax ? `${count}/${g.capaciteMax}` : `${count}`;
             const full = typeof g.capaciteMax === "number" && count >= g.capaciteMax;
             return (
-              <div key={g.id} className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] overflow-hidden">
-                <div className="flex items-center justify-between gap-3 border-b border-neutral-100 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-4 py-3">
+              <div key={g.id} className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+                <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] bg-neutral-50 dark:bg-[#1e2128] px-4 py-3">
                   <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-neutral-200/60 dark:bg-neutral-800">
-                      <GraduationCap className="h-5 w-5 text-neutral-500 dark:text-neutral-400" />
+                      <GraduationCap className="h-5 w-5 text-[var(--foreground-faint)]" />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{g.nom}</p>
-                      <p className="text-xs text-neutral-400 dark:text-neutral-500">
+                      <p className="text-sm font-semibold text-[var(--foreground)]">{g.nom}</p>
+                      <p className="text-xs text-[var(--foreground-faint)]">
                         {g.matiere?.nom || "Sans matière"}
                       </p>
                     </div>
@@ -313,12 +313,12 @@ export default function ProfGestionElevesPage() {
                 {g.inscriptions.length === 0 ? (
                   <div className="px-4 py-8 text-center">
                     <UserX className="mx-auto mb-2 h-8 w-8 text-neutral-300 dark:text-neutral-600" />
-                    <p className="text-sm text-neutral-400 dark:text-neutral-500">
+                    <p className="text-sm text-[var(--foreground-faint)]">
                       Aucun élève dans ce groupe. Cliquez sur « Ajouter un élève » pour inscrire.
                     </p>
                   </div>
                 ) : (
-                  <ul className="divide-y divide-neutral-100 dark:divide-neutral-700">
+                  <ul className="divide-y divide-[var(--border)] dark:divide-neutral-700">
                     {g.inscriptions.map((ins) => (
                       <li key={ins.id} className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
                         <div className="flex min-w-0 items-center gap-3">
@@ -331,7 +331,7 @@ export default function ProfGestionElevesPage() {
                             >
                               {ins.eleve.prenom} {ins.eleve.nom}
                             </Link>
-                            <p className="truncate text-xs text-neutral-400 dark:text-neutral-500">
+                            <p className="truncate text-xs text-[var(--foreground-faint)]">
                               {ins.eleve.codeEleve && <span className="font-mono">#{ins.eleve.codeEleve}</span>}
                               {ins.eleve.classe ? (
                                 <>
@@ -369,10 +369,10 @@ export default function ProfGestionElevesPage() {
       {/* Create modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
-            <div className="flex shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
-              <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Ajouter un élève</h2>
-              <button onClick={() => setShowModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300">
+          <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+            <div className="flex shrink-0 items-center justify-between border-b border-[var(--border)] px-6 py-4">
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">Ajouter un élève</h2>
+              <button onClick={() => setShowModal(false)} className="text-[var(--foreground-faint)] hover:text-neutral-600 dark:hover:text-neutral-300">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -387,11 +387,11 @@ export default function ProfGestionElevesPage() {
                   </div>
                 )}
                 <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Groupe</label>
+                  <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Groupe</label>
                   <select
                     value={formData.groupeId}
                     onChange={(e) => setFormData({ ...formData, groupeId: e.target.value })}
-                    className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   >
                     <option value="">-- Sélectionner un groupe --</option>
                     {groupes.map((g) => {
@@ -408,35 +408,35 @@ export default function ProfGestionElevesPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Prénom *</label>
-                    <input value={formData.prenom} onChange={(e) => setFormData({ ...formData, prenom: e.target.value })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                    <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Prénom *</label>
+                    <input value={formData.prenom} onChange={(e) => setFormData({ ...formData, prenom: e.target.value })} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                     {formErrors.prenom && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.prenom}</p>}
                   </div>
                   <div>
-                    <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Nom *</label>
-                    <input value={formData.nom} onChange={(e) => setFormData({ ...formData, nom: e.target.value })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                    <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Nom *</label>
+                    <input value={formData.nom} onChange={(e) => setFormData({ ...formData, nom: e.target.value })} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                     {formErrors.nom && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.nom}</p>}
                   </div>
                 </div>
                 <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Téléphone</label>
-                  <input value={formData.telephone} onChange={(e) => setFormData({ ...formData, telephone: e.target.value })} className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Téléphone</label>
+                  <input value={formData.telephone} onChange={(e) => setFormData({ ...formData, telephone: e.target.value })} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                 </div>
                 <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Email *</label>
+                  <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Email *</label>
                   <input value={formData.email} onChange={(e) => { setFormData({ ...formData, email: e.target.value }); if (formErrors.email) { const next = { ...formErrors }; delete next.email; setFormErrors(next); } }} type="email" className={`w-full rounded-lg border ${formErrors.email ? "border-red-500" : "border-neutral-200 dark:border-[#2a2d35]"} bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500`} />
                   {formErrors.email && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.email}</p>}
                 </div>
                 <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Mot de passe initial *</label>
+                  <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Mot de passe initial *</label>
                   <PasswordInput value={formData.motDePasse} onChange={(e) => setFormData({ ...formData, motDePasse: e.target.value })} className={`w-full rounded-lg border ${formErrors.motDePasse ? "border-red-500" : "border-neutral-200 dark:border-[#2a2d35]"} bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500`} />
                   {formErrors.motDePasse && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.motDePasse}</p>}
-                  <p className="mt-1 text-[11px] text-neutral-400 dark:text-neutral-500">
+                  <p className="mt-1 text-[11px] text-[var(--foreground-faint)]">
                     Minimum 6 caractères. L'élève se connectera avec cet email et ce mot de passe.
                   </p>
                 </div>
                 <div>
-                  <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Niveau *</label>
+                  <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Niveau *</label>
                   <select value={formData.niveau} onChange={(e) => { setFormData({ ...formData, niveau: e.target.value, classe: "", filiere: "" }); if (formErrors.niveau) { const next = { ...formErrors }; delete next.niveau; setFormErrors(next); } }} className={`w-full rounded-lg border ${formErrors.niveau ? "border-red-500" : "border-neutral-200 dark:border-[#2a2d35]"} bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500`}>
                     <option value="">-- Sélectionner --</option>
                     <option value="primaire">Primaire</option>
@@ -447,7 +447,7 @@ export default function ProfGestionElevesPage() {
                 </div>
                 {formData.niveau && (
                   <div>
-                    <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Classe *</label>
+                    <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Classe *</label>
                     <select value={formData.classe} onChange={(e) => { setFormData({ ...formData, classe: e.target.value, filiere: "" }); if (formErrors.classe) { const next = { ...formErrors }; delete next.classe; setFormErrors(next); } }} className={`w-full rounded-lg border ${formErrors.classe ? "border-red-500" : "border-neutral-200 dark:border-[#2a2d35]"} bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500`}>
                       <option value="">-- Sélectionner --</option>
                       {(classesByNiveau[formData.niveau] || []).map((c) => <option key={c} value={c}>{c}</option>)}
@@ -457,7 +457,7 @@ export default function ProfGestionElevesPage() {
                 )}
                 {formData.niveau === "lycee" && ["2ème", "3ème", "Bac"].includes(formData.classe) && (
                   <div>
-                    <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Filière *</label>
+                    <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Filière *</label>
                     <select value={formData.filiere} onChange={(e) => { setFormData({ ...formData, filiere: e.target.value }); if (formErrors.filiere) { const next = { ...formErrors }; delete next.filiere; setFormErrors(next); } }} className={`w-full rounded-lg border ${formErrors.filiere ? "border-red-500" : "border-neutral-200 dark:border-[#2a2d35]"} bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500`}>
                       <option value="">-- Sélectionner --</option>
                       {filieres.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
@@ -466,8 +466,8 @@ export default function ProfGestionElevesPage() {
                   </div>
                 )}
               </div>
-              <div className="flex shrink-0 items-center justify-end gap-3 border-t border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
-                <button type="button" onClick={() => setShowModal(false)} className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]">Annuler</button>
+              <div className="flex shrink-0 items-center justify-end gap-3 border-t border-[var(--border)] px-6 py-4">
+                <button type="button" onClick={() => setShowModal(false)} className="rounded-lg border border-[var(--border)] px-4 py-2 text-[13px] font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]">Annuler</button>
                 <button type="submit" disabled={submitting} className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700 disabled:opacity-50">
                   {submitting && <Loader2 className="h-4 w-4 animate-spin" />} Insérer au groupe
                 </button>
@@ -480,10 +480,10 @@ export default function ProfGestionElevesPage() {
       {/* Credentials modal */}
       {createdCreds && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
+          <div className="w-full max-w-md rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Élève créé avec succès</h2>
-              <button onClick={() => setCreatedCreds(null)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300">
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">Élève créé avec succès</h2>
+              <button onClick={() => setCreatedCreds(null)} className="text-[var(--foreground-faint)] hover:text-neutral-600 dark:hover:text-neutral-300">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -494,17 +494,17 @@ export default function ProfGestionElevesPage() {
               </span>
             </div>
             <div className="space-y-3">
-              <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">Code élève</p>
-                <p className="mt-0.5 font-mono text-sm font-bold text-neutral-900 dark:text-neutral-100">#{createdCreds.codeEleve}</p>
+              <div className="rounded-lg border border-[var(--border)] bg-neutral-50 dark:bg-[#1e2128] p-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--foreground-faint)]">Code élève</p>
+                <p className="mt-0.5 font-mono text-sm font-bold text-[var(--foreground)]">#{createdCreds.codeEleve}</p>
               </div>
-              <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">Email / Identifiant</p>
-                <p className="mt-0.5 break-all text-sm font-medium text-neutral-900 dark:text-neutral-100">{createdCreds.email}</p>
+              <div className="rounded-lg border border-[var(--border)] bg-neutral-50 dark:bg-[#1e2128] p-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--foreground-faint)]">Email / Identifiant</p>
+                <p className="mt-0.5 break-all text-sm font-medium text-[var(--foreground)]">{createdCreds.email}</p>
               </div>
-              <div className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">Mot de passe initial</p>
-                <p className="mt-0.5 font-mono text-sm font-bold text-neutral-900 dark:text-neutral-100">{createdCreds.motDePasse}</p>
+              <div className="rounded-lg border border-[var(--border)] bg-neutral-50 dark:bg-[#1e2128] p-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--foreground-faint)]">Mot de passe initial</p>
+                <p className="mt-0.5 font-mono text-sm font-bold text-[var(--foreground)]">{createdCreds.motDePasse}</p>
               </div>
             </div>
             <div className="mt-5 flex justify-end gap-3">
@@ -518,7 +518,7 @@ export default function ProfGestionElevesPage() {
                     setTimeout(() => setCopied(false), 2000);
                   } catch {}
                 }}
-                className="flex items-center gap-2 rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+                className="flex items-center gap-2 rounded-lg border border-[var(--border)] px-4 py-2 text-[13px] font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
               >
                 {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
                 {copied ? "Copié !" : "Copier les identifiants"}

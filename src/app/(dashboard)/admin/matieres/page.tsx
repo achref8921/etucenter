@@ -85,7 +85,7 @@ export default function MatieresPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Gestion des Matières</h1>
+        <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)]">Gestion des Matières</h1>
         <button
           onClick={() => setShowModal(true)}
           className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700"
@@ -106,20 +106,20 @@ export default function MatieresPage() {
           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
+        <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
           <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
+            <thead className="border-b border-[var(--border)]">
               <tr>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Nom</th>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Description</th>
-                <th className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-4 py-2.5">Actions</th>
+                <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Nom</th>
+                <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Description</th>
+                <th className="text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)] px-4 py-2.5">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+            <tbody className="divide-y divide-[var(--border)]">
               {matieres.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="px-4 py-2.5 text-center text-neutral-500 dark:text-neutral-400">
+                  <td colSpan={3} className="px-4 py-2.5 text-center text-[var(--foreground-faint)]">
                     Aucune matière trouvée
                   </td>
                 </tr>
@@ -127,7 +127,7 @@ export default function MatieresPage() {
                 matieres.map((matiere) => (
                   <tr key={matiere.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
                     <td className="px-4 py-2.5 font-medium">{matiere.nom}</td>
-                    <td className="px-4 py-2.5 text-[13px] text-neutral-900 dark:text-neutral-100">{matiere.description || "—"}</td>
+                    <td className="px-4 py-2.5 text-[13px] text-[var(--foreground)]">{matiere.description || "—"}</td>
                     <td className="px-4 py-2.5">
                       <button
                         onClick={() => setConfirmDelete({ id: matiere.id })}
@@ -152,37 +152,37 @@ export default function MatieresPage() {
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6">
+          <div className="w-full max-w-md rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Ajouter une matière</h2>
-              <button onClick={() => setShowModal(false)} className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300">
+              <button onClick={() => setShowModal(false)} className="text-[var(--foreground-faint)] hover:text-neutral-600 dark:hover:text-neutral-300">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Nom</label>
+                <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Nom</label>
                 <input
                   value={nom}
                   onChange={(e) => setNom(e.target.value)}
                   required
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-[13px] font-medium text-neutral-700 dark:text-neutral-300">Description</label>
+                <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Description</label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+                  className="rounded-lg border border-[var(--border)] px-4 py-2 text-[13px] font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
                 >
                   Annuler
                 </button>

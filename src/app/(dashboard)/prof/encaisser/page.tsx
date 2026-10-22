@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Banknote, Loader2, RotateCcw, Trash2, Users, X } from "lucide-react";
+import { Banknote, Loader2, RotateCcw, Trash2, Users, X } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { SkeletonPage } from "@/components/ui/skeleton";
 
@@ -225,14 +225,7 @@ export default function ProfEncaisserPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Link
-          href="/prof"
-          className="flex items-center gap-1 text-[13px] text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Retour
-        </Link>
-        <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Encaisser un paiement d'élève</h1>
+        <h1 className="text-2xl font-bold text-[var(--foreground)]">Encaisser un paiement d'élève</h1>
       </div>
 
       {error && (
@@ -262,23 +255,23 @@ export default function ProfEncaisserPage() {
       {config && config.teacherReverseEnabled && (
         <>
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white p-5 dark:bg-[#181b22]">
-            <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+          <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+            <h2 className="text-[13px] font-semibold text-[var(--foreground)]">
               Nouvel encaissement
             </h2>
-            <p className="mt-1 text-[12px] text-neutral-500 dark:text-neutral-400">
+            <p className="mt-1 text-[12px] text-[var(--foreground-faint)]">
               L'élève vous paie en mains propres pour un groupe donné. La part du centre vous est due : réglez-la depuis la page « Dettes Centre ».
             </p>
 
             <div className="mt-4 space-y-4">
               <div>
-                <label className="mb-1 block text-[12px] font-medium text-neutral-600 dark:text-neutral-400">
+                <label className="mb-1 block text-[12px] font-medium text-[var(--foreground-subtle)]">
                   Groupe
                 </label>
                 <select
                   value={groupeId}
                   onChange={(e) => setGroupeId(e.target.value)}
-                  className="w-full rounded-md border border-neutral-300 dark:border-[#2a2d35] bg-white px-3 py-2 text-[13px] text-neutral-900 dark:bg-[#1e2128] dark:text-neutral-100"
+                  className="w-full rounded-md border border-neutral-300 dark:border-[#2a2d35] bg-[var(--surface)] px-3 py-2 text-[13px] text-neutral-900 dark:bg-[#1e2128] dark:text-neutral-100"
                 >
                   <option value="">— Sélectionner —</option>
                   {eligibleGroupes.map((g) => (
@@ -290,14 +283,14 @@ export default function ProfEncaisserPage() {
               </div>
 
               <div>
-                <label className="mb-1 block text-[12px] font-medium text-neutral-600 dark:text-neutral-400">
+                <label className="mb-1 block text-[12px] font-medium text-[var(--foreground-subtle)]">
                   Élève
                 </label>
                 <select
                   value={studentId}
                   onChange={(e) => setStudentId(e.target.value)}
                   disabled={!selectedGroupe}
-                  className="w-full rounded-md border border-neutral-300 dark:border-[#2a2d35] bg-white px-3 py-2 text-[13px] text-neutral-900 dark:bg-[#1e2128] dark:text-neutral-100 disabled:opacity-50"
+                  className="w-full rounded-md border border-neutral-300 dark:border-[#2a2d35] bg-[var(--surface)] px-3 py-2 text-[13px] text-neutral-900 dark:bg-[#1e2128] dark:text-neutral-100 disabled:opacity-50"
                 >
                   <option value="">{selectedGroupe ? "— Sélectionner —" : "Choisissez d'abord un groupe"}</option>
                   {eligibleStudents.map((e) => (
@@ -309,7 +302,7 @@ export default function ProfEncaisserPage() {
               </div>
 
               <div>
-                <label className="mb-1 block text-[12px] font-medium text-neutral-600 dark:text-neutral-400">
+                <label className="mb-1 block text-[12px] font-medium text-[var(--foreground-subtle)]">
                   Montant encaissé (DT)
                 </label>
                 <input
@@ -319,24 +312,24 @@ export default function ProfEncaisserPage() {
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="Ex : 100"
-                  className="w-full rounded-md border border-neutral-300 dark:border-[#2a2d35] bg-white px-3 py-2 text-[13px] tabular-nums text-neutral-900 dark:bg-[#1e2128] dark:text-neutral-100"
+                  className="w-full rounded-md border border-neutral-300 dark:border-[#2a2d35] bg-[var(--surface)] px-3 py-2 text-[13px] tabular-nums text-neutral-900 dark:bg-[#1e2128] dark:text-neutral-100"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-[12px] font-medium text-neutral-600 dark:text-neutral-400">
+                <label className="mb-1 block text-[12px] font-medium text-[var(--foreground-subtle)]">
                   Notes (optionnel)
                 </label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={2}
-                  className="w-full rounded-md border border-neutral-300 dark:border-[#2a2d35] bg-white px-3 py-2 text-[13px] text-neutral-900 dark:bg-[#1e2128] dark:text-neutral-100"
+                  className="w-full rounded-md border border-neutral-300 dark:border-[#2a2d35] bg-[var(--surface)] px-3 py-2 text-[13px] text-neutral-900 dark:bg-[#1e2128] dark:text-neutral-100"
                 />
               </div>
 
               <div className="rounded-lg border border-blue-100 dark:border-blue-950/50 bg-blue-50/60 dark:bg-blue-600/5 p-4">
-                <p className="text-[12px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+                <p className="text-[12px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                   Répartition ({pct}% pour le centre)
                 </p>
                 <div className="mt-2 space-y-1 text-[13px]">
@@ -348,7 +341,7 @@ export default function ProfEncaisserPage() {
                     <span>Part centre (à régler)</span>
                     <span className="tabular-nums font-semibold text-blue-700 dark:text-blue-400">{formatCurrency(centerFee)}</span>
                   </div>
-                  <div className="flex items-center justify-between border-t border-neutral-200 dark:border-[#2a2d35] pt-1 text-neutral-700 dark:text-neutral-200">
+                  <div className="flex items-center justify-between border-t border-[var(--border)] pt-1 text-neutral-700 dark:text-neutral-200">
                     <span>Net prof</span>
                     <span className="tabular-nums font-semibold text-emerald-600 dark:text-emerald-400">{formatCurrency(netAmount)}</span>
                   </div>
@@ -366,9 +359,9 @@ export default function ProfEncaisserPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
-            <div className="flex items-center justify-between border-b border-neutral-200 dark:border-[#2a2d35] px-5 py-3">
-              <h2 className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
+          <div className="rounded-[18px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)]">
+            <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-3">
+              <h2 className="text-[13px] font-semibold text-[var(--foreground)]">
                 Derniers encaissements
               </h2>
               <button
@@ -378,28 +371,28 @@ export default function ProfEncaisserPage() {
                 <RotateCcw className="h-3 w-3" /> Actualiser
               </button>
             </div>
-            <div className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+            <div className="divide-y divide-[var(--border)]">
               {collections.length === 0 ? (
-                <p className="px-5 py-8 text-center text-[13px] text-neutral-500 dark:text-neutral-400">
+                <p className="px-5 py-8 text-center text-[13px] text-[var(--foreground-faint)]">
                   Aucun encaissement pour le moment
                 </p>
               ) : (
                 collections.map((c) => (
                   <div key={c.id} className="flex items-center justify-between px-5 py-3">
                     <div className="min-w-0">
-                      <p className="truncate text-[13px] font-medium text-neutral-900 dark:text-neutral-100">
+                      <p className="truncate text-[13px] font-medium text-[var(--foreground)]">
                         {c.student.prenom} {c.student.nom}
                       </p>
-                      <p className="text-[12px] text-neutral-500 dark:text-neutral-400">
+                      <p className="text-[12px] text-[var(--foreground-faint)]">
                         {formatDate(c.date)} · {c.groupe?.nom ?? c.seance?.groupe.nom ?? "—"}
                       </p>
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="text-right">
-                        <p className="text-[13px] font-semibold tabular-nums text-neutral-900 dark:text-neutral-100">
+                        <p className="text-[13px] font-semibold tabular-nums text-[var(--foreground)]">
                           {formatCurrency(c.amount)}
                         </p>
-                        <p className="text-[12px] tabular-nums text-neutral-500 dark:text-neutral-400">
+                        <p className="text-[12px] tabular-nums text-[var(--foreground-faint)]">
                           Part centre : {formatCurrency(c.centerFee)}
                         </p>
                       </div>
@@ -420,17 +413,17 @@ export default function ProfEncaisserPage() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
-          <div className="flex items-center justify-between border-b border-neutral-200 dark:border-[#2a2d35] px-5 py-3">
-            <h2 className="flex items-center gap-2 text-[13px] font-semibold text-neutral-900 dark:text-neutral-100">
-              <Users className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
+        <div className="rounded-[18px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)]">
+          <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-3">
+            <h2 className="flex items-center gap-2 text-[13px] font-semibold text-[var(--foreground)]">
+              <Users className="h-4 w-4 text-[var(--foreground-faint)]" />
               Mes élèves ({studentsWithSolde.length})
             </h2>
-            <span className="text-[12px] text-neutral-500 dark:text-neutral-400">Solde du compte</span>
+            <span className="text-[12px] text-[var(--foreground-faint)]">Solde du compte</span>
           </div>
-          <div className="max-h-[420px] divide-y divide-neutral-100 overflow-y-auto dark:divide-[#2a2d35]">
+          <div className="max-h-[420px] divide-y divide-[var(--border)] overflow-y-auto">
             {studentsWithSolde.length === 0 ? (
-              <p className="px-5 py-8 text-center text-[13px] text-neutral-500 dark:text-neutral-400">
+              <p className="px-5 py-8 text-center text-[13px] text-[var(--foreground-faint)]">
                 Aucun élève pour le moment
               </p>
             ) : (
@@ -445,10 +438,10 @@ export default function ProfEncaisserPage() {
                     }`}
                   >
                     <div className="min-w-0">
-                      <p className="truncate text-[13px] font-medium text-neutral-900 dark:text-neutral-100">
+                      <p className="truncate text-[13px] font-medium text-[var(--foreground)]">
                         {e.prenom} {e.nom}
                       </p>
-                      <p className="truncate text-[12px] text-neutral-500 dark:text-neutral-400">
+                      <p className="truncate text-[12px] text-[var(--foreground-faint)]">
                         {e.groupes.map((g) => g.nom).join(" · ") || "—"}
                       </p>
                     </div>
@@ -475,9 +468,9 @@ export default function ProfEncaisserPage() {
 
       {cancelTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white p-0 shadow-xl dark:border-[#2a2d35] dark:bg-[#181b22]">
-            <div className="flex shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
-              <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+          <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-0 shadow-xl">
+            <div className="flex shrink-0 items-center justify-between border-b border-[var(--border)] px-6 py-4">
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">
                 Annuler l&apos;encaissement
               </h2>
               <button
@@ -489,7 +482,7 @@ export default function ProfEncaisserPage() {
             </div>
             <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
               <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-[13px] dark:border-red-900/40 dark:bg-red-900/20">
-                <p className="font-medium text-neutral-900 dark:text-neutral-100">
+                <p className="font-medium text-[var(--foreground)]">
                   {cancelTarget.student.prenom} {cancelTarget.student.nom} — {formatCurrency(cancelTarget.amount)} — {cancelTarget.groupe?.nom ?? "—"}
                 </p>
                 <p className="mt-1 text-red-600 dark:text-red-400">
@@ -497,7 +490,7 @@ export default function ProfEncaisserPage() {
                 </p>
               </div>
               <div>
-                <label className="mb-1 block text-[12px] font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="mb-1 block text-[12px] font-medium text-[var(--foreground-subtle)]">
                   Motif de l&apos;annulation <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -506,14 +499,14 @@ export default function ProfEncaisserPage() {
                   rows={3}
                   required
                   placeholder="Ex : Encaissement par erreur, mauvais montant, mauvais élève..."
-                  className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-[13px] text-neutral-900 dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-100"
+                  className="w-full rounded-md border border-neutral-300 bg-[var(--surface)] px-3 py-2 text-[13px] text-neutral-900 dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-100"
                 />
               </div>
             </div>
-            <div className="flex shrink-0 items-center justify-end gap-3 border-t border-neutral-100 px-6 py-4 dark:border-[#2a2d35]">
+            <div className="flex shrink-0 items-center justify-end gap-3 border-t border-[var(--border)] px-6 py-4">
               <button
                 onClick={() => setCancelTarget(null)}
-                className="rounded-md border border-neutral-300 bg-white px-4 py-2 text-[13px] font-medium text-neutral-700 hover:bg-neutral-50 dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-300 dark:hover:bg-[#242833]"
+                className="rounded-md border border-neutral-300 bg-[var(--surface)] px-4 py-2 text-[13px] font-medium text-neutral-700 hover:bg-neutral-50 dark:border-[#2a2d35] dark:bg-[#1e2128] dark:text-neutral-300 dark:hover:bg-[#242833]"
               >
                 Retour
               </button>

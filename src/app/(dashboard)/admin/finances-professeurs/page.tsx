@@ -12,7 +12,6 @@ import {
   Undo2,
   Wallet,
   Users,
-  ArrowLeft,
 } from "lucide-react";
 import { formatDate, formatCurrency } from "@/lib/utils";
 
@@ -234,14 +233,7 @@ export default function FinancesProfesseursPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-4">
-          <Link
-            href="/admin"
-            className="flex items-center gap-1 text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Retour
-          </Link>
-          <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
+          <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)]">
             Comptes Professeurs
           </h1>
         </div>
@@ -262,35 +254,35 @@ export default function FinancesProfesseursPage() {
         </div>
       )}
 
-      <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
-        <div className="border-b border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
-          <h2 className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-            <Users className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
+      <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+        <div className="border-b border-[var(--border)] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5">
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-[var(--foreground)]">
+            <Users className="h-4 w-4 text-[var(--foreground-faint)]" />
             Professeurs ({teachers.length})
           </h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
+            <thead className="border-b border-[var(--border)]">
               <tr>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                   Professeur
                 </th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                   Contact
                 </th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                   À encaisser
                 </th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500"></th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+            <tbody className="divide-y divide-[var(--border)]">
               {teachers.length === 0 ? (
                 <tr>
                   <td
                     colSpan={4}
-                    className="px-6 py-8 text-center text-neutral-500 dark:text-neutral-400"
+                    className="px-6 py-8 text-center text-[var(--foreground-faint)]"
                   >
                     Aucun professeur
                   </td>
@@ -309,7 +301,7 @@ export default function FinancesProfesseursPage() {
                     }`}
                   >
                     <td className="px-4 py-2.5">
-                      <p className="font-medium text-neutral-900 dark:text-neutral-100">
+                      <p className="font-medium text-[var(--foreground)]">
                         {t.prenom} {t.nom}
                       </p>
                       {!t.actif && (
@@ -318,7 +310,7 @@ export default function FinancesProfesseursPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                    <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">
                       {t.email}
                       {t.telephone ? ` — ${t.telephone}` : ""}
                     </td>
@@ -327,7 +319,7 @@ export default function FinancesProfesseursPage() {
                         {formatCurrency(t.claimable)}
                       </span>
                       {t.claimable > 0 && (
-                        <span className="ml-2 text-xs text-neutral-500 dark:text-neutral-400">
+                        <span className="ml-2 text-xs text-[var(--foreground-faint)]">
                           à recevoir
                         </span>
                       )}
@@ -350,10 +342,10 @@ export default function FinancesProfesseursPage() {
       </div>
 
       {selectedId && (
-        <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22]">
-          <div className="flex flex-col gap-3 border-b border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-              <Wallet className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
+        <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+          <div className="flex flex-col gap-3 border-b border-[var(--border)] bg-neutral-50 dark:bg-[#1e2128] px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-[var(--foreground)]">
+              <Wallet className="h-4 w-4 text-[var(--foreground-faint)]" />
               Grand livre — {selectedTeacher?.prenom} {selectedTeacher?.nom}
             </h2>
             {selectedTeacher && (
@@ -373,30 +365,30 @@ export default function FinancesProfesseursPage() {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-neutral-200 dark:border-[#2a2d35]">
+              <thead className="border-b border-[var(--border)]">
                 <tr>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                     Date
                   </th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                     Type
                   </th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                     Description
                   </th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                     Méthode
                   </th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                     Montant
                   </th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]">
                     Reçu
                   </th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500"></th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground-faint)]"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+              <tbody className="divide-y divide-[var(--border)]">
                 {loadingLedger ? (
                   <tr>
                     <td colSpan={7} className="px-6 py-8 text-center">
@@ -407,7 +399,7 @@ export default function FinancesProfesseursPage() {
                   <tr>
                     <td
                       colSpan={7}
-                      className="px-6 py-8 text-center text-neutral-500 dark:text-neutral-400"
+                      className="px-6 py-8 text-center text-[var(--foreground-faint)]"
                     >
                       Aucune transaction
                     </td>
@@ -420,7 +412,7 @@ export default function FinancesProfesseursPage() {
                         tx.status === "reversed" ? "opacity-50" : ""
                       }`}
                     >
-                      <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                      <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">
                         {formatDate(tx.date)}
                       </td>
                       <td className="px-4 py-2.5">
@@ -446,16 +438,16 @@ export default function FinancesProfesseursPage() {
                         )}
                       </td>
                       <td className="max-w-xs px-4 py-2.5">
-                        <p className="truncate text-neutral-600 dark:text-neutral-400">
+                        <p className="truncate text-[var(--foreground-subtle)]">
                           {tx.description}
                         </p>
                         {tx.receiptNumber && (
-                          <p className="text-xs text-neutral-400 dark:text-neutral-500">
+                          <p className="text-xs text-[var(--foreground-faint)]">
                             {tx.receiptNumber}
                           </p>
                         )}
                       </td>
-                      <td className="px-4 py-2.5 text-neutral-600 dark:text-neutral-400">
+                      <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">
                         {tx.paymentMethod
                           ? METHODE_LABEL[tx.paymentMethod] || tx.paymentMethod
                           : "—"}
@@ -473,7 +465,7 @@ export default function FinancesProfesseursPage() {
                       <td className="px-4 py-2.5">
                         <button
                           onClick={() => openReceipt(tx)}
-                          className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] hover:text-emerald-600 dark:hover:text-emerald-400"
+                          className="rounded p-1 text-[var(--foreground-faint)] hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] hover:text-emerald-600 dark:hover:text-emerald-400"
                           title="Imprimer le reçu"
                         >
                           <FileText className="h-4 w-4" />
@@ -483,7 +475,7 @@ export default function FinancesProfesseursPage() {
                         {tx.type !== "REVERSAL" && tx.status === "active" && (
                           <button
                             onClick={() => openReverse(tx)}
-                            className="rounded p-1 text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] hover:text-red-600 dark:hover:text-red-400"
+                            className="rounded p-1 text-[var(--foreground-faint)] hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] hover:text-red-600 dark:hover:text-red-400"
                             title="Annuler la transaction"
                           >
                             <Undo2 className="h-4 w-4" />
@@ -497,22 +489,22 @@ export default function FinancesProfesseursPage() {
             </table>
           </div>
           {totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-neutral-200 dark:border-[#2a2d35] px-4 py-2.5">
-              <p className="text-sm text-neutral-500 dark:text-neutral-400">
+            <div className="flex items-center justify-between border-t border-[var(--border)] px-4 py-2.5">
+              <p className="text-sm text-[var(--foreground-faint)]">
                 {total} transaction(s) — Page {page}/{totalPages}
               </p>
               <div className="flex gap-2">
                 <button
                   onClick={() => fetchLedger(selectedId, page - 1)}
                   disabled={page <= 1}
-                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-3 py-1.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128] disabled:opacity-50"
+                  className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128] disabled:opacity-50"
                 >
                   Précédent
                 </button>
                 <button
                   onClick={() => fetchLedger(selectedId, page + 1)}
                   disabled={page >= totalPages}
-                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-3 py-1.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128] disabled:opacity-50"
+                  className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128] disabled:opacity-50"
                 >
                   Suivant
                 </button>
@@ -524,14 +516,14 @@ export default function FinancesProfesseursPage() {
 
       {showModal && selectedTeacher && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-lg rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6 shadow-xl">
+          <div className="w-full max-w-lg rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">
                 Nouvelle transaction — {selectedTeacher.prenom} {selectedTeacher.nom}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"
+                className="text-[var(--foreground-faint)] hover:text-neutral-600 dark:hover:text-neutral-400"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -542,7 +534,7 @@ export default function FinancesProfesseursPage() {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">
                   Montant (DT)
                 </label>
                 <MontantInput
@@ -551,12 +543,12 @@ export default function FinancesProfesseursPage() {
                   min={0}
                   step="0.01"
                   required
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-3 py-2 text-[13px] focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">
                   Date
                 </label>
                 <input
@@ -564,12 +556,12 @@ export default function FinancesProfesseursPage() {
                   value={form.date}
                   onChange={(e) => setForm({ ...form, date: e.target.value })}
                   required
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-3 py-2 text-[13px] focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">
                   Notes
                 </label>
                 <textarea
@@ -577,7 +569,7 @@ export default function FinancesProfesseursPage() {
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
                   rows={2}
                   placeholder="Optionnel"
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-3 py-2 text-[13px] focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
               </div>
 
@@ -585,7 +577,7 @@ export default function FinancesProfesseursPage() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+                  className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-[13px] font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
                 >
                   Annuler
                 </button>
@@ -605,31 +597,31 @@ export default function FinancesProfesseursPage() {
 
       {showReverseModal && reverseTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] p-6 shadow-xl">
+          <div className="w-full max-w-md rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Annuler la transaction</h2>
               <button
                 onClick={() => setShowReverseModal(false)}
-                className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"
+                className="text-[var(--foreground-faint)] hover:text-neutral-600 dark:hover:text-neutral-400"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="mb-4 rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-neutral-50 dark:bg-[#1e2128] p-3 text-sm">
-              <p className="text-neutral-600 dark:text-neutral-400">
+            <div className="mb-4 rounded-lg border border-[var(--border)] bg-neutral-50 dark:bg-[#1e2128] p-3 text-sm">
+              <p className="text-[var(--foreground-subtle)]">
                 <span className="font-medium">{isStudentGain(reverseTarget) ? "Gain élève" : TYPE_LABEL[reverseTarget.type]}</span> —{" "}
                 {reverseTarget.description}
               </p>
-              <p className="mt-1 text-neutral-500 dark:text-neutral-400">
+              <p className="mt-1 text-[var(--foreground-faint)]">
                 Montant :{" "}
-                <span className="font-semibold text-neutral-900 dark:text-neutral-100">
+                <span className="font-semibold text-[var(--foreground)]">
                   {formatCurrency(Math.abs(Number(reverseTarget.amount)))}
                 </span>
               </p>
             </div>
             <form onSubmit={handleReverse} className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="mb-1 block text-sm font-medium text-[var(--foreground-subtle)]">
                   Raison de l'annulation <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -638,14 +630,14 @@ export default function FinancesProfesseursPage() {
                   rows={3}
                   required
                   placeholder="Expliquez la raison..."
-                  className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-neutral-900 dark:text-neutral-100 px-3 py-2 text-[13px] focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] px-3 py-2 text-[13px] focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
               </div>
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowReverseModal(false)}
-                  className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] px-4 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
+                  className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-[13px] font-medium text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128]"
                 >
                   Annuler
                 </button>

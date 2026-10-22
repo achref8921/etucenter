@@ -152,9 +152,9 @@ export default function NotificationBellDropdown({ role }: { role: string }) {
       </button>
 
       {open && (
-        <div className="fixed top-14 right-3 left-3 z-40 flex max-h-[calc(100dvh-4rem)] w-auto flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl sm:right-4 sm:left-auto sm:w-96 dark:border-[#2a2d35] dark:bg-[#181b22]">
-          <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-[#2a2d35]">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+        <div className="fixed top-14 right-3 left-3 z-40 flex max-h-[calc(100dvh-4rem)] w-auto flex-col overflow-hidden rounded-[18px] border border-[var(--border)] bg-[var(--surface)] shadow-xl sm:right-4 sm:left-auto sm:w-96 shadow-[var(--shadow-card)]">
+          <div className="flex shrink-0 items-center justify-between border-b border-[var(--border)] px-4 py-3">
+            <h3 className="text-sm font-semibold text-[var(--foreground)] dark:text-gray-100">
               Notifications
               {nonLues > 0 && (
                 <span className="ml-2 rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
@@ -222,7 +222,7 @@ export default function NotificationBellDropdown({ role }: { role: string }) {
           <Link
             href={allLink}
             onClick={() => setOpen(false)}
-            className="block shrink-0 border-t border-gray-100 bg-gray-50 px-4 py-2.5 text-center text-xs font-medium text-blue-600 hover:bg-gray-100 dark:border-[#2a2d35] dark:bg-[#181b22] dark:text-blue-400 dark:hover:bg-[#2a2d35]"
+            className="block shrink-0 border-t border-[var(--border)] bg-gray-50 px-4 py-2.5 text-center text-xs font-medium text-blue-600 hover:bg-gray-100 dark:bg-[#181b22] dark:text-blue-400 dark:hover:bg-[#2a2d35]"
           >
             Voir toutes les notifications →
           </Link>

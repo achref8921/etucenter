@@ -60,7 +60,7 @@ export default function AdminAnalyticsPage() {
 
   if (!data) {
     return (
-      <div className="py-20 text-center text-sm text-neutral-500 dark:text-neutral-400">
+      <div className="py-20 text-center text-sm text-[var(--foreground-faint)]">
         Impossible de charger les analytiques.
       </div>
     );
@@ -90,8 +90,8 @@ export default function AdminAnalyticsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Analytiques</h1>
-        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+        <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)]">Analytiques</h1>
+        <p className="mt-1 text-sm text-[var(--foreground-faint)]">
           Vue détaillée des performances de votre centre
         </p>
       </div>
@@ -133,8 +133,8 @@ export default function AdminAnalyticsPage() {
       {/* Charts Row 1 */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Revenue Chart */}
-        <div className="rounded-xl border border-neutral-200 bg-white p-5  dark:border-[#2a2d35] dark:bg-[#181b22]">
-          <h3 className="mb-4 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+        <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+          <h3 className="mb-4 text-sm font-semibold text-[var(--foreground)]">
             Revenus mensuels
           </h3>
           {revenueChartData.length > 0 ? (
@@ -156,8 +156,8 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {/* Presence Chart */}
-        <div className="rounded-xl border border-neutral-200 bg-white p-5  dark:border-[#2a2d35] dark:bg-[#181b22]">
-          <h3 className="mb-4 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+        <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+          <h3 className="mb-4 text-sm font-semibold text-[var(--foreground)]">
             Présences / Absences
           </h3>
           {presenceChartData.length > 0 ? (
@@ -181,8 +181,8 @@ export default function AdminAnalyticsPage() {
       {/* Charts Row 2 */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Students Enrollment */}
-        <div className="rounded-xl border border-neutral-200 bg-white p-5  dark:border-[#2a2d35] dark:bg-[#181b22]">
-          <h3 className="mb-4 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+        <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+          <h3 className="mb-4 text-sm font-semibold text-[var(--foreground)]">
             Nouveaux élèves par mois
           </h3>
           {studentsChartData.length > 0 ? (
@@ -201,8 +201,8 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {/* Subject Revenue Pie */}
-        <div className="rounded-xl border border-neutral-200 bg-white p-5  dark:border-[#2a2d35] dark:bg-[#181b22]">
-          <h3 className="mb-4 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+        <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
+          <h3 className="mb-4 text-sm font-semibold text-[var(--foreground)]">
             Revenus par matière
           </h3>
           {subjectPieData.length > 0 ? (
@@ -237,14 +237,14 @@ export default function AdminAnalyticsPage() {
       {/* Tables Row */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Top Absent Teachers */}
-        <div className="rounded-xl border border-neutral-200 bg-white  dark:border-[#2a2d35] dark:bg-[#181b22]">
-          <div className="border-b border-neutral-200 px-5 py-3 dark:border-[#2a2d35]">
-            <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+        <div className="rounded-[18px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)]">
+          <div className="border-b border-[var(--border)] px-5 py-3">
+            <h3 className="flex items-center gap-2 text-sm font-semibold text-[var(--foreground)]">
               <UserX className="h-4 w-4 text-red-500" />
               Profs avec le plus d&apos;absences (élèves)
             </h3>
           </div>
-          <div className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+          <div className="divide-y divide-[var(--border)]">
             {(data.topAbsenceTeacher || []).length === 0 ? (
               <p className="px-5 py-6 text-center text-sm text-neutral-400">Aucune donnée</p>
             ) : (
@@ -254,7 +254,7 @@ export default function AdminAnalyticsPage() {
                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-neutral-100 text-xs font-bold text-neutral-600 dark:bg-[#1e2128] dark:text-neutral-400">
                       {i + 1}
                     </span>
-                    <span className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                    <span className="text-sm font-medium text-[var(--foreground)]">
                       {t.prenom} {t.nom}
                     </span>
                   </div>
@@ -268,14 +268,14 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {/* Top Profit Subjects */}
-        <div className="rounded-xl border border-neutral-200 bg-white  dark:border-[#2a2d35] dark:bg-[#181b22]">
-          <div className="border-b border-neutral-200 px-5 py-3 dark:border-[#2a2d35]">
-            <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+        <div className="rounded-[18px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)]">
+          <div className="border-b border-[var(--border)] px-5 py-3">
+            <h3 className="flex items-center gap-2 text-sm font-semibold text-[var(--foreground)]">
               <BookOpen className="h-4 w-4 text-green-500" />
               Matières les plus rentables
             </h3>
           </div>
-          <div className="divide-y divide-neutral-100 dark:divide-[#2a2d35]">
+          <div className="divide-y divide-[var(--border)]">
             {(data.topProfitSubject || []).length === 0 ? (
               <p className="px-5 py-6 text-center text-sm text-neutral-400">Aucune donnée</p>
             ) : (
@@ -285,7 +285,7 @@ export default function AdminAnalyticsPage() {
                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-neutral-100 text-xs font-bold text-neutral-600 dark:bg-[#1e2128] dark:text-neutral-400">
                       {i + 1}
                     </span>
-                    <span className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                    <span className="text-sm font-medium text-[var(--foreground)]">
                       {s.nom}
                     </span>
                   </div>
@@ -318,13 +318,13 @@ function KpiCard({
   change?: number;
 }) {
   return (
-    <div className="rounded-xl border border-neutral-200 bg-white p-4  dark:border-[#2a2d35] dark:bg-[#181b22] sm:p-5">
+    <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-5 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-md)]">
       <div className="flex items-start justify-between">
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[11px] font-medium text-neutral-500 dark:text-neutral-400 sm:text-xs">{label}</p>
-          <p className="mt-1 truncate text-lg font-bold tracking-tight text-neutral-900 dark:text-neutral-100 sm:text-xl">{value}</p>
+          <p className="truncate text-[11px] font-medium text-[var(--foreground-faint)] sm:text-xs">{label}</p>
+          <p className="mt-1 truncate text-lg font-bold tracking-tight text-[var(--foreground)] sm:text-xl">{value}</p>
           {suffix && (
-            <p className="mt-0.5 truncate text-[10px] text-neutral-400 dark:text-neutral-500 sm:text-xs">{suffix}</p>
+            <p className="mt-0.5 truncate text-[10px] text-[var(--foreground-faint)] sm:text-xs">{suffix}</p>
           )}
           {change !== undefined && (
             <div className="mt-1 flex items-center gap-1">

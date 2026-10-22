@@ -33,12 +33,12 @@ export default function ConfirmPermanentDelete({ open, userName, onConfirm, onCa
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-md rounded-lg bg-white dark:bg-[#181b22] border border-neutral-200 dark:border-[#2a2d35] p-6 shadow-xl">
+      <div className="w-full max-w-md rounded-lg bg-[var(--surface)] border border-neutral-200 p-6 shadow-xl">
         <div className="mb-4 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
             <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
           </div>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Suppression définitive</h2>
+          <h2 className="text-lg font-semibold text-[var(--foreground)] dark:text-gray-100">Suppression définitive</h2>
         </div>
 
         <div className="mb-4 rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 p-3">
@@ -64,7 +64,7 @@ export default function ConfirmPermanentDelete({ open, userName, onConfirm, onCa
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Votre mot de passe"
-              className="w-full rounded-lg border border-neutral-200 dark:border-[#2a2d35] bg-white dark:bg-[#181b22] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+              className="w-full rounded-lg border border-neutral-200 bg-[var(--surface)] text-[13px] text-neutral-900 dark:text-neutral-100 px-3 py-2 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
             />
           </div>
         )}
@@ -79,7 +79,7 @@ export default function ConfirmPermanentDelete({ open, userName, onConfirm, onCa
           <button
             onClick={onCancel}
             disabled={loading}
-            className="rounded-lg border border-neutral-200 dark:border-[#2a2d35] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128] disabled:opacity-50"
+            className="rounded-lg border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#1e2128] disabled:opacity-50"
           >
             Annuler
           </button>

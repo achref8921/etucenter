@@ -285,10 +285,10 @@ export default function SeanceDocumentsModal({
       aria-label={`Supports de la séance du ${seanceLabel}`}
     >
       <div
-        className="flex max-h-[calc(90vh-3.5rem)] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl sm:max-h-[90vh] sm:rounded-2xl dark:bg-[#181b22]"
+        className="flex max-h-[calc(90vh-3.5rem)] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl bg-[var(--surface)] shadow-xl sm:max-h-[90vh] sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-3 border-b border-neutral-200 px-5 py-4 dark:border-[#2a2d35]">
+        <div className="flex items-start justify-between gap-3 border-b border-neutral-200 px-5 py-4">
           <div>
             <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
               <Paperclip className="h-4 w-4" /> Supports de la séance
@@ -417,7 +417,7 @@ export default function SeanceDocumentsModal({
         </div>
 
         {role === "prof" && (
-          <div className="border-t border-neutral-200 px-5 py-4 dark:border-[#2a2d35]">
+          <div className="border-t border-neutral-200 px-5 py-4">
             <input
               ref={inputRef}
               type="file"
@@ -434,7 +434,7 @@ export default function SeanceDocumentsModal({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Description (facultatif)"
               maxLength={500}
-              className="mb-2 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-neutral-100"
+              className="mb-2 w-full rounded-lg border border-neutral-200 bg-[var(--surface)] px-3 py-2 text-sm text-neutral-900 outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-neutral-100"
             />
             <div className="flex items-center justify-between gap-3">
               <button

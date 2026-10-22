@@ -3,7 +3,6 @@
 import { signOut, useSession } from "next-auth/react";
 import { LogOut, Menu, Sun, Moon, ImageOff, Image as ImageIcon } from "lucide-react";
 import NotificationBellDropdown from "@/components/notification-bell-dropdown";
-import AccountSwitcher from "@/components/account-switcher";
 import { useTheme } from "@/components/theme-provider";
 import { useWatermarkEnabled } from "@/components/layout/center-watermark";
 
@@ -27,12 +26,13 @@ export default function Header({ centerLogo, onMenuToggle }: HeaderProps) {
   const { enabled: watermarkEnabled, toggle: toggleWatermark } = useWatermarkEnabled();
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-neutral-200 bg-white/85 backdrop-blur-md px-4 sm:px-6 dark:border-[#1e2128] dark:bg-[#0f1114]/85">
+    <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-neutral-200 bg-white/85 px-4 backdrop-blur-md sm:px-6 dark:border-[#1e2128] dark:bg-[#0f1114]/85">
       <div className="flex items-center gap-1.5">
         {onMenuToggle && (
           <button
             onClick={onMenuToggle}
-            className="rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200 md:hidden"
+            aria-label="Ouvrir le menu"
+            className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200 md:hidden"
           >
             <Menu className="h-5 w-5" />
           </button>
@@ -40,17 +40,17 @@ export default function Header({ centerLogo, onMenuToggle }: HeaderProps) {
         <img
           src={centerLogo || "/logo.svg"}
           alt="Logo"
-          className="h-8 w-8 rounded-lg object-contain md:hidden"
+          className="h-8 w-8 rounded-[var(--radius-md)] object-contain md:hidden"
         />
       </div>
 
-      <div className="flex items-center gap-1.5 sm:gap-2">
+      <div className="flex items-center gap-0.5 sm:gap-1.5">
         <NotificationBellDropdown role={role} />
 
         {centerLogo && (
           <button
             onClick={toggleWatermark}
-            className="hidden rounded-md p-1.5 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700 sm:block dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+            className="hidden h-9 w-9 items-center justify-center rounded-[var(--radius-md)] text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700 sm:flex dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
             title={watermarkEnabled ? "Masquer le logo en filigrane" : "Afficher le logo en filigrane"}
             aria-pressed={watermarkEnabled}
           >
@@ -60,33 +60,32 @@ export default function Header({ centerLogo, onMenuToggle }: HeaderProps) {
 
         <button
           onClick={toggleTheme}
-          className="rounded-md p-1.5 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+          className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
           title={theme === "light" ? "Dark mode" : "Light mode"}
         >
           {theme === "light" ? <Moon className="h-[18px] w-[18px]" /> : <Sun className="h-[18px] w-[18px]" />}
         </button>
 
-        <div className="h-5 w-px bg-neutral-200 dark:bg-neutral-700/50" />
+        <div className="mx-1 h-5 w-px bg-neutral-200 dark:bg-neutral-700/50" />
 
         <div className="flex items-center gap-2 sm:gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-blue-700 text-[11px] font-semibold text-white shadow-sm sm:h-8 sm:w-8">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--primary)] text-[11px] font-semibold text-[var(--primary-foreground)] shadow-xs">
             {user?.prenom?.[0]}{user?.nom?.[0]}
           </div>
           <div className="hidden sm:block">
-            <p className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100 leading-tight">
+            <p className="text-[var(--text-body)] font-semibold leading-tight text-neutral-900 dark:text-neutral-100">
               {user?.prenom} {user?.nom}
             </p>
-            <span className="inline-block rounded bg-blue-50 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wider text-blue-700 dark:bg-blue-600/10 dark:text-blue-400">
+            <span className="mt-0.5 inline-block rounded bg-[var(--primary)]/10 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wider text-[var(--primary)] dark:text-[var(--accent-foreground)]">
               {roleLabels[role] || role}
             </span>
           </div>
         </div>
 
-{/* <AccountSwitcher /> */}
-
         <button
           onClick={() => signOut({ callbackUrl: "/login" })}
-          className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[13px] font-medium text-neutral-500 transition-colors hover:bg-red-50 hover:text-red-600 sm:px-2.5 dark:text-neutral-400 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+          aria-label="Deconnexion"
+          className="flex h-9 items-center gap-1.5 rounded-[var(--radius-md)] px-2 text-[var(--text-body)] font-medium text-neutral-500 transition-colors hover:bg-red-50 hover:text-red-600 sm:px-2.5 dark:text-neutral-400 dark:hover:bg-red-500/10 dark:hover:text-red-400"
         >
           <LogOut className="h-4 w-4" />
           <span className="hidden sm:inline">Deconnexion</span>
