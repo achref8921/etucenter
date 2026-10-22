@@ -449,7 +449,7 @@ textarea {
 
 .animate-toast-in { animation: toast-in 0.25s ease-out both; }
 .animate-fade-in-up { animation: fade-in-up 0.35s ease-out backwards; }
-.animate-fade-in { animation: fade-in 0.3s ease-out both; }
+.animate-fade-in { animation: fade-in 0.3s ease-out backwards; }
 .animate-pop-in { animation: pop-in 0.2s ease-out both; }
 
 @media (prefers-reduced-motion: reduce) {

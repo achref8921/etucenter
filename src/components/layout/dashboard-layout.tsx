@@ -107,10 +107,10 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
         )}
         <main
           data-glass=""
-          className={`relative isolate p-4 sm:p-5 lg:p-6 pb-28 md:pb-6 ${frozenState ? "frozen-mode" : ""}`}
+          className={`relative p-4 sm:p-5 lg:p-6 pb-28 md:pb-6 ${frozenState ? "frozen-mode" : ""}`}
         >
           <CenterWatermark logo={centerLogo} />
-          <div className="relative z-10">
+          <div className="relative">
             {showBackButton && (
               <div className="mb-3">
                 <BackButton fallbackHref={roleHome} />
