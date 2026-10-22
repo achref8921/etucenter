@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Role } from "@/types/role";
 import { cn } from "@/lib/utils";
 import { getBottomNav, isHrefActive, roleHome } from "./nav-config";
@@ -16,6 +16,7 @@ export default function BottomNav({
   peutEncaisserReverse?: boolean;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const home = roleHome(role);
   const items = getBottomNav(role);
 
@@ -29,6 +30,9 @@ export default function BottomNav({
             <Link
               key={item.href}
               href={item.href}
+              prefetch={false}
+              onMouseEnter={() => router.prefetch(item.href)}
+              onFocus={() => router.prefetch(item.href)}
               aria-label={item.label}
               aria-current={active ? "page" : undefined}
               className={cn(

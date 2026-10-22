@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { MontantInput } from "@/components/montant-input";
@@ -194,6 +194,8 @@ export default function FinancesPage() {
   const [showStudentsPanel, setShowStudentsPanel] = useState(false);
 
   const selectedId = searchParams.get("studentId") || "";
+  const selectedIdRef = useRef(selectedId);
+  selectedIdRef.current = selectedId;
 
   useEffect(() => {
     if (selectedId) setShowStudentsPanel(false);
@@ -271,7 +273,7 @@ export default function FinancesPage() {
         if (!res.ok) throw new Error("Erreur lors du chargement");
         const data = await res.json();
         setStudents(data);
-        if (selectFirst && !selectedId && data.length > 0) {
+        if (selectFirst && !selectedIdRef.current && data.length > 0) {
           router.replace(`/admin/finances?studentId=${data[0].id}`);
         }
       } catch (err) {
@@ -280,7 +282,7 @@ export default function FinancesPage() {
         setLoadingStudents(false);
       }
     },
-    [selectedId, router]
+    [router]
   );
 
   const fetchLedger = useCallback(

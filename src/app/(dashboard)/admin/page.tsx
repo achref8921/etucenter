@@ -254,6 +254,7 @@ async function DashboardContent({ month }: { month: string }) {
                 <li key={s.id}>
                   <Link
                     href={`/admin/groupes/${s.groupe.id}`}
+                    prefetch={false}
                     title="Voir le groupe"
                     className="flex items-center gap-3 rounded-[12px] px-1 py-2 transition-colors hover:bg-[var(--surface-muted)]"
                   >
@@ -322,6 +323,7 @@ async function DashboardContent({ month }: { month: string }) {
                       <TD className="relative font-medium">
                         <Link
                           href={href}
+                          prefetch={false}
                           aria-label={`Voir le compte de ${p.prof.prenom} ${p.prof.nom}`}
                           className="absolute inset-0 rounded-[6px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--primary)]"
                         />
@@ -331,11 +333,11 @@ async function DashboardContent({ month }: { month: string }) {
                         </span>
                       </TD>
                       <TD className="relative tabular-nums text-[var(--foreground-faint)]">
-                        <Link href={href} tabIndex={-1} aria-hidden="true" className="absolute inset-0" />
+                        <Link href={href} prefetch={false} tabIndex={-1} aria-hidden="true" className="absolute inset-0" />
                         <span className="relative">{p.debts.length}</span>
                       </TD>
                       <TD className="relative text-right font-semibold tabular-nums text-amber-600 dark:text-amber-400">
-                        <Link href={href} tabIndex={-1} aria-hidden="true" className="absolute inset-0" />
+                        <Link href={href} prefetch={false} tabIndex={-1} aria-hidden="true" className="absolute inset-0" />
                         <span className="relative">{formatCurrency(p.balance)}</span>
                       </TD>
                     </TR>
@@ -377,6 +379,7 @@ async function DashboardContent({ month }: { month: string }) {
               <li key={p.prof.id} className="border-b border-[var(--border)]">
                 <Link
                   href={`/admin/professeurs/${p.prof.id}`}
+                  prefetch={false}
                   title="Voir la fiche du professeur"
                   className="flex items-center gap-3 rounded-[12px] px-1 py-2.5 transition-colors hover:bg-[var(--surface-muted)]"
                 >
@@ -430,6 +433,7 @@ async function DashboardContent({ month }: { month: string }) {
                     <TD className="font-medium">
                       <Link
                         href={`/admin/professeurs/${p.prof.id}`}
+                        prefetch={false}
                         className="transition-colors hover:text-[var(--primary)] hover:underline"
                       >
                         {p.prof.prenom} {p.prof.nom}

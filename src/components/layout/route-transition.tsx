@@ -9,28 +9,31 @@ import SplashScreen from "@/components/splash-screen";
  * (clic sur un lien, bouton retour/avant, `router.push`).
  *
  * Fonctionnement : on intercepte les clics sur les liens internes et les
- * changements d'historique, on affiche le splash, puis on le masque dès que le
- * chemin change. Un délai minimal évite un flash trop bref et un délai maximal
- * garantit que le voile ne reste jamais bloqué.
+ * changements d'historique. Le splash n'apparaît qu'après un court délai (les
+ * navigations rapides restent instantanées) et se masque immédiatement dès que
+ * le chemin change. Un délai maximal garantit que le voile ne reste jamais
+ * bloqué.
  */
 export default function RouteTransition() {
   const pathname = usePathname();
   const [visible, setVisible] = useState(false);
-  const hideTimer = useRef<number | null>(null);
+  const showTimer = useRef<number | null>(null);
   const maxTimer = useRef<number | null>(null);
 
   useEffect(() => {
     const clearTimers = () => {
-      if (hideTimer.current) window.clearTimeout(hideTimer.current);
+      if (showTimer.current) window.clearTimeout(showTimer.current);
       if (maxTimer.current) window.clearTimeout(maxTimer.current);
-      hideTimer.current = null;
+      showTimer.current = null;
       maxTimer.current = null;
     };
 
     const show = () => {
       clearTimers();
-      setVisible(true);
-      maxTimer.current = window.setTimeout(() => setVisible(false), 8000);
+      showTimer.current = window.setTimeout(() => {
+        setVisible(true);
+        maxTimer.current = window.setTimeout(() => setVisible(false), 8000);
+      }, 150);
     };
 
     const onClick = (e: MouseEvent) => {
@@ -59,10 +62,12 @@ export default function RouteTransition() {
   }, []);
 
   useEffect(() => {
-    if (!visible) return;
-    if (hideTimer.current) window.clearTimeout(hideTimer.current);
-    hideTimer.current = window.setTimeout(() => setVisible(false), 220);
-  }, [pathname, visible]);
+    if (showTimer.current) window.clearTimeout(showTimer.current);
+    if (maxTimer.current) window.clearTimeout(maxTimer.current);
+    showTimer.current = null;
+    maxTimer.current = null;
+    setVisible(false);
+  }, [pathname]);
 
   if (!visible) return null;
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ChevronDown, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -58,12 +58,16 @@ export function NavLeafLink({
 }) {
   const styles = accentStyles[accent];
   const pathname = usePathname();
+  const router = useRouter();
   const active = isHrefActive(pathname, item.href, home);
   const Icon = item.icon as LucideIcon;
 
   return (
     <Link
       href={item.href}
+      prefetch={false}
+      onMouseEnter={() => router.prefetch(item.href)}
+      onFocus={() => router.prefetch(item.href)}
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       className={cn(

@@ -177,6 +177,7 @@ export function MetricCard({
   return (
     <Link
       href={href}
+      prefetch={false}
       aria-label={typeof label === "string" ? `${label} — voir le détail` : "Voir le détail"}
       className="block h-full rounded-[20px] outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]"
     >
