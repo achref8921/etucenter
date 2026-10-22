@@ -166,7 +166,7 @@ export default function ProfDashboardPage() {
         <>
           {/* KPI cards */}
           <div
-            className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 animate-fade-in-up"
+            className="grid grid-cols-1 gap-4 sm:grid-cols-3 animate-fade-in-up"
             style={{ animationDelay: "60ms" }}
           >
             <MetricCard
@@ -175,6 +175,7 @@ export default function ProfDashboardPage() {
               sub="à recouvrer"
               icon={AlertTriangle}
               tone="error"
+              href="/prof/eleves?filter=unpaid"
             />
             <MetricCard
               label="À encaisser net"
@@ -182,13 +183,7 @@ export default function ProfDashboardPage() {
               sub="dû par le centre"
               icon={TrendingUp}
               tone="primary"
-            />
-            <MetricCard
-              label="Profit net · ce mois"
-              value={stats.profit.total}
-              sub={`${formatCurrency(stats.profit.studentShare)} gains élèves`}
-              icon={ClipboardCheck}
-              tone="success"
+              href="/prof/compte"
             />
             <MetricCard
               label="Mes élèves"
@@ -197,6 +192,7 @@ export default function ProfDashboardPage() {
               sub={`${stats.groupes.length} groupe${stats.groupes.length > 1 ? "s" : ""}`}
               icon={Users}
               tone="warning"
+              href="/prof/eleves"
             />
           </div>
 
