@@ -117,7 +117,7 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
               </div>
             )}
             <ToastProvider>
-              <div key={pathname} className="animate-fade-in-up motion-reduce:animate-none">
+              <div key={pathname} className="animate-fade-in motion-reduce:animate-none">
                 {children}
               </div>
             </ToastProvider>
