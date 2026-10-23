@@ -355,26 +355,20 @@ body {
   }
 }
 
-/* ===== Effet verre dépoli : cartes de contenu translucides =====
-   Les grandes surfaces (`.bg-white` historique et `.bg-[var(--surface)]` du
-   design system) deviennent translucides pour laisser deviner le filigrane.
-   En mode sombre, léger flou + reflet supérieur pour un rendu verre premium.
-   Les couches avec leur propre teinte de fond (KPI, alertes…) ne sont pas touchées. */
-@supports (backdrop-filter: blur(1px)) {
-  main[data-glass] .bg-white,
-  main[data-glass] :where(div, section, form, article).bg-\[var\(--surface\)\] {
-    background-color: rgba(255, 255, 255, 0.72) !important;
-  }
+/* ===== Surfaces de contenu translucides =====
+   Le filigrane reste visible sans flou plein écran : le backdrop-filter sur
+   chaque carte/tableau était très coûteux au défilement sur mobile. */
+main[data-glass] .bg-white,
+main[data-glass] :where(div, section, form, article).bg-\[var\(--surface\)\] {
+  background-color: rgba(255, 255, 255, 0.84) !important;
+}
 
-  .dark main[data-glass] .bg-white,
-  .dark main[data-glass] :where(div, section, form, article).bg-\[var\(--surface\)\],
-  .dark main[data-glass] :where(div, section, form, article)[class~="dark:bg-[#181b22]"] {
-    background-color: rgba(26, 29, 37, 0.6) !important;
-    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0) 110px);
-    border-color: color-mix(in srgb, #ffffff 8%, transparent);
-    -webkit-backdrop-filter: blur(10px) saturate(1.15);
-    backdrop-filter: blur(10px) saturate(1.15);
-  }
+.dark main[data-glass] .bg-white,
+.dark main[data-glass] :where(div, section, form, article).bg-\[var\(--surface\)\],
+.dark main[data-glass] :where(div, section, form, article)[class~="dark:bg-[#181b22]"] {
+  background-color: rgba(24, 27, 34, 0.9) !important;
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 110px);
+  border-color: color-mix(in srgb, #ffffff 8%, transparent);
 }
 
 /* ===== Ambiance premium du tableau de bord (mode sombre) =====
