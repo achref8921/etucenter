@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
     centerId: target.centerId,
     email: target.email,
     name: `${target.prenom} ${target.nom}`,
-    picture: target.image ?? null,
+    picture: null,
     linked,
   };
 
@@ -114,6 +114,6 @@ export async function POST(req: NextRequest) {
     role: target.role,
     linked,
   });
-  writeSessionToken(res, nextToken);
+  await writeSessionToken(res, nextToken);
   return res;
 }

@@ -231,6 +231,7 @@ export const authOptions: NextAuthOptions = {
         token.prenom = (user as any).prenom;
         token.centerId = (user as any).centerId;
       }
+      token.picture = null;
       return token;
     },
     async session({ session, token }) {

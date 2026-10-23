@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
   const existing = await sanitizeLinked(readLinked(token), currentId);
   if (existing.some((a) => a.id === target.id)) {
     const res = NextResponse.json({ linked: existing });
-    writeSessionToken(res, { ...(token as JWT), linked: existing });
+    await writeSessionToken(res, { ...(token as JWT), linked: existing });
     return res;
   }
 
@@ -104,6 +104,6 @@ export async function POST(req: NextRequest) {
   logger.info("Compte lié pour bascule rapide", { from: currentId, to: target.id });
 
   const res = NextResponse.json({ linked });
-  writeSessionToken(res, { ...(token as JWT), linked });
+  await writeSessionToken(res, { ...(token as JWT), linked });
   return res;
 }

@@ -39,6 +39,6 @@ export async function POST(req: NextRequest) {
   logger.info("Compte délié", { from: currentId, removed: targetId });
 
   const res = NextResponse.json({ linked });
-  writeSessionToken(res, { ...(token as JWT), linked });
+  await writeSessionToken(res, { ...(token as JWT), linked });
   return res;
 }

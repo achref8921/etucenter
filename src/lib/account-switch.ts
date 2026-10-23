@@ -10,12 +10,12 @@ const SESSION_COOKIE = {
   development: "next-auth.session-token",
 };
 
-function isProduction(): boolean {
-  return process.env.NODE_ENV === "production";
+function useSecureCookies(): boolean {
+  return process.env.NEXTAUTH_URL?.startsWith("https://") ?? !!process.env.VERCEL;
 }
 
 export function sessionCookieName(): string {
-  return isProduction() ? SESSION_COOKIE.production : SESSION_COOKIE.development;
+  return useSecureCookies() ? SESSION_COOKIE.production : SESSION_COOKIE.development;
 }
 
 function secret(): string {
@@ -41,13 +41,15 @@ export async function readSessionToken(req: NextRequest): Promise<JWT | null> {
  * accounts (link / unlink / switch) must go through here, otherwise the
  * client keeps the previous token and the change is silently lost.
  */
-export function writeSessionToken(res: NextResponse, token: JWT): void {
-  const value = encode({ token, secret: secret() });
+export async function writeSessionToken(res: NextResponse, token: JWT): Promise<void> {
+  const maxAge = 30 * 24 * 60 * 60;
+  const value = await encode({ token: { ...token, picture: null }, secret: secret(), maxAge });
   res.cookies.set(sessionCookieName(), value, {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
-    secure: isProduction(),
+    secure: useSecureCookies(),
+    maxAge,
   });
 }
 

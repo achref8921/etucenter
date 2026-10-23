@@ -78,57 +78,57 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
   }, [user.centerId, user.id]);
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <SessionGuard />
-      <RouteTransition />
-      <Suspense fallback={null}>
-        <UsageTracker />
-      </Suspense>
-      <Sidebar
-        role={user.role}
-        centerName={centerName}
-        centerLogo={centerLogo}
-        peutGererEleves={user.peutGererEleves}
-        peutEncaisserReverse={user.peutEncaisserReverse}
-        open={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-      />
-
-      <div className="relative md:pl-64">
-        <Header
+    <ToastProvider>
+      <div className="min-h-screen bg-[var(--background)]">
+        <SessionGuard />
+        <RouteTransition />
+        <Suspense fallback={null}>
+          <UsageTracker />
+        </Suspense>
+        <Sidebar
+          role={user.role}
+          centerName={centerName}
           centerLogo={centerLogo}
-          onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
+          peutGererEleves={user.peutGererEleves}
+          peutEncaisserReverse={user.peutEncaisserReverse}
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
         />
-        {frozenState && (
-          <div className="flex items-center justify-center gap-2 border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-[var(--text-body)] font-medium text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">
-            Compte gelé : aucune modification autorisée
-            <span className="hidden sm:inline">— vous pouvez uniquement consulter vos informations</span>
-          </div>
-        )}
-        <main
-          data-glass=""
-          className={`relative p-4 sm:p-5 lg:p-6 pb-28 md:pb-6 ${frozenState ? "frozen-mode" : ""}`}
-        >
-          <CenterWatermark logo={centerLogo} />
-          <div className="relative">
-            {showBackButton && (
-              <div className="mb-3">
-                <BackButton fallbackHref={roleHome} />
-              </div>
-            )}
-            <ToastProvider>
+
+        <div className="relative md:pl-64">
+          <Header
+            centerLogo={centerLogo}
+            onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
+          />
+          {frozenState && (
+            <div className="flex items-center justify-center gap-2 border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-[var(--text-body)] font-medium text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">
+              Compte gelé : aucune modification autorisée
+              <span className="hidden sm:inline">— vous pouvez uniquement consulter vos informations</span>
+            </div>
+          )}
+          <main
+            data-glass=""
+            className={`relative p-4 sm:p-5 lg:p-6 pb-28 md:pb-6 ${frozenState ? "frozen-mode" : ""}`}
+          >
+            <CenterWatermark logo={centerLogo} />
+            <div className="relative">
+              {showBackButton && (
+                <div className="mb-3">
+                  <BackButton fallbackHref={roleHome} />
+                </div>
+              )}
               <div key={pathname} className="animate-fade-in motion-reduce:animate-none">
                 {children}
               </div>
-            </ToastProvider>
-          </div>
-        </main>
-      </div>
+            </div>
+          </main>
+        </div>
 
-      <BottomNav role={user.role} peutGererEleves={user.peutGererEleves} peutEncaisserReverse={user.peutEncaisserReverse} />
-      {(user.role === "admin" || user.role === "prof") && (
-        <AssistantWidget isProf={user.role === "prof"} />
-      )}
-    </div>
+        <BottomNav role={user.role} peutGererEleves={user.peutGererEleves} peutEncaisserReverse={user.peutEncaisserReverse} />
+        {(user.role === "admin" || user.role === "prof") && (
+          <AssistantWidget isProf={user.role === "prof"} />
+        )}
+      </div>
+    </ToastProvider>
   );
 }

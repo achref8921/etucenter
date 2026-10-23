@@ -2,6 +2,7 @@
 
 import { signOut, useSession } from "next-auth/react";
 import { LogOut, Shield, Menu, Sun, Moon } from "lucide-react";
+import AccountSwitcher from "@/components/account-switcher";
 import UserAvatar from "@/components/user-avatar";
 import { useTheme } from "@/components/theme-provider";
 
@@ -45,27 +46,32 @@ export default function SuperAdminHeader({ onMenuToggle }: SuperAdminHeaderProps
 
         <div className="mx-1 h-5 w-px bg-neutral-200 dark:bg-neutral-700/50" />
 
-        <div className="flex items-center gap-2 sm:gap-2.5">
-          <UserAvatar
-            key={user?.image ?? "no-avatar"}
-            userId={user?.id}
-            nom={user?.nom}
-            prenom={user?.prenom}
-            hasImage={Boolean(user?.image)}
-            version={avatarVersion}
-            size="xs"
-            className="shadow-xs"
-            fallbackClassName="bg-blue-600 text-white"
-          />
-          <div className="hidden sm:block">
-            <p className="text-[var(--text-body)] font-semibold leading-tight text-neutral-900 dark:text-neutral-100">
-              {user?.prenom} {user?.nom}
-            </p>
-            <span className="mt-0.5 inline-block rounded bg-blue-50 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wider text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
-              Super Admin
-            </span>
-          </div>
-        </div>
+        <AccountSwitcher
+          triggerClassName="group -mx-1 flex items-center gap-2 rounded-[var(--radius-md)] px-1 py-0.5 text-left transition-colors hover:bg-neutral-100 sm:gap-2.5 dark:hover:bg-neutral-800"
+          trigger={
+            <>
+              <UserAvatar
+                key={user?.image ?? "no-avatar"}
+                userId={user?.id}
+                nom={user?.nom}
+                prenom={user?.prenom}
+                hasImage={Boolean(user?.image)}
+                version={avatarVersion}
+                size="xs"
+                className="shadow-xs"
+                fallbackClassName="bg-blue-600 text-white"
+              />
+              <div className="hidden sm:block">
+                <p className="text-[var(--text-body)] font-semibold leading-tight text-neutral-900 dark:text-neutral-100">
+                  {user?.prenom} {user?.nom}
+                </p>
+                <span className="mt-0.5 inline-block rounded bg-blue-50 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wider text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+                  Super Admin
+                </span>
+              </div>
+            </>
+          }
+        />
 
         <button
           onClick={() => signOut({ callbackUrl: "/login" })}
