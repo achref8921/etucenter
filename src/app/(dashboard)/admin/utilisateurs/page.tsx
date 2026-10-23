@@ -97,7 +97,7 @@ export default function UtilisateursPage() {
     email: "",
     motDePasse: "",
     telephone: "",
-    role: "prof",
+    role: "eleve",
     niveau: "",
     classe: "",
     filiere: "",
@@ -145,7 +145,7 @@ export default function UtilisateursPage() {
   };
 
   const resetForm = () => {
-    setFormData({ nom: "", prenom: "", email: "", motDePasse: "", telephone: "", role: "prof", niveau: "", classe: "", filiere: "" });
+    setFormData({ nom: "", prenom: "", email: "", motDePasse: "", telephone: "", role: "eleve", niveau: "", classe: "", filiere: "" });
     setFormErrors({});
     setModalError(null);
   };
@@ -787,9 +787,9 @@ export default function UtilisateursPage() {
                 <div>
                   <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Rôle</label>
                   <select value={formData.role} onChange={(e) => setFormData({ ...formData, role: e.target.value, niveau: "", classe: "", filiere: "" })} className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                    <option value="admin">Admin</option>
-                    <option value="prof">Prof</option>
                     <option value="eleve">Élève</option>
+                    <option value="prof">Prof</option>
+                    <option value="admin">Admin</option>
                   </select>
                 </div>
 
