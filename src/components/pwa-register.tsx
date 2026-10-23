@@ -20,17 +20,10 @@ export default function PwaRegister() {
     };
     navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
 
-    const register = () => {
-      navigator.serviceWorker
-        .register("/sw.js", { updateViaCache: "none" })
-        .then((reg) => reg.update().catch(() => {}))
-        .catch(() => {});
-    };
-    if (document.readyState === "complete") {
-      register();
-    } else {
-      window.addEventListener("load", register, { once: true });
-    }
+    navigator.serviceWorker
+      .register("/sw.js", { updateViaCache: "none" })
+      .then((reg) => reg.update().catch(() => {}))
+      .catch(() => {});
 
     return () => {
       navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
