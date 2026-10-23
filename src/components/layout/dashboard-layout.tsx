@@ -110,7 +110,7 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
           )}
           <main
             data-glass=""
-            className={`relative p-4 sm:p-5 lg:p-6 pb-28 md:pb-6 ${frozenState ? "frozen-mode" : ""}`}
+            className={`relative min-h-[calc(100dvh-3.5rem)] p-4 sm:p-5 lg:p-6 pb-28 md:pb-6 ${frozenState ? "frozen-mode" : ""}`}
           >
             <CenterWatermark logo={centerLogo} />
             <div className="relative">
