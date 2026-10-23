@@ -3,6 +3,7 @@
 import { signOut, useSession } from "next-auth/react";
 import { LogOut, Menu, Sun, Moon, ImageOff, Image as ImageIcon } from "lucide-react";
 import NotificationBellDropdown from "@/components/notification-bell-dropdown";
+import UserAvatar from "@/components/user-avatar";
 import { useTheme } from "@/components/theme-provider";
 import { useWatermarkEnabled } from "@/components/layout/center-watermark";
 
@@ -22,6 +23,7 @@ export default function Header({ centerLogo, onMenuToggle }: HeaderProps) {
   const { data: session } = useSession();
   const user = session?.user;
   const role = (user?.role as string) || "";
+  const avatarVersion = user?.image?.match(/[?&]v=(\d+)/)?.[1] ?? null;
   const { theme, toggleTheme } = useTheme();
   const { enabled: watermarkEnabled, toggle: toggleWatermark } = useWatermarkEnabled();
 
@@ -69,9 +71,17 @@ export default function Header({ centerLogo, onMenuToggle }: HeaderProps) {
         <div className="mx-1 h-5 w-px bg-neutral-200 dark:bg-neutral-700/50" />
 
         <div className="flex items-center gap-2 sm:gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--primary)] text-[11px] font-semibold text-[var(--primary-foreground)] shadow-xs">
-            {user?.prenom?.[0]}{user?.nom?.[0]}
-          </div>
+          <UserAvatar
+            key={user?.image ?? "no-avatar"}
+            userId={user?.id}
+            nom={user?.nom}
+            prenom={user?.prenom}
+            hasImage={Boolean(user?.image)}
+            version={avatarVersion}
+            size="xs"
+            className="shadow-xs"
+            fallbackClassName="bg-[var(--primary)] text-[var(--primary-foreground)]"
+          />
           <div className="hidden sm:block">
             <p className="text-[var(--text-body)] font-semibold leading-tight text-neutral-900 dark:text-neutral-100">
               {user?.prenom} {user?.nom}

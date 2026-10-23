@@ -245,32 +245,47 @@ export const authOptions: NextAuthOptions = {
         const userId = token.id as string | undefined;
         let frozen = false;
 
-        if (role !== "super_admin" && userId) {
+        if (userId) {
           const dbUser = await prisma.utilisateur.findUnique({
             where: { id: userId },
-            select: { actif: true, centerId: true, peutGererEleves: true, peutEncaisserReverse: true, ghost: true, deletedAt: true },
+            select: {
+              actif: true,
+              centerId: true,
+              peutGererEleves: true,
+              peutEncaisserReverse: true,
+              ghost: true,
+              deletedAt: true,
+              image: true,
+              updatedAt: true,
+            },
           });
 
-          if (!dbUser || !dbUser.actif) {
-            frozen = true;
-          }
-
-          if (dbUser?.ghost || dbUser?.deletedAt) {
-            return null as any;
-          }
-
-          if (dbUser?.centerId) {
-            const center = await prisma.center.findUnique({
-              where: { id: dbUser.centerId },
-              select: { active: true },
-            });
-            if (!center || !center.active) {
+          if (role !== "super_admin") {
+            if (!dbUser || !dbUser.actif) {
               frozen = true;
             }
+
+            if (dbUser?.ghost || dbUser?.deletedAt) {
+              return null as any;
+            }
+
+            if (dbUser?.centerId) {
+              const center = await prisma.center.findUnique({
+                where: { id: dbUser.centerId },
+                select: { active: true },
+              });
+              if (!center || !center.active) {
+                frozen = true;
+              }
+            }
+
+            (session.user as any).peutGererEleves = !!dbUser?.peutGererEleves;
+            (session.user as any).peutEncaisserReverse = !!dbUser?.peutEncaisserReverse;
           }
 
-          (session.user as any).peutGererEleves = !!dbUser?.peutGererEleves;
-          (session.user as any).peutEncaisserReverse = !!dbUser?.peutEncaisserReverse;
+          session.user.image = dbUser?.image
+            ? `/api/utilisateurs/${userId}/image?v=${dbUser.updatedAt.getTime()}`
+            : null;
         }
 
         (session.user as any).frozen = frozen;

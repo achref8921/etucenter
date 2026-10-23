@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useSession } from "next-auth/react";
 import { Camera, Loader2, Trash2 } from "lucide-react";
 import { MAX_IMAGE_DATA_URL_LENGTH } from "@/lib/utils";
 
@@ -54,6 +55,7 @@ export default function AvatarUpload({
   size = "xl",
   label = "Photo de profil",
 }: AvatarUploadProps) {
+  const { update } = useSession();
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -80,6 +82,7 @@ export default function AvatarUpload({
       }
       setPreview(image);
       onUpdated(image);
+      void update();
       setSuccess(image ? "Photo mise à jour" : "Photo supprimée");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur inconnue");

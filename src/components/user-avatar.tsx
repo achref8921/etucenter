@@ -27,6 +27,7 @@ interface UserAvatarProps {
   version?: string | number | null;
   size?: keyof typeof SIZES;
   className?: string;
+  fallbackClassName?: string;
   ring?: boolean;
 }
 
@@ -38,6 +39,7 @@ export default function UserAvatar({
   version,
   size = "md",
   className = "",
+  fallbackClassName = "",
   ring = false,
 }: UserAvatarProps) {
   const [failed, setFailed] = useState(false);
@@ -59,7 +61,7 @@ export default function UserAvatar({
       className={`inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full font-semibold ${
         SIZES[size]
       } ${ring ? "ring-2 ring-white dark:ring-slate-900" : ""} ${
-        canLoad ? "bg-neutral-100 dark:bg-slate-800" : PALETTE[colorIndex]
+        canLoad ? "bg-neutral-100 dark:bg-slate-800" : fallbackClassName || PALETTE[colorIndex]
       } ${className}`}
     >
       {canLoad ? (

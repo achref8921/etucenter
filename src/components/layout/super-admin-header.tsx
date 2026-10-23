@@ -2,6 +2,7 @@
 
 import { signOut, useSession } from "next-auth/react";
 import { LogOut, Shield, Menu, Sun, Moon } from "lucide-react";
+import UserAvatar from "@/components/user-avatar";
 import { useTheme } from "@/components/theme-provider";
 
 interface SuperAdminHeaderProps {
@@ -11,6 +12,7 @@ interface SuperAdminHeaderProps {
 export default function SuperAdminHeader({ onMenuToggle }: SuperAdminHeaderProps) {
   const { data: session } = useSession();
   const user = session?.user;
+  const avatarVersion = user?.image?.match(/[?&]v=(\d+)/)?.[1] ?? null;
   const { theme, toggleTheme } = useTheme();
 
   return (
@@ -44,9 +46,17 @@ export default function SuperAdminHeader({ onMenuToggle }: SuperAdminHeaderProps
         <div className="mx-1 h-5 w-px bg-neutral-200 dark:bg-neutral-700/50" />
 
         <div className="flex items-center gap-2 sm:gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-[11px] font-semibold text-white shadow-xs">
-            {user?.prenom?.[0]}{user?.nom?.[0]}
-          </div>
+          <UserAvatar
+            key={user?.image ?? "no-avatar"}
+            userId={user?.id}
+            nom={user?.nom}
+            prenom={user?.prenom}
+            hasImage={Boolean(user?.image)}
+            version={avatarVersion}
+            size="xs"
+            className="shadow-xs"
+            fallbackClassName="bg-blue-600 text-white"
+          />
           <div className="hidden sm:block">
             <p className="text-[var(--text-body)] font-semibold leading-tight text-neutral-900 dark:text-neutral-100">
               {user?.prenom} {user?.nom}
