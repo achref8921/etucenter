@@ -24,7 +24,7 @@ import {
 import PasswordInput from "@/components/password-input";
 import UserAvatar from "@/components/user-avatar";
 import { useToast } from "@/components/ui/toast";
-import type { LinkedAccount } from "@/types/next-auth";
+import type { AccountUser, LinkedAccount } from "@/types/next-auth";
 
 const roleLabels: Record<string, string> = {
   super_admin: "Super Admin",
@@ -46,9 +46,15 @@ interface AccountSwitcherProps {
   trigger?: React.ReactNode;
   triggerClassName?: string;
   align?: "left" | "right";
+  fallbackUser?: AccountUser | null;
 }
 
-export default function AccountSwitcher({ trigger, triggerClassName, align = "right" }: AccountSwitcherProps) {
+export default function AccountSwitcher({
+  trigger,
+  triggerClassName,
+  align = "right",
+  fallbackUser,
+}: AccountSwitcherProps) {
   const { data: session, update } = useSession();
   const router = useRouter();
   const toast = useToast();
@@ -70,7 +76,7 @@ export default function AccountSwitcher({ trigger, triggerClassName, align = "ri
   const modalRef = useRef<HTMLDivElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
 
-  const user = session?.user;
+  const user = session?.user ?? fallbackUser;
   const linked: LinkedAccount[] = session?.linked ?? [];
   const hasLinked = linked.length > 0;
   const avatarVersion = user?.image?.match(/[?&]v=(\d+)/)?.[1] ?? null;

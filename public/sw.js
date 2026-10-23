@@ -1,6 +1,23 @@
-const CACHE = "etudnet-v1";
+const CACHE = "etudnet-v2";
+const STATIC_ASSET = /\.(?:css|js|png|jpg|jpeg|svg|ico|webp|woff2?)$/i;
 
-const SKIP_CACHE = /^\/(?:api\/|_next\/data\/)/;
+function notifyOffline() {
+  return self.clients
+    .matchAll({ type: "window", includeUncontrolled: true })
+    .then((clients) => {
+      clients.forEach((client) => client.postMessage({ type: "OFFLINE_SERVE" }));
+    })
+    .catch(() => {});
+}
+
+async function offlineFallback() {
+  const offline = await caches.match("/offline.html", { ignoreVary: true });
+  if (offline) return offline;
+  return new Response("Hors ligne", {
+    status: 503,
+    headers: { "Content-Type": "text/plain; charset=utf-8" },
+  });
+}
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
@@ -9,7 +26,9 @@ self.addEventListener("install", (event) => {
       Promise.allSettled(
         ["/offline.html", "/icon-192.png", "/icon-512.png"].map((u) =>
           fetch(u, { credentials: "same-origin" })
-            .then((r) => { if (r.ok) return cache.put(u, r); })
+            .then((r) => {
+              if (r.ok && !r.redirected) return cache.put(u, r);
+            })
             .catch(() => {})
         )
       )
@@ -32,37 +51,46 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  // Les réponses API ne doivent jamais être servies depuis le cache :
-  // le filtre groupes->élèves dépend de données fraîches /api/admin/groupes.
-  if (url.pathname.startsWith("/api/")) {
-    event.respondWith(fetch(request));
+  // Les API et les données RSC restent toujours en réseau direct : aucune
+  // réponse authentifiée ne doit être servie depuis un cache obsolète.
+  if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/_next/data/")) {
     return;
   }
 
+  if (request.mode === "navigate") {
+    event.respondWith(
+      (async () => {
+        try {
+          return await fetch(request);
+        } catch {
+          await notifyOffline();
+          return offlineFallback();
+        }
+      })()
+    );
+    return;
+  }
+
+  if (!STATIC_ASSET.test(url.pathname)) return;
+
   event.respondWith(
     (async () => {
-      try {
-        const response = await fetch(request);
-        if (response && response.ok) {
-          const cache = await caches.open(CACHE);
-          await cache.put(request, response.clone());
-        }
-        return response;
-      } catch {}
-
       try {
         const cached = await caches.match(request, { ignoreVary: true });
         if (cached) return cached;
       } catch {}
 
-      if (request.mode === "navigate") {
-        try {
-          const offline = await caches.match("/offline.html", { ignoreVary: true });
-          if (offline) return offline;
-        } catch {}
+      try {
+        const response = await fetch(request);
+        if (response && response.ok && !response.redirected) {
+          const cache = await caches.open(CACHE);
+          await cache.put(request, response.clone());
+        }
+        return response;
+      } catch {
+        await notifyOffline();
+        return offlineFallback();
       }
-
-      return new Response("Hors ligne", { status: 503, headers: { "Content-Type": "text/plain; charset=utf-8" } });
     })()
   );
 });

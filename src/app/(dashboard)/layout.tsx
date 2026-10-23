@@ -53,6 +53,7 @@ export default async function DashboardRootLayout({
     prenom: session.user.prenom,
     role: session.user.role as SessionUser["role"],
     email: session.user.email ?? "",
+    image: session.user.image ?? null,
     centerId: session.user.centerId,
     frozen,
     peutGererEleves: (session.user as any).peutGererEleves === true,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { WifiOff } from "lucide-react";
+import { RefreshCw, WifiOff } from "lucide-react";
 
 export default function OfflineBanner() {
   const [offline, setOffline] = useState(false);
@@ -38,9 +38,20 @@ export default function OfflineBanner() {
   if (!offline) return null;
 
   return (
-    <div className="flex items-center justify-center gap-2 bg-orange-50 px-4 py-2 text-center text-[13px] font-medium text-orange-800 dark:bg-orange-500/10 dark:text-orange-300">
+    <div
+      role="status"
+      className="flex items-center justify-center gap-2 bg-orange-50 px-4 py-2 text-center text-[13px] font-medium text-orange-800 dark:bg-orange-500/10 dark:text-orange-300"
+    >
       <WifiOff className="h-3.5 w-3.5 shrink-0" />
-      Mode hors ligne — affichage des dernières données chargées.
+      <span className="flex-1">Connexion indisponible — certaines données peuvent être absentes.</span>
+      <button
+        type="button"
+        onClick={() => window.location.reload()}
+        className="inline-flex shrink-0 items-center gap-1 rounded px-1.5 py-0.5 font-semibold underline-offset-2 hover:underline"
+      >
+        <RefreshCw className="h-3 w-3" />
+        Réessayer
+      </button>
     </div>
   );
 }

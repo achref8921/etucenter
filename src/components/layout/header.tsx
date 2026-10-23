@@ -7,6 +7,7 @@ import NotificationBellDropdown from "@/components/notification-bell-dropdown";
 import UserAvatar from "@/components/user-avatar";
 import { useTheme } from "@/components/theme-provider";
 import { useWatermarkEnabled } from "@/components/layout/center-watermark";
+import type { AccountUser } from "@/types/next-auth";
 
 const roleLabels: Record<string, string> = {
   super_admin: "Super Admin",
@@ -18,11 +19,12 @@ const roleLabels: Record<string, string> = {
 interface HeaderProps {
   centerLogo?: string | null;
   onMenuToggle?: () => void;
+  fallbackUser?: AccountUser | null;
 }
 
-export default function Header({ centerLogo, onMenuToggle }: HeaderProps) {
+export default function Header({ centerLogo, onMenuToggle, fallbackUser }: HeaderProps) {
   const { data: session } = useSession();
-  const user = session?.user;
+  const user = session?.user ?? fallbackUser;
   const role = (user?.role as string) || "";
   const avatarVersion = user?.image?.match(/[?&]v=(\d+)/)?.[1] ?? null;
   const { theme, toggleTheme } = useTheme();
@@ -72,6 +74,7 @@ export default function Header({ centerLogo, onMenuToggle }: HeaderProps) {
         <div className="mx-1 h-5 w-px bg-neutral-200 dark:bg-neutral-700/50" />
 
         <AccountSwitcher
+          fallbackUser={fallbackUser}
           triggerClassName="group -mx-1 flex items-center gap-2 rounded-[var(--radius-md)] px-1 py-0.5 text-left transition-colors hover:bg-neutral-100 sm:gap-2.5 dark:hover:bg-neutral-800"
           trigger={
             <>

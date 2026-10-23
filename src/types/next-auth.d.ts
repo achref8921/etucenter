@@ -9,6 +9,15 @@ export interface LinkedAccount {
   centerId: string;
 }
 
+export interface AccountUser {
+  id: string;
+  role: string;
+  nom: string;
+  prenom: string;
+  email: string;
+  image?: string | null;
+}
+
 declare module "next-auth" {
   interface Session {
     user: {

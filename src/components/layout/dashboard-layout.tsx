@@ -23,6 +23,7 @@ interface DashboardLayoutProps {
     nom: string;
     prenom: string;
     email: string;
+    image?: string | null;
     role: Role;
     centerId?: string;
     frozen?: boolean;
@@ -99,6 +100,7 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
           <Header
             centerLogo={centerLogo}
             onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
+            fallbackUser={user}
           />
           {frozenState && (
             <div className="flex items-center justify-center gap-2 border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-[var(--text-body)] font-medium text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">
