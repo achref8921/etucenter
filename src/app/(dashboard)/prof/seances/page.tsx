@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, Plus, X, Loader2, Pencil, Trash2, CalendarPlus, Paperclip, CalendarCheck, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { Calendar, Plus, X, Loader2, Pencil, Trash2, CalendarPlus, CalendarCheck, Clock, CheckCircle2, XCircle } from "lucide-react";
 import { formatDate, formatTime } from "@/lib/utils";
 import ConfirmDelete from "@/components/confirm-delete";
 import SeanceDocumentsModal from "@/components/seance-documents-modal";
+import SeanceFilesButton from "@/components/seance-files-button";
 import TimeInput from "@/components/time-input";
 import { useToast } from "@/components/ui/toast";
 import { SkeletonPage } from "@/components/ui/skeleton";
@@ -19,7 +20,7 @@ interface Seance {
   statut: string;
   notes: string | null;
   groupe: { id: string; nom: string };
-  _count: { presences: number };
+  _count: { presences: number; documents: number };
 }
 
 interface Groupe {
@@ -519,13 +520,12 @@ export default function ProfSeancesPage() {
                       <td className="px-4 py-2.5 text-[var(--foreground-subtle)]">{seance._count.presences}</td>
                       <td className="px-4 py-2.5">
                         <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                          <button
+                          <SeanceFilesButton
+                            count={seance._count.documents}
+                            compact
+                            contextLabel={`${seance.groupe.nom} — ${formatDate(seance.date)}`}
                             onClick={(e) => { e.stopPropagation(); setDocumentsSeance({ id: seance.id, label: `${seance.groupe.nom} — ${formatDate(seance.date)}` }); }}
-                            className="rounded p-1 text-[var(--foreground-faint)] hover:bg-gray-100 dark:hover:bg-[#1e2128] hover:text-blue-600 dark:hover:text-blue-400"
-                            title="Supports de séance"
-                          >
-                            <Paperclip className="h-4 w-4" />
-                          </button>
+                          />
                           <button
                             onClick={(e) => openEditModal(seance, e)}
                             disabled={isSessionPast(seance)}

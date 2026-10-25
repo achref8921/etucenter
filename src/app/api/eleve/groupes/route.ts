@@ -39,7 +39,13 @@ export async function GET() {
       ? await Promise.all([
           prisma.seance.findMany({
             where: { groupeId: { in: groupeIds } },
-            select: { id: true, groupeId: true, date: true, statut: true },
+            select: {
+              id: true,
+              groupeId: true,
+              date: true,
+              statut: true,
+              _count: { select: { documents: { where: { statut: "pret" } } } },
+            },
             orderBy: { date: "desc" },
           }),
           prisma.presence.findMany({
@@ -105,7 +111,12 @@ export async function GET() {
             liste: groupeSeances
               .filter((s: any) => s.statut !== "annulee")
               .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
-              .map((s: any) => ({ id: s.id, date: s.date, statut: s.statut })),
+              .map((s: any) => ({
+                id: s.id,
+                date: s.date,
+                statut: s.statut,
+                documentCount: s._count.documents,
+              })),
           },
           presences: {
             present: groupePresences.filter((p: any) => p.statut === "present").length,

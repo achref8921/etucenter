@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { formatDate, formatTime, formatDateTime } from "@/lib/utils";
 import SeanceDocumentsModal from "@/components/seance-documents-modal";
+import SeanceFilesButton from "@/components/seance-files-button";
 import { MetricCard } from "@/components/ui";
 
 interface PresenceHistorique {
@@ -28,6 +29,7 @@ interface PresenceHistorique {
     heureDebut: string | null;
     heureFin: string | null;
     statut: string;
+    documentCount: number;
     groupe: { id: string; nom: string };
   };
 }
@@ -188,8 +190,10 @@ export default function ElevePresencesPage() {
                     </td>
                     <td className="px-4 py-2.5 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button
-                          type="button"
+                        <SeanceFilesButton
+                          count={presence.seance.documentCount}
+                          compact
+                          contextLabel={`Séance du ${formatDate(presence.seance.date)}`}
                           onClick={(e) => {
                             e.stopPropagation();
                             setDocumentsSeance({
@@ -197,12 +201,7 @@ export default function ElevePresencesPage() {
                               label: `${presence.seance.groupe.nom} — ${formatDate(presence.seance.date)}`,
                             });
                           }}
-                          title="Supports de la séance"
-                          aria-label={`Supports de la séance du ${formatDate(presence.seance.date)}`}
-                          className="rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-slate-700 dark:hover:text-blue-400"
-                        >
-                          <Paperclip className="h-4 w-4" />
-                        </button>
+                        />
                         <ChevronDown className="h-4 w-4 text-[var(--foreground-faint)]" />
                       </div>
                     </td>
@@ -292,9 +291,16 @@ export default function ElevePresencesPage() {
                   });
                   setSelected(null);
                 }}
-                className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-blue-700"
+                className={
+                  selected.seance.documentCount > 0
+                    ? "mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-blue-700"
+                    : "mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-[13px] font-medium text-[var(--foreground-subtle)] hover:bg-[var(--surface-muted)]"
+                }
               >
-                <Paperclip className="h-4 w-4" /> Supports de la séance
+                <Paperclip className="h-4 w-4" />
+                {selected.seance.documentCount > 0
+                  ? `Ouvrir les supports (${selected.seance.documentCount})`
+                  : "Aucun fichier — ajouter un support"}
               </button>
               <button
                 onClick={() => setSelected(null)}

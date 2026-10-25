@@ -16,6 +16,9 @@ export async function GET() {
             groupe: {
               select: { id: true, nom: true },
             },
+            _count: {
+              select: { documents: { where: { statut: "pret" } } },
+            },
           },
         },
       },
@@ -32,6 +35,7 @@ export async function GET() {
         heureDebut: presence.seance.heureDebut,
         heureFin: presence.seance.heureFin,
         statut: presence.seance.statut,
+        documentCount: presence.seance._count.documents,
         groupe: presence.seance.groupe,
       },
     }));

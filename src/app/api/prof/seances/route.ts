@@ -90,7 +90,10 @@ export async function GET(request: NextRequest) {
           select: { id: true, nom: true },
         },
         _count: {
-          select: { presences: true },
+          select: {
+            presences: true,
+            documents: { where: { statut: "pret" } },
+          },
         },
       },
       orderBy: { date: "desc" },
@@ -143,7 +146,10 @@ export async function POST(request: NextRequest) {
           select: { id: true, nom: true },
         },
         _count: {
-          select: { presences: true },
+          select: {
+            presences: true,
+            documents: { where: { statut: "pret" } },
+          },
         },
       },
     });

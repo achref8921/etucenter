@@ -16,10 +16,10 @@ import {
   XCircle,
   Clock,
   ChevronRight,
-  Paperclip,
 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import SeanceDocumentsModal from "@/components/seance-documents-modal";
+import SeanceFilesButton from "@/components/seance-files-button";
 
 interface GroupeData {
   inscription: {
@@ -45,7 +45,7 @@ interface GroupeData {
   seances: {
     total: number;
     aVenir: number;
-    liste?: { id: string; date: string; statut: string }[];
+    liste?: { id: string; date: string; statut: string; documentCount: number }[];
   };
   presences: { present: number; absent: number };
 }
@@ -229,15 +229,12 @@ export default function EleveGroupesPage() {
                                     ? "Planifiée"
                                     : "En cours"}
                                 </span>
-                                <button
-                                  type="button"
+                                <SeanceFilesButton
+                                  count={s.documentCount}
+                                  compact
+                                  contextLabel={`Séance du ${formatDate(s.date)}`}
                                   onClick={() => setDocumentsSeanceId(s.id)}
-                                  title="Supports de la séance"
-                                  aria-label={`Supports de la séance du ${formatDate(s.date)}`}
-                                  className="rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-slate-700 dark:hover:text-blue-400"
-                                >
-                                  <Paperclip className="h-4 w-4" />
-                                </button>
+                                />
                               </div>
                             </div>
                           ))}
