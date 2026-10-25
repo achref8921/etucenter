@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Providers from "@/components/providers";
 import PwaRegister from "@/components/pwa-register";
+import VersionGuard from "@/components/version-guard";
 import PushSetup from "@/components/push-setup";
 import OfflineBanner from "@/components/offline-banner";
 import ScrollRestoration from "@/components/scroll-restoration";
@@ -59,6 +60,7 @@ export default function RootLayout({
           <ScrollRestoration />
           {children}
           <PwaRegister />
+          <VersionGuard />
           <PushSetup />
         </Providers>
       </body>

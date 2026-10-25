@@ -1,5 +1,11 @@
 import type { NextConfig } from "next";
 
+const noStoreHeaders = [
+  { key: "Cache-Control", value: "private, no-store, max-age=0, must-revalidate" },
+  { key: "CDN-Cache-Control", value: "no-store" },
+  { key: "Vercel-CDN-Cache-Control", value: "no-store" },
+];
+
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },
@@ -23,6 +29,13 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_PUBLIC_BUILD_ID:
+      process.env.VERCEL_DEPLOYMENT_ID ||
+      process.env.VERCEL_GIT_COMMIT_SHA ||
+      process.env.NEXT_PUBLIC_BUILD_ID ||
+      "dev",
+  },
   cacheComponents: true,
   async redirects() {
     return [
@@ -44,6 +57,20 @@ const nextConfig: NextConfig = {
         source: "/(.*)",
         headers: securityHeaders,
       },
+      // Les pages et API authentifiées ne doivent jamais être servies depuis
+      // le cache navigateur/CDN : sinon une ancienne version de l'interface
+      // (ou des données financières) peut réapparaître après un déploiement.
+      { source: "/api/:path*", headers: noStoreHeaders },
+      { source: "/admin", headers: noStoreHeaders },
+      { source: "/admin/:path*", headers: noStoreHeaders },
+      { source: "/prof", headers: noStoreHeaders },
+      { source: "/prof/:path*", headers: noStoreHeaders },
+      { source: "/eleve", headers: noStoreHeaders },
+      { source: "/eleve/:path*", headers: noStoreHeaders },
+      { source: "/super-admin", headers: noStoreHeaders },
+      { source: "/super-admin/:path*", headers: noStoreHeaders },
+      { source: "/profil", headers: noStoreHeaders },
+      { source: "/profil/:path*", headers: noStoreHeaders },
     ];
   },
   images: {

@@ -1,4 +1,4 @@
-const CACHE = "etudnet-v2";
+const CACHE = "etudnet-v3";
 const STATIC_ASSET = /\.(?:css|js|png|jpg|jpeg|svg|ico|webp|woff2?)$/i;
 
 function notifyOffline() {
@@ -38,9 +38,13 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
-      .then(() => self.clients.claim())
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)));
+      await self.clients.claim();
+      const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      clients.forEach((client) => client.postMessage({ type: "SW_UPDATED", version: CACHE }));
+    })()
   );
 });
 
