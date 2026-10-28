@@ -127,12 +127,6 @@ export async function POST(request: NextRequest) {
     if (!groupe) {
       return NextResponse.json({ error: "Groupe non trouvé" }, { status: 404 });
     }
-    if (groupe.statut === "archive") {
-      return NextResponse.json(
-        { error: "Ce groupe est archivé : impossible d'y créer une séance" },
-        { status: 400 }
-      );
-    }
 
     if (groupe.profId !== (session.user as any).id) {
       return NextResponse.json({ error: "Vous n'êtes pas le prof de ce groupe" }, { status: 403 });

@@ -230,20 +230,8 @@ export async function authorizeSeanceAccess(
   }
 
   if (user.role === "eleve") {
-    // Une réorganisation (scission / fusion) ferme la période d'inscription
-    // d'origine. L'élève doit néanmoins garder accès aux supports des séances
-    // qu'il a réellement suivies : on accepte donc la période ouverte ET toute
-    // période fermée qui couvre la date de la séance. Une séance postérieure à
-    // la sortie du groupe reste, elle, inaccessible.
     const inscription = await prisma.inscription.findFirst({
-      where: {
-        eleveId: user.id,
-        groupeId: seance.groupe.id,
-        OR: [
-          { statut: "actif" },
-          { dateDebut: { lte: seance.date }, dateFin: { gte: seance.date } },
-        ],
-      },
+      where: { eleveId: user.id, groupeId: seance.groupe.id, statut: "actif" },
       select: { id: true },
     });
     if (!inscription) {

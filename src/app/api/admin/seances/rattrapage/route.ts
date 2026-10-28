@@ -52,20 +52,14 @@ export async function POST(request: NextRequest) {
     const groupe = isProf
       ? await prisma.groupe.findFirst({
           where: { id: groupeId, profId: adminId },
-          select: { id: true, nom: true, prixParSeance: true, statut: true },
+          select: { id: true, nom: true, prixParSeance: true },
         })
       : await prisma.groupe.findFirst({
           where: { id: groupeId, centerId },
-          select: { id: true, nom: true, prixParSeance: true, statut: true },
+          select: { id: true, nom: true, prixParSeance: true },
         });
     if (!groupe) {
       return NextResponse.json({ error: "Groupe non trouvé" }, { status: 404 });
-    }
-    if (groupe.statut === "archive") {
-      return NextResponse.json(
-        { error: "Ce groupe est archivé : impossible d'y créer une séance" },
-        { status: 400 }
-      );
     }
 
     const inscriptions = await prisma.inscription.findMany({

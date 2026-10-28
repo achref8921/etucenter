@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Users, Loader2, X, Search, Download, Trash2, CalendarPlus, CalendarRange, RotateCcw, Scissors } from "lucide-react";
+import { Users, Loader2, X, Search, Download, Trash2, CalendarPlus, CalendarRange, RotateCcw } from "lucide-react";
 import { MontantInput } from "@/components/montant-input";
 import { formatDate, formatCurrency, formatTime, todayDateInputValue, RATTRAPAGE_DATE_FUTURE_MESSAGE } from "@/lib/utils";
 import ConfirmDelete from "@/components/confirm-delete";
@@ -18,7 +18,6 @@ interface GroupeData {
     forfaitMontant: number | null;
     forfaitSeances: number | null;
     capaciteMax: number;
-    statut: "actif" | "archive";
     prof: { id: string; nom: string; prenom: string } | null;
     matiere: { id: string; nom: string } | null;
   };
@@ -464,38 +463,9 @@ export default function AdminGroupeDetailPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)]">{g.nom}</h1>
-          {g.statut === "archive" && (
-            <span className="rounded-full bg-neutral-100 px-2.5 py-0.5 text-[11px] font-semibold text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
-              Archivé
-            </span>
-          )}
-        </div>
-        {g.statut !== "archive" && (
-          <Link
-            href={`/admin/groupes/reorganiser?groupes=${g.id}&mode=split&parts=2`}
-            prefetch={false}
-            className="flex w-fit items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-[13px] font-medium text-[var(--foreground)] hover:bg-neutral-50 dark:hover:bg-neutral-800"
-            title="Scinder ce groupe, le fusionner avec un autre ou déplacer des élèves"
-          >
-            <Scissors className="h-4 w-4" />
-            Scinder / Fusionner
-          </Link>
-        )}
+      <div className="flex items-center gap-4">
+        <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)]">{g.nom}</h1>
       </div>
-
-      {g.statut === "archive" && (
-        <div className="rounded-[20px] border border-amber-200 bg-amber-50 p-4 text-[13px] text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-300">
-          <p className="font-semibold">Ce groupe est archivé.</p>
-          <p className="mt-1">
-            Il a été vidé lors d&apos;une réorganisation : son historique (séances, présences,
-            paiements) reste consultable ici et n&apos;a pas été modifié. Aucune inscription ni
-            séance ne peut y être ajoutée.
-          </p>
-        </div>
-      )}
 
       {success && (
         <div className="rounded-lg border border-green-200 dark:border-green-900/50 bg-green-50 dark:bg-green-900/20 p-4 text-sm text-green-700 dark:text-green-400">
@@ -613,7 +583,7 @@ export default function AdminGroupeDetailPage() {
             <button onClick={handleDownloadExcel} disabled={groupe.inscriptions.length === 0} className="flex items-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-[12px] font-semibold text-[var(--foreground-subtle)] hover:bg-neutral-50 dark:hover:bg-[#1e2128] disabled:opacity-50">
               <Download className="h-3.5 w-3.5" /> Excel
             </button>
-            <button onClick={() => setShowAddModal(true)} disabled={g.statut === "archive"} className="flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40" title={g.statut === "archive" ? "Groupe archivé : aucune inscription possible" : undefined}>
+            <button onClick={() => setShowAddModal(true)} className="flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-blue-700">
               <Users className="h-3.5 w-3.5" /> Ajouter un élève
             </button>
           </div>

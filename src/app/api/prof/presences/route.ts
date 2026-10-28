@@ -8,7 +8,6 @@ import { canModifyAttendance, clientNowFromOffset } from "@/lib/utils";
 import { consumeCourseAttendance, reverseCourseAttendance } from "@/lib/student-finance";
 import { finalizePassedSeances } from "@/lib/seance-finalizer";
 import { sendPushToUsers } from "@/lib/push";
-import { dedupeInscriptionsAtDate, inscriptionsAtDateWhere } from "@/lib/inscription-periods";
 
 export async function GET(request: NextRequest) {
   try {
@@ -44,14 +43,10 @@ export async function GET(request: NextRequest) {
 
     await finalizePassedSeances(seance.groupe.centerId, clientNow);
 
-    const [inscriptionRows, existingPresences] = await Promise.all([
+    const [inscriptions, existingPresences] = await Promise.all([
       prisma.inscription.findMany({
-        where: inscriptionsAtDateWhere(seance.groupe.id, seance.date),
-        select: {
-          eleveId: true,
-          statut: true,
-          dateDebut: true,
-          dateFin: true,
+        where: { groupeId: seance.groupe.id, statut: "actif" },
+        include: {
           eleve: { select: { id: true, nom: true, prenom: true, email: true } },
         },
       }),
@@ -62,10 +57,6 @@ export async function GET(request: NextRequest) {
         },
       }),
     ]);
-
-    // Membres du groupe à la date de la séance (les périodes d'origine fermées
-    // par une scission restent valables pour les séances passées).
-    const inscriptions = dedupeInscriptionsAtDate(inscriptionRows, seance.date);
 
     const presences = inscriptions.map((ins) => {
       const existing = existingPresences.find((p) => p.eleveId === ins.eleveId);
@@ -79,12 +70,6 @@ export async function GET(request: NextRequest) {
         eleve: ins.eleve,
       };
     });
-
-    // Une présence déjà enregistrée ne doit jamais disparaître de l'écran, même
-    // si l'élève a quitté le groupe depuis.
-    for (const existing of existingPresences) {
-      if (!presences.some((p) => p.eleveId === existing.eleveId)) presences.push(existing);
-    }
 
     presences.sort((a, b) => `${a.eleve.nom} ${a.eleve.prenom}`.localeCompare(`${b.eleve.nom} ${b.eleve.prenom}`));
 
@@ -152,23 +137,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Vous n'êtes pas le prof de ce groupe" }, { status: 403 });
     }
 
-    const [existingPresences, inscriptionRows] = await Promise.all([
-      prisma.presence.findMany({
-        where: { seanceId },
-      }),
-      prisma.inscription.findMany({
-        where: inscriptionsAtDateWhere(seance.groupe.id, seance.date),
-        select: { eleveId: true, statut: true, dateDebut: true, dateFin: true },
-      }),
-    ]);
+    const existingPresences = await prisma.presence.findMany({
+      where: { seanceId },
+    });
 
-    // Membres du groupe À LA DATE de la séance (une scission ferme la période
-    // d'origine : les séances passées doivent rester pointables), plus les
-    // élèves déjà pointés pour ne jamais bloquer une correction.
-    const allowedEleveIds = new Set(
-      dedupeInscriptionsAtDate(inscriptionRows, seance.date).map((i) => i.eleveId)
-    );
-    for (const existing of existingPresences) allowedEleveIds.add(existing.eleveId);
+    const activeInscriptions = await prisma.inscription.findMany({
+      where: { groupeId: seance.groupe.id, statut: "actif" },
+      select: { eleveId: true },
+    });
+    const activeEleveIds = new Set(activeInscriptions.map((i) => i.eleveId));
     const absentEleveIds = new Set<string>();
 
     const results = await prisma.$transaction(async (tx) => {
@@ -177,8 +154,8 @@ export async function POST(request: NextRequest) {
       for (const presence of presences as any[]) {
         const existing = existingPresences.find((p: any) => p.eleveId === presence.eleveId);
 
-        if (!allowedEleveIds.has(presence.eleveId)) {
-          logger.warn("Tentative d'enregistrement d'une présence pour un élève hors du groupe à cette date", {
+        if (!activeEleveIds.has(presence.eleveId)) {
+          logger.warn("Tentative d'enregistrement d'une présence pour un élève non inscrit activement", {
             profId: userId,
             eleveId: presence.eleveId,
             seanceId,

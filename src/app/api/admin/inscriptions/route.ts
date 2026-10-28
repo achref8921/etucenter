@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireActiveCenter, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
-import { todayDateInputValue } from "@/lib/utils";
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,37 +32,40 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Groupe non trouvé" }, { status: 404 });
     }
 
-    // Un groupe archivé (scission / fusion) ne peut plus accueillir d'élève :
-    // sa période est close et son historique est figé.
-    if (groupe.statut === "archive") {
-      return NextResponse.json(
-        { error: "Ce groupe est archivé : impossible d'y inscrire un élève" },
-        { status: 400 }
-      );
-    }
-
-    // Une inscription est une PÉRIODE [dateDebut, dateFin] : on vérifie qu'il
-    // n'existe pas déjà une période OUVERTE pour ce couple élève/groupe.
-    // (L'ancien findUnique sur eleveId_groupeId n'existe plus dans le schéma.)
-    const openInscription = await prisma.inscription.findFirst({
-      where: { eleveId, groupeId, statut: "actif" },
-      select: { id: true },
+    const existingInscription = await prisma.inscription.findUnique({
+      where: { eleveId_groupeId: { eleveId, groupeId } },
     });
 
-    if (openInscription) {
-      return NextResponse.json(
-        { error: "Cet élève est déjà inscrit dans ce groupe" },
-        { status: 409 }
-      );
-    }
+    if (existingInscription) {
+      if (existingInscription.statut === "actif") {
+        return NextResponse.json(
+          { error: "Cet élève est déjà inscrit dans ce groupe" },
+          { status: 409 }
+        );
+      }
 
-    // Réinscription : on reprend le dernier forfait connu sans réécrire
-    // l'historique (la période fermée reste intacte).
-    const previousInscription = await prisma.inscription.findFirst({
-      where: { eleveId, groupeId, statut: "inactif" },
-      orderBy: { dateDebut: "desc" },
-      select: { forfaitMontant: true, forfaitSeances: true },
-    });
+      const inscription = await prisma.inscription.update({
+        where: { id: existingInscription.id },
+        data: { statut: "actif" },
+        include: {
+          eleve: {
+            select: { id: true, nom: true, prenom: true },
+          },
+          groupe: {
+            select: { id: true, nom: true },
+          },
+        },
+      });
+
+      logger.info("Inscription réactivée", {
+        adminId: (session.user as any).id,
+        inscriptionId: inscription.id,
+        eleveId,
+        groupeId,
+      });
+
+      return NextResponse.json(inscription, { status: 201 });
+    }
 
     if (groupe.capaciteMax) {
       const currentCount = await prisma.inscription.count({
@@ -82,10 +84,6 @@ export async function POST(request: NextRequest) {
       data: {
         eleveId,
         groupeId,
-        statut: "actif",
-        forfaitMontant: previousInscription?.forfaitMontant ?? null,
-        forfaitSeances: previousInscription?.forfaitSeances ?? null,
-        forfaitSetAt: previousInscription?.forfaitMontant != null ? new Date() : null,
       },
       include: {
         eleve: {
@@ -146,17 +144,7 @@ export async function DELETE(request: NextRequest) {
 
     await prisma.inscription.update({
       where: { id: inscription.id },
-      data: {
-        statut: "inactif",
-        // La sortie ferme la période : l'historique (séances, consommations,
-        // paiements) reste rattaché à cette période, aucun montant ne change.
-        ...(inscription.dateFin
-          ? {}
-          : {
-              dateFin: new Date(`${todayDateInputValue()}T00:00:00.000Z`),
-              dateFinSource: "saisie" as const,
-            }),
-      },
+      data: { statut: "inactif" },
     });
 
     logger.info("Inscription supprimée", {
