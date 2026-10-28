@@ -138,6 +138,7 @@ model Center {
   seanceDocuments     SeanceDocument[]
   teacherCenterDebts  TeacherCenterDebt[]  @relation("TeacherCenterDebtCenter")
   paiementsAnnules    PaiementAnnule[]
+  conversations       Conversation[]
 
   @@map("centers")
 }
@@ -207,6 +208,8 @@ model Utilisateur {
   reverseCollections        TeacherTransaction[] @relation("TeacherTransactionStudent")
   teacherCenterDebts        TeacherCenterDebt[]  @relation("TeacherCenterDebtTeacher")
   teacherCenterDebtStudents TeacherCenterDebt[]  @relation("TeacherCenterDebtStudent")
+  conversationParticipations ConversationParticipant[] @relation("ConversationParticipant")
+  messagesEnvoyes            Message[]               @relation("MessageSender")
 
   @@unique([centerId, codeEleve])
   @@unique([centerId, codeProf])
@@ -627,6 +630,7 @@ model Notification {
   message        String   @db.Text
   type           String   @db.VarChar(50)
   lu             Boolean  @default(false)
+  lien           String?  @db.VarChar(255)
   createdAt      DateTime @default(now()) @map("created_at")
 
   center       Center      @relation(fields: [centerId], references: [id], onDelete: Cascade)
@@ -842,4 +846,67 @@ model UserSession {
   @@index([endedAt])
   @@index([centerId, startedAt])
   @@map("user_sessions")
+}
+
+// ─── Messagerie interne (1 à 1) ─────────────────────────────────────────────
+// Une conversation relie exactement deux utilisateurs du même centre.
+// `pairKey` = identifiants triés ("a:b") : il garantit une seule conversation
+// par paire, quel que soit l'ordre d'ouverture.
+//
+// L'état de lecture est porté par chaque participant :
+//   - unreadCount : nombre de messages non lus (dénormalisé pour le badge) ;
+//   - lastReadAt  : dernière ouverture du fil (sert aux accusés de lecture).
+// Les messages ne sont jamais supprimés en cascade avec un utilisateur sans
+// disparaître de la conversation : le pair restant conserve son historique.
+
+model Conversation {
+  id            String   @id @default(uuid()) @db.Uuid
+  centerId      String   @map("center_id") @db.Uuid
+  pairKey       String   @unique @map("pair_key") @db.VarChar(80)
+  lastMessageAt DateTime @default(now()) @map("last_message_at")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  center       Center                    @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  participants ConversationParticipant[]
+  messages     Message[]
+
+  @@index([centerId, lastMessageAt])
+  @@map("conversations")
+}
+
+model ConversationParticipant {
+  id             String    @id @default(uuid()) @db.Uuid
+  conversationId String    @map("conversation_id") @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  unreadCount    Int       @default(0) @map("unread_count")
+  lastReadAt     DateTime? @map("last_read_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         Utilisateur  @relation("ConversationParticipant", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@index([userId, unreadCount])
+  @@index([userId])
+  @@map("conversation_participants")
+}
+
+model Message {
+  id             String    @id @default(uuid()) @db.Uuid
+  conversationId String    @map("conversation_id") @db.Uuid
+  senderId       String    @map("sender_id") @db.Uuid
+  content        String    @db.Text
+  clientId       String?   @map("client_id") @db.VarChar(64)
+  readAt         DateTime? @map("read_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       Utilisateur  @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, clientId])
+  @@index([conversationId, createdAt])
+  @@index([conversationId, senderId, readAt])
+  @@index([senderId])
+  @@map("messages")
 }

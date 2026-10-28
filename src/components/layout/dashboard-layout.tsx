@@ -15,6 +15,7 @@ import UsageTracker from "@/components/usage-tracker";
 import CenterWatermark from "./center-watermark";
 import RouteTransition from "./route-transition";
 import { setCachedBranding } from "@/lib/branding-cache";
+import { ChatUnreadProvider } from "@/components/chat/chat-unread-provider";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -62,6 +63,7 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
           : "/prof";
 
   const showBackButton = pathname !== roleHome;
+  const isChat = pathname === "/messages";
 
   useEffect(() => {
     if (!user.centerId) return;
@@ -80,6 +82,7 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
 
   return (
     <ToastProvider>
+      <ChatUnreadProvider>
       <div className="min-h-screen bg-[var(--background)]">
         <SessionGuard />
         <RouteTransition />
@@ -110,27 +113,38 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
           )}
           <main
             data-glass=""
-            className={`relative min-h-[calc(100dvh-3.5rem)] p-4 sm:p-5 lg:p-6 pb-28 md:pb-6 ${frozenState ? "frozen-mode" : ""}`}
+            className={
+              isChat
+                ? `relative h-[calc(100dvh-3.5rem-4.25rem-env(safe-area-inset-bottom))] overflow-hidden md:h-[calc(100dvh-3.5rem)] ${frozenState ? "frozen-mode" : ""}`
+                : `relative min-h-[calc(100dvh-3.5rem)] p-4 sm:p-5 lg:p-6 pb-28 md:pb-6 ${frozenState ? "frozen-mode" : ""}`
+            }
           >
             <CenterWatermark logo={centerLogo} />
-            <div className="relative">
-              {showBackButton && (
-                <div className="mb-3">
-                  <BackButton fallbackHref={roleHome} />
-                </div>
-              )}
-              <div key={pathname} className="animate-fade-in motion-reduce:animate-none">
+            {isChat ? (
+              <div key={pathname} className="h-full animate-fade-in motion-reduce:animate-none">
                 {children}
               </div>
-            </div>
+            ) : (
+              <div className="relative">
+                {showBackButton && (
+                  <div className="mb-3">
+                    <BackButton fallbackHref={roleHome} />
+                  </div>
+                )}
+                <div key={pathname} className="animate-fade-in motion-reduce:animate-none">
+                  {children}
+                </div>
+              </div>
+            )}
           </main>
         </div>
 
         <BottomNav role={user.role} peutGererEleves={user.peutGererEleves} peutEncaisserReverse={user.peutEncaisserReverse} />
-        {(user.role === "admin" || user.role === "prof") && (
+        {!isChat && (user.role === "admin" || user.role === "prof") && (
           <AssistantWidget isProf={user.role === "prof"} />
         )}
       </div>
+      </ChatUnreadProvider>
     </ToastProvider>
   );
 }

@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Role } from "@/types/role";
 import { cn } from "@/lib/utils";
 import { getBottomNav, isHrefActive, roleHome } from "./nav-config";
+import { useChatUnread } from "@/components/chat/chat-unread-provider";
 
 export default function BottomNav({
   role,
@@ -19,6 +20,7 @@ export default function BottomNav({
   const router = useRouter();
   const home = roleHome(role);
   const items = getBottomNav(role);
+  const { totalUnread } = useChatUnread();
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden dark:border-[#1e2128] dark:bg-[#141720]/95">
@@ -52,17 +54,24 @@ export default function BottomNav({
                   variant === "violet" ? "bg-violet-600 dark:bg-violet-400" : "bg-[var(--primary)]"
                 )}
               />
-              <item.icon
-                className={cn(
-                  "h-5 w-5 flex-shrink-0 transition-transform duration-200 ease-out motion-reduce:transition-none",
-                  active && "-translate-y-px",
-                  active
-                    ? variant === "violet"
-                      ? "text-violet-600 dark:text-violet-400"
-                      : "text-[var(--primary)]"
-                    : "text-neutral-400 dark:text-neutral-500"
+              <span className="relative">
+                <item.icon
+                  className={cn(
+                    "h-5 w-5 flex-shrink-0 transition-transform duration-200 ease-out motion-reduce:transition-none",
+                    active && "-translate-y-px",
+                    active
+                      ? variant === "violet"
+                        ? "text-violet-600 dark:text-violet-400"
+                        : "text-[var(--primary)]"
+                      : "text-neutral-400 dark:text-neutral-500"
+                  )}
+                />
+                {item.href === "/messages" && totalUnread > 0 && (
+                  <span className="absolute -right-2 -top-1.5 flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-[var(--primary)] px-0.5 text-[9px] font-bold text-white ring-2 ring-white dark:ring-[#141720]">
+                    {totalUnread > 99 ? "99+" : totalUnread}
+                  </span>
                 )}
-              />
+              </span>
               <span className="w-full truncate text-center text-[10px] font-medium leading-tight">{item.label}</span>
             </Link>
           );

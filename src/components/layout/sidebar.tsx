@@ -8,6 +8,7 @@ import {
   roleHome as roleHomePath,
 } from "./nav-config";
 import { NavGroupSection, NavLeafLink } from "./nav-group";
+import { useChatUnread } from "@/components/chat/chat-unread-provider";
 
 export { navItemsByRole } from "./nav-config";
 
@@ -31,6 +32,7 @@ interface SidebarProps {
 export default function Sidebar({ role, centerName, centerLogo, peutGererEleves, peutEncaisserReverse, open, onClose }: SidebarProps) {
   const home = roleHomePath(role);
   const sections = getNavSections(role, { peutGererEleves, peutEncaisserReverse });
+  const { totalUnread } = useChatUnread();
 
   return (
     <>
@@ -80,6 +82,7 @@ export default function Sidebar({ role, centerName, centerLogo, peutGererEleves,
                 item={section}
                 home={home}
                 accent="blue"
+                badge={section.href === "/messages" ? totalUnread : 0}
                 onNavigate={onClose}
               />
             )

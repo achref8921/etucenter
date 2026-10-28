@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { Bell, CheckCheck, UserPlus, GraduationCap, DollarSign, Trash2, Clock, Calendar, CalendarX, UserX } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Bell, CheckCheck, UserPlus, GraduationCap, DollarSign, Trash2, Clock, Calendar, CalendarX, UserX, MessageCircle } from "lucide-react";
 
 interface Notification {
   id: string;
@@ -10,6 +11,7 @@ interface Notification {
   message: string;
   type: string;
   lu: boolean;
+  lien?: string | null;
   createdAt: string;
 }
 
@@ -25,6 +27,7 @@ function timeAgo(dateStr: string): string {
 }
 
 export default function NotificationBellDropdown({ role }: { role: string }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [nonLues, setNonLues] = useState(0);
@@ -47,6 +50,16 @@ export default function NotificationBellDropdown({ role }: { role: string }) {
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
+  }, []);
+
+  // La lecture d'une conversation solde ses alertes côté serveur : on rafraîchit
+  // la cloche immédiatement au lieu d'attendre le prochain passage (30 s).
+  useEffect(() => {
+    const onChatRead = () => {
+      void fetchNotifications();
+    };
+    window.addEventListener("chat:read", onChatRead);
+    return () => window.removeEventListener("chat:read", onChatRead);
   }, []);
 
   useEffect(() => {
@@ -125,6 +138,7 @@ export default function NotificationBellDropdown({ role }: { role: string }) {
     if (type === "absence") return <UserX className="h-4 w-4 text-orange-500" />;
     if (type === "subscription_expiring") return <Clock className="h-4 w-4 text-amber-500" />;
     if (type === "message_admin") return <Bell className="h-4 w-4 text-blue-500" />;
+    if (type === "chat_message") return <MessageCircle className="h-4 w-4 text-[var(--primary)]" />;
     return <Bell className="h-4 w-4 text-gray-400 dark:text-gray-500" />;
   };
 
@@ -189,7 +203,13 @@ export default function NotificationBellDropdown({ role }: { role: string }) {
               notifications.slice(0, 10).map((n) => (
                 <div
                   key={n.id}
-                  onClick={(e) => markAsRead(n.id, e)}
+                  onClick={(e) => {
+                    void markAsRead(n.id, e);
+                    if (n.type === "chat_message") {
+                      setOpen(false);
+                      router.push(n.lien || "/messages");
+                    }
+                  }}
                   className={`group flex items-start gap-3 border-b border-gray-50 px-4 py-3 transition-colors last:border-0 dark:border-[#2a2d35] ${
                     n.lu ? "bg-white dark:bg-[#181b22]" : "cursor-pointer bg-blue-50/60 hover:bg-blue-50 dark:bg-blue-900/20 dark:hover:bg-blue-900/30"
                   }`}

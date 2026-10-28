@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
 import { Bell, X } from "lucide-react";
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
@@ -19,6 +20,7 @@ type PushState = "checking" | "supported" | "granted" | "denied" | "unsupported"
 
 export default function PushSetup() {
   const { status, data: session } = useSession();
+  const pathname = usePathname();
   const userId: string | null =
     (session?.user as { id?: string } | null)?.id ?? null;
   const prevStatusRef = useRef<string>("checking");
@@ -138,6 +140,10 @@ export default function PushSetup() {
       setBusy(false);
     }
   };
+
+  // La messagerie occupe toute la hauteur : la bannière recouvrirait le champ
+  // de saisie. Elle reste visible sur les autres pages.
+  if (pathname === "/messages") return null;
 
   if (status !== "authenticated" || state === "checking" || state === "granted" || state === "unsupported") {
     return null;

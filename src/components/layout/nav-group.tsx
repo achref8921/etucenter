@@ -48,12 +48,14 @@ export function NavLeafLink({
   home,
   accent,
   nested = false,
+  badge = 0,
   onNavigate,
 }: {
   item: NavLeaf;
   home: string;
   accent: NavAccent;
   nested?: boolean;
+  badge?: number;
   onNavigate?: () => void;
 }) {
   const styles = accentStyles[accent];
@@ -95,6 +97,11 @@ export function NavLeafLink({
         )}
       />
       <span className="truncate">{item.label}</span>
+      {badge > 0 && (
+        <span className="ml-auto flex h-[18px] min-w-[18px] shrink-0 items-center justify-center rounded-full bg-[var(--primary)] px-1 text-[10px] font-bold text-white">
+          {badge > 99 ? "99+" : badge}
+        </span>
+      )}
     </Link>
   );
 }

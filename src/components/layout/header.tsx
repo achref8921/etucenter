@@ -4,6 +4,7 @@ import { signOut, useSession } from "next-auth/react";
 import { LogOut, Menu, Sun, Moon, ImageOff, Image as ImageIcon } from "lucide-react";
 import AccountSwitcher from "@/components/account-switcher";
 import NotificationBellDropdown from "@/components/notification-bell-dropdown";
+import MessagesBell from "@/components/chat/messages-bell";
 import UserAvatar from "@/components/user-avatar";
 import { useTheme } from "@/components/theme-provider";
 import { useWatermarkEnabled } from "@/components/layout/center-watermark";
@@ -50,6 +51,7 @@ export default function Header({ centerLogo, onMenuToggle, fallbackUser }: Heade
       </div>
 
       <div className="flex items-center gap-0.5 sm:gap-1.5">
+        <MessagesBell role={role} />
         <NotificationBellDropdown role={role} />
 
         {centerLogo && (

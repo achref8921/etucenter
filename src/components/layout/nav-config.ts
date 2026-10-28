@@ -23,6 +23,7 @@ import {
   Activity,
   ScrollText,
   MousePointerClick,
+  MessageCircle,
 } from "lucide-react";
 
 export type IconType = ComponentType<{ className?: string }>;
@@ -68,6 +69,7 @@ export function isSectionActive(pathname: string, section: NavSection, home: str
 
 const adminSections: NavSection[] = [
   { label: "Tableau de bord", href: "/admin", icon: LayoutDashboard },
+  { label: "Messages", href: "/messages", icon: MessageCircle },
   { label: "Analytiques", href: "/admin/analytics", icon: BarChart3 },
   {
     key: "gestion",
@@ -124,6 +126,7 @@ function profSections(flags: NavFlags): NavSection[] {
 
   return [
     { label: "Tableau de bord", href: "/prof", icon: LayoutDashboard },
+    { label: "Messages", href: "/messages", icon: MessageCircle },
     { key: "enseignement", label: "Enseignement", icon: GraduationCap, items: enseignement },
     { key: "finances", label: "Finances", icon: Wallet, items: finances },
     { label: "Notifications", href: "/prof/notifications", icon: Bell },
@@ -133,6 +136,7 @@ function profSections(flags: NavFlags): NavSection[] {
 
 const eleveSections: NavSection[] = [
   { label: "Tableau de bord", href: "/eleve", icon: LayoutDashboard },
+  { label: "Messages", href: "/messages", icon: MessageCircle },
   {
     key: "scolarite",
     label: "Scolarité",
@@ -232,6 +236,7 @@ const bottomNavByRole: Record<Role, NavLeaf[]> = {
     { label: "Utilisateurs", href: "/admin/utilisateurs", icon: Users },
     { label: "Groupes", href: "/admin/groupes", icon: GraduationCap },
     { label: "Finances", href: "/admin/finances", icon: Wallet },
+    { label: "Messages", href: "/messages", icon: MessageCircle },
     { label: "Profil", href: "/profil", icon: User },
   ],
   prof: [
@@ -239,6 +244,7 @@ const bottomNavByRole: Record<Role, NavLeaf[]> = {
     { label: "Groupes", href: "/prof/groupes", icon: GraduationCap },
     { label: "Séances", href: "/prof/seances", icon: Calendar },
     { label: "Présences", href: "/prof/presences", icon: ClipboardCheck },
+    { label: "Messages", href: "/messages", icon: MessageCircle },
     { label: "Élèves", href: "/prof/eleves", icon: Users },
   ],
   eleve: [
@@ -246,6 +252,7 @@ const bottomNavByRole: Record<Role, NavLeaf[]> = {
     { label: "Groupes", href: "/eleve/groupes", icon: GraduationCap },
     { label: "Présences", href: "/eleve/presences", icon: ClipboardCheck },
     { label: "Paiements", href: "/eleve/paiements", icon: FileText },
+    { label: "Messages", href: "/messages", icon: MessageCircle },
     { label: "Profil", href: "/eleve/profil", icon: User },
   ],
 };
