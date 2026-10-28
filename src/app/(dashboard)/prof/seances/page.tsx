@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Calendar, Plus, X, Loader2, Pencil, Trash2, CalendarPlus, CalendarCheck, Clock, CheckCircle2, XCircle } from "lucide-react";
-import { formatDate, formatTime } from "@/lib/utils";
+import { formatDate, formatTime, todayDateInputValue } from "@/lib/utils";
+import { RATTRAPAGE_DATE_FUTURE_MESSAGE } from "@/lib/validations";
 import ConfirmDelete from "@/components/confirm-delete";
 import SeanceDocumentsModal from "@/components/seance-documents-modal";
 import SeanceFilesButton from "@/components/seance-files-button";
@@ -285,6 +286,10 @@ export default function ProfSeancesPage() {
     }
     if (!rattrapageDate) {
       setRattrapageError("La date est requise");
+      return;
+    }
+    if (rattrapageDate > todayDateInputValue()) {
+      setRattrapageError(RATTRAPAGE_DATE_FUTURE_MESSAGE);
       return;
     }
     if (!rattrapageHeureDebut) {
@@ -627,9 +632,13 @@ export default function ProfSeancesPage() {
                 <input
                   type="date"
                   value={rattrapageDate}
+                  max={todayDateInputValue()}
                   onChange={(e) => setRattrapageDate(e.target.value)}
                   className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
+                <p className="mt-1 text-[11px] text-[var(--foreground-faint)]">
+                  Date passée ou du jour uniquement.
+                </p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>

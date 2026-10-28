@@ -1,4 +1,12 @@
 import { z } from "zod";
+import { todayDateInputValue } from "./utils";
+
+/**
+ * Une séance de rattrapage (ou « séance passée ») constate un cours déjà donné :
+ * sa date ne peut donc jamais être postérieure à aujourd'hui.
+ */
+export const RATTRAPAGE_DATE_FUTURE_MESSAGE =
+  "Une séance passée ne peut pas être datée dans le futur";
 
 export const loginSchema = z.object({
   email: z.string().email("Adresse email invalide"),
@@ -141,7 +149,11 @@ export const rattrapageSchema = z
       return ids.length > 0;
     },
     { message: "Sélectionnez au moins un élève", path: ["eleveIds"] }
-  );
+  )
+  .refine((data) => data.date <= todayDateInputValue(), {
+    message: RATTRAPAGE_DATE_FUTURE_MESSAGE,
+    path: ["date"],
+  });
 
 export const paiementSchema = z.object({
   eleveId: z.string().uuid(),

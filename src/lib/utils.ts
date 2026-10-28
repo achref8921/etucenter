@@ -35,6 +35,17 @@ export function formatTime(time: Date | string | null): string {
   return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`;
 }
 
+/**
+ * Date du jour au format `YYYY-MM-DD` (fuseau local), utilisable telle quelle
+ * par un `<input type="date">` et comparable lexicographiquement.
+ */
+export function todayDateInputValue(now: Date = new Date()): string {
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 export function canModifyAttendance(
   seanceDate: Date | string,
   _heureDebut?: Date | string | null,

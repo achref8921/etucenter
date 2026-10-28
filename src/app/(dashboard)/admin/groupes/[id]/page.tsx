@@ -5,7 +5,8 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Users, Loader2, X, Search, Download, Trash2, CalendarPlus, CalendarRange, RotateCcw } from "lucide-react";
 import { MontantInput } from "@/components/montant-input";
-import { formatDate, formatCurrency, formatTime } from "@/lib/utils";
+import { formatDate, formatCurrency, formatTime, todayDateInputValue } from "@/lib/utils";
+import { RATTRAPAGE_DATE_FUTURE_MESSAGE } from "@/lib/validations";
 import ConfirmDelete from "@/components/confirm-delete";
 import TimeInput from "@/components/time-input";
 
@@ -317,6 +318,10 @@ export default function AdminGroupeDetailPage() {
     if (!rattrapageEleve) return;
     if (!rattrapageDate) {
       setRattrapageError("La date est requise");
+      return;
+    }
+    if (rattrapageDate > todayDateInputValue()) {
+      setRattrapageError(RATTRAPAGE_DATE_FUTURE_MESSAGE);
       return;
     }
     if (!rattrapageHeureDebut) {
@@ -931,9 +936,13 @@ export default function AdminGroupeDetailPage() {
                   <input
                     type="date"
                     value={rattrapageDate}
+                    max={todayDateInputValue()}
                     onChange={(e) => setRattrapageDate(e.target.value)}
                     className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[13px] text-[var(--foreground)] px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
+                  <p className="mt-1 text-[11px] text-[var(--foreground-faint)]">
+                    Date passée ou du jour uniquement.
+                  </p>
                 </div>
                 <div>
                   <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">Heure début</label>
