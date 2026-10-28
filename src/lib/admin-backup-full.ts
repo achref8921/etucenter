@@ -377,7 +377,12 @@ export async function restoreCenterBackup(
     const newEleveId = idMap[i.eleveId];
     const newGroupeId = idMap[i.groupeId];
     if (!newEleveId || !newGroupeId) { skipped++; continue; }
-    const existing = await tx.inscription.findUnique({ where: { eleveId_groupeId: { eleveId: newEleveId, groupeId: newGroupeId } } });
+    // Inscription = période : on évite seulement de créer une 2e période OUVERTE
+    // pour le même couple (l'historique fermé peut coexister).
+    const existing = await tx.inscription.findFirst({
+      where: { eleveId: newEleveId, groupeId: newGroupeId, statut: "actif" },
+      select: { id: true },
+    });
     if (existing) { skipped++; continue; }
     await tx.inscription.create({
       data: {

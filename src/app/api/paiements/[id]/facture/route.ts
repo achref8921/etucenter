@@ -111,7 +111,7 @@ export async function GET(
       year: "numeric",
     });
 
-    const [totalSeances, presences, allPresences, totalPayments, allInscriptions, inscriptionForPrice] =
+    const [totalSeances, presences, allPresences, totalPayments, allInscriptions, pairInscriptions] =
       await Promise.all([
         prisma.seance.count({
           where: {
@@ -154,12 +154,21 @@ export async function GET(
             },
           },
         }),
-        prisma.inscription.findFirst({
-          where: { eleveId: paiement.eleveId, groupeId: paiement.groupeId, statut: "actif" },
+        prisma.inscription.findMany({
+          // Après une réorganisation de groupe, la période d'inscription
+          // d'origine est fermée : chercher uniquement `statut = actif`
+          // ferait perdre le forfait et la facture retomberait sur le prix du
+          // groupe. On récupère donc toutes les périodes du couple et on
+          // retient la plus récente qui porte un forfait.
+          where: { eleveId: paiement.eleveId, groupeId: paiement.groupeId },
+          orderBy: { dateDebut: "desc" },
           select: {
             forfaitMontant: true,
             forfaitSeances: true,
             forfaitSetAt: true,
+            statut: true,
+            dateDebut: true,
+            dateFin: true,
           },
         }),
       ]);
@@ -175,6 +184,17 @@ export async function GET(
     const totalAllSeances = allPresences.length;
 
     const totalPaid = Number(totalPayments._sum.montant || 0);
+    // Prix unitaire : forfait de la période la plus récente qui en porte un,
+    // sinon prix du groupe (comportement historique conservé).
+    const inscriptionForPrice =
+      pairInscriptions.find(
+        (ins) =>
+          ins.forfaitMontant != null &&
+          ins.forfaitSeances != null &&
+          Number(ins.forfaitSeances) > 0
+      ) ??
+      pairInscriptions.find((ins) => ins.statut === "actif") ??
+      null;
     const inscriptionPrix =
       inscriptionForPrice?.forfaitMontant != null &&
       inscriptionForPrice?.forfaitSeances != null &&

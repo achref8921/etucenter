@@ -227,6 +227,95 @@ export const resetPasswordSchema = z.object({
   path: ["confirmPassword"],
 });
 
+// ─── Réorganisation des groupes (scission / fusion) ─────────────────────────
+// Un « target » décrit un groupe cible : soit un groupe existant (groupeId),
+// soit un nouveau groupe (nom + tarif). Chaque élève déplacé est décrit avec son
+// groupe d'origine, ce qui permet de déplacer plusieurs groupes à la fois.
+
+export const repartitionEleveSchema = z.object({
+  eleveId: z.string().uuid("Identifiant élève invalide"),
+  sourceGroupeId: z.string().uuid("Identifiant de groupe invalide"),
+});
+
+export const repartitionTargetSchema = z.object({
+  key: z.string().min(1).max(60),
+  groupeId: z.string().uuid().optional().nullable(),
+  nom: z
+    .string()
+    .trim()
+    .min(2, "Le nom du groupe doit contenir au moins 2 caractères")
+    .max(120, "Le nom du groupe est trop long")
+    .optional()
+    .nullable(),
+  profId: z.string().uuid().optional().nullable(),
+  matiereId: z.string().uuid().optional().nullable(),
+  prixParSeance: z.number().positive("Prix par séance invalide").optional().nullable(),
+  forfaitMontant: z.number().positive("Montant du forfait invalide").optional().nullable(),
+  forfaitSeances: z.number().int().positive("Nombre de séances invalide").optional().nullable(),
+  capaciteMax: z.number().int().positive().optional().nullable(),
+  planningFromGroupeId: z.string().uuid().optional().nullable(),
+  eleves: z
+    .array(repartitionEleveSchema)
+    .min(1, "Chaque groupe cible doit contenir au moins un élève")
+    .max(500, "Trop d'élèves dans un même groupe cible"),
+});
+
+export const repartitionSchema = z
+  .object({
+    targets: z
+      .array(repartitionTargetSchema)
+      .min(1, "Au moins un groupe cible est requis")
+      .max(20, "Trop de groupes cibles"),
+    fusionnerHistorique: z.boolean().optional(),
+    archiverSourcesVides: z.boolean().optional(),
+    motDePasse: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    const keys = new Set<string>();
+    const eleves = new Set<string>();
+
+    data.targets.forEach((target, index) => {
+      if (keys.has(target.key)) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Référence de groupe cible en double",
+          path: ["targets", index, "key"],
+        });
+      }
+      keys.add(target.key);
+
+      if (!target.groupeId) {
+        if (!target.nom || target.nom.trim().length < 2) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Le nom du nouveau groupe est requis",
+            path: ["targets", index, "nom"],
+          });
+        }
+        const hasForfait =
+          (target.forfaitMontant ?? 0) > 0 && (target.forfaitSeances ?? 0) > 0;
+        if (!hasForfait && !(target.prixParSeance && target.prixParSeance > 0)) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Indiquez un prix par séance ou un forfait pour le nouveau groupe",
+            path: ["targets", index, "prixParSeance"],
+          });
+        }
+      }
+
+      target.eleves.forEach((eleve, eleveIndex) => {
+        if (eleves.has(eleve.eleveId)) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Un élève ne peut être placé que dans un seul groupe cible",
+            path: ["targets", index, "eleves", eleveIndex, "eleveId"],
+          });
+        }
+        eleves.add(eleve.eleveId);
+      });
+    });
+  });
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type UtilisateurInput = z.infer<typeof utilisateurSchema>;

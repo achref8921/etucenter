@@ -289,10 +289,27 @@ export async function consumeCourseAttendance(
   if (attendance.statut !== "present") return null;
   if (seance.statut === "annulee") return null;
 
-  const activeInscription = await db.inscription.findFirst({
-    where: { eleveId, groupeId: groupe.id, statut: "actif" },
+  // Réorganisation de groupe : la période d'inscription d'origine est fermée
+  // (dateFin renseignée) au moment du déplacement. Pour une séance passée, il
+  // faut donc retrouver la période qui COUVRE la date de la séance, sinon la
+  // consommation serait perdue ou re-tarifée au prix du groupe. La période
+  // ouverte reste prioritaire pour les séances à venir.
+  const coveringInscription = await db.inscription.findFirst({
+    where: {
+      eleveId,
+      groupeId: groupe.id,
+      dateDebut: { lte: seance.date },
+      dateFin: { gte: seance.date },
+    },
+    orderBy: { dateDebut: "desc" },
     select: { id: true, forfaitMontant: true, forfaitSeances: true },
   });
+  const activeInscription =
+    coveringInscription ??
+    (await db.inscription.findFirst({
+      where: { eleveId, groupeId: groupe.id, statut: "actif" },
+      select: { id: true, forfaitMontant: true, forfaitSeances: true },
+    }));
   if (!activeInscription) return null;
 
   let price: number;

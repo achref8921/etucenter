@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Trash2, X, Loader2, Pencil, Check, Search, Layers, UserCog, BookOpen, Users } from "lucide-react";
+import { Plus, Trash2, X, Loader2, Pencil, Check, Search, Layers, UserCog, BookOpen, Users, Scissors } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { MontantInput } from "@/components/montant-input";
 import ConfirmDelete from "@/components/confirm-delete";
@@ -17,6 +17,7 @@ interface Groupe {
   forfaitMontant: number | null;
   forfaitSeances: number | null;
   capaciteMax: number;
+  statut?: "actif" | "archive";
   prof: { id: string; nom: string; prenom: string } | null;
   matiere: { id: string; nom: string } | null;
 }
@@ -62,6 +63,7 @@ export default function GroupesPage() {
   const [search, setSearch] = useState("");
   const [filterProfId, setFilterProfId] = useState("");
   const [filterMatiereId, setFilterMatiereId] = useState("");
+  const [filterStatut, setFilterStatut] = useState<"actif" | "archive" | "tous">("actif");
   const [formData, setFormData] = useState<GroupeFormData>({
     nom: "",
     description: "",
@@ -270,20 +272,36 @@ export default function GroupesPage() {
       (g.description && g.description.toLowerCase().includes(search.toLowerCase()));
     const matchProf = filterProfId === "" || g.prof?.id === filterProfId;
     const matchMatiere = filterMatiereId === "" || g.matiere?.id === filterMatiereId;
-    return matchSearch && matchProf && matchMatiere;
+    const statut = g.statut ?? "actif";
+    const matchStatut = filterStatut === "tous" || statut === filterStatut;
+    return matchSearch && matchProf && matchMatiere && matchStatut;
   });
+
+  const groupesActifs = groupes.filter((g) => (g.statut ?? "actif") === "actif");
+  const groupesArchives = groupes.filter((g) => g.statut === "archive");
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)]">Gestion des Groupes</h1>
-        <button
-          onClick={openCreate}
-          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700"
-        >
-          <Plus className="h-4 w-4" />
-          Ajouter
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/admin/groupes/reorganiser"
+            prefetch={false}
+            className="flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-[13px] font-medium text-[var(--foreground)] hover:bg-neutral-50 dark:hover:bg-neutral-800"
+            title="Scinder, fusionner ou déplacer des élèves entre groupes"
+          >
+            <Scissors className="h-4 w-4" />
+            Scinder / Fusionner
+          </Link>
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-[13px] font-medium text-white hover:bg-blue-700"
+          >
+            <Plus className="h-4 w-4" />
+            Ajouter
+          </button>
+        </div>
       </div>
 
       <div
@@ -292,9 +310,9 @@ export default function GroupesPage() {
       >
         <MetricCard
           label="Groupes"
-          value={groupes.length}
+          value={groupesActifs.length}
           currency={false}
-          sub="classes actives"
+          sub={groupesArchives.length > 0 ? `${groupesArchives.length} archivé(s)` : "classes actives"}
           icon={Layers}
           tone="primary"
         />
@@ -362,6 +380,15 @@ export default function GroupesPage() {
               <option key={m.id} value={m.id}>{m.nom}</option>
             ))}
           </select>
+          <select
+            value={filterStatut}
+            onChange={(e) => setFilterStatut(e.target.value as "actif" | "archive" | "tous")}
+            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] text-[var(--foreground)] focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600/20"
+          >
+            <option value="actif">Groupes actifs</option>
+            <option value="archive">Groupes archivés</option>
+            <option value="tous">Tous les groupes</option>
+          </select>
         </div>
       )}
 
@@ -391,11 +418,26 @@ export default function GroupesPage() {
                 </tr>
               ) : (
                 filteredGroupes.map((groupe) => (
-                  <tr key={groupe.id} className="hover:bg-neutral-100/50 dark:hover:bg-[#1e2128]">
+                  <tr
+                    key={groupe.id}
+                    className={`hover:bg-neutral-100/50 dark:hover:bg-[#1e2128] ${
+                      groupe.statut === "archive" ? "opacity-70" : ""
+                    }`}
+                  >
                     <td className="px-4 py-2.5 font-medium">
-                      <Link href={`/admin/groupes/${groupe.id}`} prefetch={false} className="text-blue-600 dark:text-blue-400 hover:underline">
-                        {groupe.nom}
-                      </Link>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Link href={`/admin/groupes/${groupe.id}`} prefetch={false} className="text-blue-600 dark:text-blue-400 hover:underline">
+                          {groupe.nom}
+                        </Link>
+                        {groupe.statut === "archive" && (
+                          <span
+                            className="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-semibold text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300"
+                            title="Groupe archivé : historique conservé, plus d'inscription possible"
+                          >
+                            Archivé
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-2.5 text-[13px] text-[var(--foreground)]">
                       {editingProfId === groupe.id ? (

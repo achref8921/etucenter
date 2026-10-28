@@ -88,6 +88,12 @@ export async function POST(request: NextRequest) {
       if (!groupe) {
         return NextResponse.json({ error: "Groupe non trouvé ou non autorisé" }, { status: 404 });
       }
+      if (groupe.statut === "archive") {
+        return NextResponse.json(
+          { error: "Ce groupe est archivé : impossible d'y inscrire un élève" },
+          { status: 400 }
+        );
+      }
 
       const eleve = await prisma.utilisateur.findUnique({
         where: { id: eleveId, role: "eleve", centerId, deletedAt: null, ghost: false },
@@ -96,45 +102,36 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Élève non trouvé" }, { status: 404 });
       }
 
-      const existingInscription = await prisma.inscription.findUnique({
-        where: { eleveId_groupeId: { eleveId, groupeId } },
+      // Inscription = PÉRIODE : une seule période ouverte par couple.
+      const openInscription = await prisma.inscription.findFirst({
+        where: { eleveId, groupeId, statut: "actif" },
+        select: { id: true },
       });
-
-      if (existingInscription) {
-        if (existingInscription.statut === "actif") {
-          return NextResponse.json(
-            { error: "Cet élève est déjà inscrit dans ce groupe" },
-            { status: 409 }
-          );
-        }
-        const capacityError = await checkCapacity(groupeId, groupe.capaciteMax);
-        if (capacityError) return capacityError;
-        const inscription = await prisma.inscription.update({
-          where: { id: existingInscription.id },
-          data: { statut: "actif" },
-          include: {
-            eleve: { select: { id: true, nom: true, prenom: true, codeEleve: true } },
-            groupe: { select: { id: true, nom: true } },
-          },
-        });
-        logger.info("Inscription réactivée par le prof", { userId, eleveId, groupeId });
-        await notifyAdminsOfStudentAdd({
-          centerId,
-          elevePrenom: inscription.eleve.prenom,
-          eleveNom: inscription.eleve.nom,
-          groupeNom: inscription.groupe.nom,
-          profPrenom: (session.user as any).prenom,
-          profNom: (session.user as any).nom,
-          action: "reactive",
-        });
-        return NextResponse.json(inscription, { status: 201 });
+      if (openInscription) {
+        return NextResponse.json(
+          { error: "Cet élève est déjà inscrit dans ce groupe" },
+          { status: 409 }
+        );
       }
+
+      const previousInscription = await prisma.inscription.findFirst({
+        where: { eleveId, groupeId, statut: "inactif" },
+        orderBy: { dateDebut: "desc" },
+        select: { forfaitMontant: true, forfaitSeances: true },
+      });
 
       const capacityError = await checkCapacity(groupeId, groupe.capaciteMax);
       if (capacityError) return capacityError;
 
       const inscription = await prisma.inscription.create({
-        data: { eleveId, groupeId },
+        data: {
+          eleveId,
+          groupeId,
+          statut: "actif",
+          forfaitMontant: previousInscription?.forfaitMontant ?? null,
+          forfaitSeances: previousInscription?.forfaitSeances ?? null,
+          forfaitSetAt: previousInscription?.forfaitMontant != null ? new Date() : null,
+        },
         include: {
           eleve: { select: { id: true, nom: true, prenom: true, codeEleve: true } },
           groupe: { select: { id: true, nom: true } },
@@ -149,7 +146,7 @@ export async function POST(request: NextRequest) {
         groupeNom: inscription.groupe.nom,
         profPrenom: (session.user as any).prenom,
         profNom: (session.user as any).nom,
-        action: "ajoute",
+        action: previousInscription ? "reactive" : "ajoute",
       });
       return NextResponse.json(inscription, { status: 201 });
     }
@@ -167,6 +164,12 @@ export async function POST(request: NextRequest) {
     const groupe = await prisma.groupe.findFirst({ where: { id: groupeId, profId: userId, centerId } });
     if (!groupe) {
       return NextResponse.json({ error: "Groupe non trouvé ou non autorisé" }, { status: 404 });
+    }
+    if (groupe.statut === "archive") {
+      return NextResponse.json(
+        { error: "Ce groupe est archivé : impossible d'y inscrire un élève" },
+        { status: 400 }
+      );
     }
 
     const validNiveaux = ["primaire", "college", "lycee"];

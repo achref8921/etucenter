@@ -84,7 +84,21 @@ export async function GET() {
           FROM presences pr
           JOIN seances s ON pr.seance_id = s.id
           JOIN groupes g ON s.groupe_id = g.id
-          LEFT JOIN inscriptions i ON i.eleve_id = pr.eleve_id AND i.groupe_id = g.id AND i.statut = 'actif'
+          LEFT JOIN LATERAL (
+            SELECT i2.forfait_montant, i2.forfait_seances
+            FROM inscriptions i2
+            WHERE i2.eleve_id = pr.eleve_id
+              AND i2.groupe_id = g.id
+              AND (
+                i2.statut = 'actif'
+                OR (i2.date_fin IS NOT NULL AND i2.date_debut <= s.date AND i2.date_fin >= s.date)
+              )
+            ORDER BY
+              CASE WHEN i2.date_fin IS NOT NULL AND i2.date_debut <= s.date AND i2.date_fin >= s.date THEN 0 ELSE 1 END,
+              CASE WHEN i2.statut = 'actif' THEN 0 ELSE 1 END,
+              i2.date_debut DESC NULLS LAST
+            LIMIT 1
+          ) i ON TRUE
           WHERE pr.statut = 'present' AND s.statut <> 'annulee'
             AND pr.eleve_id = ANY($1::uuid[]) AND s.groupe_id = ANY($2::uuid[])
           GROUP BY pr.eleve_id, s.groupe_id
