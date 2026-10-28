@@ -36,15 +36,38 @@ export function formatTime(time: Date | string | null): string {
 }
 
 /**
- * Date du jour au format `YYYY-MM-DD` (fuseau local), utilisable telle quelle
- * par un `<input type="date">` et comparable lexicographiquement.
+ * Fuseau horaire de référence pour les dates « métier » (celles du centre).
+ * Le serveur peut tourner en UTC : sans fuseau explicite, une séance datée
+ * « aujourd'hui » serait refusée après minuit, ou une séance de demain
+ * acceptée avant minuit. Surchargeable via `NEXT_PUBLIC_APP_TIMEZONE`.
  */
-export function todayDateInputValue(now: Date = new Date()): string {
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+export const APP_TIMEZONE = process.env.NEXT_PUBLIC_APP_TIMEZONE || "Africa/Tunis";
+
+/**
+ * Date du jour au format `YYYY-MM-DD` dans le fuseau de référence,
+ * utilisable telle quelle par un `<input type="date">` et comparable
+ * lexicographiquement.
+ */
+export function todayDateInputValue(
+  now: Date = new Date(),
+  timeZone: string = APP_TIMEZONE
+): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const value = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return `${value("year")}-${value("month")}-${value("day")}`;
 }
+
+/**
+ * Une séance de rattrapage (ou « séance passée ») constate un cours déjà
+ * donné : sa date ne peut donc jamais être postérieure à aujourd'hui.
+ */
+export const RATTRAPAGE_DATE_FUTURE_MESSAGE =
+  "Une séance passée ne peut pas être datée dans le futur";
 
 export function canModifyAttendance(
   seanceDate: Date | string,

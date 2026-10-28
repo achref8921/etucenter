@@ -5,8 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Users, Loader2, X, Search, Download, Trash2, CalendarPlus, CalendarRange, RotateCcw } from "lucide-react";
 import { MontantInput } from "@/components/montant-input";
-import { formatDate, formatCurrency, formatTime, todayDateInputValue } from "@/lib/utils";
-import { RATTRAPAGE_DATE_FUTURE_MESSAGE } from "@/lib/validations";
+import { formatDate, formatCurrency, formatTime, todayDateInputValue, RATTRAPAGE_DATE_FUTURE_MESSAGE } from "@/lib/utils";
 import ConfirmDelete from "@/components/confirm-delete";
 import TimeInput from "@/components/time-input";
 

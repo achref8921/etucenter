@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Calendar, Plus, X, Loader2, Pencil, Trash2, CalendarPlus, CalendarCheck, Clock, CheckCircle2, XCircle } from "lucide-react";
-import { formatDate, formatTime, todayDateInputValue } from "@/lib/utils";
-import { RATTRAPAGE_DATE_FUTURE_MESSAGE } from "@/lib/validations";
+import { formatDate, formatTime, todayDateInputValue, RATTRAPAGE_DATE_FUTURE_MESSAGE } from "@/lib/utils";
 import ConfirmDelete from "@/components/confirm-delete";
 import SeanceDocumentsModal from "@/components/seance-documents-modal";
 import SeanceFilesButton from "@/components/seance-files-button";
