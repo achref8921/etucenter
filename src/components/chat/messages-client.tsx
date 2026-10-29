@@ -267,7 +267,7 @@ export default function MessagesClient() {
 
   return (
     <div className="h-full min-h-0 md:p-4 lg:p-5">
-      <div className="flex h-full min-h-0 overflow-hidden bg-[var(--surface)] md:rounded-[var(--radius-xl)] md:border md:border-[var(--border)] md:shadow-[var(--shadow-card)]">
+      <div className="flex h-full min-h-0 overflow-hidden bg-[var(--surface)] md:rounded-[var(--radius-xl)] md:border md:border-[var(--border)] md:shadow-[var(--shadow-card)] ring-1 ring-black/0 dark:ring-white/0">
         <aside
           className={cn(
             "flex w-full shrink-0 flex-col border-[var(--border)] bg-[var(--surface)] md:w-[330px] md:border-r lg:w-[370px]",
@@ -531,7 +531,7 @@ export default function MessagesClient() {
         )}
       </aside>
 
-      <div className={cn("min-w-0 flex-1", selectedId ? "flex" : "hidden md:flex")}>
+      <div className={cn("min-w-0 flex-1 bg-[var(--surface)]", selectedId ? "flex" : "hidden md:flex")}>
         {selectedId ? (
           <ChatThread
             key={selectedId}
@@ -543,8 +543,8 @@ export default function MessagesClient() {
             onMessageSent={handleMessageSent}
           />
         ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-[var(--surface-muted)] px-8 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--surface)] text-[var(--primary)] shadow-[var(--shadow-md)]">
+          <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-gradient-to-b from-[var(--surface-muted)] to-[var(--surface)] px-8 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--surface)] text-[var(--primary)] shadow-[var(--shadow-card)] ring-1 ring-[var(--border)]">
               {panel === "annuaire" ? <Users className="h-7 w-7" /> : <MessageCircle className="h-7 w-7" />}
             </div>
             <div>
