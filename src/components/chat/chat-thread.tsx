@@ -448,7 +448,7 @@ export default function ChatThread({
 
   return (
     <section className="flex h-full min-h-0 flex-1 flex-col bg-[var(--surface)]">
-      <header className="flex h-[62px] shrink-0 items-center gap-2.5 border-b border-[var(--border)] bg-[var(--surface)]/95 px-3 backdrop-blur sm:px-4">
+      <header className="relative flex h-[66px] shrink-0 items-center gap-3 border-b border-[var(--border)] bg-gradient-to-r from-[var(--surface)] via-[var(--surface)] to-[var(--primary)]/[0.06] px-3 sm:px-4">
         <button
           type="button"
           onClick={onBack}
@@ -473,15 +473,32 @@ export default function ChatThread({
               )}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[14px] font-semibold leading-tight text-[var(--foreground)]">
-                {fullName(other)}
-              </p>
-              <p className="mt-0.5 flex items-center gap-1.5 truncate text-[11px] text-[var(--foreground-faint)]">
-                <span>{ROLE_LABELS[other.role]}</span>
-                <span aria-hidden="true">·</span>
-                <span className={isOnline(other.lastSeenAt) ? "font-medium text-emerald-600 dark:text-emerald-400" : ""}>
-                  {lastSeenLabel(other.lastSeenAt)}
+              <div className="flex min-w-0 items-center gap-1.5">
+                <p className="truncate text-[14px] font-semibold leading-tight text-[var(--foreground)]">
+                  {fullName(other)}
+                </p>
+                <span
+                  className={
+                    other.role === "admin"
+                      ? "shrink-0 rounded-full bg-amber-500/12 px-1.5 py-[1px] text-[9px] font-bold uppercase tracking-wide text-amber-700 dark:text-amber-400"
+                      : "shrink-0 rounded-full bg-[var(--primary)]/10 px-1.5 py-[1px] text-[9px] font-bold uppercase tracking-wide text-[var(--primary)]"
+                  }
+                >
+                  {ROLE_LABELS[other.role]}
                 </span>
+              </div>
+              <p className="mt-0.5 flex items-center gap-1.5 truncate text-[11px] text-[var(--foreground-faint)]">
+                {isOnline(other.lastSeenAt) ? (
+                  <span className="flex items-center gap-1 font-medium text-emerald-600 dark:text-emerald-400">
+                    <span
+                      aria-hidden="true"
+                      className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500"
+                    />
+                    En ligne
+                  </span>
+                ) : (
+                  <span>{lastSeenLabel(other.lastSeenAt)}</span>
+                )}
               </p>
             </div>
           </>
@@ -492,7 +509,7 @@ export default function ChatThread({
 
       <div
         ref={scrollRef}
-        className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain bg-[var(--surface-muted)] px-3 py-3 sm:px-5"
+        className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain bg-[var(--surface-muted)] bg-gradient-to-b from-[var(--primary)]/[0.035] to-transparent px-3 py-3 sm:px-5"
         role="log"
         aria-live="polite"
         aria-label="Messages de la conversation"
@@ -534,7 +551,7 @@ export default function ChatThread({
           </div>
         ) : messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--surface)] text-[var(--primary)] shadow-xs">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--surface)] text-[var(--primary)] shadow-[var(--shadow-card)] ring-1 ring-[var(--border)]">
               <MessageCircle className="h-6 w-6" />
             </div>
             <div>
@@ -555,17 +572,17 @@ export default function ChatThread({
                 <div key={message.id}>
                   {showDay && (
                     <div className="my-3 flex justify-center">
-                      <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--foreground-faint)] shadow-xs">
+                      <span className="rounded-full bg-[var(--primary)]/[0.08] px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--primary)] ring-1 ring-[var(--primary)]/15">
                         {formatDayLabel(message.createdAt)}
                       </span>
                     </div>
                   )}
                   <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
                     <div
-                      className={`group relative max-w-[82%] rounded-[18px] px-3.5 py-2 shadow-xs sm:max-w-[68%] ${
+                      className={`group relative max-w-[82%] rounded-[18px] px-3.5 py-2 sm:max-w-[68%] ${
                         mine
-                          ? "rounded-br-[5px] bg-[var(--primary)] text-white"
-                          : "rounded-bl-[5px] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)]"
+                          ? "rounded-br-[5px] bg-[var(--primary)] bg-gradient-to-br from-white/[0.14] to-transparent text-white shadow-[var(--shadow-sm)]"
+                          : "rounded-bl-[5px] border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] shadow-[var(--shadow-xs)]"
                       } ${message.failed ? "ring-1 ring-red-400" : ""}`}
                     >
                       <p className="whitespace-pre-wrap break-words text-[13px] leading-[1.45]">
@@ -613,7 +630,7 @@ export default function ChatThread({
               scrollToBottom(true);
               setNewIncoming(false);
             }}
-            className="pointer-events-auto absolute -top-11 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-[var(--primary)] px-3 py-1.5 text-[11px] font-semibold text-white shadow-lg"
+            className="pointer-events-auto absolute -top-11 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-[var(--primary)] bg-gradient-to-br from-white/[0.16] to-transparent px-3 py-1.5 text-[11px] font-semibold text-white shadow-[var(--shadow-lg)] ring-1 ring-white/10"
           >
             <ChevronUp className="h-3.5 w-3.5 rotate-180" />
             Nouveau message
@@ -628,7 +645,7 @@ export default function ChatThread({
             {error}
           </p>
         )}
-        <div className="flex items-end gap-2">
+        <div className="flex items-end gap-2 rounded-[22px] border border-[var(--border)] bg-[var(--surface-muted)] p-1 pl-1.5 transition focus-within:border-[var(--primary)]/40 focus-within:bg-[var(--surface)] focus-within:ring-2 focus-within:ring-[var(--primary)]/15">
           <div className="relative min-w-0 flex-1">
             <textarea
               ref={textareaRef}
@@ -644,9 +661,9 @@ export default function ChatThread({
               maxLength={2000}
               placeholder="Écrivez votre message…"
               aria-label="Votre message"
-              className="max-h-[132px] min-h-[42px] w-full resize-none rounded-[16px] border border-[var(--border)] bg-[var(--surface-muted)] px-3.5 py-2.5 pr-12 text-[13px] leading-[1.4] text-[var(--foreground)] outline-none transition placeholder:text-[var(--foreground-faint)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/15"
+              className="max-h-[132px] min-h-[40px] w-full resize-none border-0 bg-transparent px-2.5 py-2.5 pr-10 text-[13px] leading-[1.4] text-[var(--foreground)] outline-none placeholder:text-[var(--foreground-faint)]"
             />
-            <span className="pointer-events-none absolute bottom-2 right-3 text-[10px] font-medium text-[var(--foreground-faint)]">
+            <span className="pointer-events-none absolute bottom-2 right-2 text-[10px] font-medium text-[var(--foreground-faint)]">
               {draft.length > 1800 ? `${draft.length}/2000` : ""}
             </span>
           </div>
@@ -655,7 +672,7 @@ export default function ChatThread({
             onClick={handleSend}
             disabled={!draft.trim() || sending}
             aria-label="Envoyer le message"
-            className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-white shadow-sm transition hover:brightness-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full bg-[var(--primary)] bg-gradient-to-br from-white/[0.16] to-transparent text-white shadow-[var(--shadow-sm)] transition hover:brightness-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {sending ? (
               <Loader2 className="h-[18px] w-[18px] animate-spin" />

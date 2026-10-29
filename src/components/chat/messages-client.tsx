@@ -9,6 +9,7 @@ import { useChatUnread } from "@/components/chat/chat-unread-provider";
 import ChatThread from "@/components/chat/chat-thread";
 import ChatDirectory from "@/components/chat/chat-directory";
 import {
+  ROLE_LABELS,
   formatListTime,
   fullName,
   isOnline,
@@ -274,7 +275,7 @@ export default function MessagesClient() {
             selectedId ? "hidden md:flex" : "flex"
           )}
         >
-        <div className="flex h-[62px] shrink-0 items-center justify-between gap-2 border-b border-[var(--border)] px-4">
+        <div className="relative flex h-[66px] shrink-0 items-center justify-between gap-2 overflow-hidden border-b border-[var(--border)] bg-gradient-to-r from-[var(--primary)]/[0.09] via-[var(--surface)] to-[var(--surface)] px-4">
           <div className="flex min-w-0 items-center gap-1.5">
             <button
               type="button"
@@ -286,13 +287,25 @@ export default function MessagesClient() {
               <ArrowLeft className="h-[18px] w-[18px]" />
             </button>
             <div className="min-w-0">
-              <h1 className="truncate text-[17px] font-semibold leading-tight text-[var(--foreground)]">
+              <h1 className="truncate text-[17px] font-semibold leading-tight tracking-tight text-[var(--foreground)]">
                 Messages
               </h1>
-              <p className="mt-0.5 truncate text-[11px] text-[var(--foreground-faint)]">
-                {totalUnread > 0
-                  ? `${totalUnread} message${totalUnread > 1 ? "s" : ""} non lu${totalUnread > 1 ? "s" : ""}`
-                  : "Vos échanges privés"}
+              <p className="mt-0.5 flex items-center gap-1.5 truncate text-[11px] text-[var(--foreground-faint)]">
+                {totalUnread > 0 ? (
+                  <>
+                    <span
+                      aria-hidden="true"
+                      className="inline-flex h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--primary)]"
+                    />
+                    <span className="truncate">
+                      {`${totalUnread} message${totalUnread > 1 ? "s" : ""} non lu${
+                        totalUnread > 1 ? "s" : ""
+                      }`}
+                    </span>
+                  </>
+                ) : (
+                  "Vos échanges privés"
+                )}
               </p>
             </div>
           </div>
@@ -301,9 +314,10 @@ export default function MessagesClient() {
             onClick={openDirectory}
             aria-label="Nouvelle conversation"
             title="Nouvelle conversation"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-white shadow-sm transition hover:brightness-110 active:scale-95"
+            className="flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-[var(--primary)] px-3 text-white shadow-[var(--shadow-sm)] transition hover:brightness-110 active:scale-95"
           >
-            <SquarePen className="h-[17px] w-[17px]" />
+            <SquarePen className="h-[16px] w-[16px]" />
+            <span className="hidden text-[12px] font-semibold sm:inline">Nouveau</span>
           </button>
         </div>
 
@@ -362,7 +376,7 @@ export default function MessagesClient() {
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Rechercher une conversation…"
                 aria-label="Rechercher une conversation"
-                className="h-9 w-full rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-muted)] pl-9 pr-8 text-[12.5px] text-[var(--foreground)] outline-none transition focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/15"
+                className="h-9 w-full rounded-full border border-[var(--border)] bg-[var(--surface-muted)] pl-9 pr-8 text-[12.5px] text-[var(--foreground)] outline-none transition placeholder:text-[var(--foreground-faint)] focus:border-[var(--primary)] focus:bg-[var(--surface)] focus:ring-2 focus:ring-[var(--primary)]/15"
               />
               {search && (
                 <button
@@ -440,17 +454,24 @@ export default function MessagesClient() {
                         className={cn(
                           "relative flex w-full items-center gap-3 px-3.5 py-3 text-left transition-colors",
                           active
-                            ? "bg-[var(--primary)]/[0.08]"
+                            ? "bg-gradient-to-r from-[var(--primary)]/[0.12] to-[var(--primary)]/[0.02]"
                             : "hover:bg-[var(--surface-muted)]"
                         )}
                       >
                         {active && (
                           <span
                             aria-hidden="true"
-                            className="absolute left-0 top-1/2 h-8 w-[3px] -translate-y-1/2 rounded-r-full bg-[var(--primary)]"
+                            className="absolute left-0 top-1/2 h-9 w-[3px] -translate-y-1/2 rounded-r-full bg-[var(--primary)]"
                           />
                         )}
-                        <div className="relative shrink-0">
+                        <div
+                          className={cn(
+                            "relative shrink-0 rounded-full transition-shadow",
+                            active
+                              ? "ring-2 ring-[var(--primary)]/30 ring-offset-2 ring-offset-[var(--surface)]"
+                              : ""
+                          )}
+                        >
                           <UserAvatar
                             userId={conversation.other.id}
                             nom={conversation.other.nom}
@@ -465,16 +486,30 @@ export default function MessagesClient() {
 
                         <div className="min-w-0 flex-1">
                           <div className="flex items-baseline justify-between gap-2">
-                            <p
-                              className={cn(
-                                "truncate text-[13px] leading-tight",
-                                unread
-                                  ? "font-semibold text-[var(--foreground)]"
-                                  : "font-medium text-[var(--foreground)]"
+                            <div className="flex min-w-0 items-baseline gap-1.5">
+                              <p
+                                className={cn(
+                                  "truncate text-[13px] leading-tight",
+                                  unread
+                                    ? "font-semibold text-[var(--foreground)]"
+                                    : "font-medium text-[var(--foreground)]"
+                                )}
+                              >
+                                {fullName(conversation.other)}
+                              </p>
+                              {conversation.other.role !== "eleve" && (
+                                <span
+                                  className={cn(
+                                    "shrink-0 rounded-full px-1.5 py-[1px] text-[9px] font-bold uppercase tracking-wide",
+                                    conversation.other.role === "admin"
+                                      ? "bg-amber-500/12 text-amber-700 dark:text-amber-400"
+                                      : "bg-[var(--primary)]/10 text-[var(--primary)]"
+                                  )}
+                                >
+                                  {ROLE_LABELS[conversation.other.role]}
+                                </span>
                               )}
-                            >
-                              {fullName(conversation.other)}
-                            </p>
+                            </div>
                             <span
                               className={cn(
                                 "shrink-0 text-[10px]",
@@ -503,7 +538,7 @@ export default function MessagesClient() {
                                 : "Nouvelle conversation"}
                             </p>
                             {unread && (
-                              <span className="flex h-[18px] min-w-[18px] shrink-0 items-center justify-center rounded-full bg-[var(--primary)] px-1 text-[10px] font-bold text-white">
+                              <span className="flex h-[18px] min-w-[18px] shrink-0 items-center justify-center rounded-full bg-[var(--primary)] px-1 text-[10px] font-bold text-white shadow-[var(--shadow-xs)]">
                                 {conversation.unreadCount > 99 ? "99+" : conversation.unreadCount}
                               </span>
                             )}
