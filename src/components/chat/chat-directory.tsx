@@ -10,6 +10,7 @@ import {
   X,
 } from "lucide-react";
 import UserAvatar from "@/components/user-avatar";
+import { SegmentedTabs } from "@/components/chat/segmented-tabs";
 import { cn } from "@/lib/utils";
 import { fullName, isOnline } from "./chat-utils";
 import type {
@@ -238,49 +239,32 @@ export default function ChatDirectory({
     <div className="flex min-h-0 flex-1 flex-col">
       {role !== "eleve" && (
         <div className="shrink-0 px-3 pt-2.5">
-          <div
-            role="tablist"
-            aria-label="Sections de l'annuaire"
-            className="flex gap-1 rounded-[var(--radius-lg)] bg-[var(--surface-muted)] p-1"
-          >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={tab === "contacts"}
-              onClick={() => {
+          <SegmentedTabs
+            ariaLabel="Sections de l'annuaire"
+            value={tab}
+            onChange={(key) => {
+              if (key === "contacts") {
                 setTab("contacts");
                 setGroupFilter("all");
-              }}
-              className={cn(
-                "flex flex-1 items-center justify-center gap-1.5 rounded-[var(--radius-md)] px-2 py-1.5 text-[11.5px] font-semibold transition-colors",
-                tab === "contacts"
-                  ? "bg-[var(--surface)] text-[var(--foreground)] shadow-sm"
-                  : "text-[var(--foreground-subtle)] hover:text-[var(--foreground)]"
-              )}
-            >
-              {data?.contactsLabel ?? (role === "prof" ? "Administration" : "Professeurs")}
-              <span className="rounded-full bg-[var(--surface-muted)] px-1.5 text-[10px] font-bold text-[var(--foreground-faint)]">
-                {data ? totalContactCount : "…"}
-              </span>
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={tab === "eleves"}
-              onClick={() => setTab("eleves")}
-              className={cn(
-                "flex flex-1 items-center justify-center gap-1.5 rounded-[var(--radius-md)] px-2 py-1.5 text-[11.5px] font-semibold transition-colors",
-                tab === "eleves"
-                  ? "bg-[var(--surface)] text-[var(--foreground)] shadow-sm"
-                  : "text-[var(--foreground-subtle)] hover:text-[var(--foreground)]"
-              )}
-            >
-              {role === "prof" ? "Mes élèves" : "Élèves"}
-              <span className="rounded-full bg-[var(--surface-muted)] px-1.5 text-[10px] font-bold text-[var(--foreground-faint)]">
-                {data ? studentCount : "…"}
-              </span>
-            </button>
-          </div>
+              } else {
+                setTab("eleves");
+              }
+            }}
+            items={[
+              {
+                key: "contacts",
+                label: data?.contactsLabel ?? (role === "prof" ? "Administration" : "Professeurs"),
+                badge: data ? totalContactCount : "…",
+                badgeTone: "muted",
+              },
+              {
+                key: "eleves",
+                label: role === "prof" ? "Mes élèves" : "Élèves",
+                badge: data ? studentCount : "…",
+                badgeTone: "muted",
+              },
+            ]}
+          />
         </div>
       )}
 

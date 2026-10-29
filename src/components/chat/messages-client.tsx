@@ -8,6 +8,7 @@ import UserAvatar from "@/components/user-avatar";
 import { useChatUnread } from "@/components/chat/chat-unread-provider";
 import ChatThread from "@/components/chat/chat-thread";
 import ChatDirectory from "@/components/chat/chat-directory";
+import { SegmentedTabs } from "@/components/chat/segmented-tabs";
 import {
   ROLE_LABELS,
   formatListTime,
@@ -322,79 +323,28 @@ export default function MessagesClient() {
         </div>
 
         <div className="shrink-0 border-b border-[var(--border)] px-3 py-2">
-          <div
-            role="tablist"
-            aria-label="Sections de la messagerie"
-            className="relative flex gap-1 rounded-[var(--radius-lg)] bg-[var(--surface-muted)] p-1 ring-1 ring-[var(--border)]/70"
-          >
-            {/* Indicateur coulissant : une seule pastille qui glisse d'un onglet à l'autre */}
-            <span
-              aria-hidden="true"
-              className={cn(
-                "pointer-events-none absolute inset-y-1 left-1 w-[calc((100%_-_12px)/2)] rounded-[var(--radius-md)]",
-                "bg-[var(--primary)] bg-gradient-to-br from-white/[0.20] via-white/[0.04] to-transparent",
-                "shadow-[0_8px_20px_-10px_var(--primary)] ring-1 ring-inset ring-white/15",
-                "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                panel === "annuaire" ? "translate-x-[calc(100%_+_4px)]" : "translate-x-0"
-              )}
-            />
-
-            <button
-              type="button"
-              role="tab"
-              aria-selected={panel === "discussions"}
-              onClick={() => setPanel("discussions")}
-              className={cn(
-                "group relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-[var(--radius-md)] px-2 py-1.5 text-[11.5px] font-semibold",
-                "transition-colors duration-300 ease-out",
-                panel === "discussions"
-                  ? "text-white"
-                  : "text-[var(--foreground-subtle)] hover:text-[var(--foreground)]"
-              )}
-            >
-              <MessageCircle
-                className={cn(
-                  "h-3.5 w-3.5 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-active:scale-95",
-                  panel === "discussions" ? "scale-105" : ""
-                )}
-              />
-              Discussions
-              {totalUnread > 0 && (
-                <span
-                  className={cn(
-                    "flex h-[16px] min-w-[16px] items-center justify-center rounded-full px-1 text-[9px] font-bold transition-colors duration-300",
-                    panel === "discussions"
-                      ? "bg-white/25 text-white ring-1 ring-white/30"
-                      : "bg-[var(--primary)] text-white"
-                  )}
-                >
-                  {totalUnread > 99 ? "99+" : totalUnread}
-                </span>
-              )}
-            </button>
-
-            <button
-              type="button"
-              role="tab"
-              aria-selected={panel === "annuaire"}
-              onClick={openDirectory}
-              className={cn(
-                "group relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-[var(--radius-md)] px-2 py-1.5 text-[11.5px] font-semibold",
-                "transition-colors duration-300 ease-out",
-                panel === "annuaire"
-                  ? "text-white"
-                  : "text-[var(--foreground-subtle)] hover:text-[var(--foreground)]"
-              )}
-            >
-              <Users
-                className={cn(
-                  "h-3.5 w-3.5 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-active:scale-95",
-                  panel === "annuaire" ? "scale-105" : ""
-                )}
-              />
-              Annuaire
-            </button>
-          </div>
+          <SegmentedTabs
+            ariaLabel="Sections de la messagerie"
+            value={panel}
+            onChange={(key) => {
+              if (key === "annuaire") openDirectory();
+              else setPanel("discussions");
+            }}
+            items={[
+              {
+                key: "discussions",
+                label: "Discussions",
+                icon: <MessageCircle className="h-3.5 w-3.5" />,
+                badge: totalUnread > 0 ? (totalUnread > 99 ? "99+" : totalUnread) : undefined,
+                badgeTone: "accent",
+              },
+              {
+                key: "annuaire",
+                label: "Annuaire",
+                icon: <Users className="h-3.5 w-3.5" />,
+              },
+            ]}
+          />
         </div>
 
         {panel === "discussions" ? (
