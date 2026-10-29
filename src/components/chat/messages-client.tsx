@@ -325,41 +325,73 @@ export default function MessagesClient() {
           <div
             role="tablist"
             aria-label="Sections de la messagerie"
-            className="flex gap-1 rounded-[var(--radius-lg)] bg-[var(--surface-muted)] p-1"
+            className="relative flex gap-1 rounded-[var(--radius-lg)] bg-[var(--surface-muted)] p-1 ring-1 ring-[var(--border)]/70"
           >
+            {/* Indicateur coulissant : une seule pastille qui glisse d'un onglet à l'autre */}
+            <span
+              aria-hidden="true"
+              className={cn(
+                "pointer-events-none absolute inset-y-1 left-1 w-[calc((100%_-_12px)/2)] rounded-[var(--radius-md)]",
+                "bg-[var(--primary)] bg-gradient-to-br from-white/[0.20] via-white/[0.04] to-transparent",
+                "shadow-[0_8px_20px_-10px_var(--primary)] ring-1 ring-inset ring-white/15",
+                "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                panel === "annuaire" ? "translate-x-[calc(100%_+_4px)]" : "translate-x-0"
+              )}
+            />
+
             <button
               type="button"
               role="tab"
               aria-selected={panel === "discussions"}
               onClick={() => setPanel("discussions")}
               className={cn(
-                "flex flex-1 items-center justify-center gap-1.5 rounded-[var(--radius-md)] px-2 py-1.5 text-[11.5px] font-semibold transition-colors",
+                "group relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-[var(--radius-md)] px-2 py-1.5 text-[11.5px] font-semibold",
+                "transition-colors duration-300 ease-out",
                 panel === "discussions"
-                  ? "bg-[var(--surface)] text-[var(--foreground)] shadow-sm"
+                  ? "text-white"
                   : "text-[var(--foreground-subtle)] hover:text-[var(--foreground)]"
               )}
             >
-              <MessageCircle className="h-3.5 w-3.5" />
+              <MessageCircle
+                className={cn(
+                  "h-3.5 w-3.5 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-active:scale-95",
+                  panel === "discussions" ? "scale-105" : ""
+                )}
+              />
               Discussions
               {totalUnread > 0 && (
-                <span className="flex h-[16px] min-w-[16px] items-center justify-center rounded-full bg-[var(--primary)] px-1 text-[9px] font-bold text-white">
+                <span
+                  className={cn(
+                    "flex h-[16px] min-w-[16px] items-center justify-center rounded-full px-1 text-[9px] font-bold transition-colors duration-300",
+                    panel === "discussions"
+                      ? "bg-white/25 text-white ring-1 ring-white/30"
+                      : "bg-[var(--primary)] text-white"
+                  )}
+                >
                   {totalUnread > 99 ? "99+" : totalUnread}
                 </span>
               )}
             </button>
+
             <button
               type="button"
               role="tab"
               aria-selected={panel === "annuaire"}
               onClick={openDirectory}
               className={cn(
-                "flex flex-1 items-center justify-center gap-1.5 rounded-[var(--radius-md)] px-2 py-1.5 text-[11.5px] font-semibold transition-colors",
+                "group relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-[var(--radius-md)] px-2 py-1.5 text-[11.5px] font-semibold",
+                "transition-colors duration-300 ease-out",
                 panel === "annuaire"
-                  ? "bg-[var(--surface)] text-[var(--foreground)] shadow-sm"
+                  ? "text-white"
                   : "text-[var(--foreground-subtle)] hover:text-[var(--foreground)]"
               )}
             >
-              <Users className="h-3.5 w-3.5" />
+              <Users
+                className={cn(
+                  "h-3.5 w-3.5 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-active:scale-95",
+                  panel === "annuaire" ? "scale-105" : ""
+                )}
+              />
               Annuaire
             </button>
           </div>
