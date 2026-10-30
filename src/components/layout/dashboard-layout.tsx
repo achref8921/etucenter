@@ -83,7 +83,13 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
   return (
     <ToastProvider>
       <ChatUnreadProvider>
-      <div className="min-h-screen bg-[var(--background)]">
+      <div
+        className={
+          isChat
+            ? "h-[100dvh] overflow-hidden overscroll-none bg-[var(--background)]"
+            : "min-h-screen bg-[var(--background)]"
+        }
+      >
         <SessionGuard />
         <RouteTransition />
         <Suspense fallback={null}>
@@ -115,7 +121,7 @@ function DashboardShell({ children, user, centerName, centerLogo, frozen }: Dash
             data-glass=""
             className={
               isChat
-                ? `relative h-[calc(100dvh-3.5rem-4.25rem-env(safe-area-inset-bottom))] overflow-hidden md:h-[calc(100dvh-3.5rem)] ${frozenState ? "frozen-mode" : ""}`
+                ? `relative h-[calc(100dvh-3.5rem-4.25rem-env(safe-area-inset-bottom))] overflow-hidden overscroll-none md:h-[calc(100dvh-3.5rem)] ${frozenState ? "frozen-mode" : ""}`
                 : `relative min-h-[calc(100dvh-3.5rem)] p-4 sm:p-5 lg:p-6 pb-28 md:pb-6 ${frozenState ? "frozen-mode" : ""}`
             }
           >

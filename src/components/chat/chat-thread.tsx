@@ -107,6 +107,15 @@ export default function ChatThread({
   const other = meta?.other ?? summary?.other ?? null;
   const otherLastReadAt = meta?.otherLastReadAt ?? null;
 
+  // Filet de sécurité mobile : après l'ouverture du clavier ou le repli de la
+  // barre d'adresse, le navigateur peut avoir défilé la page et masqué l'en-tête
+  // (nom du contact). On force le retour en haut à chaque changement de
+  // conversation pour que l'en-tête reste toujours visible.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [conversationId]);
+
   const scrollToBottom = useCallback((smooth = false) => {
     const element = scrollRef.current;
     if (!element) return;
