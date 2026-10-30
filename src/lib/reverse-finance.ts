@@ -156,7 +156,9 @@ export async function collectReversePayment(input: CollectReversePaymentInput) {
 
   const collectionPct = tauxApplique;
 
-  return prisma.$transaction(async (tx) => {
+  let adminIds: string[] = [];
+
+  const result = await prisma.$transaction(async (tx) => {
     const debt = await tx.teacherCenterDebt.create({
       data: {
         centerId,
@@ -314,6 +316,26 @@ export async function collectReversePayment(input: CollectReversePaymentInput) {
       },
     });
 
+    // Le propriétaire du centre (administrateurs) est informé de chaque
+    // encaissement réalisé par un professeur auprès d'un élève.
+    const admins = await tx.utilisateur.findMany({
+      where: { centerId, role: { in: ["admin", "super_admin"] }, deletedAt: null },
+      select: { id: true },
+    });
+    adminIds = admins.map((admin) => admin.id);
+    if (adminIds.length > 0) {
+      await tx.notification.createMany({
+        data: adminIds.map((destinataireId) => ({
+          centerId,
+          destinataireId,
+          titre: "Encaissement élève par un professeur",
+          message: `${prof.prenom} ${prof.nom} a encaissé ${gross.toFixed(2)} DT auprès de ${student.prenom} ${student.nom} pour le groupe "${groupe.nom}". Part du centre : ${centerFee.toFixed(2)} DT.`,
+          type: "paiement_recu",
+          lien: "/admin/benefices",
+        })),
+      });
+    }
+
     logger.info("Encaissement inverse créé", {
       userId: createdBy,
       transactionId: transaction.id,
@@ -329,6 +351,17 @@ export async function collectReversePayment(input: CollectReversePaymentInput) {
 
     return { transaction, debt, paiement, studentTransaction, breakdown: { gross, centerFee, netAmount, collectionPct } };
   }, { timeout: 30_000 });
+
+  // Notification push aux administrateurs, après validation de la transaction.
+  if (adminIds.length > 0) {
+    await sendPushToUsers(adminIds, {
+      title: "Encaissement élève",
+      body: `${prof.prenom} ${prof.nom} · ${gross.toFixed(2)} TND · ${student.prenom} ${student.nom}`,
+      url: "/admin/benefices",
+    }).catch(() => {});
+  }
+
+  return result;
 }
 
 export interface SettleReverseDebtInput {
