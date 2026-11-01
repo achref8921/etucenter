@@ -6,7 +6,6 @@ import {
   getProfDashboardStats,
   getProfUpcomingSeances,
 } from "@/lib/prof-dashboard-data";
-import { getStudentsOverGroupPrice } from "@/lib/students-over-group-price";
 import { SkeletonPage } from "@/components/ui/skeleton";
 import ProfDashboardClient from "@/components/prof/prof-dashboard-client";
 
@@ -24,10 +23,9 @@ async function ProfDashboardContent() {
     redirect("/");
   }
 
-  const [stats, upcomingSeances, exceedingStudents] = await Promise.all([
+  const [stats, upcomingSeances] = await Promise.all([
     getProfDashboardStats(user.id, user.centerId),
     getProfUpcomingSeances(user.id, user.centerId),
-    getStudentsOverGroupPrice({ centerId: user.centerId, profId: user.id }),
   ]);
 
   return (
@@ -35,7 +33,6 @@ async function ProfDashboardContent() {
       prenom={user.prenom ?? "Prof"}
       stats={stats}
       upcomingSeances={upcomingSeances}
-      exceedingStudents={exceedingStudents}
     />
   );
 }

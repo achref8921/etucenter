@@ -22,8 +22,6 @@ import {
   getReversePendingCenterParts,
 } from "@/lib/admin-dashboard-data";
 import { MonthSelector } from "@/components/month-selector";
-import { StudentsOverGroupPriceList } from "@/components/students-over-group-price";
-import { getStudentsOverGroupPrice } from "@/lib/students-over-group-price";
 import {
   Card,
   CardHeader,
@@ -104,7 +102,6 @@ async function DashboardContent({ month }: { month: string }) {
   const data = await getAdminDashboardMonthData(centerId, month);
   const todaySeances = await getAdminTodaySeances(centerId);
   const pendingParts = await getReversePendingCenterParts(centerId);
-  const exceedingStudents = await getStudentsOverGroupPrice({ centerId });
   const pendingPartsBalance = pendingParts.reduce((sum, p) => sum + p.balance, 0);
 
   const todayLabel = new Date().toLocaleDateString("fr-FR", {
@@ -194,9 +191,6 @@ async function DashboardContent({ month }: { month: string }) {
           </div>
         </div>
       </div>
-
-      {/* Impayé supérieur au prix du groupe */}
-      <StudentsOverGroupPriceList items={exceedingStudents} role="admin" />
 
       {/* Revenus par professeur + Activité du jour */}
       <div
