@@ -16,15 +16,18 @@ import {
 } from "lucide-react";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { MetricCard } from "@/components/ui";
+import { StudentsOverGroupPriceList } from "@/components/students-over-group-price";
 import type {
   ProfDashboardSeance,
   ProfDashboardStats,
 } from "@/lib/prof-dashboard-data";
+import type { StudentOverGroupPrice } from "@/lib/students-over-group-price";
 
 interface ProfDashboardProps {
   prenom: string;
   stats: ProfDashboardStats;
   upcomingSeances: ProfDashboardSeance[];
+  exceedingStudents: StudentOverGroupPrice[];
 }
 
 const statusColor = (s: string) => {
@@ -55,6 +58,7 @@ export default function ProfDashboardClient({
   prenom,
   stats,
   upcomingSeances,
+  exceedingStudents,
 }: ProfDashboardProps) {
   const router = useRouter();
   const [now, setNow] = useState(() => new Date());
@@ -207,6 +211,9 @@ export default function ProfDashboardClient({
               </div>
             </Link>
           </div>
+
+          {/* Impayé supérieur au prix du groupe */}
+          <StudentsOverGroupPriceList items={exceedingStudents} role="prof" />
 
           {/* Mes Groupes table */}
           {stats.groupes.length > 0 && (
