@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.etucenter.app",
+      "sha256_cert_fingerprints": [
+        "CA:E2:11:99:79:52:4B:C8:D6:18:11:3B:91:D1:BF:BE:B3:FA:00:B9:A2:38:BE:84:43:79:A8:A9:9A:9D:9D:0D"
+      ]
+    }
+  }
+]
