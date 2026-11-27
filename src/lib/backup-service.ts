@@ -139,6 +139,7 @@ function buildCenter(c: any) {
     id: c.id, name: c.name, slug: c.slug, code: c.code,
     logo: str(c.logo), phone: str(c.phone), address: str(c.address),
     active: c.active ?? true,
+    subscriptionSuspendedAt: toDate(c.subscriptionSuspendedAt),
     createdAt: toDate(c.createdAt) ?? new Date(),
     updatedAt: toDate(c.updatedAt) ?? new Date(),
   };
@@ -231,6 +232,7 @@ function buildSubscription(s: any) {
   return {
     id: s.id, centerId: s.centerId, montant: Number(s.montant ?? 0),
     dateDebut: toDate(s.dateDebut) ?? new Date(), dateFin: toDate(s.dateFin) ?? new Date(),
+    paidAt: toDate(s.paidAt), duree: str(s.duree),
     statut: s.statut, notes: str(s.notes),
     createdAt: toDate(s.createdAt) ?? new Date(), updatedAt: toDate(s.updatedAt) ?? new Date(),
   };

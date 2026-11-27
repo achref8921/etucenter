@@ -120,6 +120,7 @@ model Center {
   phone     String?  @db.VarChar(20)
   address   String?  @db.Text
   active    Boolean  @default(true)
+  subscriptionSuspendedAt DateTime? @map("subscription_suspended_at")
   teacherReverseEnabled Boolean @default(false) @map("teacher_reverse_enabled")
   teacherReversePct     Decimal @default(20.00) @map("teacher_reverse_pct") @db.Decimal(5, 2)
   createdAt DateTime @default(now()) @map("created_at")
@@ -727,6 +728,8 @@ model CenterSubscription {
   montant   Decimal            @db.Decimal(10, 2)
   dateDebut DateTime           @map("date_debut")
   dateFin   DateTime           @map("date_fin")
+  paidAt    DateTime?          @map("paid_at")
+  duree     String?            @db.VarChar(20)
   statut    SubscriptionStatus @default(active)
   notes     String?
   createdAt DateTime           @default(now()) @map("created_at")
@@ -737,6 +740,7 @@ model CenterSubscription {
   @@index([centerId])
   @@index([statut])
   @@index([dateFin])
+  @@index([paidAt])
   @@map("center_subscriptions")
 }
 

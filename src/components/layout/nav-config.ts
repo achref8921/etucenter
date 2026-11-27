@@ -7,6 +7,7 @@ import {
   GraduationCap,
   Wallet,
   Calendar,
+  CalendarClock,
   ClipboardCheck,
   User,
   CreditCard,
@@ -174,6 +175,7 @@ const superAdminSections: NavSection[] = [
     items: [
       { label: "Overview", href: "/super-admin", icon: LayoutDashboard },
       { label: "Centers", href: "/super-admin/centers", icon: Building2 },
+      { label: "Abonnements", href: "/super-admin/abonnements", icon: CalendarClock },
       { label: "Utilisateurs", href: "/super-admin/utilisateurs", icon: Users },
       { label: "Analytiques", href: "/super-admin/analytics", icon: BarChart3 },
       { label: "Usage", href: "/super-admin/usage", icon: MousePointerClick },
@@ -227,6 +229,7 @@ const bottomNavByRole: Record<Role, NavLeaf[]> = {
   super_admin: [
     { label: "Overview", href: "/super-admin", icon: LayoutDashboard },
     { label: "Centers", href: "/super-admin/centers", icon: Building2 },
+    { label: "Abonnements", href: "/super-admin/abonnements", icon: CalendarClock },
     { label: "Users", href: "/super-admin/utilisateurs", icon: Users },
     { label: "Analytics", href: "/super-admin/analytics", icon: BarChart3 },
     { label: "Settings", href: "/super-admin/settings", icon: Settings },
