@@ -121,6 +121,11 @@ function durationLabel(duree: string | null): string {
   return "—";
 }
 
+/** Date du jour au format `YYYY-MM-DD` (UTC, cohérent avec l'affichage). */
+function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 export default function SuperAdminSubscriptionsPage() {
   const { success, error: toastError, info } = useToast();
   const [data, setData] = useState<ApiData | null>(null);
@@ -134,6 +139,7 @@ export default function SuperAdminSubscriptionsPage() {
     montant: "",
     duree: "month",
     notes: "",
+    paidAt: todayIso(),
   });
 
   async function load(showSpinner = false) {
@@ -182,6 +188,7 @@ export default function SuperAdminSubscriptionsPage() {
       montant: target && target.montant > 0 ? String(target.montant) : "",
       duree: target?.duree === "quarter" || target?.duree === "year" ? target.duree : "month",
       notes: "",
+      paidAt: todayIso(),
     });
     setModalOpen(true);
   }
@@ -226,6 +233,7 @@ export default function SuperAdminSubscriptionsPage() {
           montant: Number(form.montant),
           duree: form.duree,
           notes: form.notes || undefined,
+          paidAt: form.paidAt || undefined,
         }),
       });
       const json = await res.json();
@@ -235,8 +243,11 @@ export default function SuperAdminSubscriptionsPage() {
       if (json.alreadyPaidThisMonth) {
         info("Ce centre avait déjà payé l'abonnement de ce mois : renouvellement anticipé enregistré.");
       }
+      if (json.backdated && !json.affectsCurrentPeriod) {
+        info("Paiement historique enregistré : le compteur actuel n'est pas modifié.");
+      }
       setModalOpen(false);
-      setForm({ centerId: "", montant: "", duree: "month", notes: "" });
+      setForm({ centerId: "", montant: "", duree: "month", notes: "", paidAt: todayIso() });
       await load();
     } catch (err) {
       toastError(err instanceof Error ? err.message : "Erreur lors de l'enregistrement");
@@ -246,6 +257,7 @@ export default function SuperAdminSubscriptionsPage() {
   }
 
   const summary = data?.summary;
+  const isBackdated = form.paidAt !== "" && form.paidAt < todayIso();
 
   return (
     <div className="space-y-6">
@@ -511,10 +523,38 @@ export default function SuperAdminSubscriptionsPage() {
                       ? ` (le ${fmtDate(selectedOverview.lastPaymentDate)}).`
                       : "."}{" "}
                     Le compteur est actif : prochaine échéance le {fmtDate(selectedOverview.dateFin)}. Un
-                    nouveau paiement sera enregistré comme renouvellement anticipé.
+                    nouveau paiement sera enregistré comme renouvellement anticipé, ou comme paiement
+                    historique si vous choisissez une date passée.
                   </p>
                 </div>
               )}
+
+              <div>
+                <label className="mb-1 block text-[13px] font-medium text-[var(--foreground-subtle)]">
+                  Date du paiement
+                </label>
+                <input
+                  type="date"
+                  value={form.paidAt}
+                  max={todayIso()}
+                  onChange={(e) => setForm({ ...form, paidAt: e.target.value })}
+                  required
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[13px] text-[var(--foreground)] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+                {isBackdated ? (
+                  <p className="mt-1.5 flex items-start gap-1.5 text-[11px] text-amber-700 dark:text-amber-400">
+                    <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                    Paiement rétroactif : la période est calculée à partir de cette date. Si elle se
+                    termine avant l&apos;abonnement actuel, elle est conservée comme historique sans
+                    modifier le compteur.
+                  </p>
+                ) : (
+                  <p className="mt-1.5 text-[11px] text-[var(--foreground-faint)]">
+                    Laissez la date du jour, ou choisissez une date passée pour saisir un ancien
+                    paiement.
+                  </p>
+                )}
+              </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>

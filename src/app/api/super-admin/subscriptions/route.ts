@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { centerId, montant, duree, notes } = body ?? {};
+    const { centerId, montant, duree, notes, paidAt } = body ?? {};
 
     if (!centerId || montant === undefined || montant === null || !duree) {
       return NextResponse.json({ error: "Données manquantes" }, { status: 400 });
@@ -67,12 +67,21 @@ export async function POST(request: Request) {
       montant: Number(montant),
       duree: duree as SubscriptionDuration,
       notes: typeof notes === "string" ? notes : null,
+      paidAt: typeof paidAt === "string" && paidAt.trim() ? paidAt.trim() : null,
+    });
+
+    const dateLabel = new Date(result.subscription.paidAt).toLocaleDateString("fr-FR", {
+      timeZone: "UTC",
     });
 
     return NextResponse.json(
       {
         ...result,
-        message: `Paiement enregistré pour ${result.centerName}. Prochaine échéance dans ${result.daysRemaining} jour${result.daysRemaining > 1 ? "s" : ""}.`,
+        message: result.backdated
+          ? result.affectsCurrentPeriod
+            ? `Paiement antérieur du ${dateLabel} enregistré pour ${result.centerName}. Prochaine échéance dans ${result.daysRemaining} jour${result.daysRemaining > 1 ? "s" : ""}.`
+            : `Paiement antérieur du ${dateLabel} enregistré pour ${result.centerName}. Période historique : le compteur actuel n'est pas modifié.`
+          : `Paiement enregistré pour ${result.centerName}. Prochaine échéance dans ${result.daysRemaining} jour${result.daysRemaining > 1 ? "s" : ""}.`,
       },
       { status: 201 }
     );
@@ -83,7 +92,12 @@ export async function POST(request: Request) {
     if (message === "Centre introuvable") {
       return NextResponse.json({ error: message }, { status: 404 });
     }
-    if (message === "Durée d'abonnement invalide" || message === "Montant invalide") {
+    if (
+      message === "Durée d'abonnement invalide" ||
+      message === "Montant invalide" ||
+      message === "Date de paiement invalide" ||
+      message === "La date de paiement ne peut pas être dans le futur"
+    ) {
       return NextResponse.json({ error: message }, { status: 400 });
     }
     return NextResponse.json({ error: "Erreur interne" }, { status: 500 });

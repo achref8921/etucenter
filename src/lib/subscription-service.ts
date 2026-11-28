@@ -222,11 +222,20 @@ export async function getSubscriptionOverviews(): Promise<SubscriptionOverview[]
   });
 }
 
+/**
+ * Enregistre un paiement d'abonnement.
+ *
+ * `paidAt` permet de saisir un paiement rétroactif (à une date passée).
+ * Dans ce cas la période est calculée à partir de cette date ; si elle se
+ * termine avant l'abonnement courant, elle est conservée comme historique
+ * (`expired`) sans toucher au compteur actif ni réactiver le centre.
+ */
 export async function recordSubscriptionPayment(input: {
   centerId: string;
   montant: number;
   duree: SubscriptionDuration;
   notes?: string | null;
+  paidAt?: string | Date | null;
 }): Promise<{
   subscription: {
     id: string;
@@ -239,6 +248,8 @@ export async function recordSubscriptionPayment(input: {
   centerName: string;
   daysRemaining: number;
   alreadyPaidThisMonth: boolean;
+  backdated: boolean;
+  affectsCurrentPeriod: boolean;
 }> {
   const { centerId, montant, duree } = input;
   if (!centerId) throw new Error("Centre manquant");
@@ -249,23 +260,65 @@ export async function recordSubscriptionPayment(input: {
   if (!center) throw new Error("Centre introuvable");
 
   const now = new Date();
+  const today = startOfUtcDay(now);
+
+  let paymentDate = now;
+  if (input.paidAt) {
+    const parsed = input.paidAt instanceof Date ? input.paidAt : new Date(input.paidAt);
+    if (Number.isNaN(parsed.getTime())) throw new Error("Date de paiement invalide");
+    paymentDate = startOfUtcDay(parsed);
+    if (paymentDate.getTime() > today.getTime()) {
+      throw new Error("La date de paiement ne peut pas être dans le futur");
+    }
+  }
+
+  const backdated = paymentDate.getTime() < today.getTime();
+
   const latest = await prisma.centerSubscription.findFirst({
     where: { centerId, statut: { in: ["active", "expired"] } },
     orderBy: [{ dateFin: "desc" }],
   });
 
-  // Renouvellement anticipé : la nouvelle période démarre à la fin de l'ancienne.
-  const start = latest && latest.dateFin.getTime() > now.getTime() ? latest.dateFin : now;
+  // Rétroactif : la période part de la date réelle du paiement.
+  // Sinon renouvellement anticipé : la nouvelle période démarre à la fin de l'ancienne.
+  const start = backdated
+    ? paymentDate
+    : latest && latest.dateFin.getTime() > now.getTime()
+      ? latest.dateFin
+      : now;
   const dateFin = addDuration(start, duree);
 
-  const referencePayment = latest?.paidAt ?? latest?.dateDebut ?? null;
-  const alreadyPaidThisMonth = referencePayment ? sameUtcMonth(referencePayment, now) : false;
+  // Un paiement rétroactif ne devient le compteur courant que s'il va plus loin
+  // que l'abonnement existant ET que sa période n'est pas déjà terminée.
+  const isLatestPeriod = !latest || dateFin.getTime() > latest.dateFin.getTime();
+  const affectsCurrentPeriod = isLatestPeriod && dateFin.getTime() > now.getTime();
+
+  let alreadyPaidThisMonth = false;
+  if (backdated) {
+    const monthStart = new Date(Date.UTC(paymentDate.getUTCFullYear(), paymentDate.getUTCMonth(), 1));
+    const monthEnd = new Date(Date.UTC(paymentDate.getUTCFullYear(), paymentDate.getUTCMonth() + 1, 1));
+    const sameMonthCount = await prisma.centerSubscription.count({
+      where: {
+        centerId,
+        OR: [
+          { paidAt: { gte: monthStart, lt: monthEnd } },
+          { paidAt: null, dateDebut: { gte: monthStart, lt: monthEnd } },
+        ],
+      },
+    });
+    alreadyPaidThisMonth = sameMonthCount > 0;
+  } else {
+    const referencePayment = latest?.paidAt ?? latest?.dateDebut ?? null;
+    alreadyPaidThisMonth = referencePayment ? sameUtcMonth(referencePayment, now) : false;
+  }
 
   const subscription = await prisma.$transaction(async (tx) => {
-    await tx.centerSubscription.updateMany({
-      where: { centerId, statut: "active" },
-      data: { statut: "expired" },
-    });
+    if (affectsCurrentPeriod) {
+      await tx.centerSubscription.updateMany({
+        where: { centerId, statut: "active" },
+        data: { statut: "expired" },
+      });
+    }
 
     const created = await tx.centerSubscription.create({
       data: {
@@ -273,21 +326,23 @@ export async function recordSubscriptionPayment(input: {
         montant,
         dateDebut: start,
         dateFin,
-        paidAt: now,
+        paidAt: paymentDate,
         duree,
-        statut: "active",
+        statut: affectsCurrentPeriod ? "active" : "expired",
         notes: input.notes?.trim() || null,
       },
     });
 
-    await tx.center.update({
-      where: { id: centerId },
-      data: { active: true, subscriptionSuspendedAt: null },
-    });
+    if (affectsCurrentPeriod) {
+      await tx.center.update({
+        where: { id: centerId },
+        data: { active: true, subscriptionSuspendedAt: null },
+      });
+    }
 
     await tx.systemLog.create({
       data: {
-        action: "subscription_paid",
+        action: backdated ? "subscription_paid_backdated" : "subscription_paid",
         entity: "Center",
         entityId: centerId,
         details: {
@@ -296,7 +351,9 @@ export async function recordSubscriptionPayment(input: {
           duree,
           dateDebut: start.toISOString(),
           dateFin: dateFin.toISOString(),
-          paidAt: now.toISOString(),
+          paidAt: paymentDate.toISOString(),
+          backdated,
+          affectsCurrentPeriod,
           alreadyPaidThisMonth,
         },
       },
@@ -310,14 +367,23 @@ export async function recordSubscriptionPayment(input: {
     ? " Le centre avait déjà payé l'abonnement de ce mois : le paiement est enregistré comme renouvellement anticipé."
     : "";
 
+  const message = backdated
+    ? affectsCurrentPeriod
+      ? `${center.name} : paiement antérieur enregistré le ${formatDate(paymentDate)} (${durationLabel(duree)} — ${formatAmount(montant)} DT). ` +
+        `Période du ${formatDate(start)} au ${formatDate(dateFin)} : prochaine échéance le ${formatDate(dateFin)} (${daysRemaining} jour${daysRemaining > 1 ? "s" : ""}).` +
+        suffix
+      : `${center.name} : paiement antérieur enregistré le ${formatDate(paymentDate)} (${durationLabel(duree)} — ${formatAmount(montant)} DT). ` +
+        `Période historique du ${formatDate(start)} au ${formatDate(dateFin)} : le compteur actuel n'est pas modifié.` +
+        suffix
+    : `${center.name} a payé l'abonnement (${durationLabel(duree)} — ${formatAmount(montant)} DT). ` +
+      `Compteur démarré le ${formatDate(paymentDate)} : prochaine échéance le ${formatDate(dateFin)} (${daysRemaining} jour${daysRemaining > 1 ? "s" : ""}).` +
+      suffix;
+
   await notifySuperAdmins({
     centerId,
     type: "subscription_paid",
-    titre: "Paiement d'abonnement enregistré",
-    message:
-      `${center.name} a payé l'abonnement (${durationLabel(duree)} — ${formatAmount(montant)} DT). ` +
-      `Compteur démarré le ${formatDate(now)} : prochaine échéance le ${formatDate(dateFin)} (${daysRemaining} jour${daysRemaining > 1 ? "s" : ""}).` +
-      suffix,
+    titre: backdated ? "Paiement antérieur enregistré" : "Paiement d'abonnement enregistré",
+    message,
   });
 
   return {
@@ -326,12 +392,14 @@ export async function recordSubscriptionPayment(input: {
       dateDebut: subscription.dateDebut,
       dateFin: subscription.dateFin,
       montant: Number(subscription.montant),
-      paidAt: subscription.paidAt ?? now,
+      paidAt: subscription.paidAt ?? paymentDate,
       duree: subscription.duree ?? duree,
     },
     centerName: center.name,
     daysRemaining,
     alreadyPaidThisMonth,
+    backdated,
+    affectsCurrentPeriod,
   };
 }
 
