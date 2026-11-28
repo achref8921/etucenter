@@ -126,6 +126,41 @@ function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+/** Ajoute des mois à une date `YYYY-MM-DD` sans déborder sur le mois suivant. */
+function addMonthsIso(isoDate: string, months: number): string {
+  const d = new Date(isoDate + "T00:00:00Z");
+  const day = d.getUTCDate();
+  d.setUTCDate(1);
+  d.setUTCMonth(d.getUTCMonth() + months);
+  const lastDay = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate();
+  d.setUTCDate(Math.min(day, lastDay));
+  return d.toISOString().slice(0, 10);
+}
+
+/** Aperçu de la période qui sera enregistrée (même règle que le serveur). */
+function computePeriodPreview(paidAt: string, duree: string, currentDateFin: string | null) {
+  const today = todayIso();
+  const months = duree === "quarter" ? 3 : duree === "year" ? 12 : 1;
+  const backdated = paidAt !== "" && paidAt < today;
+  const currentEnd = currentDateFin ? currentDateFin.slice(0, 10) : null;
+  const start = backdated
+    ? paidAt
+    : currentEnd && currentEnd > today
+      ? currentEnd
+      : today;
+  const end = addMonthsIso(start, months);
+  const days = Math.round(
+    (Date.parse(end + "T00:00:00Z") - Date.parse(today + "T00:00:00Z")) / 86_400_000
+  );
+  return {
+    start,
+    end,
+    days,
+    backdated,
+    historical: backdated && days < 0,
+  };
+}
+
 export default function SuperAdminSubscriptionsPage() {
   const { success, error: toastError, info } = useToast();
   const [data, setData] = useState<ApiData | null>(null);
@@ -179,6 +214,11 @@ export default function SuperAdminSubscriptionsPage() {
   const selectedOverview = useMemo(
     () => (data?.overviews ?? []).find((o) => o.centerId === form.centerId) ?? null,
     [data, form.centerId]
+  );
+
+  const periodPreview = useMemo(
+    () => computePeriodPreview(form.paidAt, form.duree, selectedOverview?.dateFin ?? null),
+    [form.paidAt, form.duree, selectedOverview?.dateFin]
   );
 
   function openPayment(centerId?: string) {
@@ -584,6 +624,25 @@ export default function SuperAdminSubscriptionsPage() {
                     <option value="year">1 an</option>
                   </select>
                 </div>
+              </div>
+
+              <div
+                className={`rounded-lg border p-3 text-[12px] ${
+                  periodPreview.historical
+                    ? "border-amber-200 bg-amber-50/70 text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-200"
+                    : "border-[var(--border)] bg-neutral-50/60 text-[var(--foreground-subtle)] dark:bg-[#1a1d23]"
+                }`}
+              >
+                <p className="font-semibold text-[var(--foreground)]">
+                  Période calculée : {fmtDate(periodPreview.start)} → {fmtDate(periodPreview.end)}
+                </p>
+                <p className="mt-0.5">
+                  {periodPreview.historical
+                    ? "Période déjà terminée : elle sera conservée comme historique, sans modifier le compteur actuel."
+                    : periodPreview.days > 0
+                      ? `${periodPreview.days} jour${periodPreview.days > 1 ? "s" : ""} restant${periodPreview.days > 1 ? "s" : ""} après enregistrement.`
+                      : "Échéance aujourd'hui."}
+                </p>
               </div>
 
               <div>
